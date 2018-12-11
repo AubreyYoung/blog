@@ -1,0 +1,82 @@
+[client]
+port            = 18501 # how about ?
+socket          = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/mysqld.sock
+
+[mysqld_safe]
+user            = mysql
+nice            = 0
+
+[mysqld]
+core-file
+server-id               = 1
+bind-address            = 0.0.0.0
+port                    = 18501
+pid-file                = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/mysqld.pid
+socket                  = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/mysqld.sock
+basedir                 = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/
+datadir                 = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/
+log-error               = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/mysqld.log
+slow_query_log                  = 1
+slow_query_log_file     = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/mysql-slow.log
+log_bin                 = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/var/mysql-bin.log
+binlog_format           = MIXED
+default_storage_engine  = innodb
+
+user                    = mysql
+language                = /data/ntse/laimingxing/autotest-tool/test/innodb/tpcc_mysql/english
+long_query_time         = 4
+
+max_connections         = 100
+query_cache_type        = 0
+character-set-server   = utf8
+skip-external-locking
+expire_logs_days        = 7
+max_binlog_size         = 100M
+max_allowed_packet      = 16M
+
+
+innodb_file_per_table
+innodb_log_file_size = 1024M
+innodb_log_files_in_group = 3
+innodb_open_files = 4000
+
+table_open_cache = 8000
+table_open_cache_instances = 16
+
+# buffers
+innodb_buffer_pool_size = 20G
+innodb_buffer_pool_instances = 8
+innodb_log_buffer_size = 64M
+
+# tune
+innodb_checksums = 0
+innodb_doublewrite = 0
+innodb_support_xa = 0
+innodb_flush_log_at_trx_commit = 0
+innodb_flush_method = O_DIRECT
+innodb_use_native_aio =1
+
+# perf special
+innodb_adaptive_flushing = 1
+innodb_flush_neighbors = 0
+innodb_read_io_threads = 16
+innodb_write_io_threads = 4
+innodb_io_capacity = 3000
+innodb_purge_threads =1
+innodb_adaptive_hash_index = 0
+
+# Monitoring
+innodb_monitor_enable = '%'
+performance_schema = ON
+performance_schema_instrument = '%=on'
+
+
+binlog-ignore-db=tpcc
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet      = 16M
+
+[mysql]
+default-character-set   = utf8

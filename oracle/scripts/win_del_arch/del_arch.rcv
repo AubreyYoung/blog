@@ -1,0 +1,5 @@
+run
+{
+crosscheck archivelog all;
+delete noprompt archivelog all completed before 'sysdate-2';
+}

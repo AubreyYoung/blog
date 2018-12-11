@@ -1,0 +1,1 @@
+rman target / cmdfile=D:\rmanbak\backup.rcv log=D:\rmanbak\backup_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%".log
