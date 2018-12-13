@@ -14,6 +14,8 @@ alter database set standby to maximize availability;
 alter database set standby  to maximize protection;
 recover database using bakup controlfile until cancel;
 ```
+
+```
 **删除table**
 drop table  bh cascade constraints purge;
 **修改归档**
@@ -1134,7 +1136,28 @@ galaxy@ORCL> select dump(sysdate) from dual;
 DUMP(SYSDATE)
 ---------------
 Typ=13 Len=8: 226,7,7,13,8,44,25,0
+
 galaxy@ORCL> select vsize(sysdate) from dual;
 VSIZE(SYSDATE)
 --------------
 7
+```
+
+##### RMAN后台还原
+
+```
+$ nohup rman cmdfile=restore.txt log=restore20181213_1.log &
+
+$ cat restore.txt
+connect target /
+run {
+allocate channel d1 type disk;
+allocate channel d2 type disk;
+allocate channel d3 type disk;
+restore database;
+release channel d1;
+release channel d2;
+release channel d3;
+}
+```
+
