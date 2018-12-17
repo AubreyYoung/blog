@@ -5,7 +5,9 @@
 ```
 //查看命令需安装的包
 # yum  whatprovides netstat                                          
-# yum provides  netstat  
+# yum provides  netstat 
+//只下载
+yumdownloader rlwrap
 ```
 
 ### mount
