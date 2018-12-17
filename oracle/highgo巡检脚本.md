@@ -455,12 +455,15 @@ netstat -r
 
 ## 4.1 查看集群运行状态
 ```
-crs_stat -t -v
-crsctl status res -t
-crsctl check crs                                              //10g或11g
-crsctl check cluster                                          //11g
+crs_stat -t -v											//10g
+crs_stat -t												//10g
+crsctl status res -t									 //11g
+crsctl check crs                                             //10g或11g
+crsctl check cluster                                         //11g
 olsnodes -n
-srvctl status asm -a                                          //11g
+或
+olsnodes -n -p -i
+srvctl status asm -a                                         //11g
 srvctl status database -d sdbip
 srvctl status diskgroup -g DGDATA1
 gpnptool get
@@ -478,15 +481,84 @@ crsctl stat res ora.LISTENER_SCAN1.lsnr -p
 **RAC自启**
 
 ```
+//11g
 crsctl disable crs
 crsctl enable crs
+//11gRAC启动、关闭
+crsctl start cluster -all
+crsctl stop cluster -all
+//10g
+/etc/init.d/init.crs enable随操作系统的启动而启动
+/etc/init.d/init.crs disable不随操作系统的启动而启动
+//10g RAC启动、关闭
+/etc/init.d/init.crs stop停止CRS主进程
+/etc/init.d/init.crs start启动CRS主进程
 ```
+**RAC网络配置**
+
+```
+[oracle@rac1 init.d]$ oifcfgOracle网卡配置工具
+Name:
+oifcfg - Oracle Interface Configuration Tool.
+Usage: oifcfg iflist [-p [-n]]
+oifcfg setif {-node <nodename> | -global} {<if_name>/<subnet>:<if_type>}...
+oifcfg getif [-node <nodename> | -global] [ -if <if_name>[/<subnet>] [-type <if_type>] ]
+oifcfg delif [-node <nodename> | -global] [<if_name>[/<subnet>]]
+oifcfg [-help]
+<nodename> - name of the host, as known to a communications network
+<if_name> - name by which the interface is configured in the system
+<subnet> - subnet address of the interface
+<if_type> - type of the interface { cluster_interconnect | public | storage }
+
+$ oifcfg iflist									  //查看网卡对应的网段，oracle网卡配置工具
+eth0 192.168.1.0
+eth1 192.168.2.0
+eth2 192.168.61.0
+
+$ oifcfg getif									  //没有配置之前是什么内容也没有
+
+$ oifcfg setif -global eth0/192.168.1.0:public		 //oracle网卡配置工具指定公有网卡
+
+$ oifcfg setif -global eth1/192.168.2.0:cluster_interconnectoracle网卡配置工具指定私有网
+
+[oracle@rac1 init.d]$ oifcfg getif					 //获取配置结果
+eth0 192.168.1.0 global public						//eth0是全局公共网卡
+eth1 192.168.2.0 global cluster_interconnect		 //eth1是全局私有网卡
+```
+
 ## 4.2 检查vote、ocr磁盘状态
+
 crsctl query css votedisk
 **OCR磁盘状态**
 ocrcheck
 **检查 ocr备份情况**
 ocrconfig -showbackup
+
+```
+//使用ocrdump命令查看OCR内容，但这个命令不能用于OCR的备份恢复只可以用于阅读
+RACDB1@rac1 /home/oracle$ ocrdump -stdout | more
+
+//导出OCR磁盘内容，一旦有问题可以导入恢复
+OCR手动导出:ocrconfig -export /tmp/ocr_bak
+OCR手动导入:ocrconfig -import /tmp/ocr_bak
+恢复OCR ocrconfig -restore /opt/product/10.2.0.1/crs/cdata/crs/backup01.ocr
+
+//创建用于镜像OCR的RAW设备,比如为:/dev/raw/ocrcopied用ocrconfig –export 导出OCR的信息,编辑/etc/oracle/ocr.loc文件,添加ocrmirrorconfig_loc行
+$ cat ocr.loc
+ocrconfig_loc=/dev/raw/raw2
+ocrmirrorconfig_loc=/dev/raw/ocrcopied
+local_only=FALSE
+用ocrconfig –import 导入OCR的信息
+
+//我们的表决磁盘使用的是裸设备，因此使用裸设备的dd命令来备份表决磁盘，使用root用户
+备份votedisk: dd if=/dev/raw/votediskcopied of=/dev/raw/raw1
+恢复votedisk: dd if=/dev/raw/raw1 of=/dev/raw/votediskcopied
+
+//通过strings命令查看votedisk内容
+# strings voting_disk.bak |sort -u
+```
+
+
 
 ## 4.3 检查节点vip资源
 srvctl config vip -n jaxnh1        #11g
@@ -1348,7 +1420,7 @@ select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log whe
 ```
 ```
 //删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
-RMAN> delete force archivelog until time "sysdate-3";
+RMAN> delete force archivelog until time "sysdate";
 //删除3天前的归档日志
 delete  archivelog until time "sysdate-3";
 ```
