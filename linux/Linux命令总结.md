@@ -8,6 +8,15 @@
 # yum provides  netstat 
 //只下载
 yumdownloader rlwrap
+yum install --downloadonly 
+
+//配置epel安裝來源
+//RHEL六版用戶
+# wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+# rpm -Uvh epel-release-latest-6.noarch.rpm 
+//RHEL七版用戶
+# wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+# rpm -Uvh epel-release-latest-7.noarch.rpm
 ```
 
 ### mount

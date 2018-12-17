@@ -304,6 +304,9 @@ ff02::2 ip6-allrouters
 172.17.0.2      9834b6f84636
 
 #docker cp .\TSINFO.sql oracle11g:/home/oracle
+
+//windows git bash下
+docker cp oracle12c://rlwrap-0.43-1.el7.x86_64.rpm .
 ```
 
 ```
