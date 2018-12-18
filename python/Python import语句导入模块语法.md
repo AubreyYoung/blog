@@ -1,0 +1,57 @@
+# Python import语句导入模块语法
+
+[python](http://www.iplaypy.com/)中的import语句是用来导入模块的，在[python模块库](http://www.iplaypy.com/module/)中有着大量的模块可供使用，要想使用这些文件需要用import语句把指定模块导入到当前程序中。
+
+## import语句作用
+
+import语句作用就是用来导入模块的，它可以出现在程序中的任何位置。
+
+## import语句语法
+
+使用import语句导入模块，import语句语法如下：
+import module
+关键字 模块名
+
+使用方法例如：
+import math       #入导math模块
+math.floor()        #调用math模块中的floor()[函数](http://www.iplaypy.com/jichu/function.html)
+
+如果要同时导入多个模块，只需要在模块名之前用逗号进行分隔：
+import module1,module2,module3.......
+
+同时导入多个模块的方法，对于初学者来说可读性和可理解性不如第一种好。所以想要导入多个模块时，还是比较推荐用第一种方式，把每一个模块都单独进行一次导入，可能会感觉操作起来麻烦一些，但便于理解。
+
+## import语句导入模块顺序
+
+在编写代码过程中，我们可能需要多种多样的模块，需要注意的是最好把导入模块放在代码的开头。
+
+
+**为什么要把import导入模块放在程序开头使用呢？**
+[解释器](http://www.iplaypy.com/jichu/interpreter.html)在执行语句时，遵循作用域原则。因为这和作用域有关系，如果在顶层导入模块，此时它的作用域是全局的；如果在函数内部导入了模块，那它的作用域只是局部的，不能被其它函数使用。如果其它函数也要用到这个模块，还需要再次导入比较麻烦。
+
+在用import语句导入模块时最好按照这样的顺序：
+
+1、python 标准库模块
+
+2、python 第三方模块
+
+3、自定义模块
+
+这只是一些高级程序员习惯用的操作方法，在www.iplaypy.com玩蛇网python学习过程中我们尽量去学习那些大家推荐的好用的方法。
+
+## from-import语句作用
+
+[python from import](http://www.iplaypy.com/jinjie/from-import.html)语句也是导入模块的一种方法，更确切的说是导入指定的模块内的指定函数方法。
+
+## from-import语句语法
+
+from module import name
+关键字 模块名 关键字 方法名
+
+例如入导函数math模块中的floor函数方法：
+from math import floor
+
+[python from](http://www.iplaypy.com/jinjie/from-import.html)使用方法例如：
+
+from math import floor     #导入math模块中的floor函数方法
+floor()                         #调用floor()函数方法
