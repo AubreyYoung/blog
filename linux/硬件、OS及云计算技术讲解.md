@@ -22,7 +22,7 @@
 
 ### 1. 软件架构
 
-![集群架构](D:\Git\blog\linux\pictures\集群架构图1.jpg)
+![集群架构](D:\Git\blog\linux\pictures\集群架构图1.png)
 
 大型网站架构演化历程 https://www.hollischuang.com/archives/728 
 
@@ -92,6 +92,7 @@
 ​	 拥抱新技术：关宁铁骑
 
  	 CAP
+
 ​		一致性（Consistency）
 ​		可用性（Availability）
 ​		分区容错性（Partition tolerance）
