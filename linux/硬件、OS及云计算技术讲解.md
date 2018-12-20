@@ -16,6 +16,8 @@
 
 ![集群架构](D:\Git\blog\linux\pictures\集群架构图1.jpg)
 
+大型网站架构演化历程 https://www.hollischuang.com/archives/728 
+
 ![集群架构](D:\Git\blog\linux\pictures\集群架构图2.jpg)
 
 ==**分层**：应用层、服务层、数据层==
@@ -32,19 +34,18 @@
 
   ![延时](\Git\blog\linux\pictures\处处皆缓存.png)
 
+  [^注]: 0.3ns约为3.1GHz
 
 
   **软件缓存**：MongoDB、Redis、Memcached
 
+  **OS buffer与cache**：
 
+  	buffer负责写、cache负责读
 
-  **buffer与cache**：
+​	buffer : 作为buffer cache的内存，是块设备的读写缓冲区
 
-  buffer负责写、cache负责读
-
-  buffer : 作为buffer cache的内存，是块设备的读写缓冲区
-
-  cache: 作为page cache的内存，文件系统的cache
+​	cache: 作为page cache的内存，文件系统的cache
 
 - 需求、目的
 
@@ -101,74 +102,56 @@
 
 x86、小机、大型机、云主机-->服务器、云主机
 
-zabbix、bmc patrol
+![x86](D:\Git\blog\linux\pictures\x86前视图.png)
 
-SaltStack、ansible、puppet--堡垒机
+![x86](D:\Git\blog\linux\pictures\x86后视图.png)
 
-NBU、commvault
+![](D:\Git\blog\linux\pictures\机柜后视图.JPG)
+
+**服务器安装软件**
+
+​	zabbix、bmc patrol
+
+​	SaltStack、ansible、puppet--堡垒机
+
+​	NBU、commvault
 
 #### 1.2 光纤交换机
 
 ##### 配置流程
 
-设备上架(插入光模块)-->使用管理口连接光纤交换-->激活端口-->创建zone-->映射划分
+![光纤交换机](D:\Git\blog\linux\pictures\光纤交换机配置.png)
 
-#####  光纤交换机讲解
+#####  光纤交换机配置
 
-![1544065703347](C:\Users\galaxy\AppData\Roaming\Typora\typora-user-images\1544065703347.png)
+光纤网关、光闸的区别
 
-![1544065734718](C:\Users\galaxy\AppData\Roaming\Typora\typora-user-images\1544065734718.png)
+![光纤交换机1](D:\Git\blog\linux\pictures\光纤交换机1.png)
+![光纤交换机1](D:\Git\blog\linux\pictures\光纤交换机2.png)
+![光纤交换机1](D:\Git\blog\linux\pictures\光纤交换机3.png)
 
-##### 光纤交换机级联
-
-光纤网关、光闸
-
-**堆叠**
+**光纤交换机堆叠**
 
 通过XPAK端口将多台光纤交换机相连，称为光纤交换机的“堆叠”。
 
 采用堆叠方式进行连接时，您需要额外购买堆叠线缆，且堆叠长度有限，堆叠线缆最长为2m；但相对于级联，堆叠具有更高的带宽，且不占用光纤交换机的FC端口。
 
 2台光纤交换机进行堆叠的建议组网如
-
-图11-1
-
-所示，最多可激活和使用40个FC端口。
-
-图11-1  2台光纤交换机堆叠 
 ![img](http://download.huawei.com/mdl/imgDownload?uuid=b4065b570c6940fa82085da22c384e61.png)
 
 3台光纤交换机进行堆叠的建议组网如
-
-图11-2
-
-，最多可激活和使用60个FC端口。
-
-图11-2  3台光纤交换机堆叠 
 ![img](http://download.huawei.com/mdl/imgDownload?uuid=6f7af80241c943bc8db6fa041e7ce2df.png)
 
-**级联**
+**光纤交换机级联**
 
 通过任意激活的FC端口将多台光纤交换机相连，称为光纤交换机的“级联”。
 
 采用级联方式进行连接时，光纤交换机部分FC端口将被占用；但相对于堆叠，级联采用的光纤具有更长走线距离。
 
 2台光纤交换机进行级联的建议组网如
-
-图11-3
-
-所示，最多可激活和使用32个FC端口。
-
-图11-3  2台光纤交换机级联 
 ![img](http://download.huawei.com/mdl/imgDownload?uuid=7a254af29ca9421c87b53cb3a534ec24.png)
 
-3台光纤交换机进行级联的建议组网如
-
-图11-4
-
-，最多可激活和使用48个FC端口。
-
-图11-4  3台光纤交换机级联 
+3台光纤交换机进行级联
 ![img](http://download.huawei.com/mdl/imgDownload?uuid=742b8d51f998402d9c8dcbf97b0e525e.png)
 
 #### 1.3 存储
@@ -177,11 +160,16 @@ NBU、commvault
 
 SATA --> SAS -->SSD
 
-##### 存储讲解
+##### 存储配置
+
+​	B-S 				C-S
+
+![](D:\Git\blog\linux\pictures\存储.png)
 
 ![存储前视图](C:\Users\galaxy\Desktop\OS\2017-07-27_165628.png)
 ![存储后视图](C:\Users\galaxy\Desktop\OS\2017-07-27_170313.png)
-![储控制器](C:\Users\galaxy\Desktop\OS\2017-07-27_170313.png)
+
+![](D:\Git\blog\linux\pictures\iscsi线.png)
 
 ![连接存储](C:\Users\galaxy\Desktop\OS\2017-07-27_170118.png)
 
@@ -211,6 +199,8 @@ SATA --> SAS -->SSD
 
 三层交换机：路由功能、地址转发
 
+![](D:\Git\blog\linux\pictures\核心交换机.png)
+
 ### 2.OS
 
 #### 2.1 OS分类
@@ -230,6 +220,14 @@ SATA --> SAS -->SSD
 linux目录结构
 
 ![img](http://img1.51cto.com/attachment/201309/230817424.jpg)
+
+**内存、CPU、磁盘IO、网络**
+
+![CPU](D:\Git\blog\linux\pictures\CPU.png)
+
+CPU亲和度：CPU0、CPU1
+
+[Linux性能优化实战]: https://time.geekbang.org/column/intro/140	"Linux性能优化实战"
 
 #### 2.3 命令参数
 
@@ -253,31 +251,37 @@ ctrl+z --> jobs -->bg %1 --> fg %1
 lsof
 strace、ltrace
 sync
+sh -x 
 ```
 
-#### 2.4 常见知识点
+#### 2.4 知识点
 
-来源协议：
+开源协议：
 
 ![开源许可证](./pictures/开源协议.png)
 
-##### vim使用技巧
+[优雅玩转Vim]: https://www.imooc.com/learn/1049	"优雅玩转Vim"
 
 #### 2.5 常用资源、办公效率提升
 
-SecretCRT
-
-Vmware
-
-Notepad++/UE
+SecretCRT、Vmware、Notepad++/UE
 
 Typora/Atom
 
-Git/SourceTree
+[Markdown教程-Typora]: https://ke.qq.com/course/204170	"Markdown教程-Typora"
+[Atom编辑器]: https://ke.qq.com/course/306649	"web开发神器之炫酷的阿童木(Atom)编辑器"
+
+**Git/GitHub Desktop/SourceTree**
+
+[Git入门]: https://www.imooc.com/learn/1052	"Git入门"
+[版本控制入门 – 搬进 Github]: https://www.imooc.com/learn/390	"版本控制入门 – 搬进 Github"
+[版本管理工具介绍—Git篇]: https://www.imooc.com/learn/208
 
 Chrome
 
 Windows
+
+[快乐的sublime编辑器]: https://www.imooc.com/learn/333	"快乐的sublime编辑器"
 
 **参考文档**：
 
@@ -285,13 +289,20 @@ Windows
 
 - 性能之巅 洞悉系统、企业与云计算
 
+- ==[Linux性能优化实战]: https://time.geekbang.org/column/intro/140	"Linux性能优化实战"==
+
+- 实战LINUX_SHELL编程与服务器管理
+
+
 ## 三、云计算
 
 ### 1. 云计算概念
 
-计算资源像电一样自由随需获取
+计算资源像电一样自由随需获取：弹性扩展、按需获取
 
-Oracle12c资源限定
+![资源使用](D:\Git\blog\linux\pictures\资源监控.png)
+
+云计算底层技术：
 
 - cgroup
 - namespace
@@ -302,11 +313,19 @@ Oracle12c资源限定
 
 #### 2.1 docker
 
-docker --> kubenotes(k8s)
+docker --> kubernotes(k8s)
+
+![docker](D:\Git\blog\linux\pictures\docker.webp)
+
+![kubernotes架构图](D:\Git\blog\linux\pictures\kubernotes.jpg)
 
 #### 2.2 openstack
 
 AWS --> OpenStack/OpenCloud
+
+OS虚拟化、网络虚拟化、存储虚拟化
+
+![openstack](D:\Git\blog\linux\pictures\openstack2)
 
 #### 2.3 VMware vSphere
 
