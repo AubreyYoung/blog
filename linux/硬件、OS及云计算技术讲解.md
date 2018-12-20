@@ -5,7 +5,15 @@
 
 
 
+# 前言
 
+​	授人以鱼不如授人以渔
+
+​	本文档、个人技术能力局限性
+
+​	软件、硬件、OS、云计算的庞杂
+
+​	启发性的指导性思想、方法
 
 
 
@@ -36,8 +44,9 @@
 
   [^注]: 0.3ns约为3.1GHz
 
-
   **软件缓存**：MongoDB、Redis、Memcached
+
+  **CDN加速**
 
   **OS buffer与cache**：
 
@@ -69,19 +78,29 @@
 
 - 对比学习：
   - Oracle-MySQL（RC--SS）；RDB--NoSQL
-
   - Oracle--MySQL--MongoDB（堆表--有序表--cson、json）
-
   - Linux--Windows
+
+==**SharedNoting Or SharedEverything**==
+​    ![SharedNoting Or SharedEverything](D:\Git\blog\linux\pictures\SharedNothingOrSharedEverything.png)
 
 
   少看中国人写的技术书，少用百度、搜狗、360，别安装360、腾讯管家。
 
-  拥抱新技术：关宁铁骑
+ **杂谈：**
 
-  CAP、BASE
+​	 拥抱新技术：关宁铁骑
 
-  贪多嚼不烂  -- 广博未必精通，精通必定广博
+ 	 CAP
+​		一致性（Consistency）
+​		可用性（Availability）
+​		分区容错性（Partition tolerance）
+
+​	BASE
+
+​	基本可用（Basically Available）、软状态（ Soft State）、最终一致性（ Eventual Consistency）
+
+  	贪多嚼不烂  -- 广博未必精通，精通必定广博
 
 **参考文档**：
 
@@ -315,7 +334,7 @@ Windows
 
 docker --> kubernotes(k8s)
 
-![docker](D:\Git\blog\linux\pictures\docker.webp)
+![docker](D:\Git\blog\linux\pictures\docker.png)
 
 ![kubernotes架构图](D:\Git\blog\linux\pictures\kubernotes.jpg)
 
