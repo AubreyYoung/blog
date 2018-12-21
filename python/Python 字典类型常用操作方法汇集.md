@@ -1,6 +1,10 @@
 # Python 字典类型常用操作方法汇集
 
-本篇文章内容适合开始学习python有一小段时间，最少是学过[python基础](http://www.iplaypy.com/jichu/)知识的同学们。**字典类型常用操作方法有哪些**？集合了python语言中字典数据类型的一些常见又实用的操作方法，对加深字典的学习很有帮助。
+本篇文章内容适合开始学习python有一小段时间，最少是学过[python基础](http://www.iplaypy.com/jichu/)知识的同学们。
+
+**字典类型常用操作方法有哪些**？
+
+集合了python语言中字典数据类型的一些常见又实用的操作方法，对加深字典的学习很有帮助。
 
 ## 字典类型常用操作方法如下：
 
@@ -10,15 +14,15 @@
 
 3、嵌套：d = { 'fruit' :{ 'apple':2 , 'bananas':6}}
 
-4、创建并返回一个新字典：d = dict.fromkeys(sequence,value=None)，以序列sequence中元素做字典的键key，value为字典所有键对应的初始值(默认为None)。
+==4、创建并返回一个新字典：d = dict.fromkeys(sequence,value=None)，以序列sequence中元素做字典的键key，value为字典所有键对应的初始值(默认为None)。==
 
 5、以键为索引，访问键对应的值：d[ 'key' ]
 
 6、成员关系：‘key name’ in d ，判断键名是否在字典中，返回值为True / False
 
-7、包含字典所有键的列表：d.keys()
+==7、包含字典所有键的列表：d.keys()==
 
-8、包含字典所有值的列表：d.values()
+==8、包含字典所有值的列表：d.values()==
 
 9、生成一个字典容器：d.items() ，[python dict iteritems](http://www.iplaypy.com/jinjie/items-iteritems.html)
 
