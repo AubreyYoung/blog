@@ -24,6 +24,11 @@ select * from table(dbms_xplan.display_cursor(null,null,'advanced'));
 select * from table(dbms_xplan.display_cursor('sql_id/hash_value',child_cursor_number,'advanced'));
 //方法四
 select * from table(dbms_xplan.display_awr('sql_id'));
+
+set timing on
+select /* +auto_dop_demo_1 */count(*) from t1;
+select  sql_test,sql_id,version_count from v$sqlarea where sql_text like 'select /* +auto_dop_demo_1 */%';
+select * from table(dbms_xplan_display_cursor('SQL_ID',0,'advanced'));
 ```
 
 ## 3. SQLPLUS中的autotrace开关

@@ -2,6 +2,8 @@
 
 并行执行的本质就是==以额外的硬件资源消耗来换取执行时间的缩短==。
 
+并行处理的机制实际上就是把一个要扫描的数据集分成很多小数据集，Oracle 会启动几个并行服务进程同时处理这些小数据集，最后将这些结果汇总，作为最终的处理结果返回给用户。
+
 并行执行并不一定会缩短执行时间，它并不适合所有的场景。
 
 **开启并行的注意事项**：并行需额外的CPU、内存、IO资源开销！
@@ -215,6 +217,8 @@ ALTER TABLE <TABLE_NAME> PARALLEL <n>;
 
 ALTER INDEX <INDEX_NAME> PARALLEL <n>;
 ```
+当在并行访问的多个对象的并行度不相等的情况下，一般来说Oracle会取其中最大的并行度来作为整个查询的并行度。
+
 **禁用对象级别的并行**
 
 ```plsql
@@ -231,6 +235,115 @@ alter INDEX <INDEX_NAME> NOPARALLEL;
 ## 3. 并行相关参数
 
 ​	因为Oracle可能会启用两组Query Slave Set，所以在实际并行执行时并行子进程的总数可能会是并行度的两倍。
+
+![1545898767660](C:\Users\galaxy\AppData\Roaming\Typora\typora-user-images\1545898767660.png)
+
+在Oracle 11gR2并行执行被开启的情况下:
+
+- Oracle是否启动并行取决于目标SQL的预估执行时间是否小于参数`PARALLEL_MIN_TIME_THRESHOLD`的值。
+- 在Oracle已决定采用并行的情况下，并行的实际并行度为Oracle根据并行执行计划计算出来的理想并行度和参数`PARALLEL_DEGREE_LIMIT`中的最小值，即 Actual DOP = min(Idel DOP,PARALLEL_DEGREE_LIMIT).
+
+在Oracle 11gR2之前，Oracle使用的自适应并行。
+
+- 所谓的自适应并行是指Oracle会根据当前系统的负载情况来决定目标SQL在并行执行时的实际并行度。
+
+```
+SQL> show parameter parallel_adaptive_multi_user
+
+parallel_adaptive_multi_user         boolean     TRUE
+
+```
+
+
+
+### PARALLEL_DEGREE_POLICY
+
+- `MANUAL`
+
+  表示自动并行没有开启
+
+- `LIMITED`
+
+  表示自动并行被有限开启
+
+  仅仅会将SQL语句中的表/索引的并行度，或没有指定具体并行度的并行hint 的并行度设置为默认值。
+
+  在`PARALLEL_DEGREE_POLICY`为limited，同时指定具体并行度的并行hint 或指定SQL语句中的表/索引的并行度为具体值`PARALLEL_DEGREE_LIMIT`将不起作用。
+
+- `AUTO`
+
+  Enables automatic degree of parallelism, statement queuing, and in-memory parallel execution.
+
+  在Oralce 11.2.0.2以上的版本里，除设置PARALLEL_DEGREE_POLICY为AUTO,还需使用`DBMS_RESOURCE_MANAGER.CALIBRATE`收集I/O Calibrate统计信息。
+
+  ```
+  SET SERVEROUTPUT ON
+  DECLARE
+    lat  INTEGER;
+    iops INTEGER;
+    mbps INTEGER;
+  BEGIN
+     DBMS_RESOURCE_MANAGER.CALIBRATE_IO (1, 10, iops, mbps, lat);
+     DBMS_OUTPUT.PUT_LINE ('max_iops = ' || iops);
+     DBMS_OUTPUT.PUT_LINE ('latency  = ' || lat);
+     DBMS_OUTPUT.PUT_LINE ('max_mbps = ' || mbps);
+  end;
+  /
+  ```
+
+- `ADAPTIVE`
+
+  This value enables automatic degree of parallelism, statement queuing and in-memory parallel execution, similar to the `AUTO` value. In addition, performance feedback is enabled. Performance feedback helps to improve the degree of parallelism automatically chosen for repeated SQL statements. After the initial execution of a statement, the degree of parallelism chosen by the optimizer is compared to the degree of parallelism computed based on the actual execution performance. If they vary significantly, then the statement is marked for re-parse and the initial execution performance statistics (for example, CPU-time) are provided as feedback for subsequent executions. The optimizer uses the initial execution performance statistics to better determine a degree of parallelism for subsequent executions.
+
+### PARALLEL_MIN_SERVERS
+
+在初始化参数中设置了这个值，Oracle 在启动的时候就会预先启动N个并行服务进程，当SQL执行并行操作时，并行协调进程首先根据并行度的值，在当前已经启动的并行服务中条用n个并行服务进程，当并行度大于n时，Oracle将启动额外的并行服务进程以满足并行度要求的并行服务进程数量。
+
+###  PARALLEL_MAX_SERVERS
+
+如果并行度的值大于parallel_min_servers或者当前可用的并行服务进程不能满足SQL的并行执行要求，Oracle将额外创建新的并行服务进程，当前实例总共启动的并行服务进程不能超过这个参数的设定值。
+
+###  PARALLEL_ADAPTIVE_MULTI_USER
+Oracle 10g R2下，并行执行默认是启用的。 这个参数的默认值为true，它让Oracle根据SQL执行时系统的负载情况，动态地调整SQL的并行度，以取得最好的SQL    执行性能。
+
+###  PARALLEL_MIN_PERCENT
+这个参数指定并行执行时，申请并行服务进程的最小值，它是一个百分比，比如我们设定这个值为50. 当一个SQL需要申请20个并行进程时，如果当前并行服务进程不足，按照这个参数的要求，这个SQL比如申请到20*50%=10个并行服务进程，如果不能够申请到这个数量的并行服务，SQL 将报出一个ORA-12827的错误。
+当这个值设为Null时，表示所有的SQL在做并行执行时，至少要获得两个并行服务进程。
+
+### PARALLEL_DEGREE_LIMIT
+
+在并行度自动调整的情况下，Oracle自动决定一个语句是否并行执行和用什么并行度执行。优化器基于语句的资源需求自动决定一个语句的并行度。然而，为了确保并行服务器进程不会导致系统过载，优化器会限制使用的并行度。这个限制通过`PARALLEL_DEGREE_LIMIT`来强制实施。
+值：
+
+- CPU
+  最大并行度被系统CPU数限制。计算限制的公式为`PARALLEL_THREADS_PER_CPU` *`CPU_COUNT` * 可用实例数（默认为簇中打开的所有实例，但也能通过`PARALLEL_INSTANCE_GROUP`或service定义来约束），这是默认的。
+-  IO
+  优化器能用的最大并行度被系统的IO容量限制。系统总吞吐除以每个进程的最大IO带宽计算出。为了使用该IO设置，你必须在系统上运行`DBMS_RESOURCE_MANAGER.CALIBRATE_IO`过程。该过程将计算系统总吞吐和单个进程的最大IO带宽。
+- integer
+  当自动并行度被激活时，该参数的数字值确定优化器为一个SQL语句能选择的最大并行度。PARALLEL_DEGREE_POLICY被设置为AUTO或LIMITED时，自动并行度才可以使用。
+
+### PARALLEL_FORCE_LOCAL
+
+​	`PARALLEL_FORCE_LOCAL`控制Oracle RAC环境下的并行执行。默认情况，被选择执行一个SQL语句的并行服务器进程能在簇中任何或所有Oracle RAC节点上操作。通过设置`PARALLEL_FORCE_LOCAL`为true，并行服务器进程被限制从而都在查询协调器驻留的同一个Oracle RAC节点上操作（语句被执行的节点上） 
+
+### PARALLEL_EXECUTION_MESSAGE_SIZE
+
+`PARALLEL_EXECUTION_MESSAGE_SIZE`确定并行执行（前面指并行查询，PDML，并行恢复，复制）所用信息的大小。
+在大多数平台上，默认值如下：
+
+- 16384字节，如果COMPATIBLE被设置为11.2.0或更高
+- 4096字节如果COMPATIBLE被设置为小于11.2.0并且`PARALLEL_AUTOMATIC_TUNING`被设置为true
+- 2148字节如果COMPATIBLE被设置为小于11.2.0并且`PARALLEL_AUTOMATIC_TUNING`被设置为false
+
+默认值对大多数应用来说是足够的。值越大，要求共享池越大。较大的值会带来较好的性能，但会消耗较多的内存。因此，复制并不能从增加该值中受益。
+
+注意：当PARALLEL_AUTOMATIC_TUNING被设置为TRUE时，信息缓冲在大池（large pool）中分配。这种情况下，默认值一般是较高的。注意参数PARALLEL_AUTOMATIC_TUNING已经被废弃。
+
+### PARALLEL_AUTOMATIC_TUNING
+
+注意: PARALLEL_AUTOMATIC_TUNING已经被废弃。保留它仅仅是为了向后兼容。
+当该参数设置为true时，[Oracle](http://www.linuxidc.com/topicnews.aspx?tid=12)决定控制并行执行的所有参数的默认值。除了设置这个参数，你必须确定系统中目标表的PARALLEL子句。Oracle于是就会自动调整所有后续的并行操作。
+如果你在之前的版本里用了并行执行且现在该参数为true，那么你将会因减少了共享池中分配的内存需求，而导致对共享池需求的减少。目前，这些内存会从large pool中分配，如果large_pool_size没被确定，那么，系统会自动计算出来。作为自动调整的一部分，Oracle将会使parallel_adaptive_multi_user参数可用。如果需要，你也可以修改系统提供的默认值。
 
 ## 4. 查看并行状态
 
@@ -324,3 +437,7 @@ i.table_name = t.table_name;
 
 - Script to Report the Degree of Parallelism DOP on Tables and Indexes (文档 ID 270837.1)
 - 如何启用和禁用并行 (文档 ID 2471049.1)
+- 基于Oracle的SQL优化
+- [Using Parallel Execution](https://docs.oracle.com/cd/B28359_01/server.111/b28313/usingpe.htm#i1007196)
+- [How Parallel Execution Works](https://docs.oracle.com/cd/E11882_01/server.112/e25523/parallel002.htm)
+
