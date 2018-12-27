@@ -82,10 +82,17 @@
   - Linux--Windows
 
 ==**SharedNoting Or SharedEverything**==
-​    ![SharedNoting Or SharedEverything](D:\Git\blog\linux\pictures\SharedNothingOrSharedEverything.png)
+​  ![SharedNoting Or SharedEverything](D:\Git\blog\linux\pictures\SharedNothingOrSharedEverything.png)
+
+> oracle RAC 物理 逻辑集群
+>
+> MongoDB延时复制、MySQL级联复制
 
 
-  少看中国人写的技术书，少用百度、搜狗、360，别安装360、腾讯管家。
+
+*少看中国人写的技术书，少用百度、搜狗、360，别安装360、腾讯管家*
+
+
 
  **杂谈：**
 
@@ -101,7 +108,11 @@
 
 ​	基本可用（Basically Available）、软状态（ Soft State）、最终一致性（ Eventual Consistency）
 
-  	贪多嚼不烂  -- 广博未必精通，精通必定广博
+  	辩证：贪多嚼不烂  -- 广博未必精通，精通必定广博
+
+软件设计理念：
+
+​	简单、易用、小巧、弹性插件
 
 **参考文档**：
 
@@ -208,6 +219,12 @@ SATA --> SAS -->SSD
 ![1544065600799](C:\Users\galaxy\AppData\Roaming\Typora\typora-user-images\1544065600799.png)
 
 ![存储监控视图](C:\Users\galaxy\Desktop\OS\2017-07-27_170425.png)
+
+
+
+> 24块磁盘存储创建，如何划分？
+
+
 
 ##### 虚拟存储
 

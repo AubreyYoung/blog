@@ -76,6 +76,7 @@ winver>win.txt   或者 我的电脑—属性截图
 **Windows**
 hostname>host.txt
 ipconfig>ip.txt
+netstat -in
 **Linux/AIX**
 cat /etc/hosts
 ifconfig -a
@@ -497,7 +498,7 @@ crsctl stop cluster -all
 **RAC网络配置**
 
 ```
-[oracle@rac1 init.d]$ oifcfgOracle网卡配置工具
+[oracle@rac1 init.d]$ oifcfg        Oracle网卡配置工具
 Name:
 oifcfg - Oracle Interface Configuration Tool.
 Usage: oifcfg iflist [-p [-n]]
