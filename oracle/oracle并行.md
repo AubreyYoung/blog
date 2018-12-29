@@ -1,4 +1,4 @@
-# Oracle并行
+# Oracle并行的影响因素及问题排查思路
 
 并行执行的本质就是==以额外的硬件资源消耗来换取执行时间的缩短==。
 
@@ -236,26 +236,6 @@ alter INDEX <INDEX_NAME> NOPARALLEL;
 
 ​	因为Oracle可能会启用两组Query Slave Set，所以在实际并行执行时并行子进程的总数可能会是并行度的两倍。
 
-![1545898767660](C:\Users\galaxy\AppData\Roaming\Typora\typora-user-images\1545898767660.png)
-
-在Oracle 11gR2并行执行被开启的情况下:
-
-- Oracle是否启动并行取决于目标SQL的预估执行时间是否小于参数`PARALLEL_MIN_TIME_THRESHOLD`的值。
-- 在Oracle已决定采用并行的情况下，并行的实际并行度为Oracle根据并行执行计划计算出来的理想并行度和参数`PARALLEL_DEGREE_LIMIT`中的最小值，即 Actual DOP = min(Idel DOP,PARALLEL_DEGREE_LIMIT).
-
-在Oracle 11gR2之前，Oracle使用的自适应并行。
-
-- 所谓的自适应并行是指Oracle会根据当前系统的负载情况来决定目标SQL在并行执行时的实际并行度。
-
-```
-SQL> show parameter parallel_adaptive_multi_user
-
-parallel_adaptive_multi_user         boolean     TRUE
-
-```
-
-
-
 ### PARALLEL_DEGREE_POLICY
 
 - `MANUAL`
@@ -304,7 +284,7 @@ parallel_adaptive_multi_user         boolean     TRUE
 如果并行度的值大于parallel_min_servers或者当前可用的并行服务进程不能满足SQL的并行执行要求，Oracle将额外创建新的并行服务进程，当前实例总共启动的并行服务进程不能超过这个参数的设定值。
 
 ###  PARALLEL_ADAPTIVE_MULTI_USER
-Oracle 10g R2下，并行执行默认是启用的。 这个参数的默认值为true，它让Oracle根据SQL执行时系统的负载情况，动态地调整SQL的并行度，以取得最好的SQL    执行性能。
+Oracle 10g R2下，并行执行默认是启用的。 这个参数的默认值为true，它让Oracle根据SQL执行时系统的负载情况，动态地调整SQL的并行度，以取得最好的SQL执行性能。
 
 ###  PARALLEL_MIN_PERCENT
 这个参数指定并行执行时，申请并行服务进程的最小值，它是一个百分比，比如我们设定这个值为50. 当一个SQL需要申请20个并行进程时，如果当前并行服务进程不足，按照这个参数的要求，这个SQL比如申请到20*50%=10个并行服务进程，如果不能够申请到这个数量的并行服务，SQL 将报出一个ORA-12827的错误。
@@ -318,7 +298,7 @@ Oracle 10g R2下，并行执行默认是启用的。 这个参数的默认值为
 - CPU
   最大并行度被系统CPU数限制。计算限制的公式为`PARALLEL_THREADS_PER_CPU` *`CPU_COUNT` * 可用实例数（默认为簇中打开的所有实例，但也能通过`PARALLEL_INSTANCE_GROUP`或service定义来约束），这是默认的。
 -  IO
-  优化器能用的最大并行度被系统的IO容量限制。系统总吞吐除以每个进程的最大IO带宽计算出。为了使用该IO设置，你必须在系统上运行`DBMS_RESOURCE_MANAGER.CALIBRATE_IO`过程。该过程将计算系统总吞吐和单个进程的最大IO带宽。
+    优化器能用的最大并行度被系统的IO容量限制。系统总吞吐除以每个进程的最大IO带宽计算出。为了使用该IO设置，你必须在系统上运行`DBMS_RESOURCE_MANAGER.CALIBRATE_IO`过程。该过程将计算系统总吞吐和单个进程的最大IO带宽。
 - integer
   当自动并行度被激活时，该参数的数字值确定优化器为一个SQL语句能选择的最大并行度。PARALLEL_DEGREE_POLICY被设置为AUTO或LIMITED时，自动并行度才可以使用。
 
@@ -345,93 +325,219 @@ Oracle 10g R2下，并行执行默认是启用的。 这个参数的默认值为
 当该参数设置为true时，[Oracle](http://www.linuxidc.com/topicnews.aspx?tid=12)决定控制并行执行的所有参数的默认值。除了设置这个参数，你必须确定系统中目标表的PARALLEL子句。Oracle于是就会自动调整所有后续的并行操作。
 如果你在之前的版本里用了并行执行且现在该参数为true，那么你将会因减少了共享池中分配的内存需求，而导致对共享池需求的减少。目前，这些内存会从large pool中分配，如果large_pool_size没被确定，那么，系统会自动计算出来。作为自动调整的一部分，Oracle将会使parallel_adaptive_multi_user参数可用。如果需要，你也可以修改系统提供的默认值。
 
-## 4. 查看并行状态
+## 4. 并行度的影响因素
 
-**Script to Report the Degree of Parallelism DOP on Tables and Indexes (文档 ID 270837.1)**
+在Oracle 11gR2中，自动并行执行被开启的情况下:
 
-```plsql
-Check Script
--------------
-col name format a30
-col value format a20
-Rem How many CPU does the system have?
-Rem Default degree of parallelism is
-Rem Default = parallel_threads_per_cpu * cpu_count
-Rem -------------------------------------------------; 
-select substr(name,1,30) Name , substr(value,1,5) Value 
-from v$parameter 
-where name in ('parallel_threads_per_cpu' , 'cpu_count' ); 
+- Oracle是否启动并行取决于目标SQL的预估执行时间是否小于参数`PARALLEL_MIN_TIME_THRESHOLD`的值。
+- 在Oracle已决定采用并行的情况下，并行的实际并行度为Oracle根据并行执行计划计算出来的理想并行度和参数`PARALLEL_DEGREE_LIMIT`中的最小值，即 Actual DOP = min(Idel DOP,PARALLEL_DEGREE_LIMIT).
 
-col owner format a30
-col degree format a10
-col instances format a10
-Rem Normally DOP := degree * Instances
-Rem See the following Note for the exact formula. 
-Rem Note:260845.1 Old and new Syntax for setting Degree of Parallelism 
-Rem How many tables a user have with different DOPs
-Rem -------------------------------------------------------;
-select * from (
-select substr(owner,1,15) Owner , ltrim(degree) Degree, 
-ltrim(instances) Instances, 
-count(*) "Num Tables" , 'Parallel' 
-from all_tables
-where ( trim(degree) != '1' and trim(degree) != '0' ) or 
-( trim(instances) != '1' and trim(instances) != '0' )
-group by owner, degree , instances
-union
-select substr(owner,1,15) owner , '1' , '1' , 
-count(*) , 'Serial' 
-from all_tables
-where ( trim(degree) = '1' or trim(degree) = '0' ) and 
-( trim(instances) = '1' or trim(instances) = '0' )
-group by owner
-)
-order by owner;
+![1545898767660](C:\Users\galaxy\AppData\Roaming\Typora\typora-user-images\1545898767660.png)
 
 
-Rem How many indexes a user have with different DOPs
-Rem ---------------------------------------------------;
-select * from (
-select substr(owner,1,15) Owner ,
-substr(trim(degree),1,7) Degree , 
-substr(trim(instances),1,9) Instances ,
-count(*) "Num Indexes",
-'Parallel' 
-from all_indexes
-where ( trim(degree) != '1' and trim(degree) != '0' ) or 
-( trim(instances) != '1' and trim(instances) != '0' )
-group by owner, degree , instances
-union
-select substr(owner,1,15) owner , '1' , '1' , 
-count(*) , 'Serial' 
-from all_indexes
-where ( trim(degree) = '1' or trim(degree) = '0' ) and 
-( trim(instances) = '1' or trim(instances) = '0' )
-group by owner
-)
-order by owner;
 
+在Oracle 11gR2之前，Oracle使用的自适应并行。
 
-col table_name format a35
-col index_name format a35
-Rem Tables that have Indexes with not the same DOP
-Rem !!!!! This command can take some time to execute !!!
-Rem ---------------------------------------------------;
-set lines 150
-select substr(t.owner,1,15) Owner ,
-t.table_name ,
-substr(trim(t.degree),1,7) Degree , 
-substr(trim(t.instances),1,9) Instances, 
-i.index_name ,
-substr(trim(i.degree),1,7) Degree , 
-substr(trim(i.instances),1,9) Instances 
-from all_indexes i,
-all_tables t
-where ( trim(i.degree) != trim(t.degree) or
-trim(i.instances) != trim(t.instances) ) and
-i.owner = t.owner and
-i.table_name = t.table_name;
+- 所谓的自适应并行是指Oracle会根据当前系统的负载情况来决定目标SQL在并行执行时的实际并行度。
+
 ```
+SQL> show parameter parallel_adaptive_multi_user
+parallel_adaptive_multi_user         boolean     TRUE
+```
+
+### 4.1 并行度影响因素
+
+一条SQL语句使用的并行度受3个层面的数值影响
+
+1. hint中指定的并行度
+
+```
+select /*+ parallel(a,8) */ * from scott.emp a order by ename;
+```
+
+2. 表的并行度，也就是表的degree:
+
+```
+select owner,table_name,degree from dba_tables where table_name='EMP';
+OWNER                          TABLE_NAME                     DEGREE   
+--------------------           ----------------               --------
+SCOTT                          EMP                            2 
+```
+
+3. auto DOP
+
+```
+单节点：auto DOP = PARALLEL_THREADS_PER_CPU x CPU_COUNT
+RAC：auto DOP = PARALLEL_THREADS_PER_CPU x CPU_COUNT x INSTANCE_COUNT
+```
+
+### 4.2并行度的优先级
+
+**并行度的优先级是：hint > degree > auto DOP**
+
+1. 如果hint指定了并行度，会忽略表的degree。
+
+2. 如果hint只指定parallel，不写具体的数字，或者表上DEGREE显示为DEFAULT，没有具体数值(alter table scott.emp parallel不指定具体degree数值)，则会使用auto DOP。
+
+除此之外，还有以下一些规则：
+
+1. 如果表中有group by或者其他排序操作，以上并行度×2。
+2. RAC中，并行度会自动平均分配到各个节点上，比如并行度256，2个节点，则每个节点上各起128个并行进程。“并行度>parallel_max_servers”的判断在各个节点上进行。
+3. 在``PARALLEL_ADAPTIVE_MULTI_USER = TRUE` 的情况下，会根据系统load(当前正在使用并行的用户数)，将并行度乘以一个衰减因子。
+4. 如果以上并行度>`parallel_max_servers`能够提供的空闲并行进程数，则最终并行度=0，也就是不并行（不使用Pnnn的进程）。
+
+### 4.3举例说明
+
+举一些例子来更详细的说明它：
+
+1. 如果SQL中没有使用hint，而表上degree=1则
+
+   并行度=0
+
+2. 如果SQL中没有使用hint，而表上degree=DEFAULT则
+
+   并行度=`PARALLEL_THREADS_PER_CPU` x `CPU_COUNT` x `INSTANCE_COUNT`
+
+3. 如果SQL中没有使用hint，而表上degree>1 则
+
+   并行度=表上degree
+
+4. 如果SQL中使用没有数值的hint(/\*+ parallel \*/ )，无论表上degree的值是多少
+
+   并行度= PARALLEL_THREADS_PER_CPU x CPU_COUNT x INSTANCE_COUNT;
+
+5. *如果SQL中使用带数值的hint(/\*+ parallel (a,8)\*/ or /\*+ parallel (a 8)\*/ )，无论表上degree的值是多少，并行度= hint中的数值8;
+
+6. 如果有排序操作，以上并行度×2;
+
+7. 并行度分配到各个RAC节点，乘以衰减因子,如果最终并行度>parallel_max_servers能够提供的空闲并行进程数，则并行度=0;
+
+## 5.并行的监控
+
+####  5.1 监控建立索引进度
+
+**并行建立索引时的监控建立索引进度**
+
+```
+alter session set nls_date_format = 'yyyy-mm-dd,hh24:mi:ss';
+set lines 300
+col target for a15
+select QCSID,sid,target,sofar,totalwork,last_update_time,ELAPSED_SECONDS,TIME_REMAINING
+from v$session_longops where QCSID=1886 order by last_update_time ;
+```
+
+注:1886是执行create index的那个session的sid 。
+
+#### 5.2 并行监控常用语句
+
+1. 查看系统中并行统计信息，是否实际使用了请求的DOP，以及这些操作是否发生降级：
+
+```
+SELECT NAME,VALUE FROM v$sysstat t WHERE t.NAME LIKE '%Parallel%';
+```
+
+2. 查看V$PQ_SYSSTAT视图中并行从属服务器统计信息。通过查看这些信息，可以看出数据库中的并行设置是否正确。如果看到服务器关闭（Servers Shutdown）和服务器启动值较高，则可能表明PARALLEL_MIN_SERVERS参数的设置值过低，因为持续不断启动和关闭并行进程需要相应的成本支出。
+
+```
+SELECT * FROM V$PQ_SYSSTAT;
+```
+
+3. 查询V$PQ_TQSTAT视图，可以确定各个并行服务器之间如何拆分工作的，也可以显示时间使用的DOP。不过查询此视图时，需要在并行操作同一个会话中执行方可显示信息。
+
+```
+SELECT * FROM V$PQ_TQSTAT;
+```
+
+4. 查询V\$SYSTEM_EVENT或者V\$SESSION_EVENT视图，可以知道数据库中与并行相关的等待。
+
+```
+SELECT event,wait_class,total_waits FROM V$SYSTEM_EVENT WHERE event LIKE 'PX%';
+```
+
+看看并行选件是否安装
+
+```
+Select * FROM V$OPTION where parameter like 'Parallel%';
+```
+
+Script to Report the Degree of Parallelism DOP on Tables and Indexes (文档 ID 270837.1)
+
+#### 5.3 并行相关视图
+
+V$PX_BUFFER_ADVICE
+提供所有并行查询的BUFFER的历史使用情况，以及相关的建议规划。对于并行执行过程中的内存不足等问题，可以查询这个视图以便能够重新配置一下SGA。
+
+V$PX_SESSION
+提供关于并行进程会话、服务器组、服务器集合、服务器数量的信息，也提供实时的并行服务器进程信息。同时可以通过这个视图查看并行语句的请求DOP和实际DOP等信息。
+
+V\$PX_SESSTAT
+将V\$PX_SESSION和V\$SESSTAT进行JOIN操作，所以此视图可以提供所有并行会话的统计信息。
+
+V$PX_PROCESS
+提供所有并行process的信息，包括状态、会话ID、进程ID以及其它信息。
+
+V$PX_PROCESS_SYSSTAT
+提供并行服务器的状态信息及BUFFER的分配信息。
+
+V$PQ_SLAVE
+列出所有并行服务器的统计信息。
+
+V$PQ_SYSSTAT
+列出并行查询的系统统计信息。
+
+V$PQ_SESSTAT
+列出并行查询的会话统计信息。只有并行语句执行完毕后，才能查看到此视图的会话统计信息。
+
+V$PQ_TQSTAT
+提供并行操作的统计信息，能够显示每个阶段的每个并行服务器处理的行数、字节数。
+只有并行语句执行完毕后，才能查看到此视图的会话统计信息，而且只能保留到会话的有效期。对于并行DML，只有提交或回滚后方能显示此视图的相关统计信息。
+
+## 6.并行问题排查思路
+
+#### 6.1 运行PX health check脚本
+
+How to Get 10046 Trace for Parallel Query (文档 ID 1102801.1)
+
+#### 6.2 收集SQL Trace/10046 trace 文件
+
+How to Get 10046 Trace for Parallel Query (文档 ID 1102801.1)
+
+#### 6.3 收集AWR 报告、SQL执行计划
+
+收集 SQL 语句在 trace 时间段内不超过一个小时的 AWR 报告。如果这是 RAC，则获取相同时段内所有节点上的报告。
+
+#### 6.4 生成SQLT 报告
+
+All About the SQLT Diagnostic Tool (文档 ID 215187.1)
+
+#### 6.5 Systemstate dumps (SSD)
+
+当并行运行的 SQL 语句 hang 住时，请收集几份 systemstate dumps (SSD)。这会为我们提供数据库中所有进程的信息，包括阻塞，等待事件，以及简短的 call stack 信息。这必须在问题发生时运行。
+如果是在 11gR2 上运行，请确保已经安装了[Bug 11800959](https://support.oracle.com/epmos/faces/BugDisplay?parent=DOCUMENT&sourceId=2407825.1&id=11800959) 和 [Bug 11827088](https://support.oracle.com/epmos/faces/BugDisplay?parent=DOCUMENT&sourceId=2407825.1&id=11827088) 的补丁程序（在11.2.0.3,11.2.0.2.5 PSU 上修复）。
+
+  ```
+(1) 执行下面的步骤来收集 system state dump:
+
+    (a) Non-RAC
+        $ sqlplus '/ as sysdba'
+          oradebug setmypid
+          oradebug unlimit
+          oradebug dump systemstate 266
+          quit
+    (b) RAC
+        $ sqlplus '/ as sysdba'
+          oradebug setmypid
+          oradebug unlimit
+          oradebug setinst all
+          oradebug -g all dump systemstate 266
+       -- oradebug -g all dump systemstate 258 <如果在 11.2.0.1 或 11.2.0.2 并且修复补丁没有安装>
+          quit
+
+(2) 等待至少1分钟，然后重复步骤1，收集第二份 dump。
+(3) 压缩并上传新创建的 trace 文件，包括 hang analyze trace 文件中列出的进程的 state dumps。如果这是 RAC，每个节点上都会有一份 dump，位于 diagnostic trace 目录下（11g+）或者 udump 中（< 11g）。
+  ```
+
+
 
 ## 参考文档
 
@@ -440,4 +546,10 @@ i.table_name = t.table_name;
 - 基于Oracle的SQL优化
 - [Using Parallel Execution](https://docs.oracle.com/cd/B28359_01/server.111/b28313/usingpe.htm#i1007196)
 - [How Parallel Execution Works](https://docs.oracle.com/cd/E11882_01/server.112/e25523/parallel002.htm)
+- 并行执行问题的数据收集 (文档 ID 2440271.1)
+- 并行执行错误和 Set-up 问题的数据收集 (文档 ID 2407822.1)
+- 并行执行 Wrong Result 问题的数据收集 (文档 ID 2407824.1)
+- 并行执行性能问题的数据收集 (文档 ID 2407825.1)
+- [Document 1102801.1](https://support.oracle.com/epmos/faces/DocumentDisplay?parent=DOCUMENT&sourceId=2407824.1&id=1102801.1) How to Get 10046 Trace for Parallel Query
+- [Document 215187.1](https://support.oracle.com/epmos/faces/DocumentDisplay?parent=DOCUMENT&sourceId=2407824.1&id=215187.1) SQLT (SQLTXPLAIN) - Tool that helps to diagnose SQL statements performing poorly
 
