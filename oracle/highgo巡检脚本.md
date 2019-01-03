@@ -113,8 +113,15 @@ topas
 
 [^注]: 如果不带任何标志运行 prtconf 命令，会显示系统型号、机器序列号、处理器类型、处理器数目、处理器时钟速度、cpu 类型、总内存大小、网络信息、文件系统信息、调页空间信息和设备信息。nmon 然后敲m   巡检报告中务必体现该命令输出信息，可选择截图方式保存
 **Solaris**
+
+```
+echo ::memstat | mdb -k
 /usr/sbin/prtconf |grep "Memory size"
 swap -s
+//如需要看具体那个进程占用内存的情况可以使用使用
+prstat -a
+```
+
 **HP-UX**
 /usr/contrib/bin/machinfo | grep -i memory
 dmesg|grep Physical
