@@ -41,68 +41,89 @@ group by s.sid),
 ## 2.1 操作系统版本/架构
 ### 2.1.1 查看定时任务
 **Linux**
+```
 crontab -l
 crontab -u oracle  -l
 crontab -u grid -l
+```
 **HP-UX、Solaris、AIX**
+```
 crontab -l
 crontab -l grid
 crontab -l oracle
-
+```
 ### 2.1.2 查看系统负载
+```
 uptime
 w
 who
 whoami
-
+```
 ### 2.1.3 查看OS内核信息
 **AIX**
+```
 oslevel -r
 oslevel -s
 bootinfo
+```
 **Linux/Solaries/HP-UX**
+```
 uname -a
 uname -r
 uname -m
 uname -sr                          <!--HP-UX操作系统及版本-->
+
 cat /etc/redhat-release
 cat /etc/issue
 lsb_release
 lsb_release -a
+```
 **Windows**
+```
 winver>win.txt   或者 我的电脑—属性截图
-
+```
 ### 2.1.4 查看IP地址信息
 **Windows**
+```
 hostname>host.txt
 ipconfig>ip.txt
 netstat -in
+```
 **Linux/AIX**
+```
 cat /etc/hosts
 ifconfig -a
 ip addr    <!--linux-->
+netstat -in
+```
 **HP-UX网卡配置**
+```
 ioscan -fnC lan
 lanscan
 vi /etc/rc.config.d/netconf
 cat /etc/inetd.conf          <!--已经打开的网络协议-->
 netstat -in
 /opt/ignite/bin/print_manifest
-
+```
 ## 2.2 系统内存检查
 ### 2.2.1 查看内存
 **Windows**
+```
 systeminfo>info.txt   或者   “任务管理器—性能”截图 Windows检查虚拟内存设置
+```
 **Linux**
+```
 cat /proc/meminfo
 grep MemTotal /proc/meminfo
 grep SwapTotal /proc/meminfo
 free
 free -g
 free -h                 <!--Redhat6.X以后支持-->
+```
 **AIX**
+```
 lsattr -El sys0 -a realmem
-**查看交换分区使用**
+//查看交换分区使用
 lsps -a
 svmon -G
 
@@ -110,7 +131,7 @@ prtconf
 lscfg -v
 nmon
 topas
-
+```
 [^注]: 如果不带任何标志运行 prtconf 命令，会显示系统型号、机器序列号、处理器类型、处理器数目、处理器时钟速度、cpu 类型、总内存大小、网络信息、文件系统信息、调页空间信息和设备信息。nmon 然后敲m   巡检报告中务必体现该命令输出信息，可选择截图方式保存
 **Solaris**
 
@@ -123,127 +144,178 @@ prstat -a
 ```
 
 **HP-UX**
+```
 /usr/contrib/bin/machinfo | grep -i memory
 dmesg|grep Physical
 swapinfo -atm
-
+```
 ### 2.2.2 查看硬件信息
 **Linux**
+```
 dmidecode
 smartctl --all /dev/sda
+```
 **HP-UX 查看系统信息**
+```
 machinfo
+```
 **HP-UX 查看系统配置**
+```
 cstm
 /opt/ignite/bin/print_manifest
 glance
+```
 **HP-UX 查看主机型号**
+```
 model
+```
 **HP-UX硬件状态**
+```
 ioscan -fn
+```
 **HP-UX CELL状态**
+```
 parstatus
 因该命令组件需要单独收费安装，部分客户系统下无此命令，可选择性搜集（该命令类似AIX下的nmon）
-
+```
 ## 2.3 操作系统补丁检查
 #### AIX
 **11.2 AIX6.1 RAC**
+```
 lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte rsct.basic.rte rsct.compat.clients.rte gpfs.base
+```
 **AIX6.1 单机**
+```
 lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte
-
+```
 #### Linux
 **11.2 OL7 or RHEL7 (x86-64)**
+```
 rpm -q compat-libstdc++-33 binutils compat-libcap1 gcc gcc-c++ glibc glibc-devel ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel libXi libXtst make sysstat cpp glibc-headers mpfr
-
+```
 [^注 ]: i386和x86_64都要有的包：glibc glibc-devel libaio libaio-devel libgcc libstdc++ libstdc++-devel libXi libXtst
 [^参考文章]: Requirements for Installing Oracle 11.2.0.4 RDBMS on OL7 or RHEL7 64-bit (x86-64) (文档 ID 1962100.1)
 **11.2 OL6 or RHEL6 (x86-64)**
+```
 rpm -q binutils compat-libcap1 compat-libstdc++-33 gcc gcc-c++ glibc glibc glibc-devel glibc-devel ksh libgcc libstdc++ libstdc++-devel libaio libaio-devel make sysstat cpp glibc-headers mpfr
-
+```
 [^参考文章]: Requirements for Installing Oracle 11gR2 RDBMS on RHEL6 or OL6 64-bit (x86-64) (文档 ID 1441282.1)
 **11.2 OL5 or RHEL5 (x86-64)**
+```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat-libstdc++-33 gcc gcc-c++ elfutils-libelf elfutils-libelf-devel elfutils-libelf-devel-static glibc glibc-common glibc-devel glibc-headers ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel make sysstat unixODBC unixODBC-devel
-
+```
 [^注 ]: i386和x86_64都要有的包：compat-libstdc++-33 glibc libaio libgcc libstdc++ glibc-devel libaio-devel unixODBC unixODBC-devel
 **11.1 OL5 or RHEL5 (x86-64)**
+```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel gcc gcc-c++ glibc glibc-common glibc-devel libaio libaio-devel libgcc libstdc++ libstdc++-devel make sysstat
-
+```
 [^注]: i386和x86_64都要有的包：compat-libstdc++-33 glibc glibc-devel libaio libgcc libstdc++
 **10.2 RHEL5**
+```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" compat-libstdc++-33 gcc-c++ libstdc++-devel glibc-headers glibc-devel glibc-devel libgomp gcc libXp sysstat util-linux
-
+```
 [^注]: i386和x86_64都要有的包：compat-libstdc++ glibc-devel   只有i386的包：libXp
 #### HP-UX查看补丁是否安装命令
+```
 swlist –l <补丁名>
 swlist –l PHSS_39824
+```
 **HP-UX查看系统中安装的所有补丁**
+```
 /usr/sbin/swlist -l patch | more
 swlist –l fileset –a state
 swlist -l bundle
 swlist -l product
 swlist -l product | grep PH
 swlist -l fileset -a state -a patch_state
-
+```
 ### 2.4 操作系统参数设置检查
 #### AIX
 **AIX检查用户shell资源限制**
+```
 cat /etc/security/limits
 ulimit -a
+```
 **AIX Maxuproc参数设置**
+```
 lsattr -EH -l sys0 -a maxuproc
+```
 **AIX检查AIX系统aio设置**
+```
 ioo -F -a | grep -i aio
+```
 **AIX检查虚拟内存参数**
+```
 vmo -a -F
-
+```
 #### Linux
 **Linux内核参数检查**
+```
 cat /etc/sysctl.conf
 cat /etc/security/limits.conf
 sysctl -a
 ulimit -a
-
+```
 #### Solaris
+```
 cat /etc/system
+```
 #### HP-UX查看参数设置
+```
 cat /stand/system
 sysdef
 /usr/sbin/kcweb -F
 ulimit -a
+```
 **HP-UX共享内存参数**
+```
 kctune| grep shm
+```
 **HP-UX显示每个module及描述**
+```
 kcmodule -d
+```
 **HP-UX显示每个内核参数及描述**
+```
 kctune -d
+```
 **HP-UX查看HP-UX的filecache使用率**
+```
 kcusage -ht filecache_max
+```
 **HP-UX修改filecache_max**
+``` 
 kctune filecache_min=5% filecache_max=10%
+```
 **HP-UX检查UDP和TCP内核参数**
+```
 /usr/bin/ndd /dev/tcp tcp_smallest_anon_port tcp_largest_anon_port
 /usr/bin/ndd /dev/udp udp_smallest_anon_port udp_largest_anon_port
+```
 **HP-UX系统内核文件**
+```
 ls /stand
-
+```
 ## 2.5 操作系统时区、时间检查
 ### AIX,HP-UX,Solaris
+```
 echo $TZ
 date
-
+```
 ### Linux
-
+```
 cat /etc/sysconfig/clock
 date -R
-
+```
 ## 2.6 操作系统日志信息
 #### AIX
+```
 errpt -a
 errpt
 last
-
+```
 #### Linux：
+```
 cat /var/log/messages
 dmesg
 dmesg | grep -i SCSI
@@ -254,10 +326,13 @@ lastlog
 lastb
 tail -1000  /var/log/secure
 cat /var/log/boot.log
-
+```
 #### Solaris:
+```
 cat /var/adm/messages
+```
 ####　HP-UX
+```
 /var/adm/syslog/syslog.log                   //系统常用信息，如配置、修改、启动、关闭等信息
 /var/adm/syslog/mail.log                     //电子邮件信息
 /var/adm/sulog                               //执行su的情况
@@ -271,114 +346,167 @@ uptime
 cat  /var/adm/syslog/syslog.log|grep panic
 cat /var/adm/syslog/syslog.log |grep warning
 cat /var/adm/syslog/syslog.log |grep err
-lastb                                                                                   //查看失败登录
+lastb                                       //查看失败登录
 last
 cat /var/adm/syslog/syslog.log|grep error
 cat /var/adm/syslog/syslog.log|grep fail
 cat /var/adm/syslog/OLDsyslog.log |grep error
 cat /var/adm/syslog/OLDsyslog.log |grep fail
+```
 **系统日志**
+```
 /var/adm/syslog/syslog.log
+```
 **上一次系统日志**
+```
 /var/adm/syslog/OLDsyslog.log 
+```
 **系统启动日志目录**
+```
 /etc/rc.log
+```
 **系统关机日志目录**
+```
 /etc/shutdownlog
+```
 **系统CORE DUMP目录**
+```
 /var/adm/crash
-
+```
 #### Tru64
+```
 /var/adm/messages
+```
 #### Windows
+```
 save Application Log and System Log as .TXT files using Event Viewer
+```
 ## 2.7 检查cpu信息
 ### Windows
+```
 wmic cpu list brief>cpu.txt
 systeminfo
-
+```
 ### AIX
 **查看逻辑cpu个数**
+```
 pmcycles -m
 bindprocessor -q
-
+```
 **查看物理cpu个数**
+```
 prtconf|grep Processors
-
+```
 ### Linux
+```
 cat /proc/cpuinfo
 lscpu
-
+```
 ### HPUX 查看 CPU个数
+```
 machinfo
 ioscan -fnC processor
-
+```
 ### Solaris
+```
 mpstat  或者 psrinfo / prtdiag -v
+```
 ## 3.1 检查文件系统空间
 ### Linux
+```
 df -h
 df -hi
 df -i
 fdisk -l
 mount |column -t
-
+```
 ### AIX
+```
 df -g
 mount
+```
 ###AIX 如若文件系统空间使用率过高，可进一步检查vg信息，在有剩余空间的情况下可以在线扩充文件系统大小；在AIX下可以通过getconf命令去得到裸盘的容量大小
+```
 getconf DISK_SIZE /dev/rhdisk1
-
+```
 ### HP-UX
+```
 bdf
 df -P
+```
 **HP-UX检查共享磁盘聚合前后对应关系**
+```
 ioscan -m dsf
+```
 **HP-UX查看磁盘大小**
+```
 diskinfo /dev/disk/disk*
 diskinfo -v
 arraydsp -a
+```
 **HP-UX pv信息**
+```
 cat /etc/lvmtab
 pvdisplay -v pv名称
 vgdisplay -v
+```
 **HP-UX区别本地磁盘以及外挂磁盘**
+```
 ioscan -funC disk
+```
 **HP-UX查看lun信息**
+```
 ioscan -m lun
+```
 **查看HBA卡信息**
+``` 
 ioscan -fnC fc
+```
 **HP-UX 显示启动卷信息**
+``` 
 lvlnboot -v
+```
 **HP-UX 启动盘设备path 信息**
+```
 setboot
+```
 **HP-UX 内核加载的设备驱动**
+```
 lsdev
-
+```
 ### Solaris
+```
 df -g 
 df -h
-
+```
 ### Windows
 计算机管理-磁盘管理：
 ## 3.2 检查物理卷
 ### AIX
+```
 lspv                                //检查pvid 部分，如果使用ASM模式一定要确保删除pvid
+```
 **查看硬盘**
+```
 lspath
+```
 **列出所有磁盘设备**
+```
 lsdev -Cc disk
-
+```
 ### HP-UX
+```
 strings /etc/lvmtab
+```
 ### Linux
+```
 pvscan
 vgscan
 lvscan
 pvdisplay
 vgdisplay
 lvdisplay
-
+```
 ## 3.3 AIX检查reserve policy设置情况
 ```
 lsattr -El hdisk1 | grep reserve
@@ -388,29 +516,38 @@ for i in `lspv |awk '{print $1}'`;do echo $i `lsattr -El $i |grep reserve` ;done
 ## 3.4 多路径状态
 ### Linux 系统下几种多路径状态的查询方法：
 **multipath方式多路径状态检查**
+```
 multipath -ll
+```
 **EMC存储powerpath**
+```
 powermt display dev=all
+```
 **日立多路径软件**
+```
 dlnkmgr view -path
+```
 **华为存储多路径查询**
+```
 upadmin
 UltraPath CLI #1 >show vlun
-
+```
 ## 3.5 aix检查共享vg下lv状态
+```
 lsvg -l datavg
 lslv -l loglv00
-
+```
 ## 3.6 以下检查针对所有平台的11.2.0.4 RAC环境：
 Oracle 11.2.0.4版本的RAC，ASM的rbal后台进程存在内存泄露的情况，将可能导致宕机，此问题影响了包括HPUX/AIX/LINUX等在内的操作系统。
 建议按照下列方法全面梳理是否存在该情况，并增加进程一级内存使用情况的监控。
-
-* ps -elf |grep -i asm_rbal
+```
+ps -elf |grep -i asm_rbal
 ps -elf|grep osw
 或
 ps aux
+```
 正常而言在100M以上，通过比对ASM的其他后台进程即可知晓
-*  select * from v$version
+select * from v$version
 * 查看asm alert 日志中是否出现下列信息
 针对11.2.0.4 RAC ASM的rbal后台进程存在内存泄露的问题，说明如下：
 1. 早在2016年初，ORACLE GCS和ACS部门就处理过几个客户的类似问题（包括文中的客户），所以这并不是一个近期突发的普遍问题，大家大可不必惊慌；
@@ -452,15 +589,21 @@ find / -name "alert*.log*" | xargs du -sk
 ```
 ## 3.10 AIX信息查看
 **查看网卡信息**
+```
 lsdev -Cc adapter|grep ent
+```
 **查看HBA卡信息**
+```
 lsdev -Cc adapter|grep fcs
+```
 **查看网络**
+```
 netstat -in
+```
 **查看路由表**
+```
 netstat -r
-
-
+```
 ## 4.1 查看集群运行状态
 ```
 crs_stat -t -v											//10g
@@ -536,12 +679,17 @@ eth1 192.168.2.0 global cluster_interconnect		 //eth1是全局私有网卡
 
 ## 4.2 检查vote、ocr磁盘状态
 
+```
 crsctl query css votedisk
+```
 **OCR磁盘状态**
+```
 ocrcheck
+```
 **检查 ocr备份情况**
+```
 ocrconfig -showbackup
-
+```
 ```
 //使用ocrdump命令查看OCR内容，但这个命令不能用于OCR的备份恢复只可以用于阅读
 RACDB1@rac1 /home/oracle$ ocrdump -stdout | more
@@ -721,8 +869,9 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 ## 5.4 数据量大小
 ### **查看数据库段空间统计**
 
+```
 select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
-
+```
 ## 5.5 控制文件
 **控制文件**
 
@@ -732,12 +881,12 @@ Col name format a55
 Select * from v$controlfile;
 ```
 #### **生成控制文件**
-
+```
 alter session set tracefile_identifier='bak_control';
 alter database backup controlfile to trace;
 或
 alter database backup controlfile to '/home/oracle/controlfile20171229.bak';
-
+```
 [^注]： RAC报错
 
 ```
@@ -1169,6 +1318,9 @@ list backup of archivelog all;
 show all;
 ```
 [^注]: 若是备份信息存储在control file中,并且rman的保留策略是天数；需要根据control_file_record_keep_time的参数值,进一步评估control_file_record_keep_time参数值的合理性。
+
+[查看RMAN备份还原进度](\Git\blog\oracle\RMAN监控脚本.md)
+
 ## 5.12  CRS 日志报错情况
 ## 5.13  RDBMS 日志报错情况
 ### 参看数据库，RAC日志、ASM日志
@@ -1339,13 +1491,17 @@ end;
 ## 5.16 数据库当前的等待事件
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
+```
+**查询每个客户端连接每个实例的连接数**
 
-//查询每个客户端连接每个实例的连接数
+```
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
+```
+**查看内存占用大的**
 
-//查看内存占用大的
+```
 SELECT server "连接类型",s.MACHINE,s.username,s.osuser,sn.NAME,VALUE/1024/1024 "占用内存MB",s.SID "会话ID",
       s.serial#,p.spid "操作系统进程ID",p.PGA_USED_MEM,p.PGA_ALLOC_MEM,p.PGA_FREEABLE_MEM, 
       p.PGA_MAX_MEM 
@@ -1368,8 +1524,10 @@ WHERE st.SID = s.SID AND st.statistic# = sn.statistic# AND sn.NAME LIKE 'session
      AND p.addr = s.paddr and s.username is not null;
 
 alter system kill session '1568,27761,@2' immediate; 
+```
+**查锁**
 
-//查锁
+```
  with lk as (select blocking_instance||'.'||blocking_session blocker, inst_id||'.'||sid waiter 
                   from gv$session 
                   where blocking_instance is not null 
@@ -1457,7 +1615,10 @@ FROM SYS.LINK$ L, SYS.USER$ U
 WHERE L.OWNER# = U.USER#;
 ```
 ## 5.23   检查object_id的最大值
+```
 select max(object_id) from dba_objects;
+```
+
 ## 5.24   入侵检查
 如果查询出信息输出则表示已经被恶意程序植入了比特币勒索触发器，需要尽快处理。该问题主要是通过使用互联网上非正规渠道获得的plsqldevloper工具连接数据库时传播感染。
 ```plsql
@@ -1603,7 +1764,10 @@ col  value for a50
 select name,value  from v$dataguard_stats;
 ```
 **检查是否存在断档**
+
+```
 select * from v$archive_gap;
+```
 
 ## 7.1 AWR、ASH
 **脚本目录  $ORACLE_HOME/rdbms/admin**
