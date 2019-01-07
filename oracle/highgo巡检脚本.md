@@ -1824,6 +1824,36 @@ EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
 //手动生成快照
 EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
 ```
+```
+awrrpt.sql 
+展示一段时间范围两个快照之间的数据库性能指标。
+awrrpti.sql 
+展示一段时间范围两个快照之间的特定数据库和特定实例的性能指标。
+awrsqrpt.sql
+展示特定 SQL 在一段时间范围两个快照之间的性能指标，运行这个脚本来检查和诊断一个特定 SQL 的性能问题。
+awrsqrpi.sql 
+展示特定 SQL 在特定数据库和特定实例的一段时间范围内两个快照之间的性能指标。
+awrddrpt.sql
+用于比较两个指定的时间段之间数据库详细性能指标和配置情况。
+awrddrpi.sql 
+用于在特定的数据库和特定实例上，比较两个指定的时间段之间的数据库详细性能指标和配置情况。
+```
+**AWR 相关的视图**
+如下系统视图与 AWR 相关：
+
+```
+V$ACTIVE_SESSION_HISTORY - 展示每秒采样的 active session history (ASH)。
+V$METRIC - 展示度量信息。
+V$METRICNAME - 展示每个度量组的度量信息。
+V$METRIC_HISTORY - 展示历史度量信息。
+V$METRICGROUP - 展示所有的度量组。
+DBA_HIST_ACTIVE_SESS_HISTORY - 展示 active session history 的历史信息。
+DBA_HIST_BASELINE - 展示 AWR 基线信息。
+DBA_HIST_DATABASE_INSTANCE - 展示数据库环境信息。
+DBA_HIST_SNAPSHOT - 展示 AWR 快照信息。
+DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
+DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
+```
 
 ## 7.2 参数文件备份
 
