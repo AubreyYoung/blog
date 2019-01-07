@@ -47,6 +47,7 @@ crontab -u oracle  -l
 crontab -u grid -l
 ```
 **HP-UX、Solaris、AIX**
+
 ```
 crontab -l
 crontab -l grid
@@ -61,12 +62,14 @@ whoami
 ```
 ### 2.1.3 查看OS内核信息
 **AIX**
+
 ```
 oslevel -r
 oslevel -s
 bootinfo
 ```
 **Linux/Solaries/HP-UX**
+
 ```
 uname -a
 uname -r
@@ -79,11 +82,13 @@ lsb_release
 lsb_release -a
 ```
 **Windows**
+
 ```
 winver>win.txt   或者 我的电脑—属性截图
 ```
 ### 2.1.4 查看IP地址信息
 **Windows**
+
 ```
 hostname>host.txt
 ipconfig>ip.txt
@@ -97,6 +102,7 @@ ip addr    <!--linux-->
 netstat -in
 ```
 **HP-UX网卡配置**
+
 ```
 ioscan -fnC lan
 lanscan
@@ -121,6 +127,7 @@ free -g
 free -h                 <!--Redhat6.X以后支持-->
 ```
 **AIX**
+
 ```
 lsattr -El sys0 -a realmem
 //查看交换分区使用
@@ -160,20 +167,24 @@ smartctl --all /dev/sda
 machinfo
 ```
 **HP-UX 查看系统配置**
+
 ```
 cstm
 /opt/ignite/bin/print_manifest
 glance
 ```
 **HP-UX 查看主机型号**
+
 ```
 model
 ```
 **HP-UX硬件状态**
+
 ```
 ioscan -fn
 ```
 **HP-UX CELL状态**
+
 ```
 parstatus
 因该命令组件需要单独收费安装，部分客户系统下无此命令，可选择性搜集（该命令类似AIX下的nmon）
@@ -181,36 +192,43 @@ parstatus
 ## 2.3 操作系统补丁检查
 #### AIX
 **11.2 AIX6.1 RAC**
+
 ```
 lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte rsct.basic.rte rsct.compat.clients.rte gpfs.base
 ```
 **AIX6.1 单机**
+
 ```
 lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte
 ```
 #### Linux
 **11.2 OL7 or RHEL7 (x86-64)**
+
 ```
 rpm -q compat-libstdc++-33 binutils compat-libcap1 gcc gcc-c++ glibc glibc-devel ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel libXi libXtst make sysstat cpp glibc-headers mpfr
 ```
 [^注 ]: i386和x86_64都要有的包：glibc glibc-devel libaio libaio-devel libgcc libstdc++ libstdc++-devel libXi libXtst
 [^参考文章]: Requirements for Installing Oracle 11.2.0.4 RDBMS on OL7 or RHEL7 64-bit (x86-64) (文档 ID 1962100.1)
 **11.2 OL6 or RHEL6 (x86-64)**
+
 ```
 rpm -q binutils compat-libcap1 compat-libstdc++-33 gcc gcc-c++ glibc glibc glibc-devel glibc-devel ksh libgcc libstdc++ libstdc++-devel libaio libaio-devel make sysstat cpp glibc-headers mpfr
 ```
 [^参考文章]: Requirements for Installing Oracle 11gR2 RDBMS on RHEL6 or OL6 64-bit (x86-64) (文档 ID 1441282.1)
 **11.2 OL5 or RHEL5 (x86-64)**
+
 ```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat-libstdc++-33 gcc gcc-c++ elfutils-libelf elfutils-libelf-devel elfutils-libelf-devel-static glibc glibc-common glibc-devel glibc-headers ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel make sysstat unixODBC unixODBC-devel
 ```
 [^注 ]: i386和x86_64都要有的包：compat-libstdc++-33 glibc libaio libgcc libstdc++ glibc-devel libaio-devel unixODBC unixODBC-devel
 **11.1 OL5 or RHEL5 (x86-64)**
+
 ```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel gcc gcc-c++ glibc glibc-common glibc-devel libaio libaio-devel libgcc libstdc++ libstdc++-devel make sysstat
 ```
 [^注]: i386和x86_64都要有的包：compat-libstdc++-33 glibc glibc-devel libaio libgcc libstdc++
 **10.2 RHEL5**
+
 ```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" compat-libstdc++-33 gcc-c++ libstdc++-devel glibc-headers glibc-devel glibc-devel libgomp gcc libXp sysstat util-linux
 ```
@@ -221,6 +239,7 @@ swlist –l <补丁名>
 swlist –l PHSS_39824
 ```
 **HP-UX查看系统中安装的所有补丁**
+
 ```
 /usr/sbin/swlist -l patch | more
 swlist –l fileset –a state
@@ -232,24 +251,29 @@ swlist -l fileset -a state -a patch_state
 ### 2.4 操作系统参数设置检查
 #### AIX
 **AIX检查用户shell资源限制**
+
 ```
 cat /etc/security/limits
 ulimit -a
 ```
 **AIX Maxuproc参数设置**
+
 ```
 lsattr -EH -l sys0 -a maxuproc
 ```
 **AIX检查AIX系统aio设置**
+
 ```
 ioo -F -a | grep -i aio
 ```
 **AIX检查虚拟内存参数**
+
 ```
 vmo -a -F
 ```
 #### Linux
 **Linux内核参数检查**
+
 ```
 cat /etc/sysctl.conf
 cat /etc/security/limits.conf
@@ -268,31 +292,38 @@ sysdef
 ulimit -a
 ```
 **HP-UX共享内存参数**
+
 ```
 kctune| grep shm
 ```
 **HP-UX显示每个module及描述**
+
 ```
 kcmodule -d
 ```
 **HP-UX显示每个内核参数及描述**
+
 ```
 kctune -d
 ```
 **HP-UX查看HP-UX的filecache使用率**
+
 ```
 kcusage -ht filecache_max
 ```
 **HP-UX修改filecache_max**
+
 ``` 
 kctune filecache_min=5% filecache_max=10%
 ```
 **HP-UX检查UDP和TCP内核参数**
+
 ```
 /usr/bin/ndd /dev/tcp tcp_smallest_anon_port tcp_largest_anon_port
 /usr/bin/ndd /dev/udp udp_smallest_anon_port udp_largest_anon_port
 ```
 **HP-UX系统内核文件**
+
 ```
 ls /stand
 ```
@@ -354,22 +385,27 @@ cat /var/adm/syslog/OLDsyslog.log |grep error
 cat /var/adm/syslog/OLDsyslog.log |grep fail
 ```
 **系统日志**
+
 ```
 /var/adm/syslog/syslog.log
 ```
 **上一次系统日志**
+
 ```
 /var/adm/syslog/OLDsyslog.log 
 ```
 **系统启动日志目录**
+
 ```
 /etc/rc.log
 ```
 **系统关机日志目录**
+
 ```
 /etc/shutdownlog
 ```
 **系统CORE DUMP目录**
+
 ```
 /var/adm/crash
 ```
@@ -389,11 +425,13 @@ systeminfo
 ```
 ### AIX
 **查看逻辑cpu个数**
+
 ```
 pmcycles -m
 bindprocessor -q
 ```
 **查看物理cpu个数**
+
 ```
 prtconf|grep Processors
 ```
@@ -426,6 +464,7 @@ df -g
 mount
 ```
 ###AIX 如若文件系统空间使用率过高，可进一步检查vg信息，在有剩余空间的情况下可以在线扩充文件系统大小；在AIX下可以通过getconf命令去得到裸盘的容量大小
+
 ```
 getconf DISK_SIZE /dev/rhdisk1
 ```
@@ -516,10 +555,12 @@ for i in `lspv |awk '{print $1}'`;do echo $i `lsattr -El $i |grep reserve` ;done
 ## 3.4 多路径状态
 ### Linux 系统下几种多路径状态的查询方法：
 **multipath方式多路径状态检查**
+
 ```
 multipath -ll
 ```
 **EMC存储powerpath**
+
 ```
 powermt display dev=all
 ```
@@ -1777,7 +1818,15 @@ select * from v$archive_gap;
 @?/rdbms/admin/awrrpt.sql
 @?/rdbms/admin/ashrpt.sql
 ```
+```
+//修改快照时间间隔
+EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
+//手动生成快照
+EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
+```
+
 ## 7.2 参数文件备份
+
 ```
 create pfile='C:\Users\Administrator\Desktop\pfile20170109.ora' from spfile;
 create pfile='/home/oracle/pfile20181127_his.ora' from spfile;
