@@ -14,18 +14,22 @@
     <SUITE FILE_PATH="coverage/PythonCoding$OS_module.coverage" NAME="OS_module Coverage Results" MODIFIED="1546840457450" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
     <SUITE FILE_PATH="coverage/PythonCoding$MySQLCreateTable.coverage" NAME="MySQLCreateTable Coverage Results" MODIFIED="1541662027588" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
     <SUITE FILE_PATH="coverage/PythonCoding$Sys_module.coverage" NAME="Sys_module Coverage Results" MODIFIED="1546846591032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
+    <SUITE FILE_PATH="coverage/PythonCoding$base64_module.coverage" NAME="base64_module Coverage Results" MODIFIED="1547101653643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
     <SUITE FILE_PATH="coverage/PythonCoding$time_module.coverage" NAME="time_module Coverage Results" MODIFIED="1546849388083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
     <SUITE FILE_PATH="coverage/PythonCoding$sqlite3_module.coverage" NAME="sqlite3_module Coverage Results" MODIFIED="1547023990668" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
     <SUITE FILE_PATH="coverage/PythonCoding$Recursive.coverage" NAME="Recursive Coverage Results" MODIFIED="1545360351271" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
     <SUITE FILE_PATH="coverage/PythonCoding$Csv_module.coverage" NAME="Csv_module Coverage Results" MODIFIED="1546934723178" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
     <SUITE FILE_PATH="coverage/PythonCoding$smtp_module.coverage" NAME="smtp_module Coverage Results" MODIFIED="1547025694391" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
     <SUITE FILE_PATH="coverage/PythonCoding$PythonConnectMySQL.coverage" NAME="PythonConnectMySQL Coverage Results" MODIFIED="1541661735857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
+    <SUITE FILE_PATH="coverage/PythonCoding$pickle_module.coverage" NAME="pickle_module Coverage Results" MODIFIED="1547100812206" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
     <SUITE FILE_PATH="coverage/PythonCoding$PythonConnectMongodb.coverage" NAME="PythonConnectMongodb Coverage Results" MODIFIED="1542701183123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181120" />
+    <SUITE FILE_PATH="coverage/PythonCoding$logging_module.coverage" NAME="logging_module Coverage Results" MODIFIED="1547102679963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
     <SUITE FILE_PATH="coverage/PythonCoding$String_module.coverage" NAME="String_module Coverage Results" MODIFIED="1546843618058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
     <SUITE FILE_PATH="coverage/PythonCoding$Urllib2_module.coverage" NAME="Urllib2_module Coverage Results" MODIFIED="1546937819700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
     <SUITE FILE_PATH="coverage/PythonCoding$json_module.coverage" NAME="json_module Coverage Results" MODIFIED="1547021934989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
     <SUITE FILE_PATH="coverage/PythonCoding$Random_module.coverage" NAME="Random_module Coverage Results" MODIFIED="1546848716659" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
     <SUITE FILE_PATH="coverage/PythonCoding$LineCache.coverage" NAME="LineCache Coverage Results" MODIFIED="1546836333806" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
+    <SUITE FILE_PATH="coverage/PythonCoding$queue_module.coverage" NAME="queue_module Coverage Results" MODIFIED="1547102682762" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
     <SUITE FILE_PATH="coverage/PythonCoding$Reture.coverage" NAME="Reture Coverage Results" MODIFIED="1545122747956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
     <SUITE FILE_PATH="coverage/PythonCoding$Math_module.coverage" NAME="Math_module Coverage Results" MODIFIED="1546932388190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
     <SUITE FILE_PATH="coverage/PythonCoding$Print.coverage" NAME="Print Coverage Results" MODIFIED="1545116267980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
@@ -44,42 +48,51 @@
     <SUITE FILE_PATH="coverage/PythonCoding$Function.coverage" NAME="Function Coverage Results" MODIFIED="1545359060770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="json_module.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Coding20190109/json_module.py">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="pickle_module.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Coding20190110/pickle_module.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
+            <state relative-caret-position="247">
+              <caret line="13" column="23" lean-forward="true" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="arrow_module.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Coding20190109/arrow_module.py">
+      <file leaf-file-name="threading_module.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Coding20190110/threading_module.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="sqlite3_module.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Coding20190109/sqlite3_module.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="207">
-              <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="smtp_module.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Coding20190109/smtp_module.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="26" column="25" selection-start-line="26" selection-start-column="25" selection-end-line="26" selection-end-column="25" />
+            <state relative-caret-position="19">
+              <caret line="1" column="14" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
               <folding>
-                <element signature="e#43#57#0" expanded="true" />
+                <element signature="e#0#16#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="base64_module.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Coding20190110/base64_module.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="133">
+              <caret line="7" column="22" lean-forward="true" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="logging_module.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Coding20190110/logging_module.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret selection-end-line="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="queue_module.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Coding20190110/queue_module.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="114">
+              <caret line="6" column="7" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -143,6 +156,13 @@
         <option value="$PROJECT_DIR$/Coding20190109/arrow_module.py" />
         <option value="$PROJECT_DIR$/Coding20190109/sqlite3_module.py" />
         <option value="$PROJECT_DIR$/Coding20190109/smtp_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/pickle_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/xmlrpclib_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/xmlrpc_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/base64_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/logging_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/queue_module.py" />
+        <option value="$PROJECT_DIR$/Coding20190110/threading_module.py" />
       </list>
     </option>
   </component>
@@ -156,8 +176,8 @@
     <packageJsonPaths />
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="15" />
-    <option name="y" value="30" />
+    <option name="x" value="78" />
+    <option name="y" value="550" />
     <option name="width" value="1890" />
     <option name="height" value="930" />
   </component>
@@ -166,7 +186,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -177,12 +196,13 @@
             <path>
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="Coding20190109" type="462c0819:PsiDirectoryNode" />
+              <item name="Coding20190110" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -202,8 +222,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.smtp_module">
-    <configuration name="arrow_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.queue_module">
+    <configuration name="base64_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -211,18 +231,18 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190109" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190110" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190109/arrow_module.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190110/base64_module.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="gzip_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="logging_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -230,18 +250,18 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190108" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190110" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190108/gzip_module.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190110/logging_module.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="json_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="pickle_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -249,12 +269,31 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190109" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190110" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190109/json_module.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190110/pickle_module.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="queue_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="PythonCoding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190110" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190110/queue_module.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -279,39 +318,20 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="sqlite3_module" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190109" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190109/sqlite3_module.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
     <list>
-      <item itemvalue="Python.gzip_module" />
-      <item itemvalue="Python.json_module" />
-      <item itemvalue="Python.arrow_module" />
-      <item itemvalue="Python.sqlite3_module" />
       <item itemvalue="Python.smtp_module" />
+      <item itemvalue="Python.pickle_module" />
+      <item itemvalue="Python.base64_module" />
+      <item itemvalue="Python.logging_module" />
+      <item itemvalue="Python.queue_module" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.queue_module" />
+        <item itemvalue="Python.logging_module" />
+        <item itemvalue="Python.base64_module" />
+        <item itemvalue="Python.pickle_module" />
         <item itemvalue="Python.smtp_module" />
-        <item itemvalue="Python.sqlite3_module" />
-        <item itemvalue="Python.arrow_module" />
-        <item itemvalue="Python.json_module" />
-        <item itemvalue="Python.gzip_module" />
       </list>
     </recent_temporary>
   </component>
@@ -333,11 +353,11 @@
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.51053864" side_tool="true" visible="true" weight="0.3298969" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5113193" side_tool="true" visible="true" weight="0.3298969" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4980484" weight="0.32993197" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48946136" weight="0.3298969" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48868072" weight="0.3298969" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24277908" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
@@ -346,15 +366,15 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.32993197" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Coverage" order="3" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="right" id="Coverage" order="3" side_tool="true" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.32993197" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -375,41 +395,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Coding20181220/Count.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181218/Class.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="14" column="11" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181218/Except.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="3" lean-forward="true" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181218/Reture.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="10" column="32" selection-start-line="10" selection-start-column="32" selection-end-line="10" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181126/PythonType.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="57">
-          <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Coding20181120/PythonConnectMongodb.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
@@ -680,17 +665,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/json_module.py">
+    <entry file="file://$PROJECT_DIR$/Coding20190109/smtp_module.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/arrow_module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
+        <state relative-caret-position="302">
+          <caret line="26" column="25" selection-start-line="26" selection-end-line="26" selection-end-column="26" />
         </state>
       </provider>
     </entry>
@@ -701,12 +679,54 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/smtp_module.py">
+    <entry file="file://$PROJECT_DIR$/Coding20190109/arrow_module.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="26" column="25" selection-start-line="26" selection-start-column="25" selection-end-line="26" selection-end-column="25" />
+        <state relative-caret-position="95">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190109/json_module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190110/pickle_module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="13" column="23" lean-forward="true" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190110/base64_module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="133">
+          <caret line="7" column="22" lean-forward="true" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190110/logging_module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190110/queue_module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="114">
+          <caret line="6" column="7" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190110/threading_module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="1" column="14" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
           <folding>
-            <element signature="e#43#57#0" expanded="true" />
+            <element signature="e#0#16#0" expanded="true" />
           </folding>
         </state>
       </provider>

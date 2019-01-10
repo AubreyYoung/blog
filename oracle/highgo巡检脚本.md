@@ -1627,7 +1627,7 @@ select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log whe
 ```
 ```
 //删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
-RMAN> delete force archivelog until time "sysdate";
+RMAN> delete force archivelog until time "sysdate-1";
 //删除3天前的归档日志
 delete  archivelog until time "sysdate-3";
 ```
