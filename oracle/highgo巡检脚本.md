@@ -1862,3 +1862,17 @@ create pfile='C:\Users\Administrator\Desktop\pfile20170109.ora' from spfile;
 create pfile='/home/oracle/pfile20181127_his.ora' from spfile;
 create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solaris-->
 ```
+
+==**性能相关**==
+----
+## 8.1查看会话ID、OSPID
+```
+column line format a79
+set heading off
+select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||
+  s.osuser || ' ' ||s.machine ||' '||s.username ||' '||s.program line
+from v$session s , v$process p
+where p.addr = s.paddr
+and s.username <> ' ';
+```
+
