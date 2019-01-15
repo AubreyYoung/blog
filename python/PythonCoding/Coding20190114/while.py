@@ -50,15 +50,15 @@ while count <= 100:
         print(count)
     count = count +1
 '''
-# count = 1
-# sum = 0
-# while count <= 100:
-#     if count%2 == 1:
-#         sum = sum + count
-#     else:
-#         sum = sum - count
-#     count = count + 1
-# print(sum)
+count = 1
+sum = 0
+while count <= 99:
+    if count % 2 == 1:
+        sum = sum + count
+    else:
+        sum = sum - count
+    count = count + 1
+print(sum)
 
 # count  = 1
 # while count <= 3:
