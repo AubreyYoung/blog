@@ -23,6 +23,7 @@
     <SUITE FILE_PATH="coverage/PythonCoding$smtp_module.coverage" NAME="smtp_module Coverage Results" MODIFIED="1547025694391" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
     <SUITE FILE_PATH="coverage/PythonCoding$PythonConnectMySQL.coverage" NAME="PythonConnectMySQL Coverage Results" MODIFIED="1541661735857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
     <SUITE FILE_PATH="coverage/PythonCoding$pickle_module.coverage" NAME="pickle_module Coverage Results" MODIFIED="1547100812206" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
+    <SUITE FILE_PATH="coverage/PythonCoding$yunsuan.coverage" NAME="yunsuan Coverage Results" MODIFIED="1547608361380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
     <SUITE FILE_PATH="coverage/PythonCoding$PythonConnectMongodb.coverage" NAME="PythonConnectMongodb Coverage Results" MODIFIED="1542701183123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181120" />
     <SUITE FILE_PATH="coverage/PythonCoding$logging_module.coverage" NAME="logging_module Coverage Results" MODIFIED="1547102679963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
     <SUITE FILE_PATH="coverage/PythonCoding$String_module.coverage" NAME="String_module Coverage Results" MODIFIED="1546843618058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
@@ -71,11 +72,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="format.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="format.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Coding20190114/format.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="376">
-              <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
+            <state relative-caret-position="300">
+              <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="yunsuan.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Coding20190116/yunsuan.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="338">
+              <caret line="18" selection-start-line="18" selection-end-line="21" selection-end-column="66" />
             </state>
           </provider>
         </entry>
@@ -100,7 +110,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Coding20181108/MySQLInsert.py" />
         <option value="$PROJECT_DIR$/Coding20181108/MySQLupdate.py" />
         <option value="$PROJECT_DIR$/Coding20181108/MySQLDelete.py" />
         <option value="$PROJECT_DIR$/Coding20181112/Delete.py" />
@@ -151,6 +160,7 @@
         <option value="$PROJECT_DIR$/Coding20190114/test1.py" />
         <option value="$PROJECT_DIR$/Coding20190114/test.py" />
         <option value="$PROJECT_DIR$/Coding20190114/format.py" />
+        <option value="$PROJECT_DIR$/Coding20190116/yunsuan.py" />
       </list>
     </option>
   </component>
@@ -182,6 +192,16 @@
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
+              <item name="Coding20190114" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
+              <item name="Coding20190116" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -192,7 +212,12 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../OldBoyPython/老男孩Python_Day01.md" />
-    <property name="settings.editor.selected.configurable" value="sshConsole" />
+    <property name="settings.editor.selected.configurable" value="fileTemplates" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Git\blog\python\PythonCoding" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -206,7 +231,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.format">
+  <component name="RunManager" selected="Python.yunsuan">
     <configuration name="break" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -264,25 +289,6 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="print" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190113" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190113/print.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
     <configuration name="while" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -302,20 +308,39 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="yunsuan" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="PythonCoding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190116" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Coding20190116/yunsuan.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <list>
-      <item itemvalue="Python.print" />
       <item itemvalue="Python.while" />
       <item itemvalue="Python.break" />
       <item itemvalue="Python.format" />
       <item itemvalue="Python.print (1)" />
+      <item itemvalue="Python.yunsuan" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.yunsuan" />
         <item itemvalue="Python.format" />
         <item itemvalue="Python.print (1)" />
         <item itemvalue="Python.while" />
         <item itemvalue="Python.break" />
-        <item itemvalue="Python.print" />
       </list>
     </recent_temporary>
   </component>
@@ -355,22 +380,22 @@
       <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4980484" weight="0.2844365" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26434922" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26434922" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="4" weight="0.32983023" />
+      <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39862543" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.32993197" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Coverage" order="3" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.32993197" />
+      <window_info anchor="right" id="Coverage" order="4" side_tool="true" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -426,13 +451,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Coding20181112/Delete.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Program Files (x86)/Python/Python37-32/Lib/site-packages/pymysql/connections.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="121">
@@ -745,8 +763,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Coding20190114/format.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="376">
-          <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
+        <state relative-caret-position="300">
+          <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Coding20190116/yunsuan.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="338">
+          <caret line="18" selection-start-line="18" selection-end-line="21" selection-end-column="66" />
         </state>
       </provider>
     </entry>
