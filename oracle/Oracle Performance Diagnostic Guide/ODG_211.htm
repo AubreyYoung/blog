@@ -1,0 +1,2487 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<!--webbot bot="PurpleText" PREVIEW="VERSION FORMAT:  release.major_change.minor_change" -->
+<title>Oracle Performance Diagnostic Guide</title>
+
+<STYLE>
+.heading1    { font-size: 18pt; color: #2B3366; text-indent: 0; word-spacing: 0; text-align: 
+               left; line-height: 150%; font-family: Arial; font-weight: bold; 
+               margin: 0 }
+.heading3    { font-family: Arial; font-size: 12pt; color: #336699; font-weight: bold }
+.bodytext    { font-family: Arial; font-size: 10pt }
+.tableText   { font-family: Arial; font-size: 12pt }
+.menuLevel2  { font-family: Arial; font-size: 12pt; color: #009999; font-weight: bold; 
+               text-align: left; word-spacing: 0; text-indent: 0; 
+               margin-left: 30px; margin-right: 15px; 
+               margin-top: 0; margin-bottom: 0 }
+.menuLevel1  { font-size: 12pt; color: #336699; text-align: left; word-spacing: 0; 
+               text-indent: 0; line-height: 150%; font-family: Arial; 
+               font-weight: bold; margin-left:15; margin-right:0; margin-top:0; margin-bottom:20 }
+.heading2    { font-size: 14pt; color: #336699; text-align: left; text-indent: 0; 
+               word-spacing: 0; line-height: 100%; font-family: Arial; 
+               font-weight: bold; border-left-width: 1; border-right-width: 1; 
+               border-bottom: 3px solid #CCCC99; margin: 0; padding: 0 }
+
+.conts	{visibility:hidden}
+.tab	{	border-bottom:2px solid #0066CC; border-top:2px solid #CCFFFF; border-right:2px solid #0066CC; border-left:2px solid #CCCCCC; font-family:Verdana;
+			font-size:10pt;
+			text-align:center;
+			font-weight:normal; background-color:#99CCFF}
+
+.selTab	{	border-left:thin solid #FFFFFF;
+			border-top:thin solid #FFFFFF;
+			border-right:thin solid #000000;
+			font-weight:bold;
+			text-align:center; background-color:#CCCCCC}
+
+.odmtest     { font-family: Arial; font-size: 10pt; color: #FFFFFF; line-height:100%; position:relative; left:2px; top:1px; margin-top:0; margin-bottom:0; z-index:3 }			
+.odmTxtOnOld     { font-family: Arial; font-size: 10pt; color: #FFFFFF; line-height:100%; position:relative; left:0px; top:-15px; margin-top:-30px; margin-bottom:0px; cursor:default; z-index:3}			
+.odmTxtOffOld    { font-family: Arial; font-size: 10pt; color: #000000; line-height:100%; position:relative; left:0px; top:-15px; margin-top:-30px; margin-bottom:0px; cursor:default; z-index:3}			
+.odmTxtOn     { font-family: Arial; font-size: 10pt; color: #336699; margin-top:0; margin-bottom:0; font-weight:bold}			
+.odmTxtOff    { font-family: Arial; font-size: 10pt; color: #A6B3C8; margin-top:0; margin-bottom:0;  font-weight:bold}			
+.odmTxtFaded  { font-family: Arial; font-size: 10pt; color: #A6B3C8; margin-top:0; margin-bottom:0;  font-weight:bold}			
+.odmPic       { font-family: Arial; font-size: 12pt; color: #00FF00; line-height:100%; position:relative; left:0px; top:0px; margin-top:0; margin-bottom:0; cursor:default; z-index:2}			
+.detailTxtOn     { font-family: Arial; font-size: 8pt; color: #FFFFFF; line-height:100%; position:relative; left:0px; top:-15px; margin-top:-25; margin-bottom:0; cursor:default; z-index:3; text-align:center}			
+.detailTxtOff    { font-family: Arial; font-size: 8pt; color: #000000; line-height:100%; position:relative; left:0px; top:-15px; margin-top:-25; margin-bottom:0; cursor:default; z-index:3; text-align:center}			
+.detailTxtFaded  { font-family: Arial; font-size: 8pt; color: #A6B3C8; line-height:100%; position:relative; left:0px; top:-15px; margin-top:-25; margin-bottom:0; cursor:default; z-index:3; text-align:center}			
+.detailPic       { font-family: Arial; font-size: 12pt; line-height:100%; position:relative; left:0px; top:0px; margin-top:0; margin-bottom:0; cursor:default; z-index:2; text-align:center}			
+.tabTxtOn     { font-family: Arial; font-size: 8pt; color: #FFFFFF; line-height:100%; position:relative; left:0px; top:0px; margin-left:8; margin-top:-23; margin-bottom:0; cursor:pointer; z-index:3; font-weight:bold}			
+.tabTxtOff    { font-family: Arial; font-size: 8pt; color: #000000; line-height:100%; position:relative; left:0px; top:0px; margin-left:8; margin-top:-23; margin-bottom:0; cursor:pointer; z-index:3; font-weight:bold}			
+.tabPic       { font-family: Arial; font-size: 12pt; color: #00FF00; line-height:100%; position:relative; left:0px; top:0px; margin-top:0; margin-bottom:0; cursor:pointer; z-index:2}			
+.help         {color:#000000; background:#F6F8FA; font-size:10pt; font-family:Arial; margin-left:10px; margin-bottom:0px; border:2px solid #0D4988; padding:5px}
+.RPHelp             { border:1px double #2B3366; font-family: Arial; font-size: 10pt; padding-left:4; padding-right:4; padding-top:1; padding-bottom:1; background-color:#CCCCCC; width:300 }
+.RPHelpCR           { border:1px double #2B3366; font-family: Arial; font-size: 10pt; padding-left:4; padding-right:4; padding-top:1; padding-bottom:1; background-color:#CCCCCC; width:300; color:#FF0000 }
+.qstTxtSm   { font-family: Arial; font-size: 10pt; margin-top:0; margin-bottom:0 }
+.qstTxtMed   { font-family: Arial; font-size: 12pt; margin-top:0; margin-bottom:0 }
+.HomeHdr1      { font-family: Arial; font-size: 16pt; color: #234A82; margin-top:0; margin-bottom:0; font-weight:bold }
+.HomeHdr2      { font-family: Arial; font-size: 14pt; margin-top:0; margin-bottom:0; font-weight:bold }
+.HomeHdr3      { font-family: Arial; font-size: 10pt; margin-top:0; margin-bottom:0; font-weight:bold }
+.HomeHdr4      { font-family: Arial; font-size: 10pt; margin-top:0; margin-bottom:0; margin-left:15 }
+.HomeDate      { font-family: Arial; font-size: 10pt; color: #234A82; margin-top:0; margin-bottom:0; font-weight:bold }
+.detailEmptyLayer  { font-size: 1px; font-family: Arial; line-height: 100%; margin: 0 }
+.detailEmptyLine 	{ font-family: Arial; font-size: 5pt; word-spacing:0; line-height:100%; color:#3C3C3C; margin-top:0; margin-bottom:0}
+.detailHdrTxt       { font-family: Arial; font-size: 14pt; color: #000000; font-weight:bold; margin-bottom:0; margin-top:0 }            
+.detailSubHdrTxt    { font-family: Arial; font-size: 12pt; color: #000000; font-weight:bold; margin-bottom:0; margin-top:0 }            
+.detailLine         {color: #A6B3C8; margin-top:0; size:1}
+.detailMainTxt      { font-family: Arial; font-size: 10pt; margin-top:0; margin-bottom:0 }
+.detailBullet       { font-family: Arial; font-size: 10pt; margin-top:0; margin-bottom:0; list-style-type:disc }
+.detailNumber       { font-family: Arial; font-size: 10pt; margin-top:0; margin-bottom:0; list-style-type:decimal }
+.detailCmdTxt       { font-family: Courier New; font-size: 10pt; margin-top:0; margin-bottom:0 }
+.detailTraceTxt     { font-family: Courier New; font-size: 8pt; color: #3C3C3C; margin-top:0; margin-bottom:0 }
+.detailTraceBlk     { font-family: Courier New; font-size: 8pt; margin-top:0; margin-bottom:0 }
+.detailTraceBlue    { font-family: Courier New; font-size: 8pt; color: #0000FF; margin-top:0; margin-bottom:0 }
+.detailTraceRed     { font-family: Courier New; font-size: 8pt; color: #FF0000; margin-top:0; margin-bottom:0 }
+.detailTraceGrn     { font-family: Courier New; font-size: 8pt; color: #00CC00; margin-top:0; margin-bottom:0 }
+.detailTracePur     { font-family: Courier New; font-size: 8pt; color: #CC33FF; margin-top:0; margin-bottom:0 }
+.detailTraceCursor  { font-family: Courier New; font-size: 8pt; color: #FF0000; margin-top:0; margin-bottom:0 }
+.detailTraceSelect  { font-family: Courier New; font-size: 8pt; color: #FF0000; margin-top:0; margin-bottom:0 }
+.detailTraceBind    { font-family: Courier New; font-size: 8pt; color: #0000FF; margin-top:0; margin-bottom:0 }
+.detailTraceValue   { font-family: Courier New; font-size: 8pt; color: #00CC00; margin-top:0; margin-bottom:0 }
+.detailTraceMsg     { font-family: Courier New; font-size: 8pt; color: #CC33FF; margin-top:0; margin-bottom:0; font-weight:bold }
+.detailLevel1       { font-family: Arial; font-size: 10pt; color: #000000; margin-top:0; margin-bottom:0; font-style:italic; font-weight:bold }
+.detailTbl          { padding:0; background-color:#EEF3F7 }
+.detailTblHdr       { font-family: Arial; font-size: 9pt; margin-top:0; margin-bottom:0; margin-left:0; font-weight:bold }
+.detailTblHdrSm     { font-family: Arial; font-size: 8pt; margin-top:0; margin-bottom:0; margin-left:0; font-weight:bold }
+.detailTblBullet    { font-family: Arial; font-size: 9pt; margin-top:0; margin-bottom:0; margin-left:0 }
+.detailTblTxt       { font-family: Arial; font-size: 9pt; word-spacing:0; line-height:100%; color:#234A82; margin-left:0; margin-right:0; margin-top:0; margin-bottom:0}
+.detailTblTxtBlk    { font-family: Arial; font-size: 9pt; word-spacing:0; line-height:100%; color:#000000; margin-left:0; margin-right:0; margin-top:0; margin-bottom:0}
+.detailTblTxt1      { font-family: Arial; font-size: 9pt; color:#234A82; }
+.detailTblTxt2      { font-family: Arial; font-size: 9pt; word-spacing:0; line-height:100%; color:#234A82; margin-top:0; margin-bottom:0}
+.detailTblTxt3      { font-family: Arial; font-size: 9pt; word-spacing:0; line-height:100%; color:#3C3C3C; margin-top:0; margin-bottom:0}
+.detailTblTxt4      { font-family: Arial; font-size: 8pt; word-spacing:0; line-height:100%; color:#3C3C3C; margin-top:0; margin-bottom:0}
+.detailTblCol1		{ background-color: #EEF3F7 }
+.detailTblCol2		{ background-color: #C4D1E6 }
+.detailTblEmptyLine { font-family: Arial; font-size: 5pt; word-spacing:0; line-height:100%; color:#3C3C3C; margin-top:0; margin-bottom:0}
+.detailTblLine      { color: #A6B3C8; margin-top:0; size:2; width:90%}
+.detailTblLowBG     { font-family: Arial; font-size: 9pt; margin:0; background-color:#00FF00; align:center; word-spacing:0; line-height:100%; text-align:center; color:#234A82}
+.detailTblMedBG     { font-family: Arial; font-size: 9pt; margin:0; background-color:#FFFF00; align:center; word-spacing:0; line-height:100%; text-align:center; color:#234A82}
+.detailTblHighBG    { font-family: Arial; font-size: 9pt; margin:0; background-color:#FF0000; align:center; word-spacing:0; line-height:100%; text-align:center; color:#234A82}
+.breadcrumb         { font-family: Arial; font-size: 10pt; color: #234a82 }
+.pagebreak          {page-break-after: always}
+.htmlTitle          { font-family: Arial; font-size: 24pt; color: #234A82; font-weight:bold; margin-bottom:0; margin-top:0; text-align:center }
+.htmlHdr            { font-family: Arial; font-size: 18pt; color: #234A82; font-weight:bold; margin-bottom:0; margin-top:0; text-align:center }
+
+
+.detailTblBkgrd1 {background-color:#EEF3F7; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd2 {background-color:#0D4988; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd3 {background-color:#A6B3C8; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd4 {background-color:#F6F8FA; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd5 {background-color:#336699; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd6 {background-color:#c4d1e6; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd7 {background-color:#234a82; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd8 {background-color:#002546; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd9 {background-color:#3c3c3c; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+.detailTblBkgrd10 {background-color:#A6B3C8; font-size:10pt;color:#000000;font-family:Arial, Helvetica, Geneva, sans-serif;}
+
+h2 {color=#ff0000; position: relative; left: 0px; top: -15px; z-index: 3; font-size:12pt; font-family:Arial; line-height:100%; margin-top:-15; margin-bottom:0}
+h1 {color=#00FF00; position: relative; left: 0px; top: 0px; z-index: 2; font-size:12pt; font-family:Arial; line-height:100%; margin-top:0; margin-bottom:0}
+
+</STYLE>
+
+<style type="text/css">
+#progressBar {position:absolute; width:400px; height:35px; visibility:show; background-color:#99ccff; padding:20px; border-width:2px; border-left-color:#9999ff; border-top-color:#9999ff; border-right-color:#666666; border-bottom-color:#666666; border-style:solid;}
+#progressBarMsg {position:absolute; left:10px; top:10px; font:18px Verdana, Helvetica, sans-serif bold}
+#sliderWrapper {position:absolute; left:10px; top:40px; width:417px; height:15px; background-color:#ffffff; border:1px solid #000000; text-align:center; font-size:12px}
+#slider{position:absolute; left:0px; top:0px; width:420px; height:15px; clip:rect(0px 0px 15px 0px); background-color:#666699; text-align:center; color:#ffffff; font-size:12px}
+</style>
+
+<style type="text/css">
+#progressBar {position:absolute; width:400px; height:35px; visibility:show; background-color:#99ccff; padding:20px; border-width:2px; border-left-color:#9999ff; border-top-color:#9999ff; border-right-color:#666666; border-bottom-color:#666666; border-style:solid;}
+#progressBarMsg {position:absolute; left:10px; top:10px; font:14px Arial, Verdana, Helvetica, sans-serif bold}
+#sliderWrapper {position:absolute; left:10px; top:40px; width:417px; height:15px; background-color:#ffffff; border:1px solid #000000; text-align:center; font-size:12px}
+#slider{position:absolute; left:0px; top:0px; width:420px; height:15px; clip:rect(0px 0px 15px 0px); background-color:#666699; text-align:center; color:#ffffff; font-size:12px}
+</style>
+
+
+<SCRIPT LANGUAGE=JavaScript>
+// The original is under C:\Documents and Settings\CoE\FAST_TRACK\Content_Training\code_help\tab_example6
+
+// ####################  GLOBAL VARIABLES ########################
+
+var read_test=0;
+var xmlDoc;
+var thepos=0;
+
+
+var local = "N";
+//XML data files
+//var guideAttName = "upgrade_guide";
+var guideAttName = "perf_guide";
+var xmlAttName = "xml_data";
+var xmlMLName = "ODGdata_sure.xml";
+var xmlLocName = "ODGdata.xml";
+//var xmlNoteNum = "466181.1";
+var xmlNoteNum = "390374.1";
+//var xmlNoteNum = "222000.1";
+//var xmlNoteNum = "785351.1";
+//var xmlNoteNum = "601807.1";
+
+
+
+// external file variable
+var arrow_rt_graphic = "";
+var arrow_rt_faded_graphic = "";
+var arrow_lt_graphic = "";
+var arrow_dwn_graphic = "";
+var plus_graphic="";
+var minus_graphic="";
+var odm_oval_on_graphic="";
+var odm_oval_off_graphic="";
+var detail_oval_on_graphic="";
+var detail_oval_off_graphic="";
+var detail_oval_faded_graphic="";
+var tab_on_graphic="";
+var tab_off_graphic="";
+var next_button_graphic="";
+var next_arrow_graphic="";
+var prev_arrow_graphic="";
+var shadow_line_graphic="";
+var guide_logo_graphic="";
+var team_logo_graphic="";
+
+// Preload images to speed up performance
+//var pre_load_test = new Image();
+//pre_load_test.src = "/cgi-bin/cr/getfile.cgi?p_attid="+xmlNoteNum+":tab_off";
+var pre_tab_on_graphic = new Image();
+var pre_tab_off_graphic = new Image();
+var pre_arrow_rt_graphic = new Image();
+var pre_arrow_rt_faded_graphic = new Image();
+var pre_arrow_lt_graphic = new Image();
+var pre_arrow_dwn_graphic = new Image();
+var pre_plus_graphic = new Image();
+var pre_minus_graphic = new Image();
+var pre_odm_oval_on_graphic = new Image();
+var pre_odm_oval_off_graphic = new Image();
+var pre_detail_oval_on_graphic = new Image();
+var pre_detail_oval_off_graphic = new Image();
+var pre_detail_oval_faded_graphic = new Image();
+var pre_tab_on_graphic = new Image();
+var pre_tab_off_graphic = new Image();
+var pre_next_button_graphic = new Image();
+var pre_next_arrow_graphic = new Image();
+var pre_prev_arrow_graphic = new Image();
+var pre_shadow_line_graphic = new Image();
+var pre_guide_logo_graphic = new Image();
+var pre_team_logo_graphic = new Image();
+
+
+
+
+
+//various links to keep track of
+var ML_attach_link		="";
+var ML_note_link		="";
+var ML_bug_link			="";
+var WebIV_attach_link	="";
+var CSM_attach_link	="";
+var CGI_link			="";
+var URLStr				="";
+init_page				="";
+
+// Layer name variables
+var classify_id = "classify_layer";
+var pageid = "page_layer";
+var tab_id = "tab_layer";
+var detail_id = "detail_layer";
+var detail_text_id = "detail_text_layer";
+var odm_id = "ODM_layer";
+var help_id = "help_layer";
+var main_id = "main_layer";
+var ref_id = "reference_layer";
+var ref_link_id="ref_link_layer";
+var progressBar_id ="progressBar_layer";
+var new_dtl_page="Y";
+var new_ref_page="N";
+
+
+//  Global variables for BUILD ODM, CHANGE ODM
+var odm_new_pos=0;  //BUILD ODM
+var odm_cur_pos=0;  //BUILD ODM
+var odm_old_pos=0;  //BUILD ODM
+var odm_num = 0;
+
+
+//  Global variables for BUILD DETAIL, CHANGE DETAIL
+var detail_new_pos=0;
+var detail_cur_pos=0;
+var detail_old_pos=0;
+var detail_num = 0;
+
+var stab_detail_pos=0;
+
+//  Global variables for BUILD TAB, CHANGE TAB
+var tab_new_pos=0;
+var tab_cur_pos=0;
+var tab_old_pos=0;
+var cur_stab_name="";
+
+
+//  Global variables for BUILD REFERENCE
+//var QT_ref_page="";
+//var ref_tmp="";
+//var ref_tmp2="";
+
+
+
+// GLOBAL variable to question array
+// create 10x7 two dimensional array
+var question_data= new Array(10);
+for ( var i=0; i < question_data.length; i++ )
+  question_data[i] = new Array(7);
+var question_data_num = 0;
+
+// GLOBAL variable to ODM array
+// create 6x4 two dimensional array
+var odm_data= new Array(6);
+for ( var i=0; i < odm_data.length; i++ )
+  odm_data[i] = new Array(4);
+var odm_data_num = 0;
+
+// GLOBAL variable to DTL array
+// create 6x4 two dimensional array
+var dtl_data= new Array(10);
+for ( var i=0; i < dtl_data.length; i++ )
+  dtl_data[i] = new Array(4);
+var dtl_data_num = 0;
+
+// GLOBAL variable to SUB TAB DATA array
+// create 10x4 two dimensional array
+var stab_data= new Array(10);
+for ( var i=0; i < stab_data.length; i++ )
+  stab_data[i] = new Array(8);
+var stab_data_num = 0;
+
+
+/*	GLOBAL variable to SUB TAB DETAIL PAGE array
+	create 10x250x10 two dimensional array
+stab_detail_page[pos][0][0] = tname
+stab_detail_page[pos][0][1] = stname
+stab_detail_page[pos][0][2] = short_stname
+stab_detail_page[pos][0][3] = ODM_name
+stab_detail_page[pos][0][4] = DTL_name
+stab_detail_page[pos][0][5] = total #records
+stab_detail_page[pos][0][6] = number of sections
+stab_detail_page[pos][0][7] = full page text
+****
+stab_detail_page[pos][k][0] = page type
+stab_detail_page[pos][k][1] = section text
+stab_detail_page[pos][k][2] = header num
+stab_detail_page[pos][k][3] = item num
+stab_detail_page[pos][k][4] = expand
+stab_detail_page[pos][k][5] = state(on/off)
+stab_detail_page[pos][k][6] = observation,cause,solution name if page type is "table text" 
+stab_detail_page[pos][k][7] = text layer name 
+stab_detail_page[pos][k][8] = picture layer name 
+
+****
+table body
+item body
+reference tables
+header body
+main header
+*/
+/*VLC 090612*/
+/*VLC changed from 30 to 100*/
+var stab_detail_page= new Array(100);
+var stab_detail_page_num = 0;
+
+
+var observation_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the plus/minus symbol or the observation text to view and remove additional details'
++'</td></tr>'
++'</table>';
+
+var cause_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the plus/minus symbol or the cause text to view and remove additional details'
++'</td></tr>'
++'</table>';
+
+var solution_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the plus/minus symbol or the solution text to view and remove additional details'
++'</td></tr>'
++'</table>';
+
+var cause_next_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the arrow to view the solution'
++'</td></tr>'
++'</table>';
+
+var cause_prev_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the arrow to view the observation'
++'</td></tr>'
++'</table>';
+
+var solution_next_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the arrow to view the solution implementation'
++'</td></tr>'
++'</table>';
+
+var solution_prev_help='<table class="help" border="1" width="150">'
++'<tr><td>'
++ 'Click on the arrow to view the cause'
++'</td></tr>'
++'</table>';
+
+
+// ####################  GLOBAL VARIABLES - END #########################
+
+// ####################  FIND BROWSER TYPE  #######################
+var browser_type = "IE";	//Variable used to hold the browser name
+var DHTML = (document.getElementById || document.all || document.layers);
+
+//detects the browser type
+// OP = Opera
+// IE = Internet Explorer (IE4 and above)
+// NN = Netscape 4
+// MO = Mozila (Netscape 6 and above)
+if (navigator.userAgent.indexOf("Opera")!=-1 && document.getElementById) browser_type='OP';
+else if (document.all) browser_type='IE';
+else if (document.layers) browser_type='NN';
+else if (!document.all && document.getElementById) browser_type='MO';
+else alert ("browser type not found");
+//alert ("browser_type is [" + browser_type + "]");
+
+
+//  ########################## INIT ARRAYS #########################
+function init_arrays() {
+//alert ("in init_arrays");
+
+/*VLC 090612*/
+/*VLC changed array size from 350 to 500*/
+for ( var i=0; i < stab_detail_page.length; i++ )
+{
+  stab_detail_page[i] = new Array(500);
+  for (var j=0; j < stab_detail_page[i].length; j++ )
+  stab_detail_page[i][j] = new Array(10);
+}
+//alert ("out of init arrays");
+}
+
+
+//  ########################## INIT PAGE #########################
+function initPage()
+{
+//alert ("in INITPAGE");
+init_page='<table border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1">'
++ '<tr>'
++ '<td width="15%" align="left">'
++ '<img border="0" src="'+guide_logo_graphic+'" width="244" height="28"></td>'
++ '<td width="85%">'
++ '<DIV ID="tab_layer" style="visibility:hidden">tab Text</DIV>'
++ '</td>'
++ '</tr>'
++ '<tr>'
++ '<td width="100%" height="25" bgcolor="#0D4988" colspan="2">'
++ '</td>'
++ '</tr>'
++ '<tr>'
++ '<td background="'+shadow_line_graphic+'" height="6" colspan="2"></td>'
++ '</tr>'
++ '<tr>'
++ '<td width="100%" style="padding-left: 4; padding-right: 4; padding-top: 1; padding-bottom: 2" colspan="2">'
++ '<DIV ID="page_layer" style="visibility:hidden">page Text</DIV>'
++ '</td></tr>'
++ '</table>';
+//alert("init_page is ["+init_page+"]");
+}
+
+
+
+//  #####################  INVI   #############################
+function invi(flag, id)
+{
+//VLC borrowed  http://www.quirksmode.org/js/cross_dhtml.html
+//alert ("INVI:  flag ["+flag+"] id ["+id+"]");
+	if (!DHTML) return;
+	var x = new getObj(id);
+	x.style.visibility = (flag) ? 'hidden' : 'visible'
+}
+
+
+//  ########################## GET OBJ #########################
+function getObj(name)
+{
+//VLC borrowed   http://www.quirksmode.org/js/cross_dhtml.html
+//alert ("getObj --- name is [" + name + "]");
+  if (browser_type=="MO" || browser_type=="OP")
+  {
+  	this.obj = document.getElementById(name);
+	this.style = document.getElementById(name).style;
+  }
+  else if (browser_type=="IE")
+  {
+	this.obj = document.all[name];
+	this.style = document.all[name].style;
+  }
+  else if (browser_type=="NN")
+  {
+   	this.obj = document.layers[name];
+   	this.style = document.layers[name];
+  }
+}
+
+//  ######################### SHOW LAYER MAIN ##########################
+function showLayerMain(id,str) {
+
+//alert("in showLayerMain -- id is [" + id + "] str ["+str+"]");
+if (!DHTML) return;
+invi(0, id);
+//alert("in showLayerMain -- after invi");
+
+if (browser_type=="IE") {
+	document.all[id].innerHTML = str;
+}
+if (browser_type=="NN") { 
+	document.layers[id].document.open();
+	document.layers[id].document.write(str);
+	document.layers[id].document.close();
+}
+if (browser_type=="MO" || browser_type=="OP") {
+	document.getElementById(id).innerHTML = str;
+}
+//if (id=="page_layer"){
+//alert("in showLayerMain -- end");
+//}
+
+}
+
+
+//  ########################## SHOW LAYER DTL #########################
+function ShowLayerDtl(id, odm_pos, detail_pos) {
+//alert ("In ShowLayerDtl -- id is [" +id+ "] detail_pos ["+detail_pos+"] stab_detail_page_num ["+stab_detail_page_num+"]");
+odm_num=odm_pos;
+detail_num=detail_pos;
+new_dtl_page="Y";
+
+for (j=0; j<=stab_detail_page_num; j++){
+//alert("ShowLayerDtl: j ["+j+"] ODM_pos ["+odm_num+"] DTL_pos ["+detail_num+"] ODM ["+odm_data[odm_num][0]+"] PAGE ODM ["+stab_detail_page[j][0][3]+"] DTL ["+dtl_data[detail_num][0]+"] PAGE DTL ["+stab_detail_page[j][0][4]+"]");
+	if ((cur_stab_name==stab_detail_page[j][0][1])&&(odm_data[odm_num][0]==stab_detail_page[j][0][3])&&(dtl_data[detail_num][0]==stab_detail_page[j][0][4])){
+	stab_detail_pos=j;
+	//alert("CHTXT FOUNDIT: stab_detail_pos ["+stab_detail_pos+"] odm_num ["+odm_num+"] ODM ["+odm_data[odm_num][0]+"] PAGE ODM ["+stab_detail_page[j][0][3]+"] DTL ["+dtl_data[detail_num][0]+"] PAGE DTL ["+stab_detail_page[j][0][4]+"]");
+	}
+}
+str=stab_detail_page[stab_detail_pos][0][7];
+
+//alert ("ShowLayerDtl:  odm num is [" + odm_num + "]  detail num [" + detail_num + "] stab_detail_pos ["+stab_detail_pos+"] str is ["+str+"]        TBL ["+stab_detail_page[stab_detail_pos][0][7]+"]");
+if (browser_type=="IE") {
+	document.all[id].innerHTML = str;
+}
+if (browser_type=="NN") { 
+	document.layers[id].document.open();
+	document.layers[id].document.write(str);
+	document.layers[id].document.close();
+}
+if (browser_type=="MO" || browser_type=="OP") {
+	document.getElementById(id).innerHTML = str;
+}
+}
+
+
+//  ######################### SHOW LAYER REF ##########################
+function showLayerRef(id,str,action) {
+//alert("in showLayerRef -- id is [" + id + "]");
+
+if (action=="0"){
+new_dtl_page="Y";
+}
+else {
+new_dtl_page="N";
+}
+
+if (!DHTML) return;
+invi(action, id);
+
+if (browser_type=="IE") {
+	document.all[id].innerHTML = str;
+	document.all[id].style.zindex=60;
+}
+if (browser_type=="NN") { 
+	document.layers[id].document.open();
+	document.layers[id].document.write(str);
+	document.layers[id].document.close();
+	document.layers[id].style.zindex=60;
+}
+if (browser_type=="MO" || browser_type=="OP") {
+	document.getElementById(id).innerHTML = str;
+	document.getElementById(id).style.zindex=60;
+}
+}
+
+// ###################### SHOW LAYER MOUSE ##########################
+function showLayerMouse(e,id,str,action)
+{
+//alert ("in showlayerMouse -- id is [" + id + "] str is ["+str+"]  action is [" + action + "]");
+var xcoord = 0;
+var ycoord = 0;
+var newstr = "";
+
+	if (!DHTML) return;
+	invi(action, id);
+  
+    if (!e) var e = window.event;
+	if (e.pageX || e.pageY)
+	{
+		xcoord = e.pageX;
+		ycoord = e.pageY;
+	}
+	else if (e.clientX || e.clientY)
+	{
+		xcoord = e.clientX + document.body.scrollLeft;
+		ycoord = e.clientY + document.body.scrollTop;
+	}	
+	  
+	if (browser_type=="IE") {
+		document.all[id].innerHTML = str;
+		document.all[id].style.left=xcoord+15+'px';
+		document.all[id].style.top=ycoord-5+'px';
+		document.all[id].style.zindex=70;
+	}
+	if (browser_type=="NN") { 
+		document.layers[id].document.open();
+		document.layers[id].document.write(str);
+		document.layers[id].document.close();
+		document.layers[id].style.left=xcoord+15+'px';
+		document.layers[id].style.top=ycoord-5+'px';
+		document.layers[id].style.zindex=70;	
+	}
+	if (browser_type=="MO" || browser_type=="OP") {
+		document.getElementById(id).innerHTML = str;
+		document.getElementById(id).style.left=xcoord+15+'px';
+		document.getElementById(id).style.top=ycoord-5+'px';
+		document.getElementById(id).style.zindex=70;		
+	}		
+//alert ("In showLayerMouse -- X [" +xcoord+ "] Y [" +ycoord+ "]");
+}
+
+
+
+// ###################### EXPAND LAYER ##########################
+function ExpandLayer(e,id_txt,id_pic,pos1,pos2,str,force_state,layer_type)
+{
+var cause_loc=0;
+var old_header_num = 0;
+var cur_header_num = 0;
+var old_subheader_num = 0;
+var cur_subheader_num = 0;
+var header_flg="on";
+var subheader_flg="on";
+var item_flg="on";
+var expandLayer="";
+var expandHeader="";
+var expandSubheader="";
+var expandItem="";
+
+//alert ("text id is ["+id_txt+"] picture id is [" +id_pic+ "] pos1 ["+pos1+"] pos2 ["+pos2+"] state is ["+stab_detail_page[pos1][pos2][6]+ "]");
+//alert ("expandlayer1:  text id is ["+id_txt+"] picture id is [" +id_pic+ "] pos1 ["+pos1+"] pos2 ["+pos2+"] new_dtl_page [" +new_dtl_page+"] state is ["+stab_detail_page[pos1][pos2][6]+ "] force_state ["+force_state+"] layer_type ["+layer_type+"] str is ["+str+"] ");
+
+
+cur_header_num = stab_detail_page[pos1][pos2][2];
+cur_subheader_num = stab_detail_page[pos1][pos2][3];
+cur_item_num = stab_detail_page[pos1][pos2][4];
+
+header_num = stab_detail_page[pos1][pos2][2];
+subheader_num = stab_detail_page[pos1][pos2][3];
+item_num = stab_detail_page[pos1][pos2][4];
+
+if (new_dtl_page =="Y"){
+new_dtl_page="N";
+expandHeader='N';
+expandSubheader='N';
+expandItem='N';
+
+//alert ("expandlayer1: new_dtl_page ["+new_dtl_page+"]");  
+for(j=pos2; j>=0; j--) { 
+expandLayer='N';
+if (stab_detail_page[pos1][j][2] < header_num){expandHeader='N';}
+if (stab_detail_page[pos1][j][3] < subheader_num){expandSubheader='N';}
+
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="header body")){expandLayer='Y'; expandHeader='Y';}
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="subheader body")&&(expandHeader=='Y')){expandLayer='Y'; expandSubheader='Y';}
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="item body")&&(expandHeader=='Y')&&(expandSubheader=='Y')){expandLayer='Y'; expandItem='Y';}
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="table text")&&(expandHeader=='Y')&&(expandSubheader=='Y')&&(expandItem=='Y')){expandLayer='Y';}
+if (expandLayer=='Y'){
+header_num=stab_detail_page[pos1][j][2];
+subheader_num=stab_detail_page[pos1][j][3];
+item_num= stab_detail_page[pos1][j][4];
+force_state="off";
+//alert ("calling expandlayer2:  1");
+ExpandLayer2('',stab_detail_page[pos1][j][8],stab_detail_page[pos1][j][9], pos1,j,stab_detail_page[pos1][j][1],force_state,'');
+}
+}
+}
+//=============================== turn on =====================================
+else if (stab_detail_page[pos1][pos2][6]=="off") {
+//alert ("in else off");
+var header_num=stab_detail_page[pos1][pos2][2];
+var subheader_num=stab_detail_page[pos1][pos2][3];
+var item_num= stab_detail_page[pos1][pos2][4];
+var header_pos=0;
+var subheader_pos=0;
+var item_pos=0;
+
+//force_state=stab_detail_page[pos1][pos2][6];
+force_state="off";
+//alert ("expandlayer1: turn it on:  page type [" +stab_detail_page[pos1][pos2][0]+"] header_num ["+header_num+"] subheader_num ["+subheader_num+"]  item_num ["+item_num+"]  text id is ["+id_txt+"] picture id is [" +id_pic+ "] pos1 ["+pos1+"] pos2 ["+pos2+"] new_dtl_page [" +new_dtl_page+"] state is ["+stab_detail_page[pos1][pos2][6]+ "] force_state ["+force_state+"] layer_type ["+layer_type+"] str is ["+str+"] ");
+//alert ("calling expandlayer2:  2");
+ExpandLayer2(e,id_txt,id_pic,pos1,pos2,str,force_state,layer_type);
+
+var expandLayer='N';
+for(j=pos2-1; j>0; j--) { 
+//alert("turn it on: j ["+j+"]  page type [" +stab_detail_page[pos1][j][0]+"] header [" +stab_detail_page[pos1][j][2]+"] subheader [" +stab_detail_page[pos1][j][3]+"] item [" +stab_detail_page[pos1][j][4]+"] str ["+stab_detail_page[pos1][j][1]+"");
+//if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][pos2][2]==stab_detail_page[pos1][j][2])){
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="subheader body")&&(header_num==stab_detail_page[pos1][j][2])){expandLayer='Y';}
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="item body")&&(header_num==stab_detail_page[pos1][j][2])&&(subheader_num==stab_detail_page[pos1][j][3])){expandLayer='Y';}
+if ((stab_detail_page[pos1][j][6] == "on")&&(stab_detail_page[pos1][j][0]=="table text")&&(header_num==stab_detail_page[pos1][j][2])&&(subheader_num==stab_detail_page[pos1][j][3])&&(item_num==stab_detail_page[pos1][j][4])){expandLayer='Y';}
+if (expandLayer=='Y'){
+header_num=stab_detail_page[pos1][j][2];
+subheader_num=stab_detail_page[pos1][j][3];
+item_num= stab_detail_page[pos1][j][4];
+force_state="off";
+//alert ("calling expandlayer2:  3");
+ExpandLayer2('',stab_detail_page[pos1][j][8],stab_detail_page[pos1][j][9], pos1,j,stab_detail_page[pos1][j][1],force_state,'');
+}
+expandLayer='N';
+}
+}
+//============================ turn off ===============================
+else if (stab_detail_page[pos1][pos2][6]=="on"){
+//alert ("in else on");
+
+//for(j=pos2-1; j>0; j--) { 
+if (stab_detail_page[pos1][pos2][7].search('CAUSE') > -1){
+//for (i=j;i>0;i--){
+	for (j=pos2-1;j>0;j--){
+	//alert("in cause loop: j ["+j+"]  type ["+stab_detail_page[pos1][j][7]+"] txt ["+stab_detail_page[pos1][j][8]+"] pic ["+stab_detail_page[pos1][j][9]+"]");	
+		if (stab_detail_page[pos1][j][7].search('SOLUTION') > -1){
+		//alert("found solution when closing cause");
+		//alert("solution found: j ["+j+"]  type ["+stab_detail_page[pos1][j][7]+"] txt ["+stab_detail_page[pos1][j][8]+"] pic ["+stab_detail_page[pos1][j][9]+"]");	
+		force_state="on";
+//alert ("calling expandlayer2:  4");
+		ExpandLayer2('',stab_detail_page[pos1][j][8],stab_detail_page[pos1][j][9], pos1,j,stab_detail_page[pos1][j][1],force_state,'');
+		}
+		else {
+		j=0;
+		//i=0;
+		//alert ("in else: j["+j+"] i ["+i+"] ");
+		}
+	}
+}
+force_state=stab_detail_page[pos1][pos2][6];
+//alert ("calling expandlayer2:  5");
+ExpandLayer2(e,id_txt,id_pic,pos1,pos2,str,force_state,layer_type);
+}		
+}
+
+
+// ###################### EXPAND LAYER 2 ##########################
+function ExpandLayer2(e,id_txt,id_pic,pos1,pos2,str,force_state,layer_type)
+{
+
+if (force_state=="off"){  //turn on, expand layer
+action=0;
+stab_detail_page[pos1][pos2][6] = "on";
+picture='<img border="0" src="'+minus_graphic+'" width="9" height="9">';
+}
+else if (force_state=="on"){ //turn off, compress layer
+action=1;
+str='<p class="detailEmptyLayer">temp text';
+stab_detail_page[pos1][pos2][6] = "off";
+picture='<img border="0" src="'+plus_graphic+'" width="9" height="9">';
+}
+else if (stab_detail_page[pos1][pos2][6] == "off"){  //turn on, expand layer
+action=0;
+stab_detail_page[pos1][pos2][6] = "on";
+picture='<img border="0" src="'+minus_graphic+'" width="9" height="9">';
+}
+else if (stab_detail_page[pos1][pos2][6] == "on"){  //turn off, compress layer
+action=1;
+str='<p class="detailEmptyLayer">temp text';
+stab_detail_page[pos1][pos2][6] = "off";
+picture='<img border="0" src="'+plus_graphic+'" width="9" height="9">';
+}
+//alert ("text id is ["+id_txt+"] picture id is [" +id_pic+ "] picture is: [" +picture+"]  state is [" +stab_detail_page[pos1][pos2][6] +"] action is [" +action+ "]");
+
+//alert ("id_pic is ["+id_pic+"] picture is: [" +picture+"]");  
+//alert ("str is ["+str+"]");  
+	if (browser_type=="IE") {
+		document.all[id_pic].innerHTML = picture;
+	}
+	if (browser_type=="NN") { 
+		document.layers[id_pic].document.open();
+		document.layers[id_pic].document.write(picture);
+		document.layers[id_pic].document.close();
+	}
+	if (browser_type=="MO" || browser_type=="OP") {
+		document.getElementById(id_pic).innerHTML = picture;		
+	}
+
+	if (!DHTML) return;
+	invi(action, id_txt);	
+   
+	if (browser_type=="IE") {
+		document.all[id_txt].innerHTML = str;
+	}
+	if (browser_type=="NN") { 
+		document.layers[id_txt].document.open();
+		document.layers[id_txt].document.write(str);
+		document.layers[id_txt].document.close();
+	}
+	if (browser_type=="MO" || browser_type=="OP") {
+		document.getElementById(id_txt).innerHTML = str;		
+	}		
+}
+
+
+
+
+// ###################### FIND URL PARAM [NOT USED 08/30/12] ##########################
+function getURLParam(name) {   
+  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");   
+  var pattern = "[\\?&]"+name+"=([^&#]*)";   
+  var regex = new RegExp(pattern);   
+  var aResult = regex.exec(window.location.href);   
+  if ( aResult == null ) {   
+    return "";   
+  } else {   
+    return aResult[1];   
+  }   
+} 
+
+
+// ###################### FIND URL ##########################
+function findURL (noteNum)
+{
+var tempLink="";
+tempLink = window.location.href;
+//alert ("findURL:  local [" +local+ "] noteNum ["+noteNum+"]  host ["+window.location.host+"]   href ["+window.location.href+"]");
+if (local=="N"){
+//hrefLink=tempLink.split("upgrade_guide")[0];
+hrefLink=tempLink.split(guideAttName)[0];
+xmlFileName = hrefLink + xmlAttName;
+//alert ("findURL:  local=N:  noteNum ["+noteNum+"]  guideAttName ["+guideAttName+ "] host ["+window.location.host+"]   href ["+window.location.href+"] hrefLink ["+hrefLink+"] xmlFileName ["+xmlFileName+"]");
+}
+else if (local=="Y"){
+hrefLink="";
+xmlFileName=xmlLocName;
+//alert ("findURL:  local=Y:  noteNum ["+noteNum+"]  host ["+window.location.host+"]   href ["+window.location.href+"] hrefLink ["+hrefLink+"] xmlFileName ["+xmlFileName+"]");
+}
+//alert ("FINDURL:  local [" +local+ "]  noteNum ["+noteNum+"] URLStr [" +URLStr+ "] hrefLink [" +hrefLink+ "] xmlFileName [" +xmlFileName+ "] host [" +window.location.host+ "]   href [" +window.location.href+ "]");
+}
+
+
+// ##############  OPEN XML FILE #######################
+function OpenXMLFile() {
+//alert("inside open xml file");
+var pos=0;
+
+//alert("OpenXMLFile: browser_type ["+browser_type+"]  xmlfilename ["+xmlFileName+"]");
+if (browser_type == "MO" || browser_type == "OP"){
+xmlDoc = document.implementation.createDocument("","",null);
+}
+if (browser_type == "IE"){
+xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+}
+
+xmlDoc.async=false;
+xmlDoc.load(xmlFileName);
+//alert("OpenXMLFile: document loaded");
+//alert("OpenXMLFile: out of open xml file");
+}
+
+// ##############  REPLACE GRAPHICS #######################
+function ReplaceGraphics(str) {
+//alert ("ReplaceGraphics: old str ["+str+"]");
+var toreplace="";
+toreplace=/arrow_rt_graphic/;
+while (str.search('arrow_rt_graphic') > -1){
+str=str.replace(toreplace,arrow_rt_graphic);
+}
+toreplace=/arrow_rt_faded_graphic/;
+while (str.search('arrow_rt_faded_graphic') > -1){
+str=str.replace(toreplace,arrow_rt_faded_graphic);
+}
+toreplace=/arrow_lt_graphic/;
+while (str.search('arrow_lt_graphic') > -1){
+str=str.replace(toreplace,arrow_lt_graphic);
+}
+toreplace=/arrow_dwn_graphic/;
+while (str.search('arrow_dwn_graphic') > -1){
+str=str.replace(toreplace,arrow_dwn_graphic);
+}
+
+toreplace=/plus_graphic/;
+//if (thepos==19){
+//alert ("toreplace: ["+toreplace+"]");
+//}
+while (str.search('plus_graphic') > -1){
+//if (thepos==19){
+//alert ("before replace:  str ["+str+"]");
+//}
+str=str.replace(toreplace,plus_graphic);
+//if (thepos==19){
+//alert ("after replace:  str ["+str+"]");
+//}
+}
+
+toreplace=/minus_graphic/;
+while (str.search('minus_graphic') > -1){
+str=str.replace(toreplace,minus_graphic);
+}
+toreplace=/odm_oval_on_graphic/;
+while (str.search('odm_oval_on_graphic') > -1){
+str=str.replace(toreplace,odm_oval_on_graphic);
+}
+toreplace=/odm_oval_off_graphic/;
+while (str.search('odm_oval_off_graphic') > -1){
+str=str.replace(toreplace,odm_oval_off_graphic);
+}
+toreplace=/detail_oval_on_graphic/;
+while (str.search('detail_oval_on_graphic') > -1){
+str=str.replace(toreplace,detail_oval_on_graphic);
+}
+toreplace=/detail_oval_off_graphic/;
+while (str.search('detail_oval_off_graphic') > -1){
+str=str.replace(toreplace,detail_oval_off_graphic);
+}
+toreplace=/detail_oval_faded_graphic/;
+while (str.search('detail_oval_faded_graphic') > -1){
+str=str.replace(toreplace,detail_oval_faded_graphic);
+}
+toreplace=/tab_on_graphic/;
+while (str.search('tab_on_graphic') > -1){
+str=str.replace(toreplace,tab_on_graphic);
+}
+toreplace=/tab_off_graphic/;
+while (str.search('tab_off_graphic') > -1){
+str=str.replace(toreplace,tab_off_graphic);
+}
+toreplace=/next_button_graphic/;
+while (str.search('next_button_graphic') > -1){
+str=str.replace(toreplace,next_button_graphic);
+}
+toreplace=/next_arrow_graphic/;
+while (str.search('next_arrow_graphic') > -1){
+str=str.replace(toreplace,next_arrow_graphic);
+//alert ("next_arrow_graphic:  next_arrow_graphic:["+next_arrow_graphic+"] str ["+str+"]");
+}
+toreplace=/prev_arrow_graphic/;
+while (str.search('prev_arrow_graphic') > -1){
+str=str.replace(toreplace,prev_arrow_graphic);
+}
+toreplace=/shadow_line_graphic/;
+while (str.search('shadow_line_graphic') > -1){
+str=str.replace(toreplace,shadow_line_graphic);
+}
+toreplace=/guide_logo_graphic/;
+while (str.search('guide_logo_graphic') > -1){
+str=str.replace(toreplace,guide_logo_graphic);
+}
+toreplace=/team_logo_graphic/;
+while (str.search('team_logo_graphic') > -1){
+str=str.replace(toreplace,team_logo_graphic);
+}
+//if (thepos==19){
+//alert ("ReplaceGraphics: new str ["+str+"]");
+//}
+return str;
+}
+
+
+
+// ##############  READ VARIABLE DATA #######################
+function ReadVariableData() {
+//alert("inside read variable data");
+var pos=0;
+
+stabVariableData = xmlDoc.getElementsByTagName('variable_data');
+//alert ("stabVariableData length [" + stabVariableData.length + "]");
+
+for(i=0; i<stabVariableData.length; i++) {
+pos = parseInt(stabVariableData[i].attributes.getNamedItem("id").value);
+//ML_attach_link		=stabVariableData[i].getElementsByTagName("ML_attach_link")[0].childNodes[0].nodeValue;
+//ML_note_link		=stabVariableData[i].getElementsByTagName("ML_note_link")[0].childNodes[0].nodeValue;
+//ML_bug_link			=stabVariableData[i].getElementsByTagName("ML_bug_link")[0].childNodes[0].nodeValue;
+//WebIV_attach_link	=stabVariableData[i].getElementsByTagName("WebIV_attach_link")[0].childNodes[0].nodeValue;
+//CGI_link			=stabVariableData[i].getElementsByTagName("CGI_link")[0].childNodes[0].nodeValue;
+CGI_link="NA";
+//VLC 012710
+//CSM_attach_link = "article?cmd=show&id=785351.1:";
+//CSM_attach_link = "article?cmd=show&id="+xmlNoteNum+":";
+
+//alert("ML_attach_link is ["+ML_attach_link+"]");
+//alert("WebIV_attach_link is ["+WebIV_attach_link+"]");
+}
+//alert("Entry not found");
+}
+
+// ##############  READ GRAPHIC DATA #######################
+function ReadGraphicData() {
+//alert("inside read graphic data");
+var pos=0;
+var graphicLink="";
+ext="gif";
+
+//alert ("ReadGraphicData: hrefLink[" + hrefLink + "]");
+
+stabGraphicData = xmlDoc.getElementsByTagName('graphic_data');
+//alert ("ReadGraphicData:  stabGraphicData length [" + stabGraphicData.length + "]");
+
+for(i=0; i<stabGraphicData.length; i++) {
+pos = parseInt(stabGraphicData[i].attributes.getNamedItem("id").value);
+
+/*
+if (URLStr=="MOS_HTML") {
+	graphicLink = MOS_HTML_attach_link + xmlNoteNum + ":";	
+}
+else if (URLStr=="MOS_FLASH") {
+	graphicLink = MOS_FLASH_attach_link + xmlNoteNum + ":";
+}
+else if (URLStr=="ISP") {
+	graphicLink = ISP_attach_link + xmlNoteNum + ":";
+}
+*/
+//graphicLink=hrefLink;
+//alert("URLStr ["+URLStr+"]");
+
+arrow_rt_graphic			=stabGraphicData[i].getElementsByTagName("arrow_rt_graphic")[0].childNodes[0].nodeValue;
+arrow_rt_faded_graphic		=stabGraphicData[i].getElementsByTagName("arrow_rt_faded_graphic")[0].childNodes[0].nodeValue;
+arrow_lt_graphic			=stabGraphicData[i].getElementsByTagName("arrow_lt_graphic")[0].childNodes[0].nodeValue;
+arrow_dwn_graphic			=stabGraphicData[i].getElementsByTagName("arrow_dwn_graphic")[0].childNodes[0].nodeValue;
+plus_graphic				=stabGraphicData[i].getElementsByTagName("plus_graphic")[0].childNodes[0].nodeValue;
+minus_graphic				=stabGraphicData[i].getElementsByTagName("minus_graphic")[0].childNodes[0].nodeValue;
+odm_oval_on_graphic			=stabGraphicData[i].getElementsByTagName("odm_oval_on_graphic")[0].childNodes[0].nodeValue;
+odm_oval_off_graphic		=stabGraphicData[i].getElementsByTagName("odm_oval_off_graphic")[0].childNodes[0].nodeValue;
+detail_oval_on_graphic		=stabGraphicData[i].getElementsByTagName("detail_oval_on_graphic")[0].childNodes[0].nodeValue;
+detail_oval_off_graphic		=stabGraphicData[i].getElementsByTagName("detail_oval_off_graphic")[0].childNodes[0].nodeValue;
+detail_oval_faded_graphic	=stabGraphicData[i].getElementsByTagName("detail_oval_faded_graphic")[0].childNodes[0].nodeValue;
+tab_on_graphic				=stabGraphicData[i].getElementsByTagName("tab_on_graphic")[0].childNodes[0].nodeValue;
+tab_off_graphic				=stabGraphicData[i].getElementsByTagName("tab_off_graphic")[0].childNodes[0].nodeValue;
+next_button_graphic			=stabGraphicData[i].getElementsByTagName("next_button_graphic")[0].childNodes[0].nodeValue;
+next_arrow_graphic			=stabGraphicData[i].getElementsByTagName("next_arrow_graphic")[0].childNodes[0].nodeValue;
+prev_arrow_graphic			=stabGraphicData[i].getElementsByTagName("prev_arrow_graphic")[0].childNodes[0].nodeValue;
+shadow_line_graphic			=stabGraphicData[i].getElementsByTagName("shadow_line_graphic")[0].childNodes[0].nodeValue;
+guide_logo_graphic			=stabGraphicData[i].getElementsByTagName("guide_logo_graphic")[0].childNodes[0].nodeValue;
+team_logo_graphic			=stabGraphicData[i].getElementsByTagName("team_logo_graphic")[0].childNodes[0].nodeValue;
+//alert("ReadGraphicData: next_button_graphic ["+next_button_graphic+"]");
+//alert("ReadGraphicData: next_arrow_graphic ["+next_arrow_graphic+"]");
+}
+
+if (local=="N"){
+pre_arrow_rt_graphic.src			=hrefLink + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1);
+pre_arrow_rt_faded_graphic.src		=hrefLink + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1);
+pre_arrow_lt_graphic.src			=hrefLink + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1);
+pre_arrow_dwn_graphic.src			=hrefLink + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1);
+pre_plus_graphic.src				=hrefLink + plus_graphic.substr(0,plus_graphic.search(ext) -1);
+pre_minus_graphic.src				=hrefLink + minus_graphic.substr(0,minus_graphic.search(ext) -1);
+pre_odm_oval_on_graphic.src			=hrefLink + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1);
+pre_odm_oval_off_graphic.src		=hrefLink + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1);
+pre_detail_oval_on_graphic.src		=hrefLink + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1);
+pre_detail_oval_off_graphic.src		=hrefLink + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1);
+pre_detail_oval_faded_graphic.src	=hrefLink + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1);
+pre_tab_on_graphic.src				=hrefLink + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1);
+pre_tab_off_graphic.src				=hrefLink + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1);
+pre_next_button_graphic.src			=hrefLink + next_button_graphic.substr(0,next_button_graphic.search(ext) -1);
+pre_next_arrow_graphic.src			=hrefLink + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1);
+pre_prev_arrow_graphic.src			=hrefLink + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1);
+pre_shadow_line_graphic.src			=hrefLink + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1);
+pre_guide_logo_graphic.src			=hrefLink + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1);
+pre_team_logo_graphic.src			=hrefLink + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1);
+//alert("ReadGraphicData: PRELOAD:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+else {
+pre_arrow_rt_graphic.src			=arrow_rt_graphic;
+pre_arrow_rt_faded_graphic.src		=arrow_rt_faded_graphic;
+pre_arrow_lt_graphic.src			=arrow_lt_graphic;
+pre_arrow_dwn_graphic.src			=arrow_dwn_graphic;
+pre_plus_graphic.src				=plus_graphic;
+pre_minus_graphic.src				=minus_graphic;
+pre_odm_oval_on_graphic.src			=odm_oval_on_graphic;
+pre_odm_oval_off_graphic.src		=odm_oval_off_graphic;
+pre_detail_oval_on_graphic.src		=detail_oval_on_graphic;
+pre_detail_oval_off_graphic.src		=detail_oval_off_graphic;
+pre_detail_oval_faded_graphic.src	=detail_oval_faded_graphic;
+pre_tab_on_graphic.src				=tab_on_graphic;
+pre_tab_off_graphic.src				=tab_off_graphic;
+pre_next_button_graphic.src			=next_button_graphic;
+pre_next_arrow_graphic.src			=next_arrow_graphic;
+pre_prev_arrow_graphic.src			=prev_arrow_graphic;
+pre_shadow_line_graphic.src			=shadow_line_graphic;
+pre_guide_logo_graphic.src			=guide_logo_graphic;
+pre_team_logo_graphic.src			=team_logo_graphic;
+//alert("ReadGraphicData: next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+//alert("ReadGraphicData: next_button_graphic ["+next_button_graphic+"] pre_next_button_graphic ["+pre_next_button_graphic.src+"]  substr ["+next_button_graphic.substr(0,next_button_graphic.search(ext) -1)+"]");
+}
+
+if (local=="N"){
+arrow_rt_graphic			=hrefLink + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1);
+arrow_rt_faded_graphic		=hrefLink + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1);
+arrow_lt_graphic			=hrefLink + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1);
+arrow_dwn_graphic			=hrefLink + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1);
+plus_graphic				=hrefLink + plus_graphic.substr(0,plus_graphic.search(ext) -1);
+minus_graphic				=hrefLink + minus_graphic.substr(0,minus_graphic.search(ext) -1);
+odm_oval_on_graphic			=hrefLink + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1);
+odm_oval_off_graphic		=hrefLink + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1);
+detail_oval_on_graphic		=hrefLink + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1);
+detail_oval_off_graphic		=hrefLink + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1);
+detail_oval_faded_graphic	=hrefLink + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1);
+tab_on_graphic				=hrefLink + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1);
+tab_off_graphic				=hrefLink + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1);
+next_button_graphic			=hrefLink + next_button_graphic.substr(0,next_button_graphic.search(ext) -1);
+next_arrow_graphic			=hrefLink + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1);
+prev_arrow_graphic			=hrefLink + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1);
+shadow_line_graphic			=hrefLink + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1);
+guide_logo_graphic			=hrefLink + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1);
+team_logo_graphic			=hrefLink + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1);
+//alert("ReadGraphicData: LOCAL=N:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+
+
+
+//alert("ReadGraphicData: odm_oval_on_graphic is ["+odm_oval_on_graphic+"]");
+//alert("ReadGraphicData: odm_oval_off_graphic is ["+odm_oval_off_graphic+"]");
+
+//alert("ReadGraphicData:  hrefLink ["+hrefLink +"] graphicLink [" +graphicLink+ "] next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+
+// ##############  READ GRAPHIC DATA #######################
+function ReadGraphicData_082912() {
+//alert("inside read graphic data");
+var pos=0;
+ext="gif";
+
+stabGraphicData = xmlDoc.getElementsByTagName('graphic_data');
+//alert ("stabGraphicData length [" + stabGraphicData.length + "]");
+
+for(i=0; i<stabGraphicData.length; i++) {
+pos = parseInt(stabGraphicData[i].attributes.getNamedItem("id").value);
+
+//alert("URLStr ["+URLStr+"]");
+
+arrow_rt_graphic			=stabGraphicData[i].getElementsByTagName("arrow_rt_graphic")[0].childNodes[0].nodeValue;
+arrow_rt_faded_graphic		=stabGraphicData[i].getElementsByTagName("arrow_rt_faded_graphic")[0].childNodes[0].nodeValue;
+arrow_lt_graphic			=stabGraphicData[i].getElementsByTagName("arrow_lt_graphic")[0].childNodes[0].nodeValue;
+arrow_dwn_graphic			=stabGraphicData[i].getElementsByTagName("arrow_dwn_graphic")[0].childNodes[0].nodeValue;
+plus_graphic				=stabGraphicData[i].getElementsByTagName("plus_graphic")[0].childNodes[0].nodeValue;
+minus_graphic				=stabGraphicData[i].getElementsByTagName("minus_graphic")[0].childNodes[0].nodeValue;
+odm_oval_on_graphic			=stabGraphicData[i].getElementsByTagName("odm_oval_on_graphic")[0].childNodes[0].nodeValue;
+odm_oval_off_graphic		=stabGraphicData[i].getElementsByTagName("odm_oval_off_graphic")[0].childNodes[0].nodeValue;
+detail_oval_on_graphic		=stabGraphicData[i].getElementsByTagName("detail_oval_on_graphic")[0].childNodes[0].nodeValue;
+detail_oval_off_graphic		=stabGraphicData[i].getElementsByTagName("detail_oval_off_graphic")[0].childNodes[0].nodeValue;
+detail_oval_faded_graphic	=stabGraphicData[i].getElementsByTagName("detail_oval_faded_graphic")[0].childNodes[0].nodeValue;
+tab_on_graphic				=stabGraphicData[i].getElementsByTagName("tab_on_graphic")[0].childNodes[0].nodeValue;
+tab_off_graphic				=stabGraphicData[i].getElementsByTagName("tab_off_graphic")[0].childNodes[0].nodeValue;
+next_button_graphic			=stabGraphicData[i].getElementsByTagName("next_button_graphic")[0].childNodes[0].nodeValue;
+next_arrow_graphic			=stabGraphicData[i].getElementsByTagName("next_arrow_graphic")[0].childNodes[0].nodeValue;
+prev_arrow_graphic			=stabGraphicData[i].getElementsByTagName("prev_arrow_graphic")[0].childNodes[0].nodeValue;
+shadow_line_graphic			=stabGraphicData[i].getElementsByTagName("shadow_line_graphic")[0].childNodes[0].nodeValue;
+guide_logo_graphic			=stabGraphicData[i].getElementsByTagName("guide_logo_graphic")[0].childNodes[0].nodeValue;
+team_logo_graphic			=stabGraphicData[i].getElementsByTagName("team_logo_graphic")[0].childNodes[0].nodeValue;
+alert("next_button_graphic ["+next_button_graphic+"]");
+//alert("next_arrow_graphic ["+next_arrow_graphic+"]");
+
+}
+
+if (local=="N"){
+pre_arrow_rt_graphic.src			=CGI_link + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1);
+pre_arrow_rt_faded_graphic.src		=CGI_link + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1);
+pre_arrow_lt_graphic.src			=CGI_link + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1);
+pre_arrow_dwn_graphic.src			=CGI_link + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1);
+pre_plus_graphic.src				=CGI_link + plus_graphic.substr(0,plus_graphic.search(ext) -1);
+pre_minus_graphic.src				=CGI_link + minus_graphic.substr(0,minus_graphic.search(ext) -1);
+pre_odm_oval_on_graphic.src		=CGI_link + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1);
+pre_odm_oval_off_graphic.src		=CGI_link + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1);
+pre_detail_oval_on_graphic.src		=CGI_link + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1);
+pre_detail_oval_off_graphic.src	=CGI_link + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1);
+pre_detail_oval_faded_graphic.src	=CGI_link + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1);
+pre_tab_on_graphic.src				=CGI_link + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1);
+pre_tab_off_graphic.src				=CGI_link + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1);
+pre_next_button_graphic.src		=CGI_link + next_button_graphic.substr(0,next_button_graphic.search(ext) -1);
+pre_next_arrow_graphic.src			=CGI_link + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1);
+pre_prev_arrow_graphic.src			=CGI_link + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1);
+pre_shadow_line_graphic.src		=CGI_link + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1);
+pre_guide_logo_graphic.src			=CGI_link + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1);
+pre_team_logo_graphic.src			=CGI_link + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1);
+
+//alert("PRELOAD:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+else {
+pre_arrow_rt_graphic.src			=arrow_rt_graphic;
+pre_arrow_rt_faded_graphic.src		=arrow_rt_faded_graphic;
+pre_arrow_lt_graphic.src			=arrow_lt_graphic;
+pre_arrow_dwn_graphic.src			=arrow_dwn_graphic;
+pre_plus_graphic.src				=plus_graphic;
+pre_minus_graphic.src				=minus_graphic;
+pre_odm_oval_on_graphic.src			=odm_oval_on_graphic;
+pre_odm_oval_off_graphic.src		=odm_oval_off_graphic;
+pre_detail_oval_on_graphic.src		=detail_oval_on_graphic;
+pre_detail_oval_off_graphic.src		=detail_oval_off_graphic;
+pre_detail_oval_faded_graphic.src	=detail_oval_faded_graphic;
+pre_tab_on_graphic.src				=tab_on_graphic;
+pre_tab_off_graphic.src				=tab_off_graphic;
+pre_next_button_graphic.src			=next_button_graphic;
+pre_next_arrow_graphic.src			=next_arrow_graphic;
+pre_prev_arrow_graphic.src			=prev_arrow_graphic;
+pre_shadow_line_graphic.src			=shadow_line_graphic;
+pre_guide_logo_graphic.src			=guide_logo_graphic;
+pre_team_logo_graphic.src			=team_logo_graphic;
+alert("next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+//alert("next_button_graphic ["+next_button_graphic+"] pre_next_button_graphic ["+pre_next_button_graphic.src+"]  substr ["+next_button_graphic.substr(0,next_button_graphic.search(ext) -1)+"]");
+}
+
+if (local=="N"){
+arrow_rt_graphic			=CGI_link + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1);
+arrow_rt_faded_graphic		=CGI_link + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1);
+arrow_lt_graphic			=CGI_link + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1);
+arrow_dwn_graphic			=CGI_link + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1);
+plus_graphic				=CGI_link + plus_graphic.substr(0,plus_graphic.search(ext) -1);
+minus_graphic				=CGI_link + minus_graphic.substr(0,minus_graphic.search(ext) -1);
+odm_oval_on_graphic		=CGI_link + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1);
+odm_oval_off_graphic		=CGI_link + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1);
+detail_oval_on_graphic		=CGI_link + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1);
+detail_oval_off_graphic	=CGI_link + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1);
+detail_oval_faded_graphic	=CGI_link + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1);
+tab_on_graphic				=CGI_link + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1);
+tab_off_graphic				=CGI_link + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1);
+next_button_graphic		=CGI_link + next_button_graphic.substr(0,next_button_graphic.search(ext) -1);
+next_arrow_graphic			=CGI_link + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1);
+prev_arrow_graphic			=CGI_link + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1);
+shadow_line_graphic		=CGI_link + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1);
+guide_logo_graphic			=CGI_link + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1);
+team_logo_graphic			=CGI_link + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1);
+
+//alert("LOCAL=N:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+
+
+
+alert("odm_oval_on_graphic is ["+odm_oval_on_graphic+"]");
+//alert("odm_oval_off_graphic is ["+odm_oval_off_graphic+"]");
+
+//alert("ReadGraphicData:  URLStr ["+URLStr +"] next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+
+//alert("Entry not found");
+
+//alert("AFTER LOAD:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+
+}
+
+
+
+// ##############  READ GRAPHIC DATA #######################
+function ReadGraphicData_bak() {
+//alert("inside read graphic data");
+var pos=0;
+ext="gif";
+
+stabGraphicData = xmlDoc.getElementsByTagName('graphic_data');
+//alert ("stabGraphicData length [" + stabGraphicData.length + "]");
+
+for(i=0; i<stabGraphicData.length; i++) {
+pos = parseInt(stabGraphicData[i].attributes.getNamedItem("id").value);
+
+//alert("URLStr ["+URLStr+"]");
+
+arrow_rt_graphic			=stabGraphicData[i].getElementsByTagName("arrow_rt_graphic")[0].childNodes[0].nodeValue;
+arrow_rt_faded_graphic		=stabGraphicData[i].getElementsByTagName("arrow_rt_faded_graphic")[0].childNodes[0].nodeValue;
+arrow_lt_graphic			=stabGraphicData[i].getElementsByTagName("arrow_lt_graphic")[0].childNodes[0].nodeValue;
+arrow_dwn_graphic			=stabGraphicData[i].getElementsByTagName("arrow_dwn_graphic")[0].childNodes[0].nodeValue;
+plus_graphic				=stabGraphicData[i].getElementsByTagName("plus_graphic")[0].childNodes[0].nodeValue;
+minus_graphic				=stabGraphicData[i].getElementsByTagName("minus_graphic")[0].childNodes[0].nodeValue;
+odm_oval_on_graphic			=stabGraphicData[i].getElementsByTagName("odm_oval_on_graphic")[0].childNodes[0].nodeValue;
+odm_oval_off_graphic		=stabGraphicData[i].getElementsByTagName("odm_oval_off_graphic")[0].childNodes[0].nodeValue;
+detail_oval_on_graphic		=stabGraphicData[i].getElementsByTagName("detail_oval_on_graphic")[0].childNodes[0].nodeValue;
+detail_oval_off_graphic		=stabGraphicData[i].getElementsByTagName("detail_oval_off_graphic")[0].childNodes[0].nodeValue;
+detail_oval_faded_graphic	=stabGraphicData[i].getElementsByTagName("detail_oval_faded_graphic")[0].childNodes[0].nodeValue;
+tab_on_graphic				=stabGraphicData[i].getElementsByTagName("tab_on_graphic")[0].childNodes[0].nodeValue;
+tab_off_graphic				=stabGraphicData[i].getElementsByTagName("tab_off_graphic")[0].childNodes[0].nodeValue;
+next_button_graphic			=stabGraphicData[i].getElementsByTagName("next_button_graphic")[0].childNodes[0].nodeValue;
+next_arrow_graphic			=stabGraphicData[i].getElementsByTagName("next_arrow_graphic")[0].childNodes[0].nodeValue;
+prev_arrow_graphic			=stabGraphicData[i].getElementsByTagName("prev_arrow_graphic")[0].childNodes[0].nodeValue;
+shadow_line_graphic			=stabGraphicData[i].getElementsByTagName("shadow_line_graphic")[0].childNodes[0].nodeValue;
+guide_logo_graphic			=stabGraphicData[i].getElementsByTagName("guide_logo_graphic")[0].childNodes[0].nodeValue;
+team_logo_graphic			=stabGraphicData[i].getElementsByTagName("team_logo_graphic")[0].childNodes[0].nodeValue;
+//alert("next_button_graphic ["+next_button_graphic+"]");
+//alert("next_arrow_graphic ["+next_arrow_graphic+"]");
+
+}
+
+
+if ((URLStr=="MOS")||(URLStr=="ML")||(URLStr=="WIV")||(URLStr=="CSM")||(URLStr=="VSERV")){
+//if ((URLStr=="ML")||(URLStr=="WIV")){
+pre_arrow_rt_graphic.src			=CGI_link + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1);
+pre_arrow_rt_faded_graphic.src		=CGI_link + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1);
+pre_arrow_lt_graphic.src			=CGI_link + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1);
+pre_arrow_dwn_graphic.src			=CGI_link + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1);
+pre_plus_graphic.src				=CGI_link + plus_graphic.substr(0,plus_graphic.search(ext) -1);
+pre_minus_graphic.src				=CGI_link + minus_graphic.substr(0,minus_graphic.search(ext) -1);
+pre_odm_oval_on_graphic.src			=CGI_link + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1);
+pre_odm_oval_off_graphic.src		=CGI_link + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1);
+pre_detail_oval_on_graphic.src		=CGI_link + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1);
+pre_detail_oval_off_graphic.src		=CGI_link + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1);
+pre_detail_oval_faded_graphic.src	=CGI_link + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1);
+pre_tab_on_graphic.src				=CGI_link + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1);
+pre_tab_off_graphic.src				=CGI_link + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1);
+pre_next_button_graphic.src			=CGI_link + next_button_graphic.substr(0,next_button_graphic.search(ext) -1);
+pre_next_arrow_graphic.src			=CGI_link + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1);
+pre_prev_arrow_graphic.src			=CGI_link + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1);
+pre_shadow_line_graphic.src			=CGI_link + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1);
+pre_guide_logo_graphic.src			=CGI_link + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1);
+pre_team_logo_graphic.src			=CGI_link + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1);
+
+//alert("PRELOAD:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+else if ((URLStr=="CSM")||(URLStr=="VSERV")){
+pre_arrow_rt_graphic.src			=CSM_attach_link + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1) + "&type=att";
+
+pre_arrow_rt_faded_graphic.src		=CSM_attach_link + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1) + "&type=att";
+pre_arrow_lt_graphic.src			=CSM_attach_link + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1) + "&type=att";
+pre_arrow_dwn_graphic.src			=CSM_attach_link + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1) + "&type=att";
+pre_plus_graphic.src				=CSM_attach_link + plus_graphic.substr(0,plus_graphic.search(ext) -1) + "&type=att";
+pre_minus_graphic.src				=CSM_attach_link + minus_graphic.substr(0,minus_graphic.search(ext) -1) + "&type=att";
+pre_odm_oval_on_graphic.src			=CSM_attach_link + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1) + "&type=att";
+pre_odm_oval_off_graphic.src		=CSM_attach_link + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1) + "&type=att";
+pre_detail_oval_on_graphic.src		=CSM_attach_link + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1) + "&type=att";
+pre_detail_oval_off_graphic.src		=CSM_attach_link + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1) + "&type=att";
+pre_detail_oval_faded_graphic.src	=CSM_attach_link + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1) + "&type=att";
+pre_tab_on_graphic.src				=CSM_attach_link + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1) + "&type=att";
+pre_tab_off_graphic.src				=CSM_attach_link + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1) + "&type=att";
+pre_next_button_graphic.src			=CSM_attach_link + next_button_graphic.substr(0,next_button_graphic.search(ext) -1) + "&type=att";
+pre_next_arrow_graphic.src			=CSM_attach_link + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1) + "&type=att";
+pre_prev_arrow_graphic.src			=CSM_attach_link + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1) + "&type=att";
+pre_shadow_line_graphic.src			=CSM_attach_link + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1) + "&type=att";
+pre_guide_logo_graphic.src			=CSM_attach_link + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1) + "&type=att";
+pre_team_logo_graphic.src			=CSM_attach_link + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1) + "&type=att";
+
+//alert("PRELOAD:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+else {
+pre_arrow_rt_graphic.src			=arrow_rt_graphic;
+pre_arrow_rt_faded_graphic.src		=arrow_rt_faded_graphic;
+pre_arrow_lt_graphic.src			=arrow_lt_graphic;
+pre_arrow_dwn_graphic.src			=arrow_dwn_graphic;
+pre_plus_graphic.src				=plus_graphic;
+pre_minus_graphic.src				=minus_graphic;
+pre_odm_oval_on_graphic.src			=odm_oval_on_graphic;
+pre_odm_oval_off_graphic.src		=odm_oval_off_graphic;
+pre_detail_oval_on_graphic.src		=detail_oval_on_graphic;
+pre_detail_oval_off_graphic.src		=detail_oval_off_graphic;
+pre_detail_oval_faded_graphic.src	=detail_oval_faded_graphic;
+pre_tab_on_graphic.src				=tab_on_graphic;
+pre_tab_off_graphic.src				=tab_off_graphic;
+pre_next_button_graphic.src			=next_button_graphic;
+pre_next_arrow_graphic.src			=next_arrow_graphic;
+pre_prev_arrow_graphic.src			=prev_arrow_graphic;
+pre_shadow_line_graphic.src			=shadow_line_graphic;
+pre_guide_logo_graphic.src			=guide_logo_graphic;
+pre_team_logo_graphic.src			=team_logo_graphic;
+//alert("next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+//alert("next_button_graphic ["+next_button_graphic+"] pre_next_button_graphic ["+pre_next_button_graphic.src+"]  substr ["+next_button_graphic.substr(0,next_button_graphic.search(ext) -1)+"]");
+}
+
+
+if (URLStr=="WIV"){
+arrow_rt_graphic			=WebIV_attach_link + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1) + "/" + arrow_rt_graphic;
+arrow_rt_faded_graphic		=WebIV_attach_link + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1) + "/" + arrow_rt_faded_graphic;
+arrow_lt_graphic			=WebIV_attach_link + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1) + "/" + arrow_lt_graphic;
+arrow_dwn_graphic			=WebIV_attach_link + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1) + "/" + arrow_dwn_graphic;
+plus_graphic				=WebIV_attach_link + plus_graphic.substr(0,plus_graphic.search(ext) -1) + "/" + plus_graphic;
+minus_graphic				=WebIV_attach_link + minus_graphic.substr(0,minus_graphic.search(ext) -1) + "/" + minus_graphic;
+odm_oval_on_graphic			=WebIV_attach_link + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1) + "/" + odm_oval_on_graphic;
+odm_oval_off_graphic		=WebIV_attach_link + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1) + "/" + odm_oval_off_graphic;
+detail_oval_on_graphic		=WebIV_attach_link + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1) + "/" + detail_oval_on_graphic;
+detail_oval_off_graphic		=WebIV_attach_link + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1) + "/" + detail_oval_off_graphic;
+detail_oval_faded_graphic	=WebIV_attach_link + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1) + "/" + detail_oval_faded_graphic;
+tab_on_graphic				=WebIV_attach_link + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1) + "/" + tab_on_graphic;
+tab_off_graphic				=WebIV_attach_link + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1) + "/" + tab_off_graphic;
+next_button_graphic			=WebIV_attach_link + next_button_graphic.substr(0,next_button_graphic.search(ext) -1) + "/" + next_button_graphic;
+next_arrow_graphic			=WebIV_attach_link + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1) + "/" + next_arrow_graphic;
+prev_arrow_graphic			=WebIV_attach_link + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1) + "/" + prev_arrow_graphic;
+shadow_line_graphic			=WebIV_attach_link + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1) + "/" + shadow_line_graphic;
+guide_logo_graphic			=WebIV_attach_link + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1) + "/" + guide_logo_graphic;
+team_logo_graphic			=WebIV_attach_link + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1) + "/" + team_logo_graphic;
+//alert("WIV:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+else if ((URLStr=="MOS")||(URLStr=="ML")) {
+arrow_rt_graphic			=ML_attach_link + arrow_rt_graphic;
+arrow_rt_faded_graphic		=ML_attach_link + arrow_rt_faded_graphic;
+arrow_lt_graphic			=ML_attach_link + arrow_lt_graphic;
+arrow_dwn_graphic			=ML_attach_link + arrow_dwn_graphic;
+plus_graphic				=ML_attach_link + plus_graphic;
+minus_graphic				=ML_attach_link + minus_graphic;
+odm_oval_on_graphic			=ML_attach_link + odm_oval_on_graphic;
+odm_oval_off_graphic		=ML_attach_link + odm_oval_off_graphic;
+detail_oval_on_graphic		=ML_attach_link + detail_oval_on_graphic;
+detail_oval_off_graphic		=ML_attach_link + detail_oval_off_graphic;
+detail_oval_faded_graphic	=ML_attach_link + detail_oval_faded_graphic;
+tab_on_graphic				=ML_attach_link + tab_on_graphic;
+tab_off_graphic				=ML_attach_link + tab_off_graphic;
+next_button_graphic			=ML_attach_link + next_button_graphic;
+next_arrow_graphic			=ML_attach_link + next_arrow_graphic;
+prev_arrow_graphic			=ML_attach_link + prev_arrow_graphic;
+shadow_line_graphic			=ML_attach_link + shadow_line_graphic;
+guide_logo_graphic			=ML_attach_link + guide_logo_graphic;
+team_logo_graphic			=ML_attach_link + team_logo_graphic;
+//alert("ML:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+}
+else if ((URLStr=="CSM") || (URLStr=="VSERV")){
+arrow_rt_graphic			=CSM_attach_link + arrow_rt_graphic.substr(0,arrow_rt_graphic.search(ext) -1) + "&type=att";
+arrow_rt_faded_graphic		=CSM_attach_link + arrow_rt_faded_graphic.substr(0,arrow_rt_faded_graphic.search(ext) -1) + "&type=att";
+arrow_lt_graphic			=CSM_attach_link + arrow_lt_graphic.substr(0,arrow_lt_graphic.search(ext) -1) + "&type=att";
+arrow_dwn_graphic			=CSM_attach_link + arrow_dwn_graphic.substr(0,arrow_dwn_graphic.search(ext) -1) + "&type=att";
+plus_graphic				=CSM_attach_link + plus_graphic.substr(0,plus_graphic.search(ext) -1) + "&type=att";
+minus_graphic				=CSM_attach_link + minus_graphic.substr(0,minus_graphic.search(ext) -1) + "&type=att";
+odm_oval_on_graphic			=CSM_attach_link + odm_oval_on_graphic.substr(0,odm_oval_on_graphic.search(ext) -1) + "&type=att";
+odm_oval_off_graphic		=CSM_attach_link + odm_oval_off_graphic.substr(0,odm_oval_off_graphic.search(ext) -1) + "&type=att";
+detail_oval_on_graphic		=CSM_attach_link + detail_oval_on_graphic.substr(0,detail_oval_on_graphic.search(ext) -1) + "&type=att";
+detail_oval_off_graphic		=CSM_attach_link + detail_oval_off_graphic.substr(0,detail_oval_off_graphic.search(ext) -1) + "&type=att";
+detail_oval_faded_graphic	=CSM_attach_link + detail_oval_faded_graphic.substr(0,detail_oval_faded_graphic.search(ext) -1) + "&type=att";
+tab_on_graphic				=CSM_attach_link + tab_on_graphic.substr(0,tab_on_graphic.search(ext) -1) + "&type=att";
+tab_off_graphic				=CSM_attach_link + tab_off_graphic.substr(0,tab_off_graphic.search(ext) -1) + "&type=att";
+next_button_graphic			=CSM_attach_link + next_button_graphic.substr(0,next_button_graphic.search(ext) -1) + "&type=att";
+next_arrow_graphic			=CSM_attach_link + next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1) + "&type=att";
+prev_arrow_graphic			=CSM_attach_link + prev_arrow_graphic.substr(0,prev_arrow_graphic.search(ext) -1) + "&type=att";
+shadow_line_graphic			=CSM_attach_link + shadow_line_graphic.substr(0,shadow_line_graphic.search(ext) -1) + "&type=att";
+guide_logo_graphic			=CSM_attach_link + guide_logo_graphic.substr(0,guide_logo_graphic.search(ext) -1) + "&type=att";
+team_logo_graphic			=CSM_attach_link + team_logo_graphic.substr(0,team_logo_graphic.search(ext) -1) + "&type=att";
+//alert("CSM:  next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+
+}
+//alert("odm_oval_on_graphic is ["+odm_oval_on_graphic+"]");
+//alert("odm_oval_off_graphic is ["+odm_oval_off_graphic+"]");
+
+//alert("ReadGraphicData:  URLStr ["+URLStr +"] next_arrow_graphic ["+next_arrow_graphic+"] pre_next_arrow_graphic ["+pre_next_arrow_graphic.src+"]  substr ["+next_arrow_graphic.substr(0,next_arrow_graphic.search(ext) -1)+"]");
+
+//alert("Entry not found");
+}
+
+
+// #############################  READ SUB TAB DATA  #####################
+function ReadSubTabData() {
+//alert("in ReadSubTabData");
+var pos=0;
+
+stabData = xmlDoc.getElementsByTagName('stab_data');
+stab_data_num = stabData.length;
+//alert ("stabData length [" + stabData.length + "]");
+
+for(i=0; i<stabData.length; i++) {
+pos = parseInt(stabData[i].attributes.getNamedItem("id").value);
+stab_data[pos][0] = stabData[i].attributes.getNamedItem("tname").value;
+stab_data[pos][1] = stabData[i].attributes.getNamedItem("stname").value;
+stab_data[pos][2] = stabData[i].attributes.getNamedItem("short_stname").value;
+stab_data[pos][3] = stabData[i].attributes.getNamedItem("type").value;
+stab_data[pos][4] = stabData[i].getElementsByTagName("long_stname")[0].childNodes[0].nodeValue;
+stab_data[pos][5] = stabData[i].getElementsByTagName("dtl_page_pos")[0].childNodes[0].nodeValue;
+stab_data[pos][6] = stabData[i].getElementsByTagName("java_str")[0].childNodes[0].nodeValue;
+stab_data[pos][7] = stabData[i].getElementsByTagName("st_page")[0].childNodes[0].nodeValue;
+
+
+stab_data[pos][7]=ReplaceGraphics(stab_data[pos][7]);
+
+//alert("TAB NUM: [" + pos + "] TAB TNAME: [" + stab_data[pos][0] + "] TAB STNAME: [" + stab_data[pos][1]+ "]  TAB SHORT STNAME: [" + stab_data[pos][2] + "] TAB TYPE: [" + stab_data[pos][3] + "] TAB LONG STNAME: [" + stab_data[pos][4] + "] TAB PAGE: ["+stab_data[pos][7]+"]");
+}
+//alert("Entry not found");
+}
+
+
+
+// #############################  READ QUESTION #####################
+function ReadQuestion() {
+var pos=0;
+var next_question=0;
+
+questionData = xmlDoc.getElementsByTagName('question_data');
+question_data_num = questionData.length;
+//alert ("questionData length [" + questionData.length + "]");
+
+for(i=0; i<questionData.length; i++) {
+
+pos = parseInt(questionData[i].attributes.getNamedItem("id").value);
+question_data[pos][0] = questionData[i].attributes.getNamedItem("tname").value;
+question_data[pos][1] = parseInt(questionData[i].attributes.getNamedItem("Qnum").value);
+question_data[pos][2] = parseInt(questionData[i].attributes.getNamedItem("YesQnum").value);
+question_data[pos][3] = parseInt(questionData[i].attributes.getNamedItem("NoQnum").value);
+question_data[pos][4] = questionData[i].attributes.getNamedItem("visit_stname").value;
+question_data[pos][5] = questionData[i].attributes.getNamedItem("last").value;
+question_data[pos][6] = questionData[i].getElementsByTagName("question")[0].childNodes[0].nodeValue;
+
+}
+//alert ("Question is [" + question_data[pos][6] + "]");
+//alert("Entry not found");
+}
+
+
+// #############################  READ ODM  #####################
+function ReadODM() {
+
+var pos=0;
+
+odmData = xmlDoc.getElementsByTagName('ODM_data');
+odm_data_num = odmData.length;
+//alert ("odmData length [" + odmData.length + "]");
+
+for(i=0; i<odmData.length; i++) {
+pos = parseInt(odmData[i].attributes.getNamedItem("id").value);
+odm_data[pos][0] = odmData[i].attributes.getNamedItem("sname").value;
+odm_data[pos][1] = odmData[i].getElementsByTagName("lname")[0].childNodes[0].nodeValue;
+odm_data[pos][2] = odmData[i].getElementsByTagName("help")[0].childNodes[0].nodeValue
+//alert("ODM HELP: ["+odm_data[pos][2]+"]");
+}
+//alert("Entry not found");
+}
+
+
+// #############################  READ DTL  #####################
+function ReadDTL() {
+
+var pos=0;
+
+dtlData = xmlDoc.getElementsByTagName('DTL_data');
+dtl_data_num = dtlData.length;
+//alert ("dtlData length [" + dtlData.length + "]");
+
+for(i=0; i<dtlData.length; i++) {
+pos = parseInt(dtlData[i].attributes.getNamedItem("id").value);
+dtl_data[pos][0] = dtlData[i].attributes.getNamedItem("sname").value;
+dtl_data[pos][1] = dtlData[i].getElementsByTagName("lname")[0].childNodes[0].nodeValue;
+dtl_data[pos][2] = dtlData[i].getElementsByTagName("help")[0].childNodes[0].nodeValue;
+}
+//alert("Entry not found");
+}
+
+
+
+// ##############  READ SUB TAB DETAIL DATA #######################
+function ReadSubTabDetailData() {
+//alert ("IN ReadSubTabDetailData:  ["+read_test+"]");
+var pos=0;
+
+stabDetailData = xmlDoc.getElementsByTagName('stab_detail_data');
+stab_detail_page_num = stabDetailData.length;
+//alert ("stabDetailData length [" + stabDetailData.length + "]");
+
+for(var i=0; i<stabDetailData.length; i++) {
+pos = parseInt(stabDetailData[i].attributes.getNamedItem("id").value);
+
+//alert ("tname is ["+stabDetailData[i].attributes.getNamedItem("tname").value+"] stname ["+stabDetailData[i].attributes.getNamedItem("stname").value+"]");
+
+stab_detail_page[pos][0][0] = stabDetailData[i].attributes.getNamedItem("tname").value;
+stab_detail_page[pos][0][1] = stabDetailData[i].attributes.getNamedItem("stname").value;
+stab_detail_page[pos][0][2] = stabDetailData[i].attributes.getNamedItem("short_stname").value;
+stab_detail_page[pos][0][3] = stabDetailData[i].attributes.getNamedItem("ODM_name").value;
+stab_detail_page[pos][0][4] = stabDetailData[i].attributes.getNamedItem("DTL_name").value;
+stab_detail_page[pos][0][5] = stabDetailData[i].getElementsByTagName("detail").length;
+stab_detail_page[pos][0][6] = stabDetailData[i].attributes.getNamedItem("num_sections").value;
+
+//alert ("tname is ["+stab_detail_page[pos][0][0]+"] stname ["+stab_detail_page[pos][0][1]+"]  ODM_name ["+stab_detail_page[pos][0][3]+"]  DTL_name ["+stab_detail_page[pos][0][4]+"]");
+
+stab_detail_rec_num = stabDetailData[i].getElementsByTagName("detail").length;
+//alert("detail length is [" + stabDetailData[i].getElementsByTagName("detail").length +"]");
+//alert("detail length is [" + stabDetailData[i].getElementsByTagName("detail")[2].attributes.getNamedItem("tag").value +"]");
+
+for (var j=0; j<stab_detail_rec_num; j++){
+k=stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("id").value;
+
+if (k==0){
+stab_detail_page[pos][0][7]=stabDetailData[i].getElementsByTagName("detail")[j].childNodes[0].nodeValue;
+stab_detail_page[pos][0][7]=ReplaceGraphics(stab_detail_page[pos][0][7]);
+//alert("DTL 0: pos ["+pos+"]  K ["+k+"]  ["+stab_detail_page[pos][k][0]+"]   ["+stab_detail_page[pos][k][1] +"]   ["+stab_detail_page[pos][k][2] +"]   ["+stab_detail_page[pos][k][3] +"]   ["+stab_detail_page[pos][k][4] +"]   ["+stab_detail_page[pos][k][5] +"]   ["+stab_detail_page[pos][k][6] +"]   ["+stab_detail_page[pos][k][7] +"]");
+}
+else {
+stab_detail_page[pos][k][0] = stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("tag").value;
+stab_detail_page[pos][k][1] = stabDetailData[i].getElementsByTagName("detail")[j].childNodes[0].nodeValue;
+stab_detail_page[pos][k][2] = parseInt(stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("header_num").value);
+stab_detail_page[pos][k][3] = parseInt(stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("subheader_num").value);
+stab_detail_page[pos][k][4] = parseInt(stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("item_num").value);
+stab_detail_page[pos][k][5] = stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("expand").value;
+stab_detail_page[pos][k][6] = stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("expand2").value;
+stab_detail_page[pos][k][7] = stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("tabletype").value;
+stab_detail_page[pos][k][8] = stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("Textlayer").value;
+stab_detail_page[pos][k][9] = stabDetailData[i].getElementsByTagName("detail")[j].attributes.getNamedItem("Piclayer").value;
+//alert("DTL other: pos ["+pos+"]  K ["+k+"]  ["+stab_detail_page[pos][k][0]+"]   ["+stab_detail_page[pos][k][1] +"]   ["+stab_detail_page[pos][k][2] +"]   ["+stab_detail_page[pos][k][3] +"]   ["+stab_detail_page[pos][k][4] +"]   ["+stab_detail_page[pos][k][5] +"]   ["+stab_detail_page[pos][k][6] +"]   ["+stab_detail_page[pos][k][7] +"]");
+
+//VLC:206:  **For troubleshooting purposes
+//if ((i==19)&&(k==107)){
+//thepos=19;
+//alert ("ReadSubTabDetailData: i ["+i+"] k ["+k+"]");
+//}
+//else {
+//thepos=0;
+//}
+stab_detail_page[pos][k][1]=ReplaceGraphics(stab_detail_page[pos][k][1]);
+}
+
+}
+//alert("MAIN:  ["+stab_detail_page[pos][0][0]+"]   ["+stab_detail_page[pos][0][1] +"]   ["+stab_detail_page[pos][0][2] +"]   ["+stab_detail_page[pos][0][3] +"]   ["+stab_detail_page[pos][0][4] +"]   ["+stab_detail_page[pos][0][5] +"]   ["+stab_detail_page[pos][0][6] +"]   ["+stab_detail_page[pos][0][7] +"]");
+//alert ("firefox issue 3");
+
+/* for troubleshooting purposes
+document.write("TAB NUM: [" + pos + "]<br> TAB TNAME: [" + stab_detail_page[pos][0][0] + "]<br>  TAB STNAME: [" + stab_detail_page[pos][0][1] + "]<br>  TAB SHORT STNAME: [" + stab_detail_page[pos][0][2] + "]<br> ODM_name: [" + stab_detail_page[pos][0][3] + "]<br> DTL name: [" + stab_detail_page[pos][0][4] + "]<br>");
+for (k=1; k<=stab_detail_rec_num; k++){
+alert("[" + stab_detail_page[pos][k][0] + "][" + stab_detail_page[pos][k][2] + "] ["+stab_detail_page[pos][k][3]+"] ["+stab_detail_page[pos][k][3]+"] [" +stab_detail_page[pos][k][1] + "]");
+alert("DATA [" +stab_detail_page[pos][5][0]+"]");
+}
+*/
+
+}
+//alert("Entry not found");
+//alert ("OUT ReadSubTabDetailData:  ["+read_test+"]");
+}
+
+
+
+
+//  ########################### BUILD TABS ############################
+function buildTab(id,tab_new_pos) {
+
+//var tab_type="";
+var tab_java_str="";
+tab_old_pos=tab_cur_pos;
+tab_cur_pos=tab_new_pos;
+
+
+//alert ("In buildTab -- id is [" +id+ "] old pos [" + tab_old_pos + "] cur pos [" + tab_cur_pos + "] new pos [" + tab_new_pos + "]");
+
+//  table header
+tab_str=' <table border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse" bordercolor="#0000FF" width="100%" id="tabs">'
+      + ' <tr>'
+      + ' <td align="center">&nbsp;</td>';
+
+// populate columns - number of column dependend on stab_data_num
+for (i=0; i<stab_data_num; i++) {
+
+//alert ("BuildTab:  i ["+i+"]  tab_type ["+tab_type+"]  tab_java_str ["+tab_java_str+"]");
+
+    // if i EQUAL to the new position then turn the graphic on
+	if (i==tab_new_pos) {
+		tab_str=tab_str 
+		+ ' <td width="85" align="center">'
+		//+ ' <div id="TAB'+i+'" onclick="javascript:changeTab(tab_id,'+i+'); showLayerMain(pageid, stab_data['+i+'][7]); '+tab_java_str[i]+'" '
+		//+ ' <div id="TAB'+i+'" onclick="'+tab_java_str+'" '
+		+ ' <div id="TAB'+i+'" onclick="'+stab_data[i][6]+'" '
+		+ ' style="cursor:pointer;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ ' <p class="tabPic"><img border="0" src="'+tab_on_graphic+'"></p>'
+		//+ ' <p class="tabTxtOn">'+tab_lst[i]+'</p>' 
+		+ ' <p class="tabTxtOn">'+stab_data[i][4]+'</p>' 
+		+ ' </div></td>';
+		//alert ("IN build tab ON:  tab name is [" + stab_data[i][4] +"]");
+	}
+	// if i is NOT equal to the new position then leave the graphic off
+	else {
+		tab_str=tab_str 
+		+ ' <td width="85" align="center">'
+		//+ ' <div id="TAB'+i+'" onclick="javascript:changeTab(tab_id,'+i+'); showLayerMain(pageid, stab_data['+i+'][7]); '+tab_java_str[i]+'" '
+		//+ ' <div id="TAB'+i+'" onclick="'+tab_java_str+'" '
+		+ ' <div id="TAB'+i+'" onclick="'+stab_data[i][6]+'" '
+		+ ' style="cursor:pointer;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ ' <p class="tabPic"><img border="0" src="'+tab_off_graphic+'"></p>'
+		//+ ' <p class="tabTxtOff">'+tab_lst[i]+'</p>' 
+		+ ' <p class="tabTxtOff">'+stab_data[i][4]+'</p>' 
+		+ ' </div></td>';
+		//alert ("IN build tab OFF:  page text is [" + stab_data[i][6] +"]");
+	}
+}
+
+tab_str=tab_str 
++ '        </tr>'
++ '      </table>';
+
+//alert ("BuildTab: tab str is [" + tab_str + "]");
+
+cur_stab_name=stab_data[0][1];
+showLayerMain(id,tab_str);
+}
+
+
+//  ######################### CHANGE TAB ############################	
+function changeTab(id,tab_new_pos) {
+
+tab_old_pos=tab_cur_pos;
+tab_cur_pos=tab_new_pos;
+odm_new_pos=0;
+odm_cur_pos=0;
+odm_old_pos=0;
+detail_new_pos=0;
+detail_cur_pos=0;
+detail_old_pos=0;
+new_dtl_page ="Y"
+
+//alert ("In changeTab -- old pos is [" +tab_old_pos+ "] cur pos [" + tab_cur_pos + "] new pos [" + tab_new_pos + "]");
+
+// turn off previous TAB tag
+tab_old_str='<p class="tabPic"><img border="0" src="'+tab_off_graphic+'"></p>'
+		  //+ '<p class="tabTxtOff">'+tab_lst[tab_old_pos]+'</p>'; 
+		  + '<p class="tabTxtOff">'+stab_data[tab_old_pos][4]+'</p>'; 
+id = "TAB" +tab_old_pos;
+showLayerMain(id,tab_old_str);
+//alert ("old str: ["+stab_data[tab_old_pos][4]+"]");
+
+// turn on new TAB tag
+tab_new_str='<p class="tabPic"><img border="0" src="'+tab_on_graphic+'"></p>'
+		  //+ '<p class="tabTxtOn">'+tab_lst[tab_new_pos]+'</p>'; 		
+		  + '<p class="tabTxtOn">'+stab_data[tab_new_pos][4]+'</p>'; 		
+id = "TAB" +tab_new_pos;
+
+//alert ("id is [" +id+ "] new tab str is [" + tab_new_str + "]");
+//alert ("IN change tab ON:  tab name is [" + stab_data[tab_new_pos][4] +"]");
+
+cur_stab_name=stab_data[tab_new_pos][1];
+showLayerMain(id,tab_new_str);
+}
+
+
+
+//  #####################  BUILD ODM  #######################
+function buildODM(id,odm_new_pos) {
+
+odm_old_pos=odm_cur_pos;
+odm_cur_pos=odm_new_pos;
+stab_detail_pos=0;
+var stab_ref_pos=0;
+var ref_str="";
+
+//alert ("In buildODM -- id is [" +id+ "] new pos [" + odm_new_pos + "] odm_data_num ["+odm_data_num+"]");
+
+//  table header
+odm_str='<table border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" height="76" id="AutoNumber2">'
+      + '<tr>';
+
+// populate columns - number of column depends on odm_data_num
+for (i=0; i<odm_data_num; i++) {
+//alert("LOOP: i ["+i+"] odm_data_num ["+odm_data_num+"] stab_detail_page_num ["+stab_detail_page_num+"] ODM ["+odm_data[i][0]+"] DTL ["+dtl_data[0][0]+"]");
+
+    //If the help text is NA, then don't do the onmouseover for popup
+    if (odm_data[i][2]=='NA'){
+    HelpDiv='<div id="ODM'+j+'_'+i+'"'
+    }
+    else {
+    HelpDiv='<div id="ODM'+i+'" onmouseover="showLayerMouse(event,help_id,odm_data['+i+'][2],0);" onmouseout="showLayerMouse(event,help_id,odm_data['+i+'][2],1);"'
+    }
+    
+//alert ("buildODM: i ["+i+"]  odm_new_pos ["+odm_new_pos+"] odm_old_pos ["+odm_old_pos+"] odm_cur_pos ["+odm_cur_pos+"]");
+    // if i EQUAL to the new position then turn the graphic on
+	if (i==odm_new_pos) {
+	odm_str=odm_str 
+	+'<td width="48%">'	
+	+'<DIV ID="BOARDER1" style="visibility:show">'
+	+'<table border="0" cellspacing="0" cellpadding="0" width="100%" height="76" id="AutoNumber1" style="border-collapse: collapse; border: 2px solid #A6B3C8; padding-left: 4; padding-right: 4; padding-top: 1; padding-bottom: 1" bordercolor="#111111">'
+	+'<tr>'
+	+'<td height="15">'
+	//+'<div id="ODM'+i+'" onmouseover="showLayerMouse(event,help_id,odm_data['+i+'][2],0);" onmouseout="showLayerMouse(event,help_id,odm_data['+i+'][2],1);"'
+	+ HelpDiv
+	+'style="visibility:show; z-index:3">'
+	+'<p align="center" class="odmTxtOn">'+odm_data[i][1]+'</p>' 
+	+'</div></td>'
+	+'</tr>'
+	+'<tr>'
+	+'<td height="61">'
+	+'<DIV ID="detail_layer_0" style="visibility:show">detail layer 1</DIV>'
+	+'</td>'
+	+'</tr>'
+	+'</table>'		
+	+'</DIV>'
+	+'</td>';
+	//alert ("buildODM:  i is ["+i+"] odm_new_pos ["+odm_new_pos+"]  odm str is [" + odm_str + "]");
+
+	}
+	// if i is NOT equal to the new position then leave the graphic off
+	else {
+	odm_str=odm_str
+	+'<td width="48%">' 	
+	+'<DIV ID="BOARDER1" style="visibility:show">'
+	//+'<table border="0" cellspacing="0" cellpadding="0" width="100%" height="76" id="AutoNumber1" style="border-collapse: collapse; border: 2px solid #A6B3C8; padding-left: 4; padding-right: 4; padding-top: 1; padding-bottom: 1" bordercolor="#111111">'
+	+'<table border="0" cellspacing="0" cellpadding="0" width="100%" height="76" id="AutoNumber1" style="border-collapse: collapse; border: 2px solid #A6B3C8; padding-left: 4; padding-right: 4; padding-top: 1; padding-bottom: 1" bordercolor="#111111">'
+	+'<tr>'
+	+'<td height="15">'
+	//+'<div id="ODM'+i+'" onmouseover="showLayerMouse(event,help_id,odm_data['+i+'][2],0);" onmouseout="showLayerMouse(event,help_id,odm_data['+i+'][2],1);"'
+	+ HelpDiv
+	+'style="visibility:show; z-index:3">'
+	+'<p align="center" class="odmTxtOff">'+odm_data[i][1]+'</p>' 
+	+'</div></td>'
+	+'</tr>'
+	+'<tr>'
+	+'<td height="61">'
+	+'<DIV ID="detail_layer_1" style="visibility:show">detail layer 2</DIV>'
+	+'</td>'
+	+'</tr>'
+	+'</table>'
+	+'</DIV>'
+	+'</td>';
+	}
+
+	if (i < odm_data_num-1) {
+		odm_str=odm_str 
+		+ '          <td width="5%" align="center">'
+		+ '          <img border="0" src="'+arrow_rt_graphic+'"></td>';
+	}
+}
+
+odm_str=odm_str 
++ ' <td width="85%">&nbsp;</td>'
++ ' </tr>'
++ ' </table>';
+
+//alert ("buildODM:  odm str is [" + odm_str + "]");
+//alert ("odm num is [" + odm_num + "]  detail num [" + detail_num + "] odm str is [" + odm_str + "]");
+
+
+
+for (var j=0; j<=stab_detail_page_num; j++){
+	if ((cur_stab_name==stab_detail_page[j][0][1])&&(stab_detail_page[j][0][3]=="REF")){
+		stab_ref_pos=j;
+		//alert("buildODM:  jpos ["+stab_ref_pos+"] cur_stab_name ["+cur_stab_name+"] ODM ["+stab_detail_page[j][0][3]+"]");
+	}
+}
+
+if (stab_ref_pos !=0){
+ref_str=
+'<table border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber2">'
++ '<tr>'
++ ' <td width="10%" align="center">'
++ ' <div id="'+ref_link_id+'"'
+//+ ' onclick="showLayerRef(ref_id, stab_detail_page[6][0][7],0);ExpandLayer(\'\',\'\',\'\', 6,stab_detail_page[6][0][6],\'\',\'off\',\'\');" '
++ ' onclick="showLayerRef(ref_id, stab_detail_page['+stab_ref_pos+'][0][7],0);ExpandLayer(\'\',\'\',\'\', '+stab_ref_pos+',stab_detail_page['+stab_ref_pos+'][0][6],\'\',\'off\',\'\');" '
++ ' style="cursor:pointer;  background-color:#C4DLE6; visibility:show; left:0px;top:0px;z-index:60">'
++ ' <p class="detailmaintxt"><u>Reference</u></p>'
++ ' </div></td>'
++ ' </tr>'
++ ' </table>';
+}
+
+
+showLayerMain(id,odm_str);
+// error on page here
+showLayerMain(ref_link_id,ref_str);
+//alert ("buildodm:  odm_str ["+odm_str+"]");
+}
+
+
+// ############################### CHANGE ODM ######################
+function changeODM(id,odm_new_pos) {
+
+odm_old_pos=odm_cur_pos;
+odm_cur_pos=odm_new_pos;
+		
+// turn off previous ODM tag
+//odm_old_str='<p class="odmPic"><img border="0" src="'+odm_oval_off_graphic+'"></p>'
+//		  + '<p class="odmTxtOff">'+odm_data[odm_old_pos][1]+'</p>';
+odm_old_str='<p align="center" class="odmTxtOff">'+odm_data[odm_old_pos][1]+'</p>';
+id = "ODM" +odm_old_pos;
+
+showLayerMain(id,odm_old_str);
+
+// turn on new ODM tag
+//odm_new_str='<p class="odmPic"><img border="0" src="'+odm_oval_on_graphic+'"></p>'
+//          + '<p class="odmTxtOn">'+odm_data[odm_new_pos][1]+'</p>';
+odm_new_str='<p align="center" class="odmTxtOn">'+odm_data[odm_new_pos][1]+'</p>';
+id = "ODM" +odm_new_pos;
+//alert ("In changeODM --id is ["+id+"]  old pos is [" +odm_old_pos+ "] cur pos [" + odm_cur_pos + "] new pos [" + odm_new_pos + "] odm_old_str ["+odm_old_str+"]  odm_new_str ["+odm_new_str+"]");
+
+showLayerMain(id,odm_new_str);
+}
+
+
+// ############################### NEXT ODM ######################
+function nextODM() {
+
+var odm_pos=odm_cur_pos;
+var dtl_pos=detail_cur_pos;
+
+//alert("nextODM 1:  odm_pos ["+odm_pos+"] dtl_pos ["+dtl_pos+"] dtl_data_num ["+dtl_data_num+"]");
+if (dtl_pos < dtl_data_num-1){
+changeODM(odm_id, odm_pos); 
+changeDetail(detail_id, dtl_pos+1); 
+//alert("nextODM 2:  odm_pos ["+odm_pos+"] dtl_pos ["+dtl_pos+"]");
+ShowLayerDtl(detail_text_id, odm_pos, dtl_pos+1);
+}
+else if ((dtl_pos == dtl_data_num-1)&&(odm_pos < odm_data_num-1)){
+changeODM(odm_id, odm_pos+1); 
+//alert("nextODM 3:  odm_pos ["+odm_pos+"] dtl_pos ["+dtl_pos+"]");
+changeDetail(detail_id, 0); 
+ShowLayerDtl(detail_text_id, odm_pos+1, 0);
+}
+ExpandLayer('','','', stab_detail_pos,stab_detail_page[stab_detail_pos][0][6],'','off','');
+}	
+
+// ############################### PREV ODM ######################
+function prevODM() {
+
+var odm_pos=odm_cur_pos;
+var dtl_pos=detail_cur_pos;
+new_dtl_page="Y";
+
+//alert("prev odm:  odm_pos ["+odm_pos+"] dlt_pos ["+dtl_pos+"] dtl_data_num ["+dtl_data_num+"]");
+
+if (detail_cur_pos > 0){
+changeODM(odm_id, odm_pos); 
+changeDetail(detail_id, dtl_pos-1); 
+ShowLayerDtl(detail_text_id, odm_pos, dtl_pos-1);
+}
+else if ((dtl_pos == 0)&&(odm_pos >0)){
+changeODM(odm_id, odm_pos-1); 
+changeDetail(detail_id, dtl_data_num-1); 
+ShowLayerDtl(detail_text_id, odm_pos-1, dtl_data_num-1);
+}
+ExpandLayer('','','', stab_detail_pos,stab_detail_page[stab_detail_pos][0][6],'','off','');
+}
+
+
+
+// ########################### BUILD DETAIL  ###########################
+function buildDetail(id,detail_new_pos) {
+
+//alert ("In buildDetail -- id is [" +id+ "] new pos [" + detail_new_pos + "]");
+
+detail_old_pos=detail_cur_pos;
+detail_cur_pos=detail_new_pos;
+var jpos=0;
+stab_detail_pos=0;
+
+tdwidth=Math.round(100/((dtl_data_num*2)-1));
+//alert ("tdwidth is ["+tdwidth+"]");
+// populate columns - number of column dependend on dtl_data_num
+for (j=0; j<odm_data_num; j++){
+detail_str='<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber2">'
++'<tr>';
+
+  for (i=0; i<dtl_data_num; i++) {
+    //If the help text is NA, then don't do the onmouseover for popup
+    if (dtl_data[i][2]=='NA'){
+    HelpDiv='<div id="DTL'+j+'_'+i+'"'
+    }
+    else {
+    HelpDiv='<div id="DTL'+j+'_'+i+'" onmouseover="showLayerMouse(event,help_id,dtl_data['+i+'][2],0);" onmouseout="showLayerMouse(event,help_id,dtl_data['+i+'][2],1);"'
+    }
+
+   // if i EQUAL to the new position then turn the graphic on
+	if ((j==0)&&(i==detail_new_pos)) {	
+		detail_str=detail_str 
+		//+ ' <td width="20%" align="center" valign="center">'
+		+ ' <td width="'+tdwidth+'%" align="center" valign="center">'
+		//+ ' <div id="DTL'+j+'_'+i+'"'
+	    //+ '<div id="DTL'+j+'_'+i+'" onmouseover="showLayerMouse(event,help_id,dtl_data['+i+'][2],0);" onmouseout="showLayerMouse(event,help_id,dtl_data['+i+'][2],1);"'
+		+ HelpDiv
+		+ ' style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+	    + ' <p class="detailPic"><img border="0" src="'+detail_oval_on_graphic+'"></p>'
+		+ ' <p class="detailTxtOn">'+dtl_data[i][1]+'</p>'
+		+ ' </div></td>';
+	}
+	// if i is NOT equal to the new position then leave the graphic off
+	else {
+		detail_str=detail_str 
+		//+ ' <td width="20%" align="center" valign="center">'
+		+ ' <td width="'+tdwidth+'%" align="center" valign="center">'
+		//+ ' <div id="DTL'+j+'_'+i+'"'
+	    //+ '<div id="DTL'+j+'_'+i+'" onmouseover="showLayerMouse(event,help_id,dtl_data['+i+'][2],0);" onmouseout="showLayerMouse(event,help_id,dtl_data['+i+'][2],1);"'
+		+ HelpDiv
+		+ ' style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ ' <p class="detailPic"><img border="0" src="'+detail_oval_off_graphic+'"></p>'
+		+ ' <p class="detailTxtOff">'+dtl_data[i][1]+'</p>'		+ ' </div></td>';
+	}
+	if (i < dtl_data_num-1) {
+		detail_str=detail_str 
+		//+ '<td width="20%" align="center" valign="center">'
+		+ ' <td width="'+tdwidth+'%" align="center" valign="center">'
+		+ '<div id="ARROW'+j+'_'+i+'"'
+		+ 'style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ '<p class="detailPic"><img border="0" src="'+arrow_rt_graphic+'"></p>'
+		+ '</div></td>';
+	}
+//alert ("builddetail:  i ["+i+"] j ["+j+"] detail_new_pos ["+detail_new_pos+"] dtl_data_num ["+dtl_data_num+"] detail_str ["+detail_str+"]");
+}
+
+detail_str=detail_str 
++ '        </tr>'
++ '      </table>';
+
+id="detail_layer_"+j;
+//alert ("builddetail:  id ["+id+"] j ["+j+"] odm_data_num ["+odm_data_num+"] detail_str ["+detail_str+"]");
+showLayerMain(id,detail_str);
+}
+
+//alert ("builddetail:  detail_str 2 ["+detail_str+"]");
+}
+
+
+// ########################### BUILD DETAIL  BAK###########################
+function buildDetail_BAK(id,detail_new_pos) {
+
+//alert ("In buildDetail -- id is [" +id+ "] new pos [" + detail_new_pos + "]");
+
+detail_old_pos=detail_cur_pos;
+detail_cur_pos=detail_new_pos;
+var jpos=0;
+stab_detail_pos=0;
+
+//  table header
+//detail_str='<table border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" height="350" id="AutoNumber3">';
+detail_str='<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber2">'
++'<tr>';
+
+
+//odm_data_num
+
+// populate columns - number of column dependend on dtl_data_num
+
+for (i=0; i<dtl_data_num; i++) {
+   // if i EQUAL to the new position then turn the graphic on
+	if (i==detail_new_pos) {	
+		detail_str=detail_str 
+		+ ' <td width="20%" align="center" valign="center">'
+		+ ' <div id="DTL0_'+i+'"'
+		//+ '	onclick="javascript:changeDetail(detail_id, '+i+'); ShowLayerDtl(detail_text_id, odm_cur_pos, '+i+');" '
+		+ ' style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		//+ ' <p class="detailPic" align="center"><img border="0" src="'+detail_oval_on_graphic+'"></p>'
+		//+ ' <p class="detailTxtOn" align="center">'+dtl_data[i][1]+'</p>'
+		+ ' <p class="detailPic"><img border="0" src="'+detail_oval_on_graphic+'"></p>'
+		+ ' <p class="detailTxtOn">'+dtl_data[i][1]+'</p>'
+		+ ' </div></td>';
+	}
+	// if i is NOT equal to the new position then leave the graphic off
+	else {
+		detail_str=detail_str 
+		+ ' <td width="20%" align="center" valign="center">'
+		+ ' <div id="DTL0_'+i+'"'
+		//+ '	onclick="javascript:changeDetail(detail_id, '+i+'); ShowLayerDtl(detail_text_id, odm_cur_pos, '+i+');" '
+		+ ' style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		//+ ' <p class="detailPic" align="center"><img border="0" src="'+detail_oval_off_graphic+'"></p>'
+		//+ ' <p class="detailTxtOff" align="center">'+dtl_data[i][1]+'</p>' 
+		+ ' <p class="detailPic"><img border="0" src="'+detail_oval_off_graphic+'"></p>'
+		+ ' <p class="detailTxtOff">'+dtl_data[i][1]+'</p>'		+ ' </div></td>';
+	}
+	if (i < dtl_data_num-1) {
+		detail_str=detail_str 
+		+ '<td width="20%" align="center" valign="center">'
+		+ '<div id="ARROW0_'+i+'"'
+		+ 'style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ '<p class="detailPic"><img border="0" src="'+arrow_rt_graphic+'"></p>'
+		+ '</div></td>';
+	}
+}
+
+detail_str=detail_str 
++ '        </tr>'
++ '      </table>';
+
+id="detail_layer_0";
+showLayerMain(id,detail_str);
+//alert ("builddetail:  detail_str 1 ["+detail_str+"]");
+
+detail_str='<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber2">'
++'<tr>';
+
+// build faded detail bubbles
+for (i=0; i<dtl_data_num; i++) {
+   // if i EQUAL to the new position then turn the graphic on
+		detail_str=detail_str 
+		+ ' <td width="20%">'
+		+ ' <div id="DTL1_'+i+'"'
+		//+ '	onclick="javascript:changeDetail(detail_id, '+i+'); ShowLayerDtl(detail_text_id, odm_cur_pos, '+i+');" '
+		+ ' style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ ' <p class="detailPic"><img border="0" src="'+detail_oval_faded_graphic+'"></p>'
+		+ ' <p class="detailTxtFaded">'+dtl_data[i][1]+'</p>'
+		+ ' </div></td>';
+
+		if (i < dtl_data_num-1) {
+		detail_str=detail_str 
+		+ '<td width="20%" align="center" valign="center">'
+		+ '<div id="ARROW1_'+i+'"'
+		+ 'style="cursor:default;  background-color:#FFFFFF; visibility:show; z-index:3">'
+		+ '<p class="detailPic"><img border="0" src="'+arrow_rt_faded_graphic+'"></p>'
+		+ '</div></td>';
+	}
+}
+detail_str=detail_str 
++ '        </tr>'
++ '      </table>';
+
+
+id="detail_layer_1";
+showLayerMain(id,detail_str);
+//alert ("builddetail:  detail_str 2 ["+detail_str+"]");
+}
+
+
+//  ######################### CHANGE DETAIL ############################	
+function changeDetail(id,detail_new_pos) {
+
+detail_old_pos=detail_cur_pos;
+detail_cur_pos=detail_new_pos;
+
+//alert ("In changeDetail -- id is ["+id+"] old pos is [" +detail_old_pos+ "] cur pos [" + detail_cur_pos + "] new pos [" + detail_new_pos + "]");
+//alert ("In changeDetail -- id is ["+id+"] odm old pos is [" +odm_old_pos+ "] odm cur pos [" + odm_cur_pos + "] odm new pos [" + odm_new_pos + "]");
+
+if (odm_old_pos==odm_cur_pos){
+	// turn off previous Detail tag
+	detail_old_str=	'<p class="detailPic"><img border="0" src="'+detail_oval_off_graphic+'"></p>'
+				  + '<p class="detailTxtOff">'+dtl_data[detail_old_pos][1]+'</p>';				  
+	id = "DTL" +odm_old_pos+"_" +detail_old_pos;
+	showLayerMain(id,detail_old_str);
+
+	// turn on new Detail tag
+	detail_new_str='<p class="detailPic"><img border="0" src="'+detail_oval_on_graphic+'"></p>'
+				 + '<p class="detailTxtOn">'+dtl_data[detail_new_pos][1]+'</p>';	
+	id = "DTL" +odm_cur_pos+"_" +detail_new_pos;
+	showLayerMain(id,detail_new_str);
+}
+else {
+	for (i=0; i<dtl_data_num; i++) {
+	if (i==detail_new_pos){
+	// turn on new Detail tag
+	detail_new_str='<p class="detailPic"><img border="0" src="'+detail_oval_on_graphic+'"></p>'
+				 + '<p class="detailTxtOn">'+dtl_data[i][1]+'</p>';	
+	id = "DTL" +odm_cur_pos+"_" +i;
+	showLayerMain(id,detail_new_str);
+	}
+	else {
+	// turn off previous Detail tag
+	detail_new_str='<p class="detailPic"><img border="0" src="'+detail_oval_off_graphic+'"></p>'
+				 + '<p class="detailTxtOff">'+dtl_data[i][1]+'</p>';	
+	id = "DTL" +odm_cur_pos+"_" +i;
+	showLayerMain(id,detail_new_str);
+	}
+	if (i < dtl_data_num-1) {
+	detail_new_str='<p class="detailPic"><img border="0" src="'+arrow_rt_graphic+'"></p>';
+	id = "ARROW" +odm_cur_pos+"_" +i;
+	showLayerMain(id,detail_new_str);
+	}
+	}
+
+	// fade all detail bubbles for ODM that is turned off
+	for (i=0; i<dtl_data_num; i++) {
+	detail_new_str='<p class="detailPic"><img border="0" src="'+detail_oval_faded_graphic+'"></p>'
+				 + '<p class="detailTxtFaded">'+dtl_data[i][1]+'</p>';	
+	id = "DTL" +odm_old_pos+"_" +i;
+	showLayerMain(id,detail_new_str);
+	
+	if (i < dtl_data_num-1) {
+	detail_new_str='<p class="detailPic"><img border="0" src="'+arrow_rt_faded_graphic+'"></p>';
+	id = "ARROW" +odm_old_pos+"_" +i;
+	showLayerMain(id,detail_new_str);
+	}
+	}
+}
+}
+
+
+/* ***********************************************************
+Example 4-3 (DHTMLAPI.js)
+"Dynamic HTML:The Definitive Reference"
+2nd Edition
+by Danny Goodman
+Published by O'Reilly & Associates  ISBN 1-56592-494-0
+http://www.oreilly.com
+Copyright 2002 Danny Goodman.  All Rights Reserved.
+************************************************************ */
+// DHTMLapi.js custom API for cross-platform
+// object positioning by Danny Goodman (http://www.dannyg.com).
+// Release 2.0. Supports NN4, IE, and W3C DOMs.
+
+// Global variables
+var isCSS, isW3C, isIE4, isNN4, isIE6CSS;
+// Initialize upon load to let all browsers establish content objects
+function initDHTMLAPI() {
+//alert("in initDHTMLAPI");
+    if (document.images) {
+        isCSS = (document.body && document.body.style) ? true : false;
+        isW3C = (isCSS && document.getElementById) ? true : false;
+        isIE4 = (isCSS && document.all) ? true : false;
+        isNN4 = (document.layers) ? true : false;
+        isIE6CSS = (document.compatMode && document.compatMode.indexOf("CSS1") >= 0) ? true : false;
+    }
+}
+// Set event handler to initialize API
+//VLC window.onload = initDHTMLAPI;
+
+
+//  ########################## EMPTY FUNCT #########################
+//  This is used in the progress bar code to activate the display of
+//  the progress bar.
+function empty_funct(){
+avar=0;
+}
+
+// Seek nested NN4 layer from string name
+function seekLayer(doc, name) {
+    var theObj;
+    for (var i = 0; i < doc.layers.length; i++) {
+        if (doc.layers[i].name == name) {
+            theObj = doc.layers[i];
+            break;
+        }
+        // dive into nested layers if necessary
+        if (doc.layers[i].document.layers.length > 0) {
+            theObj = seekLayer(document.layers[i].document, name);
+        }
+    }
+    return theObj;
+}
+
+// Convert object name string or object reference
+// into a valid element object reference
+function getRawObject(obj) {
+    var theObj;
+    if (typeof obj == "string") {
+        if (isW3C) {
+            theObj = document.getElementById(obj);
+        } else if (isIE4) {
+            theObj = document.all(obj);
+        } else if (isNN4) {
+            theObj = seekLayer(document, obj);
+        }
+    } else {
+        // pass through object reference
+        theObj = obj;
+    }
+    return theObj;
+}
+
+// Convert object name string or object reference
+// into a valid style (or NN4 layer) reference
+function getObject(obj) {
+    var theObj = getRawObject(obj);
+    if (theObj && isCSS) {
+        theObj = theObj.style;
+    }
+    return theObj;
+}
+
+// Position an object at a specific pixel coordinate
+function shiftTo(obj, x, y) {
+    var theObj = getObject(obj);
+    if (theObj) {
+        if (isCSS) {
+            // equalize incorrect numeric value type
+            var units = (typeof theObj.left == "string") ? "px" : 0 
+            theObj.left = x + units;
+            theObj.top = y + units;
+        } else if (isNN4) {
+            theObj.moveTo(x,y)
+        }
+    }
+}
+
+// Move an object by x and/or y pixels
+function shiftBy(obj, deltaX, deltaY) {
+    var theObj = getObject(obj);
+    if (theObj) {
+        if (isCSS) {
+            // equalize incorrect numeric value type
+            var units = (typeof theObj.left == "string") ? "px" : 0 
+            theObj.left = getObjectLeft(obj) + deltaX + units;
+            theObj.top = getObjectTop(obj) + deltaY + units;
+        } else if (isNN4) {
+            theObj.moveBy(deltaX, deltaY);
+        }
+    }
+}
+
+// Set the z-order of an object
+function setZIndex(obj, zOrder) {
+    var theObj = getObject(obj);
+    if (theObj) {
+        theObj.zIndex = zOrder;
+    }
+}
+
+// Set the background color of an object
+function setBGColor(obj, color) {
+    var theObj = getObject(obj);
+    if (theObj) {
+        if (isNN4) {
+            theObj.bgColor = color;
+        } else if (isCSS) {
+            theObj.backgroundColor = color;
+        }
+    }
+}
+
+// Set the visibility of an object to visible
+function show(obj) {
+    var theObj = getObject(obj);
+    if (theObj) {
+        theObj.visibility = "visible";
+    }
+}
+
+// Set the visibility of an object to hidden
+function hide(obj) {
+    var theObj = getObject(obj);
+    if (theObj) {
+        theObj.visibility = "hidden";
+    }
+}
+
+// Retrieve the x coordinate of a positionable object
+function getObjectLeft(obj)  {
+    var elem = getRawObject(obj);
+    var result = 0;
+    if (document.defaultView) {
+        var style = document.defaultView;
+        var cssDecl = style.getComputedStyle(elem, "");
+        result = cssDecl.getPropertyValue("left");
+    } else if (elem.currentStyle) {
+        result = elem.currentStyle.left;
+    } else if (elem.style) {
+        result = elem.style.left;
+    } else if (isNN4) {
+        result = elem.left;
+    }
+    return parseInt(result);
+}
+
+// Retrieve the y coordinate of a positionable object
+function getObjectTop(obj)  {
+    var elem = getRawObject(obj);
+    var result = 0;
+    if (document.defaultView) {
+        var style = document.defaultView;
+        var cssDecl = style.getComputedStyle(elem, "");
+        result = cssDecl.getPropertyValue("top");
+    } else if (elem.currentStyle) {
+        result = elem.currentStyle.top;
+    } else if (elem.style) {
+        result = elem.style.top;
+    } else if (isNN4) {
+        result = elem.top;
+    }
+    return parseInt(result);
+}
+
+// Retrieve the rendered width of an element
+function getObjectWidth(obj)  {
+    var elem = getRawObject(obj);
+    var result = 0;
+    if (elem.offsetWidth) {
+        result = elem.offsetWidth;
+    } else if (elem.clip && elem.clip.width) {
+        result = elem.clip.width;
+    } else if (elem.style && elem.style.pixelWidth) {
+        result = elem.style.pixelWidth;
+    }
+    return parseInt(result);
+}
+
+// Retrieve the rendered height of an element
+function getObjectHeight(obj)  {
+    var elem = getRawObject(obj);
+    var result = 0;
+    if (elem.offsetHeight) {
+        result = elem.offsetHeight;
+    } else if (elem.clip && elem.clip.height) {
+        result = elem.clip.height;
+    } else if (elem.style && elem.style.pixelHeight) {
+        result = elem.style.pixelHeight;
+    }
+    return parseInt(result);
+}
+
+// Return the available content width space in browser window
+function getInsideWindowWidth() {
+    if (window.innerWidth) {
+        return window.innerWidth;
+    } else if (isIE6CSS) {
+        // measure the html element's clientWidth
+        return document.body.parentElement.clientWidth
+    } else if (document.body && document.body.clientWidth) {
+        return document.body.clientWidth;
+    }
+    return 0;
+}
+
+// Return the available content height space in browser window
+function getInsideWindowHeight() {
+    if (window.innerHeight) {
+        return window.innerHeight;
+    } else if (isIE6CSS) {
+        // measure the html element's clientHeight
+        return document.body.parentElement.clientHeight
+    } else if (document.body && document.body.clientHeight) {
+        return document.body.clientHeight;
+    }
+    return 0;
+}
+
+
+// Center a positionable element whose name is passed as 
+// a parameter in the current window/frame, and show it
+function centerOnWindow(elemID) {
+//alert ("in centerOnWindow");
+    // 'obj' is the positionable object
+    var obj = getRawObject(elemID);
+    // window scroll factors
+    var scrollX = 0, scrollY = 0;
+    if (document.body && typeof document.body.scrollTop != "undefined") {
+        scrollX += document.body.scrollLeft;
+        scrollY += document.body.scrollTop;
+        if (document.body.parentNode && 
+            typeof document.body.parentNode.scrollTop != "undefined") {
+            scrollX += document.body.parentNode.scrollLeft;
+            scrollY += document.body.parentNode.scrollTop
+        }
+    } else if (typeof window.pageXOffset != "undefined") {
+        scrollX += window.pageXOffset;
+        scrollY += window.pageYOffset;
+    }
+    var x = Math.round((getInsideWindowWidth()/2) - (getObjectWidth(obj)/2)) + scrollX;
+    var y = Math.round((getInsideWindowHeight()/2) -  (getObjectHeight(obj)/2)) + scrollY;
+    shiftTo(obj, x, y);
+    show(obj);
+//    alert("out of centerOnWindow");
+}
+
+function initProgressBar() {
+//alert("in initProgressBar");
+	// create quirks object whose default (CSS-compatible) values
+    // are zero; pertinent values for quirks mode filled in later	
+	if (navigator.appName == "Microsoft Internet Explorer" && 
+        navigator.userAgent.indexOf("Win") != -1 && 
+        (typeof document.compatMode == "undefined" || 
+        document.compatMode == "BackCompat")) {
+        document.getElementById("progressBar").style.height = "81px";
+        document.getElementById("progressBar").style.width = "444px";
+        document.getElementById("sliderWrapper").style.fontSize = "xx-small";
+        document.getElementById("slider").style.fontSize = "xx-small";
+        document.getElementById("slider").style.height = "13px";
+        document.getElementById("slider").style.width = "415px";
+    }
+}
+
+function showProgressBar() {
+//alert("in showProgressBar");
+    centerOnWindow("progressBar");
+}
+
+function calcProgress(current, total) {
+    if (current <= total) {
+        var factor = current/total;
+        var pct = Math.ceil(factor * 100);
+		//alert("Pct: "+pct+"| Current: "+current+"| Total: "+total+"| Factor: "+Number(factor));
+        document.getElementById("sliderWrapper").firstChild.nodeValue = pct + "%";
+        document.getElementById("slider").firstChild.nodeValue = pct + "%";
+        document.getElementById("slider").style.clip = "rect(0px " + parseInt(factor * 417) + "px 16px 0px)";
+    	focus;
+    }
+}
+
+function hideProgressBar() {
+    hide("progressBar");
+    calcProgress(0, 0);
+}
+
+// Test bench to see progress bar in action at random intervals
+//var loopObject = {start:0, end:10, current:0, interval:null};
+var loopObject = {start:0, end:14, current:0, interval:null};
+var loopnum=0;
+function runit() {
+//alert ("in runit");
+    loopnum++;
+    if (loopObject.current <= loopObject.end) {
+        calcProgress(loopObject.current, loopObject.end);        
+        loopObject.current += 1;
+        if (loopnum==1) empty_funct();
+        if (loopnum==2) init_arrays();
+        //if (loopnum==3) findURL(pre_load_test.src);
+        //VLC 012710 - replaced line
+        //if (loopnum==3) findURL("785351.1");
+        if (loopnum==3) findURL(xmlNoteNum);       
+        if (loopnum==4) OpenXMLFile();
+        if (loopnum==5) ReadVariableData();
+        if (loopnum==6) ReadGraphicData();
+        if (loopnum==7) ReadSubTabData();
+		if (loopnum==8) ReadQuestion();
+		if (loopnum==9) ReadODM();
+		if (loopnum==10) ReadDTL();
+		if (loopnum==11) ReadSubTabDetailData();
+		//if (loopnum==12) ReadSubTabReferenceData();
+		//if (loopnum==13) BuildSubTabReferenceData();
+        if (loopnum==12) initPage();
+   		if (loopnum==13) showLayerMain(main_id,init_page);
+		if (loopnum==14) buildTab(tab_id,0);
+
+        loopObject.interval = setTimeout("runit()", 300);
+        //alert("interval is ["+loopObject.interval+"]");
+
+    } else {
+        calcProgress(loopObject.end, loopObject.end);
+        loopObject.current = 0;
+        loopObject.interval = null;
+        //setTimeout("hideProgressBar()", 500);
+        setTimeout("hideProgressBar()", 50);
+        showLayerMain(pageid,stab_data[0][7]);
+        loopnum=0;
+    }
+}
+
+</SCRIPT>
+
+</head>
+<body>
+<div id="progressBar">
+<div id="progressBarMsg">Please Wait.  Loading data.  This could take several minutes.</div>
+<div id="sliderWrapper">0%
+	<div id="slider">0%</div>
+</div>
+</div>
+
+<DIV ID="help_layer" style="color:black;background:transparent; visibility:hidden; position:absolute;left:0px;top:0px;z-index:70">help layer Text</DIV>
+<DIV ID="main_layer" style="visibility:hidden; z-index:1">Main Page</DIV>
+
+<SCRIPT>
+initDHTMLAPI();
+initProgressBar();
+showProgressBar();
+runit();
+</SCRIPT>
+</body>
+</html>

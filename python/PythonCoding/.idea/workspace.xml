@@ -74,8 +74,8 @@
       <file leaf-file-name="format.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Coding20190114/format.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="395">
-              <caret line="35" column="9" selection-start-line="35" selection-start-column="9" selection-end-line="35" selection-end-column="10" />
+            <state relative-caret-position="376">
+              <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -181,11 +181,6 @@
             <path>
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
-              <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="Coding20190114" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -360,22 +355,22 @@
       <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4980484" weight="0.2844365" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2603072" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26434922" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="4" weight="0.32983023" />
-      <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39862543" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.32993197" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Coverage" order="3" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="right" id="Coverage" order="3" side_tool="true" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.32993197" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -750,8 +745,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Coding20190114/format.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="35" column="9" selection-start-line="35" selection-start-column="9" selection-end-line="35" selection-end-column="10" />
+        <state relative-caret-position="376">
+          <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
         </state>
       </provider>
     </entry>
