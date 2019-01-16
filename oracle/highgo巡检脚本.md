@@ -1867,6 +1867,7 @@ create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solari
 ----
 ## 8.1查看会话ID、OSPID
 ```
+//方法一：
 column line format a79
 set heading off
 select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||
@@ -1874,5 +1875,79 @@ select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||
 from v$session s , v$process p
 where p.addr = s.paddr
 and s.username <> ' ';
+
+//方法二
+select p.pid, p.spid, s.username  
+        from v$process p, v$session s  
+        where p.addr = s.paddr;  
+```
+
+## 8.2查看ASH信息
+
+```
+select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
+       from v$active_session_history ash, v$event_name enm 
+       where ash.event#=enm.event# 
+       and SESSION_ID=&SID and SAMPLE_TIME>=(sysdate-&minute/(24*60));
+
+//Input is:
+//Enter value for sid: 15 
+//Enter value for minute: 1  /* How many minutes activity you want to see */
+```
+
+### 8.3 oradebug
+
+```
+11:33:20 sys@ORCL> oradebug help
+HELP           [command]                 Describe one or all commands
+SETMYPID                                 Debug current process
+SETOSPID       <ospid>                   Set OS pid of process to debug
+SETORAPID      <orapid> ['force']        Set Oracle pid of process to debug
+SETORAPNAME    <orapname>                Set Oracle process name to debug
+SHORT_STACK                              Get abridged OS stack
+CURRENT_SQL                              Get current SQL
+DUMP           <dump_name> <lvl> [addr]  Invoke named dump
+PDUMP          [interval=<interval>]     Invoke named dump periodically
+               [ndumps=<count>]  <dump_name> <lvl> [addr]
+DUMPSGA        [bytes]                   Dump fixed SGA
+DUMPLIST                                 Print a list of available dumps
+EVENT          <text>                    Set trace event in process
+SESSION_EVENT  <text>                    Set trace event in session
+DUMPVAR        <p|s|uga> <name> [level]  Print/dump a fixed PGA/SGA/UGA variable
+DUMPTYPE       <address> <type> <count>  Print/dump an address with type info
+SETVAR         <p|s|uga> <name> <value>  Modify a fixed PGA/SGA/UGA variable
+PEEK           <addr> <len> [level]      Print/Dump memory
+POKE           <addr> <len> <value>      Modify memory
+WAKEUP         <orapid>                  Wake up Oracle process
+SUSPEND                                  Suspend execution
+RESUME                                   Resume execution
+FLUSH                                    Flush pending writes to trace file
+CLOSE_TRACE                              Close trace file
+TRACEFILE_NAME                           Get name of trace file
+SETTRACEFILEID <identifier name>         Set tracefile identifier
+LKDEBUG                                  Invoke global enqueue service debugger
+NSDBX                                    Invoke CGS name-service debugger
+-G             <Inst-List | def | all>   Parallel oradebug command prefix
+-R             <Inst-List | def | all>   Parallel oradebug prefix (return output
+SETINST        <instance# .. | all>      Set instance list in double quotes
+SGATOFILE      <SGA dump dir>         Dump SGA to file; dirname in double quotes
+DMPCOWSGA      <SGA dump dir> Dump & map SGA as COW; dirname in double quotes
+MAPCOWSGA      <SGA dump dir>         Map SGA as COW; dirname in double quotes
+HANGANALYZE    [level] [syslevel]        Analyze system hang
+FFBEGIN                                  Flash Freeze the Instance
+FFDEREGISTER                             FF deregister instance from cluster
+FFTERMINST                               Call exit and terminate instance
+FFRESUMEINST                             Resume the flash frozen instance
+FFSTATUS                                 Flash freeze status of instance
+SKDSTTPCS      <ifname>  <ofname>        Helps translate PCs to names
+WATCH          <address> <len> <self|exist|all|target>  Watch a region of memory
+DELETE         <local|global|target> watchpoint <id>    Delete a watchpoint
+SHOW           <local|global|target> watchpoints        Show  watchpoints
+DIRECT_ACCESS  <set/enable/disable command | select query> Fixed table access
+IPC                                      Dump ipc information
+UNLIMIT                                  Unlimit the size of the trace file
+CALL           [-t count] <func> [arg1]...[argn]  Invoke function with arguments
+CORE                                     Dump core without crashing process
+PROCSTAT                                 Dump process statistics
 ```
 
