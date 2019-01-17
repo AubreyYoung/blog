@@ -1823,6 +1823,51 @@ select * from v$archive_gap;
 EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
 //手动生成快照
 EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
+或
+BEGIN 
+  DBMS_WORKLOAD_REPOSITORY.create_snapshot(); 
+END; 
+/
+
+//生成 AWR 基线：
+BEGIN 
+  DBMS_WORKLOAD_REPOSITORY.create_baseline ( 
+    start_snap_id => 10,  
+    end_snap_id   => 100, 
+    baseline_name => 'AWR First baseline'); 
+END; 
+/
+
+//生成 AWR 基线(11g)：
+BEGIN
+DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
+start_time => to_date('&start_date_time','&start_date_time_format'),
+end_time => to_date('&end_date_time','&end_date_time_format'),
+baseline_name => 'MORNING',
+template_name => 'MORNING',
+expiration => NULL ) ;
+END;
+/
+
+//基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
+BEGIN
+DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
+day_of_week => 'MONDAY',
+hour_in_day => 9,
+duration => 3,
+start_time => to_date('&start_date_time','&start_date_time_format'),
+end_time => to_date('&end_date_time','&end_date_time_format'),
+baseline_name_prefix => 'MONDAY_MORNING'
+template_name => 'MONDAY_MORNING',
+expiration => 30 );
+END;
+/
+
+//删除 AWR 基线：
+BEGIN
+    DBMS_WORKLOAD_REPOSITORY.DROP_BASELINE (baseline_name => 'AWR First baseline');
+END;
+/
 ```
 ```
 awrrpt.sql 
