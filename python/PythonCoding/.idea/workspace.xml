@@ -73,17 +73,7 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="oldboy_python_day3_session.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Coding20190116/oldboy_python_day3_session.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="126" column="15" selection-start-line="126" selection-start-column="15" selection-end-line="126" selection-end-column="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -107,7 +97,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Coding20181120/PythonConnectMongodb.py" />
         <option value="$PROJECT_DIR$/Coding20181126/PythonDatatype.py" />
         <option value="$PROJECT_DIR$/Coding20181126/PythonType.py" />
         <option value="$PROJECT_DIR$/Coding20181218/Print.py" />
@@ -158,6 +147,7 @@
         <option value="$PROJECT_DIR$/Coding20190116/Oldboy_Python_Day3_session.py" />
         <option value="$PROJECT_DIR$/Coding20190116/Oldboy_Python_Day02_homework.py" />
         <option value="$PROJECT_DIR$/Coding20190116/oldboy_python_day3_session.py" />
+        <option value="$PROJECT_DIR$/coding20190116/oldboy_python_day3_session.py" />
       </list>
     </option>
   </component>
@@ -181,6 +171,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -191,18 +182,12 @@
             <path>
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="Coding20190114" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
-              <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="Coding20190116" type="462c0819:PsiDirectoryNode" />
+              <item name="coding20190116" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -215,6 +200,9 @@
     <option name="myUseBundledCoveragePy" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Git\blog\python\PythonCoding\coding20190116" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Git\blog\python\PythonCoding" />
     </key>
@@ -374,28 +362,28 @@
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3291592" />
-      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.51444185" side_tool="true" weight="0.3298969" />
+      <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5092967" side_tool="true" weight="0.2844365" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4980484" weight="0.2844365" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.2844365" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
-      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27647534" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2813258" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
-      <window_info active="true" anchor="bottom" id="Find" order="1" visible="true" weight="0.3291592" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39534885" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
+      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -408,113 +396,106 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Coding20190107/String_module.py</url>
+          <url>file://$PROJECT_DIR$/coding20190107/string_module.py</url>
           <line>14</line>
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="32" />
+      <option name="time" value="33" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Coding20181218/Reture.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="10" column="32" selection-start-line="10" selection-start-column="32" selection-end-line="10" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181218/Except.py">
+    <entry file="file://$PROJECT_DIR$/coding20181218/except.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
           <caret line="2" column="3" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181218/Class.py">
+    <entry file="file://$PROJECT_DIR$/coding20181218/class.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="19">
           <caret line="14" column="11" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="11" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181220/Count.py">
+    <entry file="file://$PROJECT_DIR$/coding20181220/count.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181221/Recursive.py">
+    <entry file="file://$PROJECT_DIR$/coding20181221/recursive.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
           <caret line="6" selection-start-line="6" selection-end-line="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181221/ListInsert.py">
+    <entry file="file://$PROJECT_DIR$/coding20181221/listinsert.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="16" selection-start-column="16" selection-end-column="16" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181221/Function.py">
+    <entry file="file://$PROJECT_DIR$/coding20181221/function.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
           <caret line="17" column="20" selection-start-line="17" selection-start-column="20" selection-end-line="17" selection-end-column="20" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181221/DictDelete.py">
+    <entry file="file://$PROJECT_DIR$/coding20181221/dictdelete.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="283">
           <caret line="19" column="11" selection-start-line="19" selection-start-column="11" selection-end-line="19" selection-end-column="11" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190107/LineCache.py">
+    <entry file="file://$PROJECT_DIR$/coding20190107/linecache.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="169">
           <caret line="10" column="30" selection-start-line="10" selection-start-column="30" selection-end-line="10" selection-end-column="30" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190107/OS_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190107/os_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="152">
           <caret line="8" column="49" lean-forward="true" selection-start-line="8" selection-start-column="49" selection-end-line="8" selection-end-column="49" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190107/String_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190107/string_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="171">
           <caret line="9" selection-start-line="9" selection-end-line="9" selection-end-column="4" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190107/Sys_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190107/sys_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
           <caret line="14" column="10" selection-start-line="14" selection-start-column="10" selection-end-line="14" selection-end-column="10" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190107/Random_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190107/random_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
           <caret line="6" selection-start-line="6" selection-end-line="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190107/time_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190107/time_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="171">
           <caret line="9" column="26" lean-forward="true" selection-start-line="9" selection-start-column="26" selection-end-line="9" selection-end-column="26" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190108/Math_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190108/math_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
           <caret line="14" column="17" selection-start-line="14" selection-start-column="17" selection-end-line="14" selection-end-column="17" />
@@ -539,122 +520,122 @@
     <entry file="file://D:/Program Files (x86)/Python/Python37-32/Lib/urllib/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190108/Csv_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190108/csv_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="95">
           <caret line="5" column="23" lean-forward="true" selection-start-line="5" selection-start-column="23" selection-end-line="5" selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190108/socket_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190108/socket_module.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190108/http.cookies_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190108/http.cookies_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="1" selection-start-column="1" selection-end-column="1" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190108/gzip_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190108/gzip_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="283">
           <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190108/urllib_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190108/urllib_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="57">
           <caret line="3" column="31" selection-start-line="3" selection-start-column="30" selection-end-line="3" selection-end-column="31" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/smtp_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190109/smtp_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="302">
           <caret line="26" column="25" selection-start-line="26" selection-end-line="26" selection-end-column="26" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/sqlite3_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190109/sqlite3_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="207">
           <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/arrow_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190109/arrow_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="95">
           <caret line="5" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190109/json_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190109/json_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="152">
           <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190110/queue_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190110/queue_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
           <caret line="6" column="7" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190110/logging_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190110/logging_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret selection-end-line="7" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190110/base64_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190110/base64_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="133">
           <caret line="7" column="22" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190110/threading_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190110/threading_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="19">
           <caret line="1" column="14" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190110/pickle_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190110/pickle_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="226">
           <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190111/datatime_module.py">
+    <entry file="file://$PROJECT_DIR$/coding20190111/datatime_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="152">
           <caret line="8" column="24" lean-forward="true" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20181108/MySQLCreateTable.py">
+    <entry file="file://$PROJECT_DIR$/coding20181108/mysqlcreatetable.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
           <caret line="14" column="29" lean-forward="true" selection-start-line="14" selection-start-column="29" selection-end-line="14" selection-end-column="29" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190111/open.py">
+    <entry file="file://$PROJECT_DIR$/coding20190111/open.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
           <caret line="12" column="15" lean-forward="true" selection-start-line="12" selection-start-column="15" selection-end-line="12" selection-end-column="15" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190111/walk.py">
+    <entry file="file://$PROJECT_DIR$/coding20190111/walk.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="116">
           <caret line="10" column="20" lean-forward="true" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
@@ -667,38 +648,31 @@
     <entry file="file://$PROJECT_DIR$/../OldBoyPython/老男孩Python_Day01.md">
       <provider editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190116/yunsuan.py">
+    <entry file="file://$PROJECT_DIR$/coding20190116/yunsuan.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="338">
           <caret line="18" selection-start-line="18" selection-end-line="21" selection-end-column="66" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190114/break.py">
+    <entry file="file://$PROJECT_DIR$/coding20190114/break.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="76">
           <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190114/format.py">
+    <entry file="file://$PROJECT_DIR$/coding20190114/format.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="570">
           <caret line="30" selection-start-line="30" selection-end-line="30" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190113/print.py">
+    <entry file="file://$PROJECT_DIR$/coding20190113/print.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="57">
           <caret line="3" column="28" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190114/oldboy_python_day01_homework.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="19" selection-start-line="19" selection-end-line="19" />
         </state>
       </provider>
     </entry>
@@ -719,17 +693,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190116/oldboy_python_day02_homework.py">
+    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day02_homework.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="46">
           <caret line="145" column="60" lean-forward="true" selection-start-line="145" selection-start-column="60" selection-end-line="145" selection-end-column="60" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Coding20190116/oldboy_python_day3_session.py">
+    <entry file="file://$PROJECT_DIR$/coding20190114/oldboy_python_day01_homework.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="126" column="15" selection-start-line="126" selection-start-column="15" selection-end-line="126" selection-end-column="15" />
+        <state relative-caret-position="228">
+          <caret line="32" lean-forward="true" selection-start-line="32" selection-end-line="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day4_session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="222">
+          <caret line="200" column="8" lean-forward="true" selection-start-line="200" selection-start-column="8" selection-end-line="200" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day3_session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="274">
+          <caret line="210" column="10" lean-forward="true" selection-start-line="210" selection-start-column="10" selection-end-line="210" selection-end-column="10" />
         </state>
       </provider>
     </entry>

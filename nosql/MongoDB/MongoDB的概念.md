@@ -74,8 +74,11 @@ mongooplog
 ```
 
 ```
+//登陆
 mongo 127.0.0.1:27017/test
+//切换db
 use admin
+//关闭mongo
 db.shutdownServer()
 ```
 
@@ -132,7 +135,89 @@ Authentication Options:
 file names: a list of files to run. files have to end in .js and will exit after unless --shell is specified
 ```
 
+## CURD
+
 ```
-//关闭mongo
-db.shutdownServer()
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+
+> use mongo
+switched to db mongo
+
+> db.mongo_collection.insert({x:1})
+WriteResult({ "nInserted" : 1 })
+
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+mongo   0.000GB
+
+> show collections;
+mongo_collection
+
+> db.mongo_collection.find()
+{ "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
+
+> db.mysql_collection.insert({x:2,_id:1})
+WriteResult({ "nInserted" : 1 })
+
+> db.mysql_collection.find()
+{ "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
+{ "_id" : 1, "x" : 2 }
+
+> db.mysql_collection.find({x:1})
+{ "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
+
+> db.mysql_collection.find({x:2})
+{ "_id" : 1, "x" : 2 }
+
+> for(i=3;i<100;i++)db.mongo_collection.insert({x:i})
+WriteResult({ "nInserted" : 1 })
+
+> db.mongo_collection.find().count()
+99
+
+> db.mongo_collection.find().skip(3).limit(5)
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d86e"), "x" : 3 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d86f"), "x" : 4 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d870"), "x" : 5 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d871"), "x" : 6 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d872"), "x" : 7 }
+
+> db.mongo_collection.find().skip(3).limit(5).sort({x:1})
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d86e"), "x" : 3 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d86f"), "x" : 4 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d870"), "x" : 5 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d871"), "x" : 6 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d872"), "x" : 7 }
+
+> db.mongo_collection.find().skip(3).limit(5).sort({x:-1})
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d8cb"), "x" : 96 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d8ca"), "x" : 95 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d8c9"), "x" : 94 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d8c8"), "x" : 93 }
+{ "_id" : ObjectId("5c418febf6bc46fdc6b2d8c7"), "x" : 92 }
+
+> db.mongo_collection.find({x:1})
+{ "_id" : ObjectId("5c418f2ff6bc46fdc6b2d80b"), "x" : 1 }
+> db.mongo_collection.update({x:1},{x:000})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.mongo_collection.find({x:1})
+> db.mongo_collection.find({x:000})
+{ "_id" : ObjectId("5c418f2ff6bc46fdc6b2d80b"), "x" : 0 }
+
+
+> db.mongo_collection.find({x:100})
+{ "_id" : ObjectId("5c419191f6bc46fdc6b2d8cf"), "x" : 100, "y" : 100, "z" : 100 }
+> db.mongo_collection.update({z:100},{$set:{y:99}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.mongo_collection.find({x:100})
+{ "_id" : ObjectId("5c419191f6bc46fdc6b2d8cf"), "x" : 100, "y" : 99, "z" : 100 }
+
+
+
 ```
+

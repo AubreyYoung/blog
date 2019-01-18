@@ -199,13 +199,3 @@ if s:
     print("您输入的为空,请重新输入!")
 else:
     pass
-
-s = '132a4b5c'
-s1 = s[0]+s[2]+s[1]
-print(s1)
-
-s = 'aewqrqreda  ad$##'
-i = 0
-while i < s.__len__():  # 注意为什么是<,str index从0开始
-    print(s[i])
-    i += 1
