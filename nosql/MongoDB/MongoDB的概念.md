@@ -138,69 +138,67 @@ file names: a list of files to run. files have to end in .js and will exit after
 ## CURD
 
 ```
+//查看db
 > show dbs
 admin   0.000GB
 config  0.000GB
 local   0.000GB
-
+//切换db
 > use mongo
 switched to db mongo
-
+//插入
 > db.mongo_collection.insert({x:1})
 WriteResult({ "nInserted" : 1 })
-
+//插入后数据库即创建
 > show dbs
 admin   0.000GB
 config  0.000GB
 local   0.000GB
 mongo   0.000GB
-
+//查看collection
 > show collections;
 mongo_collection
-
+//find查询全部
 > db.mongo_collection.find()
 { "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
-
+//插入指定id
 > db.mysql_collection.insert({x:2,_id:1})
 WriteResult({ "nInserted" : 1 })
-
 > db.mysql_collection.find()
 { "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
 { "_id" : 1, "x" : 2 }
-
+//条件查询
 > db.mysql_collection.find({x:1})
 { "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
-
 > db.mysql_collection.find({x:2})
 { "_id" : 1, "x" : 2 }
-
+//for循环insert
 > for(i=3;i<100;i++)db.mongo_collection.insert({x:i})
 WriteResult({ "nInserted" : 1 })
-
 > db.mongo_collection.find().count()
 99
-
+//find skip limit用法
 > db.mongo_collection.find().skip(3).limit(5)
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d86e"), "x" : 3 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d86f"), "x" : 4 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d870"), "x" : 5 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d871"), "x" : 6 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d872"), "x" : 7 }
-
+//排序
 > db.mongo_collection.find().skip(3).limit(5).sort({x:1})
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d86e"), "x" : 3 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d86f"), "x" : 4 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d870"), "x" : 5 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d871"), "x" : 6 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d872"), "x" : 7 }
-
+//倒叙
 > db.mongo_collection.find().skip(3).limit(5).sort({x:-1})
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8cb"), "x" : 96 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8ca"), "x" : 95 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8c9"), "x" : 94 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8c8"), "x" : 93 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8c7"), "x" : 92 }
-
+//更新
 > db.mongo_collection.find({x:1})
 { "_id" : ObjectId("5c418f2ff6bc46fdc6b2d80b"), "x" : 1 }
 > db.mongo_collection.update({x:1},{x:000})
@@ -208,16 +206,72 @@ WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 > db.mongo_collection.find({x:1})
 > db.mongo_collection.find({x:000})
 { "_id" : ObjectId("5c418f2ff6bc46fdc6b2d80b"), "x" : 0 }
-
-
+//条件更新
 > db.mongo_collection.find({x:100})
 { "_id" : ObjectId("5c419191f6bc46fdc6b2d8cf"), "x" : 100, "y" : 100, "z" : 100 }
 > db.mongo_collection.update({z:100},{$set:{y:99}})
 WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 > db.mongo_collection.find({x:100})
 { "_id" : ObjectId("5c419191f6bc46fdc6b2d8cf"), "x" : 100, "y" : 99, "z" : 100 }
-
-
-
+//更新,如不存在便插入
+> db.mongo_collection.find({y:100})
+> db.mongo_collection.update({y:100},{y:999})
+WriteResult({ "nMatched" : 0, "nUpserted" : 0, "nModified" : 0 })
+> db.mongo_collection.find({y:100})
+> db.mongo_collection.find({y:999})
+> db.mongo_collection.update({y:100},{y:999},true)
+WriteResult({
+        "nMatched" : 0,
+        "nUpserted" : 1,
+        "nModified" : 0,
+        "_id" : ObjectId("5c41973c9ff93c45faa4f3a7")
+})
+> db.mongo_collection.find({y:999})
+{ "_id" : ObjectId("5c41973c9ff93c45faa4f3a7"), "y" : 999 }
+//批量更新
+> db.mongo_collection.insert({c:1})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.insert({c:1})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.insert({c:1})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.find({c:1})
+{ "_id" : ObjectId("5c4197e30c32fefce1f94b45"), "c" : 1 }
+{ "_id" : ObjectId("5c4197e50c32fefce1f94b46"), "c" : 1 }
+{ "_id" : ObjectId("5c4197e60c32fefce1f94b47"), "c" : 1 }
+> 
+> db.mongo_collection.update({c:1},{c:2})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.mongo_collection.find({c:1})
+{ "_id" : ObjectId("5c4197e50c32fefce1f94b46"), "c" : 1 }
+{ "_id" : ObjectId("5c4197e60c32fefce1f94b47"), "c" : 1 }
+> db.mongo_collection.find({c:2})
+{ "_id" : ObjectId("5c4197e30c32fefce1f94b45"), "c" : 2 }
+> db.mongo_collection.update({c:1},{$set:{c:2}},false,true)
+WriteResult({ "nMatched" : 2, "nUpserted" : 0, "nModified" : 2 })
+> db.mongo_collection.find({c:2})
+{ "_id" : ObjectId("5c4197e30c32fefce1f94b45"), "c" : 2 }
+{ "_id" : ObjectId("5c4197e50c32fefce1f94b46"), "c" : 2 }
+{ "_id" : ObjectId("5c4197e60c32fefce1f94b47"), "c" : 2 }
+> db.mongo_collection.find({c:1})
+//删除
+> db.mongo_collection.remove()
+2019-01-18T17:14:45.292+0800 E QUERY    [thread1] Error: remove needs a query :
+DBCollection.prototype._parseRemove@src/mongo/shell/collection.js:357:1
+DBCollection.prototype.remove@src/mongo/shell/collection.js:382:18
+@(shell):1:1
+> db.mongo_collection.find({c:2})
+{ "_id" : ObjectId("5c4197e30c32fefce1f94b45"), "c" : 2 }
+{ "_id" : ObjectId("5c4197e50c32fefce1f94b46"), "c" : 2 }
+{ "_id" : ObjectId("5c4197e60c32fefce1f94b47"), "c" : 2 }
+> db.mongo_collection.remove({c:2})
+WriteResult({ "nRemoved" : 3 })
+> db.mongo_collection.find({c:2})
+//dropcollection
+> db.mongo_collection.drop()
+true
+//查看表
+> show tables
+mysql_collection
 ```
 
