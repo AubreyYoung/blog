@@ -1,4 +1,4 @@
-## MongoDB的概念
+# MongoDB的概念
 
 * Mongodb
 * mongo
@@ -135,7 +135,7 @@ Authentication Options:
 file names: a list of files to run. files have to end in .js and will exit after unless --shell is specified
 ```
 
-## CURD
+## MongoDB基本使用--CURD
 
 ```
 //查看db
@@ -143,40 +143,53 @@ file names: a list of files to run. files have to end in .js and will exit after
 admin   0.000GB
 config  0.000GB
 local   0.000GB
+
 //切换db
 > use mongo
 switched to db mongo
+
 //插入
 > db.mongo_collection.insert({x:1})
 WriteResult({ "nInserted" : 1 })
+
 //插入后数据库即创建
 > show dbs
 admin   0.000GB
 config  0.000GB
 local   0.000GB
 mongo   0.000GB
+
 //查看collection
 > show collections;
 mongo_collection
+
+//findOne
+> db.mongo_collection.findOne()
+{ "_id" : ObjectId("5c41c8b40c32fefce1f94b48"), "x" : 1 }
+
 //find查询全部
 > db.mongo_collection.find()
 { "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
+
 //插入指定id
 > db.mysql_collection.insert({x:2,_id:1})
 WriteResult({ "nInserted" : 1 })
 > db.mysql_collection.find()
 { "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
 { "_id" : 1, "x" : 2 }
+
 //条件查询
 > db.mysql_collection.find({x:1})
 { "_id" : ObjectId("5c418c37f6bc46fdc6b2d6e7"), "x" : 1 }
 > db.mysql_collection.find({x:2})
 { "_id" : 1, "x" : 2 }
+
 //for循环insert
 > for(i=3;i<100;i++)db.mongo_collection.insert({x:i})
 WriteResult({ "nInserted" : 1 })
 > db.mongo_collection.find().count()
 99
+
 //find skip limit用法
 > db.mongo_collection.find().skip(3).limit(5)
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d86e"), "x" : 3 }
@@ -184,6 +197,7 @@ WriteResult({ "nInserted" : 1 })
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d870"), "x" : 5 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d871"), "x" : 6 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d872"), "x" : 7 }
+
 //排序
 > db.mongo_collection.find().skip(3).limit(5).sort({x:1})
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d86e"), "x" : 3 }
@@ -191,6 +205,7 @@ WriteResult({ "nInserted" : 1 })
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d870"), "x" : 5 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d871"), "x" : 6 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d872"), "x" : 7 }
+
 //倒叙
 > db.mongo_collection.find().skip(3).limit(5).sort({x:-1})
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8cb"), "x" : 96 }
@@ -198,6 +213,7 @@ WriteResult({ "nInserted" : 1 })
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8c9"), "x" : 94 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8c8"), "x" : 93 }
 { "_id" : ObjectId("5c418febf6bc46fdc6b2d8c7"), "x" : 92 }
+
 //更新
 > db.mongo_collection.find({x:1})
 { "_id" : ObjectId("5c418f2ff6bc46fdc6b2d80b"), "x" : 1 }
@@ -206,6 +222,7 @@ WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 > db.mongo_collection.find({x:1})
 > db.mongo_collection.find({x:000})
 { "_id" : ObjectId("5c418f2ff6bc46fdc6b2d80b"), "x" : 0 }
+
 //条件更新
 > db.mongo_collection.find({x:100})
 { "_id" : ObjectId("5c419191f6bc46fdc6b2d8cf"), "x" : 100, "y" : 100, "z" : 100 }
@@ -213,6 +230,7 @@ WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 > db.mongo_collection.find({x:100})
 { "_id" : ObjectId("5c419191f6bc46fdc6b2d8cf"), "x" : 100, "y" : 99, "z" : 100 }
+
 //更新,如不存在便插入
 > db.mongo_collection.find({y:100})
 > db.mongo_collection.update({y:100},{y:999})
@@ -228,6 +246,7 @@ WriteResult({
 })
 > db.mongo_collection.find({y:999})
 { "_id" : ObjectId("5c41973c9ff93c45faa4f3a7"), "y" : 999 }
+
 //批量更新
 > db.mongo_collection.insert({c:1})
 WriteResult({ "nInserted" : 1 })
@@ -254,6 +273,7 @@ WriteResult({ "nMatched" : 2, "nUpserted" : 0, "nModified" : 2 })
 { "_id" : ObjectId("5c4197e50c32fefce1f94b46"), "c" : 2 }
 { "_id" : ObjectId("5c4197e60c32fefce1f94b47"), "c" : 2 }
 > db.mongo_collection.find({c:1})
+
 //删除
 > db.mongo_collection.remove()
 2019-01-18T17:14:45.292+0800 E QUERY    [thread1] Error: remove needs a query :
@@ -270,8 +290,193 @@ WriteResult({ "nRemoved" : 3 })
 //dropcollection
 > db.mongo_collection.drop()
 true
+
 //查看表
 > show tables
 mysql_collection
 ```
+
+## MongoDB常见的查询索引
+
+### 索引的作用
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\索引的作用.png)
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\索引内容简介.png)
+
+### 索引的种类
+
+- _id索引
+- 单键索引
+- 多键索引
+- 复合索引
+- 过期索引
+- 全文索引
+- 地理位置索引
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\_id索引.png)
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\单键索引.png)
+
+```
+//查看index
+> db.mongo_collection.getIndexes()
+[
+        {
+                "v" : 2,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_",
+                "ns" : "mongo.mongo_collection"
+        }
+]
+
+//创建索引
+> db.mongo_collection.ensureIndex({x:1})
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+```
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\多键索引.png)
+
+```
+> db.mongo_collection.insert({x:[1,2,3,4,5]})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.find()
+{ "_id" : ObjectId("5c41c8b40c32fefce1f94b48"), "x" : 1 }
+{ "_id" : ObjectId("5c41cfac0c32fefce1f94b49"), "x" : 100 }
+{ "_id" : ObjectId("5c41cfc40c32fefce1f94b4a"), "x" : 100 }
+{ "_id" : ObjectId("5c41d01c0c32fefce1f94b4b"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0250c32fefce1f94b4c"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0960c32fefce1f94b4d"), "x" : 100, "y" : 100, "z" : 100 }
+{ "_id" : ObjectId("5c41d0c40c32fefce1f94b4e"), "x" : [ 1, 2, 3, 4, 5 ] }
+```
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\复合索引.png)
+
+```
+> db.mongo_collection.ensureIndex({x:1,y:1})
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 2,
+        "numIndexesAfter" : 3,
+        "ok" : 1
+}
+> db.mongo_collection.getIndexes()
+[
+        {
+                "v" : 2,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_",
+                "ns" : "mongo.mongo_collection"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "x" : 1
+                },
+                "name" : "x_1",
+                "ns" : "mongo.mongo_collection"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "x" : 1,
+                        "y" : 1
+                },
+                "name" : "x_1_y_1",
+                "ns" : "mongo.mongo_collection"
+        }
+]
+```
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\过期索引.png)
+
+```
+> db.mongo_collection.getIndexes()
+[
+        {
+                "v" : 2,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_",
+                "ns" : "mongo.mongo_collection"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "x" : 1
+                },
+                "name" : "x_1",
+                "ns" : "mongo.mongo_collection"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "x" : 1,
+                        "y" : 1
+                },
+                "name" : "x_1_y_1",
+                "ns" : "mongo.mongo_collection"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "z" : 1
+                },
+                "name" : "z_1",
+                "ns" : "mongo.mongo_collection",
+                "expireAfterSeconds" : 10
+        }
+
+
+> db.mongo_collection.insert({x:100,y:100,z:200})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.insert({time:new Date()})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.find()
+{ "_id" : ObjectId("5c41c8b40c32fefce1f94b48"), "x" : 1 }
+{ "_id" : ObjectId("5c41cfac0c32fefce1f94b49"), "x" : 100 }
+{ "_id" : ObjectId("5c41cfc40c32fefce1f94b4a"), "x" : 100 }
+{ "_id" : ObjectId("5c41d01c0c32fefce1f94b4b"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0250c32fefce1f94b4c"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0960c32fefce1f94b4d"), "x" : 100, "y" : 100, "z" : 100 }
+{ "_id" : ObjectId("5c41d0c40c32fefce1f94b4e"), "x" : [ 1, 2, 3, 4, 5 ] }
+{ "_id" : ObjectId("5c41d2e20c32fefce1f94b4f"), "x" : 100, "y" : 100, "z" : 200 }
+{ "_id" : ObjectId("5c41d30a0c32fefce1f94b50"), "time" : ISODate("2019-01-18T13:22:18.999Z") }
+
+> db.mongo_collection.insert({time2:new Date()})
+WriteResult({ "nInserted" : 1 })
+> db.mongo_collection.find()
+{ "_id" : ObjectId("5c41c8b40c32fefce1f94b48"), "x" : 1 }
+{ "_id" : ObjectId("5c41cfac0c32fefce1f94b49"), "x" : 100 }
+{ "_id" : ObjectId("5c41cfc40c32fefce1f94b4a"), "x" : 100 }
+{ "_id" : ObjectId("5c41d01c0c32fefce1f94b4b"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0250c32fefce1f94b4c"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0960c32fefce1f94b4d"), "x" : 100, "y" : 100, "z" : 100 }
+{ "_id" : ObjectId("5c41d0c40c32fefce1f94b4e"), "x" : [ 1, 2, 3, 4, 5 ] }
+{ "_id" : ObjectId("5c41d2e20c32fefce1f94b4f"), "x" : 100, "y" : 100, "z" : 200 }
+{ "_id" : ObjectId("5c41d30a0c32fefce1f94b50"), "time" : ISODate("2019-01-18T13:22:18.999Z") }
+{ "_id" : ObjectId("5c41d3770c32fefce1f94b51"), "time2" : ISODate("2019-01-18T13:24:07.263Z") }
+> db.mongo_collection.find()
+{ "_id" : ObjectId("5c41c8b40c32fefce1f94b48"), "x" : 1 }
+{ "_id" : ObjectId("5c41cfac0c32fefce1f94b49"), "x" : 100 }
+{ "_id" : ObjectId("5c41cfc40c32fefce1f94b4a"), "x" : 100 }
+{ "_id" : ObjectId("5c41d01c0c32fefce1f94b4b"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0250c32fefce1f94b4c"), "x" : 100 }
+{ "_id" : ObjectId("5c41d0960c32fefce1f94b4d"), "x" : 100, "y" : 100, "z" : 100 }
+{ "_id" : ObjectId("5c41d0c40c32fefce1f94b4e"), "x" : [ 1, 2, 3, 4, 5 ] }
+{ "_id" : ObjectId("5c41d2e20c32fefce1f94b4f"), "x" : 100, "y" : 100, "z" : 200 }
+{ "_id" : ObjectId("5c41d3770c32fefce1f94b51"), "time2" : ISODate("2019-01-18T13:24:07.263Z") }
+```
+
+![](D:\Git\blog\nosql\MongoDB\Pictures\过期索引限制.png)
 

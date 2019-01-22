@@ -48,9 +48,10 @@
     <SUITE FILE_PATH="coverage/PythonCoding$break.coverage" NAME="break Coverage Results" MODIFIED="1547434030295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190114" />
     <SUITE FILE_PATH="coverage/PythonCoding$ListInsert.coverage" NAME="ListInsert Coverage Results" MODIFIED="1545371716239" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
     <SUITE FILE_PATH="coverage/PythonCoding$gzip_module.coverage" NAME="gzip_module Coverage Results" MODIFIED="1546938380986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Oldboy_Python_Day3_session.coverage" NAME="Oldboy_Python_Day3_session Coverage Results" MODIFIED="1547705318460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
+    <SUITE FILE_PATH="coverage/PythonCoding$Oldboy_Python_Day3_session.coverage" NAME="Oldboy_Python_Day3_session Coverage Results" MODIFIED="1548048913675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
     <SUITE FILE_PATH="coverage/PythonCoding$MySQLInsert.coverage" NAME="MySQLInsert Coverage Results" MODIFIED="1541662685382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
     <SUITE FILE_PATH="coverage/PythonCoding$Count.coverage" NAME="Count Coverage Results" MODIFIED="1545272279096" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181220" />
+    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day3_session.coverage" NAME="oldboy_python_day3_session Coverage Results" MODIFIED="1548048935600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190116" />
     <SUITE FILE_PATH="coverage/PythonCoding$format.coverage" NAME="format Coverage Results" MODIFIED="1547519120782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190114" />
     <SUITE FILE_PATH="coverage/PythonCoding$Class.coverage" NAME="Class Coverage Results" MODIFIED="1545118038637" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
     <SUITE FILE_PATH="coverage/PythonCoding$walk.coverage" NAME="walk Coverage Results" MODIFIED="1547188562704" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190111" />
@@ -73,7 +74,26 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="oldboy_python_day4_session.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day4_session.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="102">
+              <caret line="273" column="9" lean-forward="true" selection-start-line="273" selection-start-column="9" selection-end-line="273" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="builtins.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.PyCharm2018.1/system/python_stubs/396143780/builtins.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="38">
+              <caret line="2" selection-start-line="2" selection-end-line="2" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -97,7 +117,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Coding20181126/PythonDatatype.py" />
         <option value="$PROJECT_DIR$/Coding20181126/PythonType.py" />
         <option value="$PROJECT_DIR$/Coding20181218/Print.py" />
         <option value="$PROJECT_DIR$/Coding20181218/Class.py" />
@@ -148,6 +167,7 @@
         <option value="$PROJECT_DIR$/Coding20190116/Oldboy_Python_Day02_homework.py" />
         <option value="$PROJECT_DIR$/Coding20190116/oldboy_python_day3_session.py" />
         <option value="$PROJECT_DIR$/coding20190116/oldboy_python_day3_session.py" />
+        <option value="$PROJECT_DIR$/coding20190116/oldboy_python_day4_session.py" />
       </list>
     </option>
   </component>
@@ -191,10 +211,11 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/galaxy/.PyCharm2018.1/system/python_stubs/396143780/builtins.py" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../OldBoyPython/老男孩Python_Day01.md" />
-    <property name="settings.editor.selected.configurable" value="fileTemplates" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="PyCoverageOptionsProvider">
     <option name="myUseBundledCoveragePy" value="true" />
@@ -219,7 +240,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Oldboy_Python_Day3_session">
+  <component name="RunManager" selected="Python.oldboy_python_day3_session">
     <configuration name="Oldboy_Python_Day02_homework" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -277,7 +298,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="print (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="oldboy_python_day3_session" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PythonCoding" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -285,12 +306,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Coding20190114" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/coding20190116" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="D:\Git\blog\python\PythonCoding\Coding20190114\printformat.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coding20190116/oldboy_python_day3_session.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -317,18 +338,18 @@
     </configuration>
     <list>
       <item itemvalue="Python.format" />
-      <item itemvalue="Python.print (1)" />
       <item itemvalue="Python.yunsuan" />
       <item itemvalue="Python.Oldboy_Python_Day02_homework" />
       <item itemvalue="Python.Oldboy_Python_Day3_session" />
+      <item itemvalue="Python.oldboy_python_day3_session" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.oldboy_python_day3_session" />
         <item itemvalue="Python.Oldboy_Python_Day3_session" />
         <item itemvalue="Python.Oldboy_Python_Day02_homework" />
         <item itemvalue="Python.yunsuan" />
         <item itemvalue="Python.format" />
-        <item itemvalue="Python.print (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -365,10 +386,10 @@
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5092967" side_tool="true" weight="0.2844365" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.2844365" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.2862254" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2813258" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.28617623" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
       <window_info anchor="right" id="SciView" order="3" />
@@ -400,7 +421,7 @@
           <line>14</line>
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="33" />
+      <option name="time" value="39" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -686,13 +707,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2018.1/system/python_stubs/396143780/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="5055" column="11" selection-start-line="5043" selection-end-line="5055" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day02_homework.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="46">
@@ -707,17 +721,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day4_session.py">
+    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day3_session.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="222">
-          <caret line="200" column="8" lean-forward="true" selection-start-line="200" selection-start-column="8" selection-end-line="200" selection-end-column="8" />
+        <state relative-caret-position="160">
+          <caret line="210" column="10" lean-forward="true" selection-start-line="210" selection-start-column="10" selection-end-line="210" selection-end-column="10" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day3_session.py">
+    <entry file="file://$USER_HOME$/.PyCharm2018.1/system/python_stubs/396143780/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="210" column="10" lean-forward="true" selection-start-line="210" selection-start-column="10" selection-end-line="210" selection-end-column="10" />
+        <state relative-caret-position="38">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190116/oldboy_python_day4_session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="273" column="9" lean-forward="true" selection-start-line="273" selection-start-column="9" selection-end-line="273" selection-end-column="9" />
         </state>
       </provider>
     </entry>
