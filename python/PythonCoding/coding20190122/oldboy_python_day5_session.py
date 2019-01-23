@@ -10,7 +10,7 @@
 @contact: yangguang1900@163.com
 @site: https://github.com/AubreyYoung/blog
 @software: PyCharm
-@file: oldboy_python_day4_session.py
+@file: oldboy_python_day5_session.py
 @Date:2019/1/22 9:43
 -------------------------------------------------
 """
@@ -126,7 +126,7 @@ print(dic1)
 
 info = input('>>').strip()
 
-for i  in  info:
+for i in info:
     if i.isalpha():
         info = info.replace(i," ")
 l = info.split()

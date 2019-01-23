@@ -41,6 +41,7 @@ group by s.sid),
 ## 2.1 操作系统版本/架构
 ### 2.1.1 查看定时任务
 **Linux**
+
 ```
 crontab -l
 crontab -u oracle  -l
@@ -95,6 +96,7 @@ ipconfig>ip.txt
 netstat -in
 ```
 **Linux/AIX**
+
 ```
 cat /etc/hosts
 ifconfig -a
@@ -114,10 +116,12 @@ netstat -in
 ## 2.2 系统内存检查
 ### 2.2.1 查看内存
 **Windows**
+
 ```
 systeminfo>info.txt   或者   “任务管理器—性能”截图 Windows检查虚拟内存设置
 ```
 **Linux**
+
 ```
 cat /proc/meminfo
 grep MemTotal /proc/meminfo
@@ -336,6 +340,7 @@ date
 ### Linux
 ```
 cat /etc/sysconfig/clock
+timedatectl status    # linux7
 date -R
 ```
 ## 2.6 操作系统日志信息
@@ -474,42 +479,51 @@ bdf
 df -P
 ```
 **HP-UX检查共享磁盘聚合前后对应关系**
+
 ```
 ioscan -m dsf
 ```
 **HP-UX查看磁盘大小**
+
 ```
 diskinfo /dev/disk/disk*
 diskinfo -v
 arraydsp -a
 ```
 **HP-UX pv信息**
+
 ```
 cat /etc/lvmtab
 pvdisplay -v pv名称
 vgdisplay -v
 ```
 **HP-UX区别本地磁盘以及外挂磁盘**
+
 ```
 ioscan -funC disk
 ```
 **HP-UX查看lun信息**
+
 ```
 ioscan -m lun
 ```
 **查看HBA卡信息**
+
 ``` 
 ioscan -fnC fc
 ```
 **HP-UX 显示启动卷信息**
+
 ``` 
 lvlnboot -v
 ```
 **HP-UX 启动盘设备path 信息**
+
 ```
 setboot
 ```
 **HP-UX 内核加载的设备驱动**
+
 ```
 lsdev
 ```
@@ -526,10 +540,12 @@ df -h
 lspv                                //检查pvid 部分，如果使用ASM模式一定要确保删除pvid
 ```
 **查看硬盘**
+
 ```
 lspath
 ```
 **列出所有磁盘设备**
+
 ```
 lsdev -Cc disk
 ```
@@ -565,10 +581,12 @@ multipath -ll
 powermt display dev=all
 ```
 **日立多路径软件**
+
 ```
 dlnkmgr view -path
 ```
 **华为存储多路径查询**
+
 ```
 upadmin
 UltraPath CLI #1 >show vlun
@@ -589,6 +607,7 @@ ps aux
 ```
 正常而言在100M以上，通过比对ASM的其他后台进程即可知晓
 select * from v$version
+
 * 查看asm alert 日志中是否出现下列信息
 针对11.2.0.4 RAC ASM的rbal后台进程存在内存泄露的问题，说明如下：
 1. 早在2016年初，ORACLE GCS和ACS部门就处理过几个客户的类似问题（包括文中的客户），所以这并不是一个近期突发的普遍问题，大家大可不必惊慌；
@@ -621,6 +640,7 @@ find / -name "alert*.log*" | xargs du -h
 ```
 [^说明]: Windows下操作系统日接近或者大于4GB时，会造成数据库连接中断或者无法连接的现象；但在某些低版本的数据库中，listener.log大于2GB时会触发某些bug进而造成连接问题。为安全考虑，在所有操作系统平台下，建议尽量防止listener.log出现大于2GB的情况，及时备份清理。
 **UNIX**
+
 ```
 find / -name "*listener*.log*" | xargs du -m
 find / -name "alert*.log*" | xargs du -m
@@ -630,14 +650,17 @@ find / -name "alert*.log*" | xargs du -sk
 ```
 ## 3.10 AIX信息查看
 **查看网卡信息**
+
 ```
 lsdev -Cc adapter|grep ent
 ```
 **查看HBA卡信息**
+
 ```
 lsdev -Cc adapter|grep fcs
 ```
 **查看网络**
+
 ```
 netstat -in
 ```
@@ -654,7 +677,7 @@ crsctl check crs                                             //10g或11g
 crsctl check cluster                                         //11g
 olsnodes -n
 或
-olsnodes -n -p -i
+olsnodes -n -i -s -t 
 srvctl status asm -a                                         //11g
 srvctl status database -d sdbip
 srvctl status diskgroup -g DGDATA1
@@ -728,6 +751,7 @@ crsctl query css votedisk
 ocrcheck
 ```
 **检查 ocr备份情况**
+
 ```
 ocrconfig -showbackup
 ```
@@ -1904,7 +1928,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 
 ```
 create pfile='C:\Users\Administrator\Desktop\pfile20170109.ora' from spfile;
-create pfile='/home/oracle/pfile20181127_his.ora' from spfile;
+create pfile='/home/oracle/pfile20190123.ora' from spfile;
 create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solaris-->
 ```
 
