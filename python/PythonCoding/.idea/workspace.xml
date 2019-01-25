@@ -101,7 +101,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Coding20181220/Count.py" />
         <option value="$PROJECT_DIR$/Coding20181221/Function.py" />
         <option value="$PROJECT_DIR$/Coding20181221/Recursive.py" />
         <option value="$PROJECT_DIR$/Coding20181221/DictDelete.py" />
@@ -152,6 +151,7 @@
         <option value="$PROJECT_DIR$/coding20190122/oldboy_python_day7_session.py" />
         <option value="$PROJECT_DIR$/coding20190122/oldboy_python_day8_session.py" />
         <option value="$PROJECT_DIR$/coding20190123/oldboy_python_day9_session.py" />
+        <option value="$PROJECT_DIR$/coding20190124/oldboy_python_day10_session.py" />
       </list>
     </option>
   </component>
@@ -186,12 +186,12 @@
             <path>
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="coding20190122" type="462c0819:PsiDirectoryNode" />
+              <item name="coding20190123" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="coding20190123" type="462c0819:PsiDirectoryNode" />
+              <item name="coding20190124" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -204,7 +204,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../OldBoyPython/老男孩Python_Day01.md" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
     <property name="settings.editor.splitter.proportion" value="0.2585034" />
   </component>
   <component name="PyCoverageOptionsProvider">
@@ -373,11 +373,11 @@
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
     <layout>
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.3291592" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32743362" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.39534885" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.3059034" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" weight="0.32021466" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48746967" weight="0.3291592" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
       <window_info content_ui="combo" id="Project" order="0" weight="0.28617623" />
@@ -387,40 +387,40 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4987874" weight="0.39534885" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
+      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28617623" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3291592" />
-      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.29874778" />
+      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39534885" />
       <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
       <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5092967" side_tool="true" weight="0.2844365" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="right" id="SciView" order="3" />
-      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.29874778" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -437,31 +437,10 @@
           <line>14</line>
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="54" />
+      <option name="time" value="57" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/coding20190107/os_module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="49" lean-forward="true" selection-start-line="8" selection-start-column="49" selection-end-line="8" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coding20190107/string_module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="9" selection-start-line="9" selection-end-line="9" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coding20190107/sys_module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="14" column="10" selection-start-line="14" selection-start-column="10" selection-end-line="14" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coding20190107/random_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
@@ -744,20 +723,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coding20190123/oldboy_python_day9_session.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="253" column="19" lean-forward="true" selection-end-line="256" />
-          <folding>
-            <element signature="e#47#367#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coding20190122/oldboy_python_day8_session.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="131" column="23" selection-start-line="131" selection-start-column="23" selection-end-line="131" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/users.txt" />
+    <entry file="file://$PROJECT_DIR$/coding20190123/10.225.11.115_20190123_091734.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-906800" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190123/oldboy_python_day9_session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-570">
+          <caret line="105" lean-forward="true" selection-start-line="105" selection-end-line="105" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190124/oldboy_python_day10_session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="359">
+          <caret line="265" column="10" lean-forward="true" selection-end-line="265" selection-end-column="10" />
         </state>
       </provider>
     </entry>
