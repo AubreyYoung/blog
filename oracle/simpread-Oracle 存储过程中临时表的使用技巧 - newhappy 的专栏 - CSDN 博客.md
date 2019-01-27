@@ -1,5 +1,3 @@
-> 本文由 [简悦 SimpRead](http://ksria.com/simpread/) 转码， 原文地址 https://blog.csdn.net/newhappy2008/article/details/9115675 版权声明：本文为博主原创文章，未经博主允许不得转载。 https://blog.csdn.net/newhappy2008/article/details/9115675 <link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/template/css/ck_htmledit_views-d7e2a68c7c.css">
-
 **一、Oracle 临时表知识　** 　
 
 在 Oracle 中，临时表分为 SESSION、TRANSACTION 两种，SESSION 级的临时表数据在整个 SESSION 都存在，直到结束此次 SESSION；而 TRANSACTION 级的临时表数据在 TRANACTION 结束后消失，即 COMMIT/ROLLBACK 或结束 SESSION 都会清除 TRANACTION 临时表数据。 

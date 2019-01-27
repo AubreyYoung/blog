@@ -76,7 +76,21 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf>
+      <file leaf-file-name="test.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/coding20190124/test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="175">
+              <caret line="18" column="16" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
+              <folding>
+                <element signature="e#46#344#1" />
+                <element signature="e#346#356#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -101,7 +115,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Coding20181221/Function.py" />
         <option value="$PROJECT_DIR$/Coding20181221/Recursive.py" />
         <option value="$PROJECT_DIR$/Coding20181221/DictDelete.py" />
         <option value="$PROJECT_DIR$/Coding20181221/ListInsert.py" />
@@ -152,6 +165,7 @@
         <option value="$PROJECT_DIR$/coding20190122/oldboy_python_day8_session.py" />
         <option value="$PROJECT_DIR$/coding20190123/oldboy_python_day9_session.py" />
         <option value="$PROJECT_DIR$/coding20190124/oldboy_python_day10_session.py" />
+        <option value="$PROJECT_DIR$/coding20190124/test.py" />
       </list>
     </option>
   </component>
@@ -175,7 +189,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -186,25 +199,21 @@
             <path>
               <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
               <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
-              <item name="coding20190123" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="PythonCoding" type="b2602c69:ProjectViewProjectNode" />
-              <item name="PythonCoding" type="462c0819:PsiDirectoryNode" />
               <item name="coding20190124" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/galaxy/.PyCharm2018.1/system/python_stubs/396143780/builtins.py" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
+    <property name="com.intellij.database.dataSource.DataSourceTemplate" value="Oracle&#10;MySQL" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../OldBoyPython/老男孩Python_Day01.md" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
     <property name="settings.editor.splitter.proportion" value="0.2585034" />
   </component>
   <component name="PyCoverageOptionsProvider">
@@ -382,45 +391,45 @@
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
       <window_info content_ui="combo" id="Project" order="0" weight="0.28617623" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
+      <window_info active="true" anchor="right" id="Database" order="5" visible="true" weight="0.32983023" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4987874" weight="0.39534885" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
-      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28617623" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3291592" />
+      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
-      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.29874778" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39534885" />
       <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
       <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5092967" side_tool="true" weight="0.2844365" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="right" id="SciView" order="3" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
+      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.29874778" />
+      <window_info id="Favorites" order="2" side_tool="true" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -441,13 +450,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/coding20190107/random_module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coding20190107/time_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="171">
@@ -747,6 +749,17 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="359">
           <caret line="265" column="10" lean-forward="true" selection-end-line="265" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190124/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="18" column="16" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
+          <folding>
+            <element signature="e#46#344#1" />
+            <element signature="e#346#356#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
