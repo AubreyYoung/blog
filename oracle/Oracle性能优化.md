@@ -128,7 +128,8 @@ select INST_ID,status,count(status) from gv$session group by status,INST_ID orde
 ```
 select
 substr(s.username,1,18) username,
-s.sid,s.serial#,s.machine,y.sql_text
+s.sid,s.serial#,s.machine,y.sql_text,
+'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''';' "kill Session "
 from v$session s,v$process p,v$transaction t,v$rollstat r,v$rollname n,v$sql y
 where s.paddr = p.addr
 and s.taddr = t.addr (+)
@@ -137,6 +138,21 @@ and r.usn = n.usn (+)
 and s.username is not null
 and s.sql_address=y.address
 and s.sid=2065
+order by s.sid,s.serial#,s.username,s.status
+```
+
+```
+select
+substr(s.username,1,18) username,
+s.sid,s.serial#,s.machine,y.sql_text,
+'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''';' "kill Session "
+from v$session s,v$process p,v$transaction t,v$rollstat r,v$rollname n,v$sql y
+where s.paddr = p.addr
+and s.taddr = t.addr (+)
+and t.xidusn = r.usn (+)
+and r.usn = n.usn (+)
+and s.username is not null
+and s.sql_address=y.address
 order by s.sid,s.serial#,s.username,s.status
 ```
 

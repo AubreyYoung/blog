@@ -30,6 +30,8 @@ umount -lf /mnt
 
 ```
 //断点续传
-rsync -avzP file root@172.20.7.219:/root/tmp  
+rsync -avzP file root@172.20.7.219:/root/tmp
+//指定ssh端口
+rsync -aP "-e ssh -p 99922" $LOCALDIR $REMOTE
 ```
 

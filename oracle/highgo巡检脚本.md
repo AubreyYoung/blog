@@ -1,43 +1,7 @@
 #           HighGo巡检脚本
-[TOC]
-## 1.1 Oracle实例运行时间
-```plsql
-col running format a30
-select to_char(startup_time, 'DD-MON-YYYY HH24:MI:SS') starttime,
-TRUNC(sysdate - (startup_time)) || 'days' ||
-TRUNC(24 *
-((sysdate - startup_time) - TRUNC(sysdate - startup_time))) ||
-'hours' || MOD(TRUNC(1440 * ((SYSDATE - startup_time) -
-TRUNC(sysdate - startup_time))),
-60) || 'min' ||
-MOD(TRUNC(86400 *
-((SYSDATE - STARTUP_TIME) - TRUNC(SYSDATE - startup_time))),
-60) || 's' running
-from v$instance;
-```
-## 1.2  查看cursors
-**查询session_cached_cursors和 open_cursors 的使用率(每个实例)**
+----
+# 一、操作系统检查
 
-```plsql
-select 'session_cached_cursors' parameter,
-lpad(value, 5) value,
-decode(value, 0, ' n/a', to_char(100 * used / value, '990') || '%') usage
-from (select max(s.value) used
-from v$statname n, v$sesstat s
-where n.name = 'session cursor cache count'
-and s.statistic# = n.statistic#),
-(select value from v$parameter where name = 'session_cached_cursors')
-union all
-select 'open_cursors',
-lpad(value, 5),
-to_char(100 * used / value, '990') || '%'
-from (select max(sum(s.value)) used
-from v$statname n, v$sesstat s
-where n.name in ('opened cursors current')
-and s.statistic# = n.statistic#
-group by s.sid),
-(select value from v$parameter where name = 'open_cursors');
-```
 ## 2.1 操作系统版本/架构
 ### 2.1.1 查看定时任务
 **Linux**
@@ -102,6 +66,7 @@ cat /etc/hosts
 ifconfig -a
 ip addr    <!--linux-->
 netstat -in
+netstat -r
 ```
 **HP-UX网卡配置**
 
@@ -114,7 +79,6 @@ netstat -in
 /opt/ignite/bin/print_manifest
 ```
 ## 2.2 系统内存检查
-### 2.2.1 查看内存
 **Windows**
 
 ```
@@ -134,10 +98,8 @@ free -h                 <!--Redhat6.X以后支持-->
 
 ```
 lsattr -El sys0 -a realmem
-//查看交换分区使用
-lsps -a
+lsps -a											//查看交换分区使用
 svmon -G
-
 prtconf
 lscfg -v
 nmon
@@ -150,51 +112,19 @@ topas
 echo ::memstat | mdb -k
 /usr/sbin/prtconf |grep "Memory size"
 swap -s
-//如需要看具体那个进程占用内存的情况可以使用使用
-prstat -a
+prstat -a										//如需要看具体那个进程占用内存的情况可以使用使用
 ```
 
 **HP-UX**
+
 ```
 /usr/contrib/bin/machinfo | grep -i memory
 dmesg|grep Physical
 swapinfo -atm
 ```
-### 2.2.2 查看硬件信息
-**Linux**
-```
-dmidecode
-smartctl --all /dev/sda
-```
-**HP-UX 查看系统信息**
-```
-machinfo
-```
-**HP-UX 查看系统配置**
-
-```
-cstm
-/opt/ignite/bin/print_manifest
-glance
-```
-**HP-UX 查看主机型号**
-
-```
-model
-```
-**HP-UX硬件状态**
-
-```
-ioscan -fn
-```
-**HP-UX CELL状态**
-
-```
-parstatus
-因该命令组件需要单独收费安装，部分客户系统下无此命令，可选择性搜集（该命令类似AIX下的nmon）
-```
 ## 2.3 操作系统补丁检查
-#### AIX
+**AIX**
+
 **11.2 AIX6.1 RAC**
 
 ```
@@ -205,7 +135,8 @@ lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.per
 ```
 lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte
 ```
-#### Linux
+**Linux**
+
 **11.2 OL7 or RHEL7 (x86-64)**
 
 ```
@@ -237,14 +168,13 @@ rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" compat-libstdc++-33 gcc-c++ libstdc++-devel glibc-headers glibc-devel glibc-devel libgomp gcc libXp sysstat util-linux
 ```
 [^注]: i386和x86_64都要有的包：compat-libstdc++ glibc-devel   只有i386的包：libXp
-#### HP-UX查看补丁是否安装命令
+**HP-UX查看补丁是否安装命令**
+
 ```
 swlist –l <补丁名>
 swlist –l PHSS_39824
-```
-**HP-UX查看系统中安装的所有补丁**
 
-```
+//HP-UX查看系统中安装的所有补丁
 /usr/sbin/swlist -l patch | more
 swlist –l fileset –a state
 swlist -l bundle
@@ -252,30 +182,16 @@ swlist -l product
 swlist -l product | grep PH
 swlist -l fileset -a state -a patch_state
 ```
-### 2.4 操作系统参数设置检查
-#### AIX
-**AIX检查用户shell资源限制**
+## 2.4 操作系统参数设置检查
+**AIX内核参数检查**
 
 ```
-cat /etc/security/limits
+cat /etc/security/limits							//AIX检查用户shell资源限制
 ulimit -a
+lsattr -EH -l sys0 -a maxuproc						//AIX Maxuproc参数设置
+ioo -F -a | grep -i aio								//AIX检查AIX系统aio设置
+vmo -a -F											//AIX检查虚拟内存参数
 ```
-**AIX Maxuproc参数设置**
-
-```
-lsattr -EH -l sys0 -a maxuproc
-```
-**AIX检查AIX系统aio设置**
-
-```
-ioo -F -a | grep -i aio
-```
-**AIX检查虚拟内存参数**
-
-```
-vmo -a -F
-```
-#### Linux
 **Linux内核参数检查**
 
 ```
@@ -284,73 +200,54 @@ cat /etc/security/limits.conf
 sysctl -a
 ulimit -a
 ```
-#### Solaris
+**Solaris**
+
 ```
 cat /etc/system
 ```
-#### HP-UX查看参数设置
+**HP-UX查看参数设置**
+
 ```
 cat /stand/system
 sysdef
 /usr/sbin/kcweb -F
 ulimit -a
-```
-**HP-UX共享内存参数**
 
-```
-kctune| grep shm
-```
-**HP-UX显示每个module及描述**
+kctune| grep shm										//**HP-UX共享内存参数**
+kcmodule -d												//**HP-UX显示每个module及描述**
+kctune -d												//**HP-UX显示每个内核参数及描述**
+kcusage -ht filecache_max								//**HP-UX查看HP-UX的filecache使用率**
+kctune filecache_min=5% filecache_max=10%				//**HP-UX修改filecache_max**
+ls /stand												//**HP-UX系统内核文件**
 
-```
-kcmodule -d
-```
-**HP-UX显示每个内核参数及描述**
-
-```
-kctune -d
-```
-**HP-UX查看HP-UX的filecache使用率**
-
-```
-kcusage -ht filecache_max
-```
-**HP-UX修改filecache_max**
-
-``` 
-kctune filecache_min=5% filecache_max=10%
-```
-**HP-UX检查UDP和TCP内核参数**
-
-```
+//**HP-UX检查UDP和TCP内核参数**
 /usr/bin/ndd /dev/tcp tcp_smallest_anon_port tcp_largest_anon_port
 /usr/bin/ndd /dev/udp udp_smallest_anon_port udp_largest_anon_port
 ```
-**HP-UX系统内核文件**
-
-```
-ls /stand
-```
 ## 2.5 操作系统时区、时间检查
-### AIX,HP-UX,Solaris
+**AIX,HP-UX,Solaris**
+
 ```
 echo $TZ
 date
 ```
-### Linux
+**Linux**
+
 ```
 cat /etc/sysconfig/clock
-timedatectl status    # linux7
+timedatectl status    										//Linux7.X
 date -R
 ```
 ## 2.6 操作系统日志信息
-#### AIX
+**AIX**
+
 ```
 errpt -a
 errpt
 last
 ```
-#### Linux：
+**Linux**
+
 ```
 cat /var/log/messages
 dmesg
@@ -363,11 +260,13 @@ lastb
 tail -1000  /var/log/secure
 cat /var/log/boot.log
 ```
-#### Solaris:
+**Solaris**
+
 ```
 cat /var/adm/messages
 ```
-####　HP-UX
+**HP-UX**
+
 ```
 /var/adm/syslog/syslog.log                   //系统常用信息，如配置、修改、启动、关闭等信息
 /var/adm/syslog/mail.log                     //电子邮件信息
@@ -382,80 +281,95 @@ uptime
 cat  /var/adm/syslog/syslog.log|grep panic
 cat /var/adm/syslog/syslog.log |grep warning
 cat /var/adm/syslog/syslog.log |grep err
-lastb                                       //查看失败登录
+lastb                                       		//查看失败登录
 last
 cat /var/adm/syslog/syslog.log|grep error
 cat /var/adm/syslog/syslog.log|grep fail
 cat /var/adm/syslog/OLDsyslog.log |grep error
 cat /var/adm/syslog/OLDsyslog.log |grep fail
+/var/adm/syslog/syslog.log							//**系统日志**
+/var/adm/syslog/OLDsyslog.log 						//**上一次系统日志**
+/etc/rc.log											//**系统启动日志目录**
+/etc/shutdownlog									//**系统关机日志目录**
+/var/adm/crash										//**系统CORE DUMP目录**
 ```
-**系统日志**
+**Tru64**
 
-```
-/var/adm/syslog/syslog.log
-```
-**上一次系统日志**
-
-```
-/var/adm/syslog/OLDsyslog.log 
-```
-**系统启动日志目录**
-
-```
-/etc/rc.log
-```
-**系统关机日志目录**
-
-```
-/etc/shutdownlog
-```
-**系统CORE DUMP目录**
-
-```
-/var/adm/crash
-```
-#### Tru64
 ```
 /var/adm/messages
 ```
-#### Windows
+**Windows**
+
 ```
 save Application Log and System Log as .TXT files using Event Viewer
 ```
 ## 2.7 检查cpu信息
-### Windows
+**Windows**
+
 ```
 wmic cpu list brief>cpu.txt
 systeminfo
 ```
-### AIX
-**查看逻辑cpu个数**
+**AIX**
 
 ```
-pmcycles -m
+pmcycles -m												//**查看逻辑cpu个数**
 bindprocessor -q
+prtconf|grep Processors									//**查看物理cpu个数**
 ```
-**查看物理cpu个数**
+**Linux**
 
-```
-prtconf|grep Processors
-```
-### Linux
 ```
 cat /proc/cpuinfo
 lscpu
 ```
-### HPUX 查看 CPU个数
+**HP-UX**
+
 ```
 machinfo
 ioscan -fnC processor
 ```
-### Solaris
+**Solaris**
+
 ```
-mpstat  或者 psrinfo / prtdiag -v
+mpstat  
+psrinfo
+prtdiag -v
 ```
+## 2.8 查看硬件信息
+**Linux**
+
+```
+dmidecode
+smartctl --all /dev/sda
+```
+**HP-UX查看硬件信息**
+
+```
+machinfo										//HP-UX 查看系统信息
+cstm											//HP-UX 查看系统配置
+/opt/ignite/bin/print_manifest
+glance
+model											//HP-UX 查看主机型号
+ioscan -fn										//HP-UX硬件状态
+parstatus										//HP-UX CELL状态
+因该命令组件需要单独收费安装，部分客户系统下无此命令，可选择性搜集（该命令类似AIX下的nmon）
+```
+**AIX**
+
+```
+**查看网卡信息**
+lsdev -Cc adapter|grep ent
+**查看HBA卡信息**
+lsdev -Cc adapter|grep fcs
+netstat -in										////**查看网络**
+netstat -r										//**查看路由表**
+```
+
 ## 3.1 检查文件系统空间
-### Linux
+
+**Linux**
+
 ```
 df -h
 df -hi
@@ -463,97 +377,70 @@ df -i
 fdisk -l
 mount |column -t
 ```
-### AIX
+**AIX**
+
 ```
 df -g
 mount
-```
-###AIX 如若文件系统空间使用率过高，可进一步检查vg信息，在有剩余空间的情况下可以在线扩充文件系统大小；在AIX下可以通过getconf命令去得到裸盘的容量大小
 
-```
+//AIX 如若文件系统空间使用率过高，可进一步检查vg信息，在有剩余空间的情况下可以在线扩充文件系统大小；在AIX下可以通过getconf命令去得到裸盘的容量大小
 getconf DISK_SIZE /dev/rhdisk1
 ```
-### HP-UX
+**HP-UX**
+
 ```
 bdf
 df -P
-```
-**HP-UX检查共享磁盘聚合前后对应关系**
+ioscan -m dsf										//**HP-UX检查共享磁盘聚合前后对应关系**
 
-```
-ioscan -m dsf
-```
-**HP-UX查看磁盘大小**
-
-```
-diskinfo /dev/disk/disk*
+diskinfo /dev/disk/disk								//**HP-UX查看磁盘大小**
 diskinfo -v
 arraydsp -a
-```
-**HP-UX pv信息**
 
-```
-cat /etc/lvmtab
+cat /etc/lvmtab										//**HP-UX pv信息**
 pvdisplay -v pv名称
 vgdisplay -v
-```
-**HP-UX区别本地磁盘以及外挂磁盘**
 
+ioscan -funC disk									//**HP-UX区别本地磁盘以及外挂磁盘**
+ioscan -m lun										//**HP-UX查看lun信息**
+ioscan -fnC fc										//**查看HBA卡信息**
+lvlnboot -v											//**HP-UX 显示启动卷信息**
+setboot												//**HP-UX 启动盘设备path 信息**
+lsdev												//**HP-UX 内核加载的设备驱动**
 ```
-ioscan -funC disk
-```
-**HP-UX查看lun信息**
+**Solaris**
 
-```
-ioscan -m lun
-```
-**查看HBA卡信息**
-
-``` 
-ioscan -fnC fc
-```
-**HP-UX 显示启动卷信息**
-
-``` 
-lvlnboot -v
-```
-**HP-UX 启动盘设备path 信息**
-
-```
-setboot
-```
-**HP-UX 内核加载的设备驱动**
-
-```
-lsdev
-```
-### Solaris
 ```
 df -g 
 df -h
 ```
-### Windows
-计算机管理-磁盘管理：
+**Windows**
+
+计算机管理-磁盘管理
 ## 3.2 检查物理卷
-### AIX
-```
-lspv                                //检查pvid 部分，如果使用ASM模式一定要确保删除pvid
-```
-**查看硬盘**
+**AIX**
 
 ```
-lspath
-```
-**列出所有磁盘设备**
+lspv                                		//检查pvid 部分，如果使用ASM模式一定要确保删除pvid
+lspath										//**查看硬盘**
+lsdev -Cc disk								//**列出所有磁盘设备**
 
+//AIX检查reserve policy设置情况
+lsattr -El hdisk1 | grep reserve
+lsattr -El rhdiskpower1 | grep reserve
+for i in `lspv |awk '{print $1}'`;do echo $i `lsattr -El $i |grep reserve` ;done;
+
+//AIX检查共享vg下lv状态
+lsvg -l datavg
+lslv -l loglv00
 ```
-lsdev -Cc disk
-```
-### HP-UX
+**HP-UX**
+
 ```
 strings /etc/lvmtab
 ```
-### Linux
+**Linux**
+
 ```
 pvscan
 vgscan
@@ -562,40 +449,60 @@ pvdisplay
 vgdisplay
 lvdisplay
 ```
-## 3.3 AIX检查reserve policy设置情况
-```
-lsattr -El hdisk1 | grep reserve
-lsattr -El rhdiskpower1 | grep reserve
-for i in `lspv |awk '{print $1}'`;do echo $i `lsattr -El $i |grep reserve` ;done;
-```
-## 3.4 多路径状态
-### Linux 系统下几种多路径状态的查询方法：
-**multipath方式多路径状态检查**
+## 3.3 多路径状态
+**Linux 系统下几种多路径状态的查询方法**
 
 ```
-multipath -ll
-```
-**EMC存储powerpath**
-
-```
-powermt display dev=all
-```
-**日立多路径软件**
-
-```
-dlnkmgr view -path
-```
-**华为存储多路径查询**
-
-```
-upadmin
+multipath -ll											//**multipath方式多路径状态检查**
+powermt display dev=all									//**EMC存储powerpath**
+dlnkmgr view -path										//**日立多路径软件**
+upadmin													//**华为存储多路径查询**
 UltraPath CLI #1 >show vlun
 ```
-## 3.5 aix检查共享vg下lv状态
+----
+
+# 二、Oracle数据库检查
+
+
+## 1.1 Oracle实例运行时间
+```plsql
+col running format a30
+select to_char(startup_time, 'DD-MON-YYYY HH24:MI:SS') starttime,
+TRUNC(sysdate - (startup_time)) || 'days' ||
+TRUNC(24 *
+((sysdate - startup_time) - TRUNC(sysdate - startup_time))) ||
+'hours' || MOD(TRUNC(1440 * ((SYSDATE - startup_time) -
+TRUNC(sysdate - startup_time))),
+60) || 'min' ||
+MOD(TRUNC(86400 *
+((SYSDATE - STARTUP_TIME) - TRUNC(SYSDATE - startup_time))),
+60) || 's' running
+from v$instance;
 ```
-lsvg -l datavg
-lslv -l loglv00
+## 1.2  查看cursors
+**查询session_cached_cursors和 open_cursors 的使用率(每个实例)**
+
+```plsql
+select 'session_cached_cursors' parameter,
+lpad(value, 5) value,
+decode(value, 0, ' n/a', to_char(100 * used / value, '990') || '%') usage
+from (select max(s.value) used
+from v$statname n, v$sesstat s
+where n.name = 'session cursor cache count'
+and s.statistic# = n.statistic#),
+(select value from v$parameter where name = 'session_cached_cursors')
+union all
+select 'open_cursors',
+lpad(value, 5),
+to_char(100 * used / value, '990') || '%'
+from (select max(sum(s.value)) used
+from v$statname n, v$sesstat s
+where n.name in ('opened cursors current')
+and s.statistic# = n.statistic#
+group by s.sid),
+(select value from v$parameter where name = 'open_cursors');
 ```
+
 ## 3.6 以下检查针对所有平台的11.2.0.4 RAC环境：
 Oracle 11.2.0.4版本的RAC，ASM的rbal后台进程存在内存泄露的情况，将可能导致宕机，此问题影响了包括HPUX/AIX/LINUX等在内的操作系统。
 建议按照下列方法全面梳理是否存在该情况，并增加进程一级内存使用情况的监控。
@@ -632,7 +539,7 @@ lsdg
 ## 3.9 检查监听日志及alert日志文件大小
 **Windows**
 进入监听文件及alert目录，检查listener.log大小
-**Linux**
+**Linux**,Solrias
 
 ```
 find / -name "*listener*.log*" | xargs du -h
@@ -647,26 +554,6 @@ find / -name "alert*.log*" | xargs du -m
 HP-UX
 find / -name "*listener*.log*" | xargs du -sk
 find / -name "alert*.log*" | xargs du -sk
-```
-## 3.10 AIX信息查看
-**查看网卡信息**
-
-```
-lsdev -Cc adapter|grep ent
-```
-**查看HBA卡信息**
-
-```
-lsdev -Cc adapter|grep fcs
-```
-**查看网络**
-
-```
-netstat -in
-```
-**查看路由表**
-```
-netstat -r
 ```
 ## 4.1 查看集群运行状态
 ```
@@ -755,6 +642,7 @@ ocrcheck
 ```
 ocrconfig -showbackup
 ```
+
 ```
 //使用ocrdump命令查看OCR内容，但这个命令不能用于OCR的备份恢复只可以用于阅读
 RACDB1@rac1 /home/oracle$ ocrdump -stdout | more
@@ -779,8 +667,6 @@ local_only=FALSE
 # strings voting_disk.bak |sort -u
 ```
 
-
-
 ## 4.3 检查节点vip资源
 srvctl config vip -n jaxnh1        #11g
 srvctl config nodeapps -n jaxnh1 -a        #10g
@@ -804,9 +690,7 @@ $ORA_CRS_HOME/OPatch/opatch lsinventory  -oh $ORA_CRS_HOME
 ./opatch lsinventory -oh $ORACLE_CRS_HOME                               //10g
 ./opatch lsinventory -oh $ORACLE_HOME                      //10g
 ```
-#### **补丁安装情况2**
-
-```plsql
+#### **补丁安装情况2**​
 set pages 100 lines 120
 set echo on
 col action format a6
@@ -817,11 +701,16 @@ col action_time format a30
 col bundle_series format a15
 alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.ff';
 select * from dba_registry_history;
+
+```
+
+```
+
 ```
 ## 5.2 数据库基本配置信息
 **数据库基本信息**
 
-```plsql
+​```plsql
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
 col PLATFORM_NAME format a30
 select dbid,name,platform_name,created, log_mode  from v$database;
@@ -936,6 +825,9 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 
 ```
 select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
+
+//查看表大小
+Select Segment_Name,Sum(bytes)/1024/1024 From User_Extents Group By Segment_Name
 ```
 ## 5.5 控制文件
 **控制文件**
@@ -1613,7 +1505,7 @@ select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log whe
 //删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
 RMAN> delete force archivelog until time "sysdate-1";
 //删除3天前的归档日志
-delete  archivelog until time "sysdate-3";
+delete  archivelog until time "sysdate-1";
 ```
 ## 5.20 数据库所有实例每天生成的归档大小
 ```plsql
@@ -1751,8 +1643,6 @@ from v$database;
 
 ```plsql
 select max(sequence#),thread# from v$archived_log where RESETLOGS_CHANGE# = (SELECT RESETLOGS_CHANGE# FROM V$DATABASE_INCARNATION WHERE STATUS = 'CURRENT') GROUP BY THREAD#;
-
-archive log list;
 ```
 **备端查询**
 
@@ -1760,14 +1650,6 @@ archive log list;
 select max(sequence#),thread# from gv$archived_log where  applied='YES' and RESETLOGS_CHANGE# = (SELECT RESETLOGS_CHANGE# FROM V$DATABASE_INCARNATION WHERE STATUS = 'CURRENT') GROUP BY THREAD#; 
 
 SELECT PROCESS,STATUS,THREAD#,SEQUENCE#,BLOCK#,BLOCKS,DELAY_MINS FROM V$MANAGED_STANDBY;
-
-select DB_UNIQUE_NAME,SWITCHOVER_STATUS,CURRENT_SCN from v$database;
-select sequence#,applied from v$archived_log;
-select max(sequence#),applied,thread# from v$archived_log group by applied,thread# order by thread#;
-
-select * from V$DATAGUARD_STATUS order by TIMESTAMP desc,error_code;
-
-archive log list;
 ```
 [^注]: 如果主备相差3个以内可以接受，如果相差较多则表示同步异常。
 **切换归档日志**
@@ -1778,6 +1660,11 @@ ALTER DATABASE OPEN READ ONLY;
 RECOVER MANAGED STANDBY DATABASE DISCONNECT USING CURRENT LOGFILE;
 ALTER SYSTEM SWITCH LOGFILE;
 ALTER SYSTEM ARCHIVE LOG CURRENT;
+
+//单个或少量
+SQL> alter database register logfile '/u01/archlog/1_132735_893238304.arc';
+//大量
+rman> catalog start with '/u01/archlog/';
 ```
 
 **同步状态**
