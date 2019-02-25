@@ -57,7 +57,6 @@ winver>win.txt   或者 我的电脑—属性截图
 ```
 hostname>host.txt
 ipconfig>ip.txt
-netstat -in
 ```
 **Linux/AIX**
 
@@ -691,6 +690,7 @@ $ORA_CRS_HOME/OPatch/opatch lsinventory  -oh $ORA_CRS_HOME
 ./opatch lsinventory -oh $ORACLE_HOME                      //10g
 ```
 #### **补丁安装情况2**​
+```
 set pages 100 lines 120
 set echo on
 col action format a6
@@ -701,16 +701,12 @@ col action_time format a30
 col bundle_series format a15
 alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.ff';
 select * from dba_registry_history;
-
 ```
 
-```
-
-```
 ## 5.2 数据库基本配置信息
 **数据库基本信息**
 
-​```plsql
+```plsql
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
 col PLATFORM_NAME format a30
 select dbid,name,platform_name,created, log_mode  from v$database;
