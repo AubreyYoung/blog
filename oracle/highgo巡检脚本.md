@@ -127,7 +127,7 @@ swapinfo -atm
 **11.2 AIX6.1 RAC**
 
 ```
-lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte rsct.basic.rte rsct.compat.clients.rte gpfs.base
+lslpp -l abos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte rsct.basic.rte rsct.compat.clients.rte gpfs.base
 ```
 **AIX6.1 单机**
 
@@ -784,8 +784,36 @@ show parameter remote_listener
 show parameter db_create_file_dest
 show parameter log_archive_dest_1
 show parameter log_archive_dest_2
+show parameter  control_file_record_keep_time
+show parameter enable_ddl_logging
 ```
+```
+alter system set deferred_segment_creation=FALSE;     
+alter system set audit_trail             =none           scope=spfile;  
+alter system set SGA_MAX_SIZE            =xxxxxM         scope=spfile; 
+alter system set SGA_TARGET              =xxxxxM         scope=spfile;  
+alter systemn set pga_aggregate_target   =XXXXXM         scope=spfile;
+Alter PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
+alter database add SUPPLEMENTAL log data;
+alter system set enable_ddl_logging=true;
+#关闭11g密码延迟验证新特性
+ALTER SYSTEM SET EVENT = '28401 TRACE NAME CONTEXT FOREVER, LEVEL 1' SCOPE = SPFILE;
+#限制trace日志文件大最大25M
 alter system set max_dump_file_size ='25m' ;
+#关闭密码大小写限制
+ALTER SYSTEM SET SEC_CASE_SENSITIVE_LOGON = FALSE;
+alter system set db_files=2000 scope=spfile; 
+#RAC修改local_listener：（现象：使用PlSql Developer第一次连接超时，第二次之后连接正常）
+alter system set local_listener = '(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.125)(PORT = 1521))' sid='orcl1';
+alter system set local_listener = '(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.130)(PORT = 1521))' sid='orcl2';
+HOST = 192.168.1.216 --此处使用数字形式的VIP，绝对禁止使用rac1-vip
+HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-vip
+#更改控制文件记录保留时间
+alter system set control_file_record_keep_time =31;
+```
+
+
+
 ```
 set pagesize 200
 col PROFILE format a20
