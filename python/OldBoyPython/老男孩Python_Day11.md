@@ -24,6 +24,17 @@
 ## 装饰器的固定模式
 
 ```python
+def wrapper(func):
+    def inner(*args,**kwargs):
+        '''在被装饰函数之前要做的事'''
+        ret =func(*args,**kwargs)
+        '''在被装饰函数之后要做的事'''
+        return  ret
+    return inner
 
+@wrapper
+def func(*args,**kwargs):
+    pass
+    return 0
 ```
 

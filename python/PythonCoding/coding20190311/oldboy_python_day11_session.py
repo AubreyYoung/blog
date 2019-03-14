@@ -55,7 +55,6 @@ def func():
 timmer(func)
 
 import time
-@timmer  # 语法糖
 def timmer(f):  # 装饰器函数
     def inner():
         start = time.time()
@@ -65,6 +64,7 @@ def timmer(f):  # 装饰器函数
         return  ret
     return  inner
 
+@timmer  # 语法糖
 def func():
     print('Oracle')
     return  'Hello'
@@ -73,3 +73,36 @@ def func():
 ret = func()
 print(ret)
 
+# 装饰器带参数
+import time
+def timmer(f):  # 装饰器函数
+    def inner(*args,**kargs):
+        start = time.time()
+        ret = f(*args,**kargs)  # 被装饰的函数
+        end = time.time()
+        print(end - start)
+        return  ret
+    return  inner
+
+@timmer  # 语法糖 @装饰器函数名
+def func(*args,**kargs):
+    print('Oracle',*args,**kargs)
+    return  'Hello'
+
+# func = timmer(func)
+ret = func(1,'a')
+print(ret)
+
+# 装饰器固定模式
+def wrapper(func):
+    def inner(*args,**kwargs):
+        '''在被装饰函数之前要做的事'''
+        ret =func(*args,**kwargs)
+        '''在被装饰函数之后要做的事'''
+        return  ret
+    return inner
+
+@wrapper  # func = wrapper(func)
+def func(*args,**kwargs):
+    pass
+    return 0
