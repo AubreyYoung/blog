@@ -32,7 +32,7 @@
     <SUITE FILE_PATH="coverage/PythonCoding$gzip_module.coverage" NAME="gzip_module Coverage Results" MODIFIED="1546938380986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
     <SUITE FILE_PATH="coverage/PythonCoding$Oldboy_Python_Day3_session.coverage" NAME="Oldboy_Python_Day3_session Coverage Results" MODIFIED="1548048913675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
     <SUITE FILE_PATH="coverage/PythonCoding$MySQLInsert.coverage" NAME="MySQLInsert Coverage Results" MODIFIED="1541662685382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day11_session.coverage" NAME="oldboy_python_day11_session Coverage Results" MODIFIED="1552270382056" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190311" />
+    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day11_session.coverage" NAME="oldboy_python_day11_session Coverage Results" MODIFIED="1552483016367" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190311" />
     <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day3_session.coverage" NAME="oldboy_python_day3_session Coverage Results" MODIFIED="1548048935600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190116" />
     <SUITE FILE_PATH="coverage/PythonCoding$MySQLupdate.coverage" NAME="MySQLupdate Coverage Results" MODIFIED="1541662573843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
     <SUITE FILE_PATH="coverage/PythonCoding$Function.coverage" NAME="Function Coverage Results" MODIFIED="1545359060770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
@@ -79,19 +79,27 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="oldboy_python_day11_session.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="oldboy_python_day11_session.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/coding20190311/oldboy_python_day11_session.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
+            <state relative-caret-position="80">
+              <caret line="56" selection-start-line="56" selection-end-line="73" selection-end-column="10" />
               <folding>
                 <element signature="e#46#370#1" />
+                <element signature="e#474#559#0" />
+                <element signature="e#599#664#0" />
+                <element signature="e#696#711#0" />
+                <element signature="e#737#812#0" />
+                <element signature="e#830#845#0" />
+                <element signature="e#904#1027#0" />
+                <element signature="e#947#1067#0" />
+                <element signature="e#1103#1133#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="oldboy_python_day12_session.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="oldboy_python_day12_session.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="150">
@@ -176,9 +184,9 @@
         <option value="$PROJECT_DIR$/coding20190124/oldboy_python_day10_session.py" />
         <option value="$PROJECT_DIR$/coding20190124/test.py" />
         <option value="$PROJECT_DIR$/coding20190310/object.py" />
-        <option value="$PROJECT_DIR$/coding20190311/oldboy_python_day11_session.py" />
         <option value="$PROJECT_DIR$/coding20190124/oldboy_python_day11_session.py" />
         <option value="$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py" />
+        <option value="$PROJECT_DIR$/coding20190311/oldboy_python_day11_session.py" />
       </list>
     </option>
   </component>
@@ -395,56 +403,55 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32743362" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5012126" side_tool="true" weight="0.39534885" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" weight="0.32021466" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.32021466" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48746967" weight="0.3291592" />
+      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28617623" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.29102668" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4987874" weight="0.39534885" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28617623" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3291592" />
-      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48555815" weight="0.3291592" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.29874778" />
+      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39534885" />
       <window_info anchor="right" id="Database" order="5" weight="0.32983023" />
       <window_info anchor="right" id="Coverage" order="4" side_tool="true" weight="0.32983023" />
       <window_info anchor="bottom" id="Event Log" order="12" sideWeight="0.5092967" side_tool="true" weight="0.2844365" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="right" id="SciView" order="3" />
-      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3291592" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3291592" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" sideWeight="0.49960968" weight="0.3291592" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4907033" visible="true" weight="0.29874778" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -461,7 +468,7 @@
           <line>14</line>
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="57" />
+      <option name="time" value="63" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -750,10 +757,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
           <caret line="21" column="19" selection-start-line="21" selection-start-column="19" selection-end-line="21" selection-end-column="19" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#46#346#1" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -762,17 +765,15 @@
         <state relative-caret-position="368">
           <caret line="62" column="4" selection-start-line="62" selection-start-column="4" selection-end-line="62" selection-end-column="4" />
           <folding>
-            <element signature="e#46#366#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coding20190311/oldboy_python_day11_session.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
-          <folding>
             <element signature="e#46#370#1" />
+            <element signature="e#474#559#0" />
+            <element signature="e#599#664#0" />
+            <element signature="e#696#711#0" />
+            <element signature="e#737#812#0" />
+            <element signature="e#830#845#0" />
+            <element signature="e#904#1027#0" />
+            <element signature="e#947#1067#0" />
+            <element signature="e#1103#1133#0" />
           </folding>
         </state>
       </provider>
@@ -783,6 +784,24 @@
           <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
           <folding>
             <element signature="e#46#370#1" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coding20190311/oldboy_python_day11_session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="80">
+          <caret line="56" selection-start-line="56" selection-end-line="73" selection-end-column="10" />
+          <folding>
+            <element signature="e#46#370#1" />
+            <element signature="e#474#559#0" />
+            <element signature="e#599#664#0" />
+            <element signature="e#696#711#0" />
+            <element signature="e#737#812#0" />
+            <element signature="e#830#845#0" />
+            <element signature="e#904#1027#0" />
+            <element signature="e#947#1067#0" />
+            <element signature="e#1103#1133#0" />
           </folding>
         </state>
       </provider>
