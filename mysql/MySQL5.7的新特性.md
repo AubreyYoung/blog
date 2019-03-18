@@ -310,9 +310,28 @@ Query OK, 0 rows affected (0.00 sec)
 
 ### 3.3 支持为innodb表建立表空间
 
-## MySQL安全方面的增强
+- MySQL5.7之前
 
-## 初始化数据库后的默认密码
+  系统表空间及可以为每个表建立一个独立的表空间
+
+- MySQL5.7之后
+
+  支持create tablespace语法为一个表或多个表建立共用的表空间,节约内存,可以将表空间放置在其他存储设备上;drop table无法回收表空间.
+
+  ```
+  > create tablespace ts1 add datafile 'ts1.ibd' engine=innodb;
+  Query OK, 0 rows affected (0.00 sec)
+  > create table t3(c1 int primary key) tablespace ts1;
+  Query OK, 0 rows affected (0.00 sec)
+  > create table t4(c1 int primary key) tablespace ts1; 
+  Query OK, 0 rows affected (0.00 sec)
+  ```
+
+  
+
+## 4. MySQL安全方面的增强
+
+### 4.1 初始化数据库后的默认密码
 
 - 在MySQL5.7之前的版本，初始化数据库后，默认的root密码为空，在localhost直接使用mysql客户端，可以以无密码的方式进入到数据库中
 - 在MySQL5.7中，在初始化数据库之后，会为root生成一个强度为`大写字母+小写字母+数字+特殊符号`的密码，并且首次进入到mysql时，强制要你更改密码，且强度默认依然为`大写字母+小写字母+数字+特殊符号`
@@ -321,7 +340,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 - [https://docs.20150509.cn/2016/07/28/MySQL5-7初始密码/](https://docs.20150509.cn/2016/07/28/MySQL5-7%E5%88%9D%E5%A7%8B%E5%AF%86%E7%A0%81/)
 
-## 默认的密码强度
+### 4.2 默认的密码强度
 
 mysql对于密码有3种检验策略，默认validate_password_policy为MEDIUM
 
@@ -333,10 +352,107 @@ mysql对于密码有3种检验策略，默认validate_password_policy为MEDIUM
 
 - [https://docs.20150509.cn/2016/08/19/CentOS7安装MySQL5-7/](https://docs.20150509.cn/2016/08/19/CentOS7%E5%AE%89%E8%A3%85MySQL5-7/)
 
-## 不在支持old_password认证
+### 4.3 不在支持old_password认证(移除)
 
-## 增加账号默认过期时间
+- 只存在 root localhost 账号
 
-## 加强了对账号的管理功能
+### 4.4 增加账号默认过期时间
 
-## 增加了sys管理数据库
+默认为360天
+
+```
+> show variables like 'default_password_%';
++---------------------------+-------+
+| Variable_name             | Value |
++---------------------------+-------+
+| default_password_lifetime | 0     |
++---------------------------+-------+
+1 row in set (0.00 sec)
+```
+
+### 4.5 增加了sys管理数据库
+
+information_schema在MySQL8.X中已可以移除,不建议使用
+
+```
+> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+```
+
+
+
+### 4.6 加强了对账号的管理功能
+
+```
+> help create user
+Name: 'CREATE USER'
+Description:
+Syntax:
+CREATE USER [IF NOT EXISTS]
+    user [auth_option] [, user [auth_option]] ...
+    [REQUIRE {NONE | tls_option [[AND] tls_option] ...}]
+    [WITH resource_option [resource_option] ...]
+    [password_option | lock_option] ...
+
+user:
+    (see )
+
+auth_option: {
+    IDENTIFIED BY 'auth_string'
+  | IDENTIFIED WITH auth_plugin
+  | IDENTIFIED WITH auth_plugin BY 'auth_string'
+  | IDENTIFIED WITH auth_plugin AS 'hash_string'
+  | IDENTIFIED BY PASSWORD 'hash_string'
+}
+
+tls_option: {
+   SSL
+ | X509
+ | CIPHER 'cipher'
+ | ISSUER 'issuer'
+ | SUBJECT 'subject'
+}
+
+resource_option: {
+    MAX_QUERIES_PER_HOUR count
+  | MAX_UPDATES_PER_HOUR count
+  | MAX_CONNECTIONS_PER_HOUR count
+  | MAX_USER_CONNECTIONS count
+}
+
+password_option: {
+    PASSWORD EXPIRE
+  | PASSWORD EXPIRE DEFAULT
+  | PASSWORD EXPIRE NEVER
+  | PASSWORD EXPIRE INTERVAL N DAY
+}
+
+lock_option: {
+    ACCOUNT LOCK
+  | ACCOUNT UNLOCK
+}
+
+The CREATE USER statement creates new MySQL accounts. It enables
+authentication, SSL/TLS, resource-limit, and password-management
+properties to be established for new accounts, and controls whether
+accounts are initially locked or unlocked.
+
+To use CREATE USER, you must have the global CREATE USER privilege, or
+the INSERT privilege for the mysql database. When the read_only system
+variable is enabled, CREATE USER additionally requires the SUPER
+privilege.
+
+An error occurs if you try to create an account that already exists. If
+the IF NOT EXISTS clause is given, the statement produces a warning for
+each named account that already exists, rather than an error.
+
+URL: http://dev.mysql.com/doc/refman/5.7/en/create-user.html
+```
+
