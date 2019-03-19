@@ -1,7 +1,7 @@
 # Oracle开发
 
-## SQL基础
-### 用户与表空间
+## 一、SQL基础
+### 1.1 用户与表空间
 
 - 用户
 
@@ -30,7 +30,7 @@ alter tablespace tablesapce_name drop datafile '(数据文件名,可以不添加
 /*不能删除表空间一个数据文件,若要删除必须删除表空间*/
 drop tablesapce tablesapce_name including contents;
 ```
-### 表与约束
+### 1.2 表与约束
 
 - 表
 
@@ -86,7 +86,7 @@ ALTER TABLE T_INVOICE_DETAIL ADD CONSTRAINT FK_INVOICE_ID FOREIGN KEY(INVOICE_ID
 ALTER TABLE T_INVOICE_DETAIL ADD CONSTRAINT FK_INVOICE_ID FOREIGN KEY(INVOICE_ID ) REFERENCES T_INVOICE(ID) ON DELETE SET NULL;
 ```
 
-### 查询语句
+### 1.3 查询语句
 
 查询的作用,强大的select
 
@@ -105,14 +105,14 @@ select sal,case when sal=800 then '=800'  when sal=1250 then '=1250'  else '不�
 select sal,decode(sal,800,'工资低',5000,'工资高','工资一般') from emp;
 ```
 
-## SQL函数
+## 二、SQL函数
 
-### 函数的作用
+### 2.1 函数的作用
 
 - 方便数据的统计
 - 处理查询结果
 
-### 函数的分类
+### 2.2 函数的分类
 
 - 数值函数
 
@@ -331,5 +331,57 @@ SQL> select to_number('$122,322.233','$999,999.999') from dual;
 TO_NUMBER('$122,322.233','$999,999.999')
 ----------------------------------------
                               122322.233
+```
+
+## 三、Oracle触发器
+
+### 3.1 什么是触发器
+
+每当一个特定的数据操作语句(insert,update,delete)在指定的表上发出时,Oracle自动地执行触发器中定义的语句序列.
+
+```plsql
+create trigger update_emp after insert on emp
+declare
+begin
+  dbms_output.put_line('成功插入新员工');
+end;
+/
+
+```
+
+### 3.2  触发器的应用场景
+
+- 复杂的安全性检查
+- 数据的确认
+- 实现审计功能
+- 数据的备份与同步
+
+### 3.3 触发器的语法
+
+```plsql
+create [or replace] trigger 触发器名
+{befor|after}
+{delete|insert|update [of 列名]}
+on 表名
+[for each row [when(条件)]]
+PLSQL块
+```
+
+### 3.4 触发器的类型
+
+- 语句级触发器
+
+  指定的操作语句操作之前或之后执行一次,不管这条语句影响了多少行
+
+- 行级触发器
+
+  触发语句作用的每一条记录都被出发.在行级触发器中使用:old和:new伪记录变量识别值的状态
+
+### 3.5 案例
+
+- 案例一: 复杂的安全性检查      禁止在非工作时间插入新员工
+
+```
+
 ```
 
