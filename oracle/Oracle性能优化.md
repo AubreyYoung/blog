@@ -322,4 +322,3 @@ order by t.diff desc
 ```
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
-
