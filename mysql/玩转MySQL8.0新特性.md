@@ -303,3 +303,154 @@ mysql> show grants for 'write_role';
 3 rows in set (0.00 sec)
 ```
 
+## 2. 优化器索引
+
+### 2.1  隐藏索引 
+
+​	invisible index,不可见索引 
+
+​	隐藏索引不会被优化器使用,但仍然需要进行维护
+
+- 应用场景
+  - 软删除
+  - 灰度发布
+
+```
+mysql> create table t2(i int,j int);
+Query OK, 0 rows affected (0.65 sec)
+
+mysql> create index i_idx on t2(i);
+Query OK, 0 rows affected (0.35 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> create index j_idx on t2(j) invisible;
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> show index from t2\G
+*************************** 1. row ***************************
+        Table: t2
+   Non_unique: 1
+     Key_name: i_idx
+ Seq_in_index: 1
+  Column_name: i
+    Collation: A
+  Cardinality: 0
+     Sub_part: NULL
+       Packed: NULL
+         Null: YES
+   Index_type: BTREE
+      Comment: 
+Index_comment: 
+      Visible: YES
+   Expression: NULL
+*************************** 2. row ***************************
+        Table: t2
+   Non_unique: 1
+     Key_name: j_idx
+ Seq_in_index: 1
+  Column_name: j
+    Collation: A
+  Cardinality: 0
+     Sub_part: NULL
+       Packed: NULL
+         Null: YES
+   Index_type: BTREE
+      Comment: 
+Index_comment: 
+      Visible: NO
+   Expression: NULL
+2 rows in set (0.01 sec)
+
+mysql> explain select * from t2 where i=1;
++----+-------------+-------+------------+------+---------------+-------+---------+-------+------+----------+-------+
+| id | select_type | table | partitions | type | possible_keys | key   | key_len | ref   | rows | filtered | Extra |
++----+-------------+-------+------------+------+---------------+-------+---------+-------+------+----------+-------+
+|  1 | SIMPLE      | t2    | NULL       | ref  | i_idx         | i_idx | 5       | const |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+------+---------------+-------+---------+-------+------+----------+-------+
+1 row in set, 1 warning (0.01 sec)
+
+mysql> explain select * from t2 where j=1;
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | ALL  | NULL          | NULL | NULL    | NULL |    1 |   100.00 | Using where |
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+```
+
+```
+//打开不可见索引
+mysql> select  @@optimizer_switch\G
+*************************** 1. row ***************************
+@@optimizer_switch: index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on
+1 row in set (0.00 sec)
+
+mysql> set session optimizer_switch = "use_invisible_indexes=on";
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select  @@optimizer_switch\G
+*************************** 1. row ***************************
+@@optimizer_switch: index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=on,skip_scan=on
+1 row in set (0.00 sec)
+
+mysql> explain select * from t2 where j=1;
++----+-------------+-------+------------+------+---------------+-------+---------+-------+------+----------+-------+
+| id | select_type | table | partitions | type | possible_keys | key   | key_len | ref   | rows | filtered | Extra |
++----+-------------+-------+------------+------+---------------+-------+---------+-------+------+----------+-------+
+|  1 | SIMPLE      | t2    | NULL       | ref  | j_idx         | j_idx | 5       | const |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+------+---------------+-------+---------+-------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+```
+
+```
+//切换不可见索引与可见索引,主键不可以设置为不可见索引
+mysql> alter table t2 alter index j_idx visible;
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> show index from t2\G
+*************************** 1. row ***************************
+        Table: t2
+   Non_unique: 1
+     Key_name: i_idx
+ Seq_in_index: 1
+  Column_name: i
+    Collation: A
+  Cardinality: 0
+     Sub_part: NULL
+       Packed: NULL
+         Null: YES
+   Index_type: BTREE
+      Comment: 
+Index_comment: 
+      Visible: YES
+   Expression: NULL
+*************************** 2. row ***************************
+        Table: t2
+   Non_unique: 1
+     Key_name: j_idx
+ Seq_in_index: 1
+  Column_name: j
+    Collation: A
+  Cardinality: 0
+     Sub_part: NULL
+       Packed: NULL
+         Null: YES
+   Index_type: BTREE
+      Comment: 
+Index_comment: 
+      Visible: YES
+   Expression: NULL
+2 rows in set (0.00 sec)
+
+mysql> create table t3(i int not null,j int);                  
+Query OK, 0 rows affected (0.60 sec)
+
+mysql> alter table t3 add primary key pk_t3(i) invisible;
+ERROR 3522 (HY000): A primary key index cannot be invisible
+```
+
+### 2.2 降序索引
+
+### 2.3 函数索引
