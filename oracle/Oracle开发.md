@@ -7,10 +7,14 @@
 
 ```
 show user
---解锁用户
+//解锁用户
 alter  user usernmae account unlock;
+//修改用户默认表空间
 alter user username  default tablespace tablesapce_name;
 alter user username  default temporary tablespace tablesapce_name;
+
+//删除user
+drop user ×× cascade
 ```
 - 表空间
 
@@ -27,8 +31,10 @@ alter tablespace tablesapce_name read only/read write;
 --修改数据文件
 alter tablespace tablesapce_name add datafile '+DATA' size 30g autoextend on;
 alter tablespace tablesapce_name drop datafile '(数据文件名,可以不添加路径*/)';
-/*不能删除表空间一个数据文件,若要删除必须删除表空间*/
+/*不能删除表空间第一个数据文件,若要删除必须删除表空间*/
 drop tablesapce tablesapce_name including contents;
+//如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
+drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;
 ```
 ### 1.2 表与约束
 

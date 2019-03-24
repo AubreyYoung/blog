@@ -182,8 +182,6 @@ AND f.database_status = 'ACTIVE'
 order by b.ctime;
 ```
 
-
-
 ## 根据sid查询已经执行过的sql 
 
 ```
@@ -322,3 +320,16 @@ order by t.diff desc
 ```
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
+
+## 查询SQL语句的SQL_ID
+
+```
+SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
+```
+
+## 查看表的并行度
+
+```
+select owner,table_name,degree from dba_tables where table_name='EMP';
+```
+

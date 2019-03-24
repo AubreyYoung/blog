@@ -740,6 +740,8 @@ select inst_id,name,value from gv$parameter where value is not null;
 Col name for a20
 Col value for a40
 select num,name,value FROM V$PARAMETER where isdefault='FALSE';
+
+select NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE' OR ismodified != 'FALSE';
 ```
 #### **隐藏参数**
 
