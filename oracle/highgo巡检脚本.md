@@ -1805,3 +1805,68 @@ create pfile='/home/oracle/pfile20190123.ora' from spfile;
 create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solaris-->
 ```
 
+## 8.1 JOB状态查询
+
+```
+//主端查看当前DBMS_JOB 的状态
+SELECT * FROM DBA_JOBS_RUNNING;
+//主端查看当前DBMS_SCHEDULER的状态
+select owner,job_name,session_id,slave_process_id,running_instance from dba_scheduler_running_jobs;
+```
+
+## 8.2还原点设置
+
+创建可靠还原点（可选）如果switch切换后有问题可以通过还原点回退数据库。 
+
+确认是否开启了闪回，如果没有则要先开启，主库和备库。
+
+```
+SQL> show parameter DB_RECOVERY
+NAME TYPE VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest string
+db_recovery_file_dest_size big integer 0
+
+SQL> ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=10G;
+
+SQL> ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='/fra/flashback';
+
+SQL> show parameter DB_RECOVERY
+NAME TYPE VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest string /fra/flashback
+db_recovery_file_dest_size big integer 10G
+
+停止恢复应用
+SQL> RECOVER MANAGED STANDBY DATABASE CANCEL;
+Media recovery complete.
+创建还原点
+SQL> CREATE RESTORE POINT SWITCHOVER_START_GRP GUARANTEE FLASHBACK DATABASE;
+Restore point created.
+启动应用进程
+SQL> RECOVER MANAGED STANDBY DATABASE DISCONNECT USING CURRENT LOGFILE;
+Media recovery complete.
+查看还原点信息
+SQL> col NAME format a30
+col time format a40
+set line 300
+select NAME,SCN,TIME from v$restore_point;
+NAME SCN TIME
+------------------------------ ---------- ----------------------------------------
+SWITCHOVER_START_GRP 987029 04-JUL-16 02.11.05.000000000 PM
+```
+
+**主库同样检查是否开启闪回，并创建还原点**
+
+```
+SQL> CREATE RESTORE POINT SWITCHOVER_START_GRP GUARANTEE FLASHBACK DATABASE;
+Restore point created.
+```
+[^注意]: 如果创建还原点，在switch 切换完毕后一定要删除主备节点上还原点，否则还原点的文件会不断增长直到磁盘爆满。
+
+**删除还原点**
+
+```
+drop restore point SWITCHOVER_START_GRP;
+```
+

@@ -43,7 +43,20 @@ collation-server = utf8mb4_unicode_ci
 init_connect = 'SET NAMES utf8mb4'
 ```
 ------
+## 修改字符集
+
+```
+//对每一个数据库:
+ALTER DATABASE 这里数据库名字 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+//对每一个表:
+ALTER TABLE 这里是表名字 CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+//对每一个字段:
+ALTER TABLE 这里是表名字 CHANGE 字段名字 重复字段名字 VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE 这里是表名字 modify 字段名字 VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '';
+```
+
 参考文章:
+
 - <http://www.jb51.net/article/29576.htm>
 - <http://www.jb51.net/article/52511.htm>
 - <http://www.tuicool.com/articles/2IRVV3>
