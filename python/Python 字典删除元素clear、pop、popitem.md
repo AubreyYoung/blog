@@ -1,6 +1,6 @@
 # Python 字典删除元素clear、pop、popitem
 
- 同其它python内建[数据类型](http://www.iplaypy.com/jichu/data-type.html)一样，[字典dic](http://www.iplaypy.com/jichu/dict.html)t也是有一些实用的操作方法。这里我们要说的是**字典删除方法**：clear()、pop()和popitem()，这三种方法的作用不同，操作方法及返回值都不相同。接下来就来查看下这些字典特定方法的具体用法是什么。
+ 同其它python内建[数据类型](http://www.iplaypy.com/jichu/data-type.html)一样，[字典dict](http://www.iplaypy.com/jichu/dict.html)也是有一些实用的操作方法。这里我们要说的是**字典删除方法**：clear()、pop()和popitem()，这三种方法的作用不同，操作方法及返回值都不相同。接下来就来查看下这些字典特定方法的具体用法是什么。
 
 ## 字典clear()方法
 
