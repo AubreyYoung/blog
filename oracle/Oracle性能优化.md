@@ -333,3 +333,65 @@ SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE 
 select owner,table_name,degree from dba_tables where table_name='EMP';
 ```
 
+## 收集10046Trace
+
+```
+//在Session级打开trace
+适用于SQL语句可以在新的session创建后再运行。
+在session级收集10046 trace：
+alter session set tracefile_identifier='10046'; 
+alter session set timed_statistics = true;
+alter session set statistics_level=all;
+alter session set max_dump_file_size = unlimited;
+alter session set events '10046 trace name context forever,level 12';
+
+-- 执行需要被trace的SQL --
+
+select * from dual;
+exit;
+如果不退出当前session, 可以用以下命令关闭trace:
+alter session set events '10046 trace name context off';
+注意，如果session没有被彻底地关闭并且跟踪被停止了，某些重要的trace信息的可能会丢失。
+注意：这里我们将"statistics_level"设置为all，这是因为有可能这个参数在系统级不是默认值"TYPICAL"（比如 BASIC）。为了收集性能相关问题的信息我们需要打开某个级别的statistics。我们推荐在 session 级将这个参数设置成 ALL 以便于收集更多的信息，尽管这不是必须的。
+ 
+//跟踪一个已经开始的进程
+如果需要跟踪一个已经存在session，可以用 oradebug连接到session上，并发起10046 trace。
+首先，用某种方法找到需要被跟踪的session.
+例如，在SQL*Plus里，找出目标session的OS的进程ID(spid):
+select p.PID,p.SPID,s.SID from v$process p,v$session s where s.paddr = p.addr and s.sid = &SESSION_ID;
+SPID 是操作系统的进程标识符（os pid）
+PID 是Oracle的进程标识符(ora pid)
+如果你不知道session的ID, 那么可以使用类似下面的SQL语句来帮助你找到它
+column line format a79
+set heading off
+select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||
+  s.osuser || ' ' ||s.machine ||' '||s.username ||' '||s.program line
+from v$session s , v$process p
+where p.addr = s.paddr
+and s.username <> ' ';
+
+如果是使用了12c的multi thread下，那么需要使用v$process中新的列stid来找到对应的thread, 因为Oracle把多个processes放进了一个单独的 ospid 中。如果想找到特定的thread, 使用下面的语法:
+oradebug setospid <spid> <stid>
+一旦找到OS PID，就可以用以下命令初始化跟踪：
+假设需要被跟踪的OSPID是9834。
+以sysdba的身份登录到SQL*Plus并执行下面的命令：
+connect / as sysdba
+oradebug setospid 9834
+oradebug unlimit
+oradebug event 10046 trace name context forever,level 12
+记得把例子中的'9834' 替换成真实的os pid。
+注:也可以通过oradebug使用 'setorapid'命令连接到一个session。
+ 
+下面的例中， 使用PID（Oracle进程标识符）(而不是SPID), oradebug命令将被改为：
+connect / as sysdba
+oradebug setorapid 9834
+oradebug unlimit
+oradebug event 10046 trace name context forever,level 12
+记得把例子中的9834替换成真实的ora pid。
+跟踪过程完成以后，关闭oradebug跟踪：
+oradebug event 10046 trace name context off
+如果是使用了12c的multi thread下，那么需要使用v$process中新的列stid来找到对应的thread, 因为Oracle把多个processes放进了一个单独的 ospid 中。如果想找到特定的thread, 使用下面的语法:
+oradebug setospid <spid> <stid>oradebug unlimit
+tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
+```
+
