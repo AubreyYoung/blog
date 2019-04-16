@@ -325,6 +325,17 @@ order by t.diff desc
 
 ```
 SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
+
+//根据SQL 查询到操作用户
+select s.username from v$active_session_history t,dba_users s  where t.USER_ID=s.user_id and t.SQL_ID='0nx7fbv1w5xg2';
+ 
+//查询并获取当前sql的杀会话语句
+select 'alter system kill session '''|| t.SID||','||t.SERIAL#||''';' from v$session t where t.SQL_ID='0nx7fbv1w5xg2';
+
+//查询并获取当前会话的执行计划清空过程语句
+select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, invalidations from v$sqlarea  where sql_id='0nx7fbv1w5xg2';
+
+call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 
 ## 查看表的并行度
