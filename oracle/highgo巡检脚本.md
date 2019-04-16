@@ -1,6 +1,5 @@
 #           HighGo巡检脚本
-----
-# 一、操作系统检查
+**操作系统检查**
 
 ## 2.1 操作系统版本/架构
 ### 2.1.1 查看定时任务
@@ -460,10 +459,10 @@ UltraPath CLI #1 >show vlun
 ```
 ----
 
-# 二、Oracle数据库检查
+**Oracle数据库检查**
 
+##  3.4 Oracle实例运行时间
 
-## 1.1 Oracle实例运行时间
 ```plsql
 col running format a30
 select to_char(startup_time, 'DD-MON-YYYY HH24:MI:SS') starttime,
@@ -478,7 +477,8 @@ MOD(TRUNC(86400 *
 60) || 's' running
 from v$instance;
 ```
-## 1.2  查看cursors
+##  3.5  查看cursors
+
 **查询session_cached_cursors和 open_cursors 的使用率(每个实例)**
 
 ```plsql
@@ -1319,8 +1319,18 @@ col object_type format a10
 SELECT OWNER,OBJECT_NAME, OBJECT_ID, OBJECT_TYPE,to_char(CREATED,'yyyy-mm-dd,hh24:mi:ss') CREATED,
 to_char(LAST_DDL_TIME,'yyyy-mm-dd,hh24:mi:ss') LAST_DDL_TIME,STATUS
 FROM  dba_objects where status<>'VALID' order by owner,object_name,OBJECT_TYPE;
+
+//其他查询
+set pagesize500
+set linesize 100
+select substr(comp_name,1,40) comp_name, status, substr(version,1,10) version from dba_registry order by comp_name;
+
+select substr(object_name,1,40) object_name,substr(owner,1,15) owner,object_type from dba_objects where status='INVALID' order by owner,object_type;
+
+select owner,object_type,count(*) from dba_objects where status='INVALID' group by owner,object_type order by owner,object_type ;
 ```
 ### 非SYS
+
 ```plsql
 set linesize 200
 col owner format a15
@@ -1331,6 +1341,15 @@ SELECT OWNER,OBJECT_NAME, OBJECT_ID, OBJECT_TYPE,to_char(CREATED,'yyyy-mm-dd,hh2
 to_char(LAST_DDL_TIME,'yyyy-mm-dd,hh24:mi:ss') LAST_DDL_TIME,STATUS
 FROM  dba_objects where status<>'VALID' and owner='SYS' order by last_ddl_time;
 ```
+### **编译无效对象**
+
+```
+alter package <schema name>.<package_name> compile;
+alter package <schema name>.<package_name> compile body;
+alter view <schema name>.<view_name> compile;
+alter trigger <schema).<trigger_name> compile;
+```
+
 [^参考文章]: How to Diagnose Invalid or Missing Data Dictionary (SYS) Objects (文档 ID 554520.1)
 [^参考文章]: Debug and Validate Invalid Objects (文档 ID 300056.1)
 ### 占用空间最多的10个object
