@@ -52,6 +52,9 @@ rename   tablename to new_tablename;
 truncate table  tablename;
 drop table tablename;
 
+#删除table
+drop table  bh cascade constraints purge;
+
 insert into table_name (....) values();
 update table table_name set XX=XX where  ...
 ```

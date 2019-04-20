@@ -4,7 +4,9 @@
 ----
 
 ## 2.1 操作系统版本/架构
+
 ### 2.1.1 查看定时任务
+
 **Linux**
 
 ```
@@ -1788,6 +1790,8 @@ ALTER DATABASE OPEN READ ONLY;
 RECOVER MANAGED STANDBY DATABASE DISCONNECT USING CURRENT LOGFILE;
 ALTER SYSTEM SWITCH LOGFILE;
 ALTER SYSTEM ARCHIVE LOG CURRENT;
+
+archive log all；
 
 //单个或少量
 SQL> alter database register logfile '/u01/archlog/1_132735_893238304.arc';
