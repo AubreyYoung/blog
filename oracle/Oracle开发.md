@@ -112,7 +112,124 @@ select sal,case sal  when 800 then '=800'  when 1250 then '=1250' else '不等80
 select sal,case when sal=800 then '=800'  when sal=1250 then '=1250'  else '不等800,1250' end from emp;
 
 select sal,decode(sal,800,'工资低',5000,'工资高','工资一般') from emp;
+
+//查询空值
+SQL> select * from emp where comm is null;
+
+     EMPNO ENAME      JOB              MGR HIREDATE         SAL       COMM     DEPTNO
+---------- ---------- --------- ---------- --------- ---------- ---------- ----------
+      7369 SMITH      CLERK           7902 17-DEC-80        800                    20
+      7566 JONES      MANAGER         7839 02-APR-81       2975                    20
+      7698 BLAKE      MANAGER         7839 01-MAY-81       2850                    30
+      7782 CLARK      MANAGER         7839 09-JUN-81       2450                    10
+      7788 SCOTT      ANALYST         7566 19-APR-87       3000                    20
+      7839 KING       PRESIDENT            17-NOV-81       5000                    10
+      7876 ADAMS      CLERK           7788 23-MAY-87       1100                    20
+      7900 JAMES      CLERK           7698 03-DEC-81        950                    30
+      7902 FORD       ANALYST         7566 03-DEC-81       3000                    20
+      7934 MILLER     CLERK           7782 23-JAN-82       1300                    10
+
+10 rows selected.
+
+SQL> select * from emp where comm <> null;
+
+no rows selected
 ```
+
+[^注]: NULL不支持加、减、乘、除、大小比较、相等比较，否则运算结果为NULL。而对于其他的函数,在使用时最好测试一下有NULL时的返回结果。
+
+````
+SQL> select * from emp where comm <> null;
+
+no rows selected
+
+SQL> select * from dept where 1>= null;
+
+no rows selected
+
+SQL> select * from dept where 1<= null;
+
+no rows selected
+
+SQL> select * from dept where 1+null <= 0;
+
+no rows selected
+
+SQL> select * from dept where 1+null >= 0;
+
+no rows selected
+
+SQL> select * from dept where 1*null >= 0;
+
+no rows selected
+
+SQL> select replace('abcde','a',NULL) as str from dual;
+
+STR
+----
+bcde
+
+SQL> 
+SQL> select greatest(1,null) from dual;
+
+GREATEST(1,NULL)
+----------------
+````
+
+**NULL转换为0**
+
+```
+SQL> select coalesce(comm,0) from emp;
+
+COALESCE(COMM,0)
+----------------
+               0
+             300
+             500
+               0
+            1400
+               0
+               0
+               0
+               0
+               0
+               0
+               0
+               0
+               0
+
+14 rows selected.
+
+SQL> create or replace view v1 as 
+  2  select null as c1,null as c2,1 as c3, null as c4,2 as c5, null as c6 from dual union all
+  3  select null as c1,null as c2,null as c3, 3 as c4,null as c5, 2 as c6 from dual
+  4  ;
+
+View created.
+
+SQL> select * from v1;
+
+C C         C3         C4         C5         C6
+- - ---------- ---------- ---------- ----------
+             1                     2
+                        3                     2
+
+SQL> select coalesce(c1,c2,c3,c4,c5,c6) as c from v1;
+
+         C
+----------
+         1
+         3
+
+SQL> select nvl(nvl(nvl(nvl(nvl(c1,c2),c3),c4),c5),c6)from v1;
+
+NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
+----------------------------------------
+1
+3
+```
+
+
 
 ## 二、SQL函数
 

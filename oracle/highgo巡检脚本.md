@@ -1647,6 +1647,7 @@ from gv$archived_log where  STANDBY_DEST  ='NO'
 group by trunc(completion_time) order by trunc(completion_time) ;
 ```
 ## 5.21  检查数据库中DBA权限的用户
+
 ```plsql
 set pagesize 400
 select * from dba_role_privs where granted_role='DBA';
@@ -1769,6 +1770,7 @@ GUARD_STATUS GUARD,PROTECTION_MODE PROT_MODE
 from v$database;
 ```
 ## 6.2 备库同步状态
+
 **主端查询**
 
 ```plsql
