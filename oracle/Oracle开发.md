@@ -381,11 +381,76 @@ SELECT * FROM v2 WHERE vname LIKE '_\\BCD%' ESCAPE '\';
 SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
 SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
 SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
+
+SELECT LAST_NAME AS 名称,
+       PHONE_NUMBER AS 号码,
+       SALARY AS 工资,
+       SUBSTR(PHONE_NUMBER, -4) AS 尾号
+  FROM HR.EMPLOYEES
+ WHERE ROWNUM <= 5
+ ORDER BY 4;
 ```
 
+**TRANSLATE**
+
+```
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
+
+NEW_STR
+---------------
+12 您好 2314567
+
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg','1') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+ 您好
+SQL>  SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg ','1') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+您好
+```
+**部分字段排序**
+
+```
+CREATE OR REPLACE VIEW V3 AS SELECT EMPNO || ' ' ||ename AS DATA FROM emp;
+SELECT * FROM v3;
+
+SQL> SELECT DATA, TRANSLATE(DATA, '- 0123456789', '-') AS ENAME
+  2    FROM V3
+  3   ORDER BY 2;
+
+DATA                                                ENAME
+------------- --------------------------------------------------------------
+7876 ADAMS                                          ADAMS
+7499 ALLEN                                          ALLEN
+7698 BLAKE                                          BLAKE
+7782 CLARK                                          CLARK
+7902 FORD                                           FORD
+7900 JAMES                                          JAMES
+7566 JONES                                          JONES
+7839 KING                                           KING
+7654 MARTIN                                         MARTIN
+7934 MILLER                                         MILLER
+7788 SCOTT                                          SCOTT
+7369 SMITH                                          SMITH
+7844 TURNER                                         TURNER
+7521 WARD                                           WARD
+
+14 rows selected
+```
+
+**处理排序空值**
 
 
-二、SQL函数
+
+## 二、SQL函数
 
 ### 2.1 函数的作用
 

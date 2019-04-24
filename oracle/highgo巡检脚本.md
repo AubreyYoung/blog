@@ -1784,6 +1784,7 @@ select max(sequence#),thread# from gv$archived_log where  applied='YES' and RESE
 SELECT PROCESS,STATUS,THREAD#,SEQUENCE#,BLOCK#,BLOCKS,DELAY_MINS FROM V$MANAGED_STANDBY;
 ```
 [^注]: 如果主备相差3个以内可以接受，如果相差较多则表示同步异常。
+
 **切换归档日志**
 
 ```
@@ -1816,6 +1817,7 @@ select * from v$archive_gap;
 ```
 
 ## 7.1 AWR、ASH
+
 **脚本目录  $ORACLE_HOME/rdbms/admin**
 
 ```
