@@ -339,13 +339,57 @@ SQL> SELECT 档次, COUNT(*)
 4000-5000            1
 ```
 
+**取第二行数据**
+
+```
+SELECT * FROM (SELECT ROWNUM AS SN, EMP.* FROM EMP) WHERE SN = 2;
+```
+
+**随机读取数据**
+
+```
+SQL> SELECT empno,ename FROM (SELECT empno,ename FROM emp ORDER BY dbms_random.value()) WHERE ROWNUM <= 3;
+
+EMPNO ENAME
+----- ----------
+ 7844 TURNER
+ 7934 MILLER
+ 7654 MARTIN
+```
+**转义字符**
+
+```
+CREATE OR REPLACE VIEW v2 AS
+SELECT 'ABCDEF' AS vname FROM dual
+UNION ALL
+SELECT '_BCEFG' AS vname FROM dual
+UNION ALL
+SELECT '_BCDEF' AS vname FROM dual
+UNION ALL
+SELECT '_\BCDEF' AS vname FROM dual
+UNION ALL
+SELECT 'XYCEG' AS vname FROM dual;
+
+SELECT * FROM v2 WHERE vname LIKE '%CDE%';
+SELECT * FROM v2 WHERE vname LIKE '_BCD%';
+SELECT * FROM v2 WHERE vname LIKE '\_BCD%' ESCAPE '\';
+SELECT * FROM v2 WHERE vname LIKE '_\\BCD%' ESCAPE '\';
+```
+**排序**
+
+```
+SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
+SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
+SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
+```
 
 
-## 二、SQL函数
+
+二、SQL函数
 
 ### 2.1 函数的作用
 
-- 方便数据的统计
+- 方便数据的统计 
 - 处理查询结果
 
 ### 2.2 函数的分类
