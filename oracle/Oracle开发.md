@@ -229,6 +229,116 @@ NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
 3
 ```
 
+**过滤条件加括号,便于查看**
+
+```
+select *
+  from emp
+ where ((DEPTNO = 10)
+    or (comm is not null)
+    or (DEPTNO = 20 and sal <= 2000));
+```
+
+**别名作为where条件**
+
+```
+select  * from (select ename as 姓名,sal as 薪水,comm as 提成 from emp) x 
+where 薪水 > 3000;
+```
+
+**拼接字符**
+
+```
+select 'truncate table '||owner||'.'||table_name||';' as 清空表 from all_tables where owner ='SCOTT';
+//单引号转义
+select 'select table_name from all_tables where owner =''SCOTT'';' from dual;
+1.首尾单引号为字符串识别标识,不做转译用
+2.首尾单引号里面如果出现的单引号，并且有多个,则相连两个单引号转译为一个字符串单引号
+3.单引号一定成对出现,否者这个字符串出错,因为字符串不知道哪个单引号负责结束
+```
+
+**select条件逻辑**
+
+```
+select ename as 姓名,
+       case  when sal <= 2000 then '薪资低'
+       when  sal >= 5000 then '薪资高'
+       else '薪资中等'  end as 薪资水平
+  from emp
+ where deptno = 10;
+姓名       薪资水平
+---------- --------
+CLARK      薪资中等
+KING       薪资高
+MILLER     薪资低
+
+SQL>SELECT (CASE
+         WHEN SAL <= 1000 THEN
+          '0000-1000'
+         WHEN SAL <= 2000 THEN
+          '1000-2000'
+         WHEN SAL <= 3000 THEN
+          '2000-3000'
+         WHEN SAL <= 4000 THEN
+          '3000-4000'
+         WHEN SAL <= 5000 THEN
+          '4000-5000'
+         ELSE
+          'high salary'
+       END) AS 档次,
+       ENAME,
+       SAL
+  FROM EMP;
+
+档次        ENAME            SAL
+----------- ---------- ---------
+0000-1000   SMITH         800.00
+1000-2000   ALLEN        1600.00
+1000-2000   WARD         1250.00
+2000-3000   JONES        2975.00
+1000-2000   MARTIN       1250.00
+2000-3000   BLAKE        2850.00
+2000-3000   CLARK        2450.00
+2000-3000   SCOTT        3000.00
+4000-5000   KING         5000.00
+1000-2000   TURNER       1500.00
+1000-2000   ADAMS        1100.00
+0000-1000   JAMES         950.00
+2000-3000   FORD         3000.00
+1000-2000   MILLER       1300.00
+
+14 rows selected
+
+SQL> SELECT 档次, COUNT(*) 
+  FROM (SELECT (CASE
+                 WHEN SAL <= 1000 THEN
+                  '0000-1000'
+                 WHEN SAL <= 2000 THEN
+                  '1000-2000'
+                 WHEN SAL <= 3000 THEN
+                  '2000-3000'
+                 WHEN SAL <= 4000 THEN
+                  '3000-4000'
+                 WHEN SAL <= 5000 THEN
+                  '4000-5000'
+                 ELSE
+                  'high salary'
+               END) AS 档次,
+               ENAME,
+               SAL
+          FROM EMP) X
+ GROUP BY 档次
+ ORDER BY 2 DESC;
+ 
+ 
+档次          COUNT(*)
+----------- ----------
+1000-2000            6
+2000-3000            5
+0000-1000            2
+4000-5000            1
+```
+
 
 
 ## 二、SQL函数
