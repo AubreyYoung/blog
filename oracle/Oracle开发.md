@@ -448,7 +448,39 @@ DATA                                                ENAME
 
 **处理排序空值**
 
+```
+SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS FIRST;
+SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS LAST;
+```
 
+**部分值排序**
+
+```
+SELECT EMPNO AS 编码,
+       ENAME AS 姓名,
+       CASE
+         WHEN SAL >= 1000 AND SAL <= 2000 THEN
+          1
+         ELSE
+          2
+       END AS 级别,
+       SAL AS 工资
+  FROM EMP
+ WHERE DEPTNO = 30
+ ORDER BY 3, 4;
+ 
+ SELECT EMPNO AS 编码,
+       ENAME AS 姓名,
+       SAL AS 工资
+  FROM EMP
+ WHERE DEPTNO = 30
+ ORDER BY CASE
+         WHEN SAL >= 1000 AND SAL <= 2000 THEN
+          1
+         ELSE
+          2
+       END,3;
+```
 
 ## 二、SQL函数
 
