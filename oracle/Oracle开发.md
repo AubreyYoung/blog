@@ -52,6 +52,9 @@ rename   tablename to new_tablename;
 truncate table  tablename;
 drop table tablename;
 
+//创建索引
+CREATE INDEX idx_emp_ename ON emp(ename);
+
 #删除table
 drop table  bh cascade constraints purge;
 
@@ -481,6 +484,100 @@ SELECT EMPNO AS 编码,
           2
        END,3;
 ```
+
+**UNION ALL 和空值**
+
+```
+SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
+     FROM EMP
+    WHERE EMPNO = 7788
+   UNION ALL
+   SELECT DEPTNO AS 编码, DNAME AS 名称, NULL AS 上级编码
+     FROM DEPT
+    WHERE DEPTNO = 10;
+
+        编码 名称                 上级编码
+---------- -------------- ----------
+      7788 SCOTT                7566
+        10 ACCOUNTING     
+        
+SQL> SELECT '' AS c1 FROM dual;
+
+C1
+--
+```
+
+**UNION 与 OR**
+
+```
+SQL> SELECT empno,ename FROM emp WHERE empno = 7788 OR ename = 'SCOTT';
+
+EMPNO ENAME
+----- ----------
+ 7788 SCOTT
+
+SQL> SELECT EMPNO, ENAME
+  2    FROM EMP
+  3   WHERE EMPNO = 7788
+  4  UNION ALL
+  5  SELECT EMPNO, ENAME
+  6    FROM EMP
+  7   WHERE ENAME = 'SCOTT';
+
+EMPNO ENAME
+----- ----------
+ 7788 SCOTT
+ 7788 SCOTT
+ 
+SQL> SELECT EMPNO, ENAME
+  2    FROM EMP
+  3   WHERE EMPNO = 7788
+  4  UNION
+  5  SELECT EMPNO, ENAME
+  6    FROM EMP
+  7   WHERE ENAME = 'SCOTT';
+
+EMPNO ENAME
+----- ----------
+ 7788 SCOTT
+ 
+ SCOTT@ORCLPDB1@ORCLPDB1>  ALTER SESSION SET "_b_tree_bitmap_plans" = FALSE;
+
+Session altered.
+
+SCOTT@ORCLPDB1@ORCLPDB1>  EXPLAIN PLAN FOR SELECT empno,ename FROM emp WHERE empno = 7788 OR ename = 'SCOTT';
+
+Explained.
+
+SCOTT@ORCLPDB1@ORCLPDB1>  SELECT * FROM TABLE(dbms_xplan.display);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 1494988596
+
+---------------------------------------------------------------------------------------------------------
+| Id  | Operation                             | Name            | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                      |                 |     2 |    40 |     3   (0)| 00:00:01 |
+|   1 |  VIEW                                 | VW_ORE_DD1C526D |     2 |    40 |     3   (0)| 00:00:01 |
+|   2 |   UNION-ALL                           |                 |       |       |            |          |
+|   3 |    TABLE ACCESS BY INDEX ROWID        | EMP             |     1 |    10 |     1   (0)| 00:00:01 |
+|*  4 |     INDEX UNIQUE SCAN                 | PK_EMP          |     1 |       |     0   (0)| 00:00:01 |
+|*  5 |    TABLE ACCESS BY INDEX ROWID BATCHED| EMP             |     1 |    10 |     2   (0)| 00:00:01 |
+|*  6 |     INDEX RANGE SCAN                  | IDX_EMP_ENAME   |     1 |       |     1   (0)| 00:00:01 |
+---------------------------------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   4 - access("EMPNO"=7788)
+   5 - filter(LNNVL("EMPNO"=7788))
+   6 - access("ENAME"='SCOTT')
+
+20 rows selected.
+```
+
+
 
 ## 二、SQL函数
 

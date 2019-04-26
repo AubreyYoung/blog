@@ -82,6 +82,7 @@ netstat -in
 /opt/ignite/bin/print_manifest
 ```
 ## 2.2 系统内存检查
+
 **Windows**
 
 ```
@@ -109,6 +110,7 @@ nmon
 topas
 ```
 [^注]: 如果不带任何标志运行 prtconf 命令，会显示系统型号、机器序列号、处理器类型、处理器数目、处理器时钟速度、cpu 类型、总内存大小、网络信息、文件系统信息、调页空间信息和设备信息。nmon 然后敲m   巡检报告中务必体现该命令输出信息，可选择截图方式保存
+
 **Solaris**
 
 ```
@@ -126,6 +128,7 @@ dmesg|grep Physical
 swapinfo -atm
 ```
 ## 2.3 操作系统补丁检查
+
 **AIX**
 
 **11.2 AIX6.1 RAC**
@@ -147,18 +150,21 @@ rpm -q compat-libstdc++-33 binutils compat-libcap1 gcc gcc-c++ glibc glibc-devel
 ```
 [^注 ]: i386和x86_64都要有的包：glibc glibc-devel libaio libaio-devel libgcc libstdc++ libstdc++-devel libXi libXtst
 [^参考文章]: Requirements for Installing Oracle 11.2.0.4 RDBMS on OL7 or RHEL7 64-bit (x86-64) (文档 ID 1962100.1)
+
 **11.2 OL6 or RHEL6 (x86-64)**
 
 ```
 rpm -q binutils compat-libcap1 compat-libstdc++-33 gcc gcc-c++ glibc glibc glibc-devel glibc-devel ksh libgcc libstdc++ libstdc++-devel libaio libaio-devel make sysstat cpp glibc-headers mpfr
 ```
 [^参考文章]: Requirements for Installing Oracle 11gR2 RDBMS on RHEL6 or OL6 64-bit (x86-64) (文档 ID 1441282.1)
+
 **11.2 OL5 or RHEL5 (x86-64)**
 
 ```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat-libstdc++-33 gcc gcc-c++ elfutils-libelf elfutils-libelf-devel elfutils-libelf-devel-static glibc glibc-common glibc-devel glibc-headers ksh libaio libaio-devel libgcc libstdc++ libstdc++-devel make sysstat unixODBC unixODBC-devel
 ```
 [^注 ]: i386和x86_64都要有的包：compat-libstdc++-33 glibc libaio libgcc libstdc++ glibc-devel libaio-devel unixODBC unixODBC-devel
+
 **11.1 OL5 or RHEL5 (x86-64)**
 
 ```
@@ -228,6 +234,7 @@ ls /stand												//**HP-UX系统内核文件**
 /usr/bin/ndd /dev/udp udp_smallest_anon_port udp_largest_anon_port
 ```
 ## 2.5 操作系统时区、时间检查
+
 **AIX,HP-UX,Solaris**
 
 ```
