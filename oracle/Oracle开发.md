@@ -577,6 +577,21 @@ Predicate Information (identified by operation id):
 20 rows selected.
 ```
 
+```
+SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
+  FROM EMP E
+ INNER JOIN DEPT D
+    ON (E.DEPTNO = D.DEPTNO)
+ WHERE E.DEPTNO = 10;
+ 
+ SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
+   FROM EMP E, DEPT D
+  WHERE E.DEPTNO = D.DEPTNO
+    AND E.DEPTNO = 10;
+```
+
+
+
 
 
 ## 二、SQL函数

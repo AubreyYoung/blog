@@ -1807,6 +1807,9 @@ archive log all；
 SQL> alter database register logfile '/u01/archlog/1_132735_893238304.arc';
 //大量
 rman> catalog start with '/u01/archlog/';
+
+//rman 
+CONFIGURE ARCHIVELOG DELETION POLICY TO APPLIED ON ALL STANDBY;
 ```
 
 **同步状态**
