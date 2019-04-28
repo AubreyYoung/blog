@@ -746,6 +746,27 @@ column name format a30
 column value format a40
 select inst_id,name,value from gv$parameter where value is not null;
 ```
+#### 数据库时区
+
+```
+//数据库时区
+select dbtimezone from dual ;  
+//看会话时区
+select sessiontimezone from dual ; 
+//查看当前时间和时区 
+SQL> select systimestamp from dual; 
+//修改数据时区 
+alter database set time_zone='+8:00'; 
+
+select u.name || '.' || o.name || '.' || c.name TSLTZcolumn
+  from sys.obj$ o, sys.col$ c, sys.user$ u
+where c.type# = 231
+   and o.obj# = c.obj#
+   and u.user# = o.owner#;
+```
+
+
+
 #### **非默认参数**
 
 ```plsql
