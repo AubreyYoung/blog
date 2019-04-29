@@ -746,6 +746,27 @@ column name format a30
 column value format a40
 select inst_id,name,value from gv$parameter where value is not null;
 ```
+#### 数据库时区
+
+```
+//数据库时区
+select dbtimezone from dual ;  
+//看会话时区
+select sessiontimezone from dual ; 
+//查看当前时间和时区 
+SQL> select systimestamp from dual; 
+//修改数据时区 
+alter database set time_zone='+8:00'; 
+
+select u.name || '.' || o.name || '.' || c.name TSLTZcolumn
+  from sys.obj$ o, sys.col$ c, sys.user$ u
+where c.type# = 231
+   and o.obj# = c.obj#
+   and u.user# = o.owner#;
+```
+
+
+
 #### **非默认参数**
 
 ```plsql
@@ -1807,6 +1828,9 @@ archive log all；
 SQL> alter database register logfile '/u01/archlog/1_132735_893238304.arc';
 //大量
 rman> catalog start with '/u01/archlog/';
+
+//rman 
+CONFIGURE ARCHIVELOG DELETION POLICY TO APPLIED ON ALL STANDBY;
 ```
 
 **同步状态**
@@ -1985,5 +2009,22 @@ Restore point created.
 
 ```
 drop restore point SWITCHOVER_START_GRP;
+```
+
+## 8.3 Windows Oracle服务配置
+
+```
+oradim.exe -delete -SID HISSERVER
+oradim.exe -new -sid HISSERVER -startmode auto -srvcstart system -spfile
+```
+
+## 8.4 密码文件创建
+
+```
+//UNIX
+orapwd file=$ORACLE_HOME/dbs/orapw<local ORACLE_SID> password=<sys password> entries=5
+
+//Windows
+orapwd file=$ORACLE_HOME/database/PWD<local ORACLE_SID>.ora password=<sys password> entries=5
 ```
 
