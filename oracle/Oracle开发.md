@@ -5,7 +5,7 @@
 
 - 用户
 
-```
+```plsql
 show user
 //解锁用户
 alter  user usernmae account unlock;
@@ -18,7 +18,7 @@ drop user ×× cascade
 ```
 - 表空间
 
-```
+```plsql
 create tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
 create temporary tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
 select * from dba_data_files;
@@ -40,7 +40,7 @@ drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRA
 
 - 表
 
-```
+```plsql
 alter table tablename add column_nmae datatype;
 --修改数据类型
 alter table tablename modify column_nmae datatype not null/null;
@@ -57,12 +57,13 @@ CREATE INDEX idx_emp_ename ON emp(ename);
 
 #删除table
 drop table  bh cascade constraints purge;
+drop table emp2 purge;
 
 insert into table_name (....) values();
 update table table_name set XX=XX where  ...
 ```
 - 约束在表中的作用
-```
+```plsql
 create table tablename(
 )
 constraint constraintname primary key();
@@ -102,7 +103,7 @@ ALTER TABLE T_INVOICE_DETAIL ADD CONSTRAINT FK_INVOICE_ID FOREIGN KEY(INVOICE_ID
 
 查询的作用,强大的select
 
-```
+```plsql
 select  distinct .. from tablename where ...;
 -- col username heading 用户名
 -- col value for 9999.99 
@@ -141,7 +142,7 @@ no rows selected
 
 [^注]: NULL不支持加、减、乘、除、大小比较、相等比较，否则运算结果为NULL。而对于其他的函数,在使用时最好测试一下有NULL时的返回结果。
 
-````
+````plsql
 SQL> select * from emp where comm <> null;
 
 no rows selected
@@ -181,7 +182,7 @@ GREATEST(1,NULL)
 
 **NULL转换为0**
 
-```
+```plsql
 SQL> select coalesce(comm,0) from emp;
 
 COALESCE(COMM,0)
@@ -234,7 +235,7 @@ NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
 
 **过滤条件加括号,便于查看**
 
-```
+```plsql
 select *
   from emp
  where ((DEPTNO = 10)
@@ -244,14 +245,14 @@ select *
 
 **别名作为where条件**
 
-```
+```plsql
 select  * from (select ename as 姓名,sal as 薪水,comm as 提成 from emp) x 
 where 薪水 > 3000;
 ```
 
 **拼接字符**
 
-```
+```plsql
 select 'truncate table '||owner||'.'||table_name||';' as 清空表 from all_tables where owner ='SCOTT';
 //单引号转义
 select 'select table_name from all_tables where owner =''SCOTT'';' from dual;
@@ -262,7 +263,7 @@ select 'select table_name from all_tables where owner =''SCOTT'';' from dual;
 
 **select条件逻辑**
 
-```
+```plsql
 select ename as 姓名,
        case  when sal <= 2000 then '薪资低'
        when  sal >= 5000 then '薪资高'
@@ -344,13 +345,13 @@ SQL> SELECT 档次, COUNT(*)
 
 **取第二行数据**
 
-```
+```plsql
 SELECT * FROM (SELECT ROWNUM AS SN, EMP.* FROM EMP) WHERE SN = 2;
 ```
 
 **随机读取数据**
 
-```
+```plsql
 SQL> SELECT empno,ename FROM (SELECT empno,ename FROM emp ORDER BY dbms_random.value()) WHERE ROWNUM <= 3;
 
 EMPNO ENAME
@@ -361,7 +362,7 @@ EMPNO ENAME
 ```
 **转义字符**
 
-```
+```plsql
 CREATE OR REPLACE VIEW v2 AS
 SELECT 'ABCDEF' AS vname FROM dual
 UNION ALL
@@ -380,7 +381,7 @@ SELECT * FROM v2 WHERE vname LIKE '_\\BCD%' ESCAPE '\';
 ```
 **排序**
 
-```
+```plsql
 SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
 SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
 SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
@@ -396,7 +397,7 @@ SELECT LAST_NAME AS 名称,
 
 **TRANSLATE**
 
-```
+```plsql
 SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
 
 NEW_STR
@@ -421,7 +422,7 @@ NEW_STR
 ```
 **部分字段排序**
 
-```
+```plsql
 CREATE OR REPLACE VIEW V3 AS SELECT EMPNO || ' ' ||ename AS DATA FROM emp;
 SELECT * FROM v3;
 
@@ -451,14 +452,14 @@ DATA                                                ENAME
 
 **处理排序空值**
 
-```
+```plsql
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS FIRST;
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS LAST;
 ```
 
 **部分值排序**
 
-```
+```plsql
 SELECT EMPNO AS 编码,
        ENAME AS 姓名,
        CASE
@@ -487,7 +488,7 @@ SELECT EMPNO AS 编码,
 
 **UNION ALL 和空值**
 
-```
+```plsql
 SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
      FROM EMP
     WHERE EMPNO = 7788
@@ -509,7 +510,7 @@ C1
 
 **UNION 与 OR**
 
-```
+```plsql
 SQL> SELECT empno,ename FROM emp WHERE empno = 7788 OR ename = 'SCOTT';
 
 EMPNO ENAME
@@ -576,8 +577,9 @@ Predicate Information (identified by operation id):
 
 20 rows selected.
 ```
+**inner join**
 
-```
+```plsql
 SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
   FROM EMP E
  INNER JOIN DEPT D
@@ -588,6 +590,341 @@ SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
    FROM EMP E, DEPT D
   WHERE E.DEPTNO = D.DEPTNO
     AND E.DEPTNO = 10;
+    
+    
+    SQL> EXPLAIN PLAN FOR
+  2    SELECT A.EMPNO, A.ENAME, A.JOB, A.SAL, A.DEPTNO
+  3      FROM EMP A
+  4     INNER JOIN EMP3 B
+  5        ON (B.ENAME = A.ENAME AND B.JOB = A.JOB AND B.SAL = A.SAL);
+
+Explained
+
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 620718003
+---------------------------------------------------------------------------
+| Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |      |     4 |   160 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN         |      |     4 |   160 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP3 |     4 |    60 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP  |    14 |   350 |     3   (0)| 00:00:01 |
+---------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - access("B"."ENAME"="A"."ENAME" AND "B"."JOB"="A"."JOB" AND
+              "B"."SAL"="A"."SAL")
+Note
+-----
+   - this is an adaptive plan
+
+20 rows selected
+```
+
+**IN**
+
+```plsql
+SQL> EXPLAIN PLAN FOR
+  2    SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
+  3      FROM EMP
+  4     WHERE (ENAME, JOB, SAL) IN (SELECT ENAME, JOB, SAL FROM EMP3);
+
+Explained
+
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 102031456
+--------------------------------------------------------------------------------
+| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CP
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT             |               |     4 |   160 |     6  (1
+|   1 |  NESTED LOOPS                |               |     4 |   160 |     6  (1
+|   2 |   NESTED LOOPS               |               |     4 |   160 |     6  (1
+|   3 |    SORT UNIQUE               |               |     4 |    60 |     3   (
+|   4 |     TABLE ACCESS FULL        | EMP3          |     4 |    60 |     3   (
+|*  5 |    INDEX RANGE SCAN          | IDX_EMP_ENAME |     1 |       |     0   (
+|*  6 |   TABLE ACCESS BY INDEX ROWID| EMP           |     1 |    25 |     1   (
+--------------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   5 - access("ENAME"="ENAME")
+   6 - filter("SAL"="SAL" AND "JOB"="JOB")
+
+19 rows selected
+```
+
+**exists**
+
+```plsql
+SQL> EXPLAIN PLAN FOR
+  2    SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
+  3      FROM EMP A
+  4     WHERE EXISTS (SELECT NULL
+  5              FROM EMP3 B
+  6             WHERE B.ENAME = A.ENAME
+  7               AND B.JOB = A.JOB
+  8               AND B.SAL = A.SAL);
+
+Explained
+
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 102031456
+--------------------------------------------------------------------------------
+| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CP
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT             |               |     4 |   160 |     6  (1
+|   1 |  NESTED LOOPS                |               |     4 |   160 |     6  (1
+|   2 |   NESTED LOOPS               |               |     4 |   160 |     6  (1
+|   3 |    SORT UNIQUE               |               |     4 |    60 |     3   (
+|   4 |     TABLE ACCESS FULL        | EMP3          |     4 |    60 |     3   (
+|*  5 |    INDEX RANGE SCAN          | IDX_EMP_ENAME |     1 |       |     0   (
+|*  6 |   TABLE ACCESS BY INDEX ROWID| EMP           |     1 |    25 |     1   (
+--------------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   5 - access("B"."ENAME"="A"."ENAME")
+   6 - filter("B"."SAL"="A"."SAL" AND "B"."JOB"="A"."JOB")
+
+19 rows selected
+```
+
+**表连接**
+
+```plsql
+DROP TABLE L PURGE;
+DROP TABLE R PURGE;
+
+/*左表*/
+CREATE TABLE L AS
+  SELECT 'left_1' AS STR, '1' AS V
+    FROM DUAL
+  UNION ALL
+  SELECT 'left_2' AS STR, '2' AS V
+    FROM DUAL
+  UNION ALL
+  SELECT 'left_3' AS STR, '3' AS V
+    FROM DUAL
+  UNION ALL
+  SELECT 'left_4' AS STR, '4' AS V
+    FROM DUAL;
+
+/*右表*/
+CREATE TABLE R AS
+  SELECT 'right_3' AS STR, '3' AS V
+    FROM DUAL
+  UNION ALL
+  SELECT 'right_4' AS STR, '4' AS V
+    FROM DUAL
+  UNION ALL
+  SELECT 'right_5' AS STR, '5' AS V
+    FROM DUAL
+  UNION ALL
+  SELECT 'right_6' AS STR, '6' AS V
+    FROM DUAL;
+
+/*INNER JOIN*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L
+ INNER JOIN R
+    ON L.V = R.V
+ ORDER BY 1, 2;
+
+/*WHERE*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L, R
+ WHERE L.V = R.V
+ ORDER BY 1, 2;
+
+/*LEFT JOIN*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L
+  LEFT JOIN R
+    ON L.V = R.V
+ ORDER BY 1, 2;
+
+/*+*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L, R
+ WHERE L.V = R.V(+)
+ ORDER BY 1, 2;
+
+/*RIGHT JOIN*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L
+ RIGHT JOIN R
+    ON L.V = R.V
+ ORDER BY 1, 2;
+ 
+/*+*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L, R
+ WHERE L.V(+) = R.V
+ ORDER BY 1, 2;
+ 
+/*FULL JOIN*/
+SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
+  FROM L
+ FULL JOIN R
+    ON L.V = R.V
+ ORDER BY 1, 2;
+```
+
+**自关联**
+
+```plsql
+/*自关联*/
+SELECT 员工.EMPNO AS 职工编码,
+       员工.ENAME AS 职工姓名,
+       员工.JOB   AS 工作,
+       员工.MGR   AS 员工表_主管编码,
+       主管.EMPNO AS 主管表_主管编码,
+       主管.ENAME AS 主管姓名
+  FROM EMP 员工
+  LEFT JOIN EMP 主管
+    ON (员工.MGR = 主管.EMPNO)
+ ORDER BY 1;
+/*视图*/
+CREATE OR REPLACE VIEW 员工 AS SELECT * FROM emp;
+CREATE OR REPLACE VIEW 主管 AS SELECT * FROM emp;
+SELECT 员工.EMPNO AS 职工编码,
+       员工.ENAME AS 职工姓名,
+       员工.JOB   AS 工作,
+       员工.MGR   AS 员工表_主管编码,
+       主管.EMPNO AS 主管表_主管编码,
+       主管.ENAME AS 主管姓名
+  FROM 员工
+  LEFT JOIN 主管
+    ON (员工.MGR = 主管.EMPNO)
+ ORDER BY 1;
+```
+
+**NOT IN,NOT EXISTS 和LEFT JOIN**
+
+```PLSQL
+/*NOT IN*/
+SQL> EXPLAIN PLAN FOR
+  2    SELECT *
+  3      FROM DEPT
+  4     WHERE DEPTNO NOT IN
+  5           (SELECT EMP.DEPTNO FROM EMP WHERE EMP.DEPTNO IS NOT NULL);
+
+Explained
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 1353548327
+--------------------------------------------------------------------------------
+| Id  | Operation                    | Name    | Rows  | Bytes | Cost (%CPU)| Ti
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT             |         |     1 |    23 |     6  (17)| 00
+|   1 |  MERGE JOIN ANTI             |         |     1 |    23 |     6  (17)| 00
+|   2 |   TABLE ACCESS BY INDEX ROWID| DEPT    |     4 |    80 |     2   (0)| 00
+|   3 |    INDEX FULL SCAN           | PK_DEPT |     4 |       |     1   (0)| 00
+|*  4 |   SORT UNIQUE                |         |    14 |    42 |     4  (25)| 00
+|*  5 |    TABLE ACCESS FULL         | EMP     |    14 |    42 |     3   (0)| 00
+--------------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   4 - access("DEPTNO"="EMP"."DEPTNO")
+       filter("DEPTNO"="EMP"."DEPTNO")
+   5 - filter("EMP"."DEPTNO" IS NOT NULL)
+
+19 rows selected
+
+/*NOT EXISTS*/
+SQL> EXPLAIN PLAN FOR
+  2    SELECT *
+  3      FROM DEPT
+  4     WHERE NOT EXISTS (SELECT NULL FROM EMP WHERE EMP.DEPTNO = DEPT.DEPTNO);
+
+Explained
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 1353548327
+--------------------------------------------------------------------------------
+| Id  | Operation                    | Name    | Rows  | Bytes | Cost (%CPU)| Ti
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT             |         |     1 |    23 |     6  (17)| 00
+|   1 |  MERGE JOIN ANTI             |         |     1 |    23 |     6  (17)| 00
+|   2 |   TABLE ACCESS BY INDEX ROWID| DEPT    |     4 |    80 |     2   (0)| 00
+|   3 |    INDEX FULL SCAN           | PK_DEPT |     4 |       |     1   (0)| 00
+|*  4 |   SORT UNIQUE                |         |    14 |    42 |     4  (25)| 00
+|   5 |    TABLE ACCESS FULL         | EMP     |    14 |    42 |     3   (0)| 00
+--------------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   4 - access("EMP"."DEPTNO"="DEPT"."DEPTNO")
+       filter("EMP"."DEPTNO"="DEPT"."DEPTNO")
+
+18 rows selected
+
+/*LEFT JOIN*/
+SQL> EXPLAIN PLAN FOR
+  2    SELECT DEPT.*
+  3      FROM DEPT
+  4      LEFT JOIN EMP
+  5        ON EMP.DEPTNO = DEPT.DEPTNO
+  6     WHERE EMP.EMPNO IS NULL;
+
+Explained
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 457395871
+--------------------------------------------------------------------------------
+| Id  | Operation                     | Name    | Rows  | Bytes | Cost (%CPU)| T
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT              |         |     1 |    27 |     6  (17)| 0
+|*  1 |  FILTER                       |         |       |       |            |
+|   2 |   MERGE JOIN OUTER            |         |     1 |    27 |     6  (17)| 0
+|   3 |    TABLE ACCESS BY INDEX ROWID| DEPT    |     4 |    80 |     2   (0)| 0
+|   4 |     INDEX FULL SCAN           | PK_DEPT |     4 |       |     1   (0)| 0
+|*  5 |    SORT JOIN                  |         |    14 |    98 |     4  (25)| 0
+|   6 |     TABLE ACCESS FULL         | EMP     |    14 |    98 |     3   (0)| 0
+--------------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("EMP"."EMPNO" IS NULL)
+   5 - access("EMP"."DEPTNO"(+)="DEPT"."DEPTNO")
+       filter("EMP"."DEPTNO"(+)="DEPT"."DEPTNO")
+
+20 rows selected
+```
+
+**GROUP BY不显示0行**
+
+```plsql
+SQL> SELECT COUNT(*) FROM EMP GROUP BY DEPTNO;
+
+  COUNT(*)
+----------
+         6
+         5
+         3
+
+SQL> SELECT COUNT(*) FROM EMP WHERE DEPTNO = 40;
+
+  COUNT(*)
+----------
+         0
 ```
 
 
