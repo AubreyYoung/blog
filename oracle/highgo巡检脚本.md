@@ -2011,3 +2011,20 @@ Restore point created.
 drop restore point SWITCHOVER_START_GRP;
 ```
 
+## 8.3 Windows Oracle服务配置
+
+```
+oradim.exe -delete -SID HISSERVER
+oradim.exe -new -sid HISSERVER -startmode auto -srvcstart system -spfile
+```
+
+## 8.4 密码文件创建
+
+```
+//UNIX
+orapwd file=$ORACLE_HOME/dbs/orapw<local ORACLE_SID> password=<sys password> entries=5
+
+//Windows
+orapwd file=$ORACLE_HOME/database/PWD<local ORACLE_SID>.ora password=<sys password> entries=5
+```
+
