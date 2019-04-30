@@ -927,7 +927,192 @@ SQL> SELECT COUNT(*) FROM EMP WHERE DEPTNO = 40;
          0
 ```
 
+**LEFT JOIN的条件**
 
+```plsql
+SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  2    FROM L
+  3    LEFT JOIN R
+  4      ON L.V = R.V
+  5   WHERE R.STATUS = 1
+  6   ORDER BY 1, 2;
+
+LEFT_STR RIGHT_STR     STATUS
+-------- --------- ----------
+left_3   right_3            1
+
+SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  2    FROM L,R
+  3   WHERE L.V = R.V(+)
+  4     AND R.STATUS = 1
+  5   ORDER BY 1, 2;
+
+LEFT_STR RIGHT_STR     STATUS
+-------- --------- ----------
+left_3   right_3            1
+
+SQL> EXPLAIN PLAN FOR
+  2    SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  3      FROM L
+  4      LEFT JOIN R
+  5        ON L.V = R.V
+  6     WHERE R.STATUS = 1
+  7     ORDER BY 1, 2;
+
+Explained
+
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 688663707
+----------------------------------------------------------------------------
+| Id  | Operation           | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT    |      |     2 |    42 |     7  (15)| 00:00:01 |
+|   1 |  SORT ORDER BY      |      |     2 |    42 |     7  (15)| 00:00:01 |
+|*  2 |   HASH JOIN         |      |     2 |    42 |     6   (0)| 00:00:01 |
+|*  3 |    TABLE ACCESS FULL| R    |     2 |    24 |     3   (0)| 00:00:01 |
+|   4 |    TABLE ACCESS FULL| L    |     4 |    36 |     3   (0)| 00:00:01 |
+----------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   2 - access("L"."V"="R"."V")
+   3 - filter("R"."STATUS"=1)
+
+17 rows selected
+
+SQL> EXPLAIN PLAN FOR
+  2    SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  3      FROM L,R
+  4     WHERE L.V = R.V(+)
+  5       AND R.STATUS = 1
+  6     ORDER BY 1, 2;
+
+Explained
+
+
+SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+PLAN_TABLE_OUTPUT
+--------------------------------------------------------------------------------
+Plan hash value: 688663707
+----------------------------------------------------------------------------
+| Id  | Operation           | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT    |      |     2 |    42 |     7  (15)| 00:00:01 |
+|   1 |  SORT ORDER BY      |      |     2 |    42 |     7  (15)| 00:00:01 |
+|*  2 |   HASH JOIN         |      |     2 |    42 |     6   (0)| 00:00:01 |
+|*  3 |    TABLE ACCESS FULL| R    |     2 |    24 |     3   (0)| 00:00:01 |
+|   4 |    TABLE ACCESS FULL| L    |     4 |    36 |     3   (0)| 00:00:01 |
+----------------------------------------------------------------------------
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   2 - access("L"."V"="R"."V")
+   3 - filter("R"."STATUS"=1)
+
+17 rows selected
+
+
+SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  2    FROM L
+  3    LEFT JOIN R
+  4      ON (L.V = R.V AND R.STATUS = 1)
+  5   ORDER BY 1, 2;
+
+LEFT_STR RIGHT_STR     STATUS
+-------- --------- ----------
+left_1             
+left_2             
+left_3   right_3            1
+left_4             
+
+SQL> 
+SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  2    FROM L,R
+  3   WHERE L.V = R.V(+)
+  4     AND R.STATUS(+) = 1
+  5   ORDER BY 1, 2;
+
+LEFT_STR RIGHT_STR     STATUS
+-------- --------- ----------
+left_1             
+left_2             
+left_3   right_3            1
+left_4             
+
+//改写的SQL
+SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
+  FROM L
+  LEFT JOIN (SELECT * FROM R WHERE STATUS = 1) R
+    ON (L.V = R.V AND R.STATUS = 1)
+ ORDER BY 1, 2;
+ 
+ //改写的SQL执行计划
+  Plan Hash Value  : 2310059642 
+
+-----------------------------------------------------------------------
+| Id  | Operation             | Name | Rows | Bytes | Cost | Time     |
+-----------------------------------------------------------------------
+|   0 | SELECT STATEMENT      |      |    4 |    84 |    7 | 00:00:01 |
+|   1 |   SORT ORDER BY       |      |    4 |    84 |    7 | 00:00:01 |
+| * 2 |    HASH JOIN OUTER    |      |    4 |    84 |    6 | 00:00:01 |
+|   3 |     TABLE ACCESS FULL | L    |    4 |    36 |    3 | 00:00:01 |
+| * 4 |     TABLE ACCESS FULL | R    |    2 |    24 |    3 | 00:00:01 |
+-----------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+------------------------------------------
+* 2 - access("L"."V"="R"."V"(+))
+* 4 - filter("R"."STATUS"(+)=1 AND "STATUS"(+)=1)
+```
+
+**比对表数据**
+
+```plsql
+CREATE OR REPLACE VIEW V4 AS
+  SELECT *
+    FROM EMP
+   WHERE DEPTNO != 10
+  UNION ALL
+  SELECT *
+    FROM EMP
+   WHERE ENAME = 'SCOTT';
+
+SELECT * FROM V4 WHERE ENAME = 'SCOTT';
+
+SELECT ROWNUM, EMPNO, ENAME FROM EMP WHERE ENAME = 'SCOTT';
+
+SQL> SELECT V4.EMPNO, V4.ENAME, B.EMPNO, B.ENAME
+  2    FROM V4
+  3    FULL JOIN EMP B
+  4      ON (B.EMPNO = V4.EMPNO)
+  5   WHERE (V4.EMPNO IS NULL OR B.EMPNO IS NULL);
+
+EMPNO ENAME      EMPNO ENAME
+----- ---------- ----- ----------
+                  7782 CLARK
+                  7839 KING
+                  7934 MILLER
+                
+//改写SQL
+SQL> SELECT V.EMPNO, V.ENAME, V.CNT, EMP.EMPNO, EMP.ENAME, EMP.CNT
+  2    FROM (SELECT EMPNO, ENAME, COUNT(*) AS CNT FROM V4 GROUP BY EMPNO, ENAME) V
+  3    FULL JOIN (SELECT EMPNO, ENAME, COUNT(*) AS CNT
+  4                 FROM EMP
+  5                GROUP BY EMPNO, ENAME) EMP
+  6      ON (EMP.EMPNO = V.EMPNO AND V.CNT = EMP.CNT)
+  7   WHERE (V.EMPNO IS NULL OR EMP.EMPNO IS NULL);
+
+EMPNO ENAME             CNT EMPNO ENAME             CNT
+----- ---------- ---------- ----- ---------- ----------
+                             7782 CLARK               1
+                             7788 SCOTT               1
+                             7839 KING                1
+                             7934 MILLER              1
+ 7788 SCOTT               2                  
+```
 
 
 

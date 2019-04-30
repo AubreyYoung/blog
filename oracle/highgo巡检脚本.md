@@ -1666,6 +1666,7 @@ RMAN> delete force archivelog until time "sysdate-1";
 delete  archivelog until time "sysdate-1";
 ```
 ## 5.20 数据库所有实例每天生成的归档大小
+
 ```plsql
 select
 trunc(completion_time) as "Date"
