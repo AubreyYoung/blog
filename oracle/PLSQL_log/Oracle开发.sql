@@ -517,3 +517,84 @@ INSERT INTO EMP_BONUS VALUES (7839, DATE '2005-2-15', 3);
 INSERT INTO EMP_BONUS VALUES (7783, DATE '2005-2-15', 1);
 
 SELECT * FROM EMP_BONUS;
+
+SELECT E.DEPTNO,
+       E.EMPNO,
+       E.ENAME,
+       E.SAL,
+       (E.SAL * CASE
+         WHEN EB.TYPE = 1 THEN
+          0.1
+         WHEN EB.TYPE = 2 THEN
+          0.2
+         WHEN EB.TYPE = 3 THEN
+          0.3
+       END) AS BONUS
+  FROM EMP E
+ INNER JOIN EMP_BONUS EB
+    ON (E.EMPNO = EB.EMPNO)
+ WHERE E.DEPTNO = 10
+ ORDER BY 1, 2;
+
+SELECT SUM(E.SAL) AS TOTAL_SAL,
+       SUM((E.SAL * CASE
+             WHEN EB.TYPE = 1 THEN
+              0.1
+             WHEN EB.TYPE = 2 THEN
+              0.2
+             WHEN EB.TYPE = 3 THEN
+              0.3
+           END)) AS TOLTAL_BONUS
+  FROM EMP E
+ INNER JOIN EMP_BONUS EB
+    ON (E.EMPNO = EB.EMPNO)
+ WHERE E.DEPTNO = 10
+ ORDER BY 1, 2;
+
+SELECT SUM(SAL) AS TOTAL_SAL FROM EMP WHERE DEPTNO = 10;
+SELECT SAL AS TOTAL_SAL FROM EMP WHERE DEPTNO = 10;
+
+SELECT EB.EMPNO,
+       (CASE
+         WHEN EB.TYPE = 1 THEN
+          0.1
+         WHEN EB.TYPE = 2 THEN
+          0.2
+         WHEN EB.TYPE = 3 THEN
+          0.3
+       END) AS RATE
+  FROM EMP_BONUS EB
+ ORDER BY 1, 2;
+
+SELECT SUM(E.SAL) AS TOTAL_SAL, SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+  FROM EMP E
+ INNER JOIN (SELECT EB.EMPNO,
+                    SUM(CASE
+                          WHEN EB.TYPE = 1 THEN
+                           0.1
+                          WHEN EB.TYPE = 2 THEN
+                           0.2
+                          WHEN EB.TYPE = 3 THEN
+                           0.3
+                        END) AS RATE
+               FROM EMP_BONUS EB
+              GROUP BY EB.EMPNO) EB2
+    ON E.EMPNO = EB2.EMPNO
+ WHERE E.DEPTNO = 10;
+ 
+ 
+ SELECT SUM(E.SAL) AS TOTAL_SAL, SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+  FROM EMP E
+ INNER JOIN (SELECT EB.EMPNO,
+                    SUM(CASE
+                          WHEN EB.TYPE = 1 THEN
+                           0.1
+                          WHEN EB.TYPE = 2 THEN
+                           0.2
+                          WHEN EB.TYPE = 3 THEN
+                           0.3
+                        END) AS RATE
+               FROM EMP_BONUS EB
+              GROUP BY EB.EMPNO) EB2
+    ON E.EMPNO = EB2.EMPNO
+ WHERE E.DEPTNO = 10;
