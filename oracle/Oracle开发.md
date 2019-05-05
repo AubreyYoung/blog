@@ -1114,6 +1114,159 @@ EMPNO ENAME             CNT EMPNO ENAME             CNT
  7788 SCOTT               2                  
 ```
 
+**聚集与内连接**
+
+```plsql
+SQL> SELECT E.DEPTNO,
+  2         SUM(E.SAL) AS TOTAL_SAL,
+  3         SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+  4    FROM EMP E
+  5   INNER JOIN (SELECT EB.EMPNO,
+  6                      SUM(CASE
+  7                            WHEN EB.TYPE = 1 THEN
+  8                             0.1
+  9                            WHEN EB.TYPE = 2 THEN
+ 10                             0.2
+ 11                            WHEN EB.TYPE = 3 THEN
+ 12                             0.3
+ 13                          END) AS RATE
+ 14                 FROM EMP_BONUS EB
+ 15                GROUP BY EB.EMPNO) EB2
+ 16      ON E.EMPNO = EB2.EMPNO
+ 17   WHERE E.DEPTNO = 10
+ 18   GROUP BY DEPTNO;
+
+DEPTNO  TOTAL_SAL TOLTAL_BONUS
+------ ---------- ------------
+    10       6300         1890
+```
+
+**聚集与外连接**
+
+```plsql
+SQL> SELECT E.DEPTNO,
+  2         SUM(E.SAL) AS TOTAL_SAL,
+  3         SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+  4    FROM EMP E
+  5    LEFT JOIN (SELECT EB.EMPNO,
+  6                      SUM(CASE
+  7                            WHEN EB.TYPE = 1 THEN
+  8                             0.1
+  9                            WHEN EB.TYPE = 2 THEN
+ 10                             0.2
+ 11                            WHEN EB.TYPE = 3 THEN
+ 12                             0.3
+ 13                          END) AS RATE
+ 14                 FROM EMP_BONUS EB
+ 15                GROUP BY EB.EMPNO) EB2
+ 16      ON E.EMPNO = EB2.EMPNO
+ 17   GROUP BY DEPTNO;
+
+DEPTNO  TOTAL_SAL TOLTAL_BONUS
+------ ---------- ------------
+    30       9400 
+    20      10875 
+    10       8750         1890
+```
+
+**空值连接**
+
+```plsql
+SQL> SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
+  2    FROM EMP
+  3    FULL JOIN DEPT
+  4      ON DEPT.DEPTNO = EMP.DEPTNO;
+
+EMPNO ENAME      DEPTNO DNAME
+----- ---------- ------ --------------
+ 7369 SMITH          20 RESEARCH
+ 7499 ALLEN          30 SALES
+ 7521 WARD           30 SALES
+ 7566 JONES          20 RESEARCH
+ 7654 MARTIN         30 SALES
+ 7698 BLAKE          30 SALES
+ 7782 CLARK          10 ACCOUNTING
+ 7788 SCOTT          20 RESEARCH
+ 7839 KING           10 ACCOUNTING
+ 7844 TURNER         30 SALES
+ 7876 ADAMS          20 RESEARCH
+ 7900 JAMES          30 SALES
+ 7902 FORD           20 RESEARCH
+ 7934 MILLER         10 ACCOUNTING
+                     40 OPERATIONS
+
+15 rows selected
+
+
+SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
+  FROM EMP
+  LEFT JOIN DEPT
+    ON DEPT.DEPTNO = EMP.DEPTNO
+UNION ALL
+SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
+  FROM EMP
+ RIGHT JOIN DEPT
+    ON DEPT.DEPTNO = EMP.DEPTNO;
+```
+
+**空值转换**
+
+```plsql
+SQL> SELECT A.ENAME, A.COMM
+  2    FROM EMP A
+  3   WHERE COALESCE(A.COMM, 0) <
+  4         (SELECT B.COMM FROM EMP B WHERE B.ENAME = 'ALLEN');
+
+ENAME           COMM
+---------- ---------
+SMITH      
+JONES      
+BLAKE      
+CLARK      
+SCOTT      
+KING       
+TURNER          0.00
+ADAMS      
+JAMES      
+FORD       
+MILLER     
+
+11 rows selected
+
+
+UPDATE emp SET deptno=NULL WHERE empno=7788;
+SQL> SELECT COUNT(*)
+  2    FROM DEPT
+  3   WHERE DEPTNO NOT IN (SELECT EMP.DEPTNO FROM EMP WHERE EMP.DEPTNO IS NOT NULL);
+
+  COUNT(*)
+----------
+         1
+```
+
+### 1.4  插入、更新与删除
+
+**插入**
+
+```plsql
+ CREATE TABLE test1 (
+ c1 VARCHAR2(10) DEFAULT '默认1',
+ c2 VARCHAR2(10) DEFAULT '默认2',
+ c3 VARCHAR2(10) DEFAULT '默认3',
+ c4 DATE DEFAULT SYSDATE
+ );
+ 
+ INSERT INTO test1(c1,c2,c3) VALUES(DEFAULT,NULL,'手输值');
+ 
+SQL>  SELECT * FROM test1;
+
+C1         C2         C3         C4
+---------- ---------- ---------- -----------
+默认1                 手输值     2019/5/5 11
+```
+
+
+
 
 
 ## 二、SQL函数
