@@ -61,6 +61,10 @@ drop table emp2 purge;
 
 insert into table_name (....) values();
 update table table_name set XX=XX where  ...
+
+//删除
+DELETE EMP4;
+DELETE * FROM EMP5;
 ```
 - 约束在表中的作用
 ```plsql
@@ -97,6 +101,24 @@ ALTER TABLE T_INVOICE_DETAIL ADD CONSTRAINT FK_INVOICE_ID FOREIGN KEY(INVOICE_ID
 ALTER TABLE T_INVOICE_DETAIL ADD CONSTRAINT FK_INVOICE_ID FOREIGN KEY(INVOICE_ID ) REFERENCES T_INVOICE(ID) ON DELETE CASCADE;
 //3、置空外键约束：
 ALTER TABLE T_INVOICE_DETAIL ADD CONSTRAINT FK_INVOICE_ID FOREIGN KEY(INVOICE_ID ) REFERENCES T_INVOICE(ID) ON DELETE SET NULL;
+
+ALTER TABLE emp ADD CONSTRAINTS ch_sal CHECK(sal > 0);
+
+//约束的替代写法
+SQL> INSERT INTO
+  2    (SELECT EMPNO, ENAME, HIREDATE
+  3       FROM EMP
+  4      WHERE HIREDATE <= SYSDATE WITH CHECK OPTION)
+  5  VALUES
+  6    (9999, 'test', SYSDATE + 1);
+INSERT INTO
+  (SELECT EMPNO, ENAME, HIREDATE
+     FROM EMP
+    WHERE HIREDATE <= SYSDATE WITH CHECK OPTION)
+VALUES
+  (9999, 'test', SYSDATE + 1)
+
+ORA-01402: view WITH CHECK OPTION where-clause violation
 ```
 
 ### 1.3 查询语句
@@ -1263,7 +1285,141 @@ SQL>  SELECT * FROM test1;
 C1         C2         C3         C4
 ---------- ---------- ---------- -----------
 默认1                 手输值     2019/5/5 11
+
+//视图的作用
+
+CREATE OR REPLACE VIEW V_TEST1 AS
+  SELECT C1, C2, C3 FROM TEST1;
+  
+INSERT INTO v_test1(c1,c2,c3) VALUES('手输c1',NULL,'不能改c4');
+
+SQL> INSERT INTO v_test1(c1,c2,c3) VALUES(DEFAULT,NULL,'不能改c4');
+INSERT INTO v_test1(c1,c2,c3) VALUES(DEFAULT,NULL,'不能改c4')
+
+ORA-32575: Explicit column default is not supported for modifying views
 ```
+
+**复制数据**
+
+```plsql
+CREATE TABLE test2 AS SELECT * FROM test1;
+
+CREATE TABLE test2 AS SELECT * FROM test1 WHERE 1=2;
+
+SQL> desc test2
+Name Type         Nullable Default Comments 
+---- ------------ -------- ------- -------- 
+C1   VARCHAR2(10) Y                         
+C2   VARCHAR2(10) Y                         
+C3   VARCHAR2(10) Y                         
+C4   DATE         Y         
+
+INSERT INTO test2 SELECT * FROM test1;
+```
+
+[^注]:复制的表不包含默认值等约束信息,使用这种方式复制表后,需重建默认值及索引和约束.
+
+**无条件INSTER INTO**
+
+```plsql
+CREATE TABLE EMP4 AS
+  SELECT EMPNO, ENAME, JOB FROM EMP WHERE 1 = 2;
+
+CREATE TABLE EMP5 AS
+  SELECT EMPNO, ENAME, DEPTNO FROM EMP WHERE 1 = 2;
+
+INSERT ALL INTO EMP4
+  (EMPNO, ENAME, JOB)
+VALUES
+  (EMPNO, ENAME, JOB) INTO EMP5
+  (EMPNO, ENAME, DEPTNO)
+VALUES
+  (EMPNO, ENAME, DEPTNO)
+  SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP WHERE DEPTNO IN (10, 20);
+```
+
+**有条件INSTER INTO**
+
+```plsql
+INSERT ALL WHEN JOB IN
+  ('SALESMAN', 'MANAGER') THEN INTO EMP4
+  (EMPNO, ENAME, JOB)
+VALUES
+  (EMPNO, ENAME, JOB) WHEN DEPTNO IN
+  ('20', '30') THEN INTO EMP5
+  (EMPNO, ENAME, DEPTNO)
+VALUES
+  (EMPNO, ENAME, DEPTNO)
+  SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP;
+```
+
+**INSTER FIRST**
+
+```PLSQL
+/*INSERT FIRST*/
+DELETE EMP4;
+DELETE EMP5;
+INSERT FIRST WHEN JOB IN
+  ('SALESMAN', 'MANAGER') THEN INTO EMP4
+  (EMPNO, ENAME, JOB)
+VALUES
+  (EMPNO, ENAME, JOB) WHEN DEPTNO IN
+  ('20', '30') THEN INTO EMP5
+  (EMPNO, ENAME, DEPTNO)
+VALUES
+  (EMPNO, ENAME, DEPTNO)
+  SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP;
+```
+
+**转置INSTER**
+
+```plsql
+/*转置 INSERT*/
+DROP TABLE test3;
+DROP TABLE test4;
+CREATE TABLE TEST4(D VARCHAR2(10), DES VARCHAR2(50));
+CREATE TABLE TEST3 AS
+  SELECT '熊样,精神不佳' AS D1,
+         '猫样,温驯听话' AS D2,
+         '狗样,神气活现' AS D3,
+         '鸟样,向往明天' AS D4,
+         '花样,愿你快乐像花儿一样' AS D5
+    FROM DUAL;
+ 
+ SQL> INSERT ALL INTO TEST4
+  2    (D, DES)
+  3  VALUES
+  4    ('周一', D1) INTO TEST4
+  5    (D, DES)
+  6  VALUES
+  7    ('周二', D2) INTO TEST4
+  8    (D, DES)
+  9  VALUES
+ 10    ('周三', D3) INTO TEST4
+ 11    (D, DES)
+ 12  VALUES
+ 13    ('周四', D4) INTO TEST4
+ 14    (D, DES)
+ 15  VALUES
+ 16    ('周五', D5)
+ 17    SELECT D1, D2, D3, D4,D5 FROM TEST3;
+
+5 rows inserted
+
+SQL> SELECT * FROM test4;
+
+D          DES
+---------- --------------------------------------------------
+周一       熊样,精神不佳
+周二       猫样,温驯听话
+周三       狗样,神气活现
+周四       鸟样,向往明天
+周五       花样,愿你快乐像花儿一样
+```
+
+
+
+
 
 
 
