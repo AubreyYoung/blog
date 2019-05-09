@@ -1415,6 +1415,14 @@ D          DES
 周三       狗样,神气活现
 周四       鸟样,向往明天
 周五       花样,愿你快乐像花儿一样
+
+//转置INSERT
+INSERT INTO test4(d,des)
+SELECT '周一',d1 FROM test3 UNION ALL
+SELECT '周二',d2 FROM test3 UNION ALL
+SELECT '周三',d3 FROM test3 UNION ALL
+SELECT '周四',d4 FROM test3 UNION ALL
+SELECT '周五',d5 FROM test3;
 ```
 
 
