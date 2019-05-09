@@ -138,7 +138,7 @@ ff02::2 ip6-allrouters
 ```
 docker pull python:2.7 
 docker pull python
-docker pull python -name 
+docker pull python name python3.6
 ```
 
 ### build

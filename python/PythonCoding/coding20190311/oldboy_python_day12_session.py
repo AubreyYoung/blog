@@ -66,5 +66,3 @@ def func(*args,**kargs):
 
 func()
 print(func.__name__)
-
-

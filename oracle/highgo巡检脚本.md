@@ -56,6 +56,7 @@ lsb_release -a
 winver>win.txt   或者 我的电脑—属性截图
 ```
 ### 2.1.4 查看IP地址信息
+
 **Windows**
 
 ```
@@ -171,12 +172,14 @@ rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" binutils compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel gcc gcc-c++ glibc glibc-common glibc-devel libaio libaio-devel libgcc libstdc++ libstdc++-devel make sysstat
 ```
 [^注]: i386和x86_64都要有的包：compat-libstdc++-33 glibc glibc-devel libaio libgcc libstdc++
+
 **10.2 RHEL5**
 
 ```
 rpm -q --queryformat "%{NAME}-%{VERSION}-%{RELEASE} (%{ARCH})\n" compat-libstdc++-33 gcc-c++ libstdc++-devel glibc-headers glibc-devel glibc-devel libgomp gcc libXp sysstat util-linux
 ```
 [^注]: i386和x86_64都要有的包：compat-libstdc++ glibc-devel   只有i386的包：libXp
+
 **HP-UX查看补丁是否安装命令**
 
 ```
@@ -192,6 +195,7 @@ swlist -l product | grep PH
 swlist -l fileset -a state -a patch_state
 ```
 ## 2.4 操作系统参数设置检查
+
 **AIX内核参数检查**
 
 ```
