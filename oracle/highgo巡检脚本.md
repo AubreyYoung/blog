@@ -10,7 +10,6 @@
 **Linux**
 
 ```
-
 crontab -l
 crontab -u oracle  -l
 crontab -u grid -l
