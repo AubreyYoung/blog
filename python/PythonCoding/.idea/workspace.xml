@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3e9b97b2-9b29-451b-ae01-a0efb4d919ef" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/../../linux/Docker常用命令.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../linux/Docker常用命令.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle开发.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle开发.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../oracle/highgo巡检脚本.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/highgo巡检脚本.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py" afterDir="false" />
-    </list>
+    <list default="true" id="3e9b97b2-9b29-451b-ae01-a0efb4d919ef" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,12 +80,12 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="230">
-              <caret line="45" lean-forward="true" selection-start-line="45" selection-end-line="45" />
+              <caret line="45" selection-start-line="45" selection-end-line="45" />
               <folding>
                 <element signature="e#46#370#1" />
               </folding>
@@ -391,11 +385,12 @@
       <workItem from="1554193168125" duration="61000" />
       <workItem from="1557037931083" duration="29000" />
       <workItem from="1557220188095" duration="1117000" />
+      <workItem from="1557381456520" duration="277000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1207000" />
+    <option name="totallyTimeSpent" value="1484000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -762,7 +757,7 @@
     <entry file="file://$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="230">
-          <caret line="45" lean-forward="true" selection-start-line="45" selection-end-line="45" />
+          <caret line="45" selection-start-line="45" selection-end-line="45" />
           <folding>
             <element signature="e#46#370#1" />
           </folding>

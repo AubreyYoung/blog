@@ -2033,3 +2033,51 @@ orapwd file=$ORACLE_HOME/dbs/orapw<local ORACLE_SID> password=<sys password> ent
 orapwd file=$ORACLE_HOME/database/PWD<local ORACLE_SID>.ora password=<sys password> entries=5
 ```
 
+## 8.5 闪回
+
+### 闪回信息查询
+
+```plsql
+//查看数据库状态
+select NAME,OPEN_MODE ,DATABASE_ROLE,CURRENT_SCN,FLASHBACK_ON from v$database;
+
+//获取当前数据库的系统时间和SCN
+select to_char(systimestamp,'yyyy-mm-dd HH24:MI:SS') as sysdt , dbms_flashback.get_system_change_number scn from dual;
+
+//查看数据库可恢复的时间点
+select * from V$FLASHBACK_DATABASE_LOG;
+
+//查看闪回日志空间情况
+select * from V$flashback_database_stat;
+
+//SCN和timestamp转换关系查询
+select scn,to_char(time_dp,'yyyy-mm-dd hh24:mi:ss')from sys.smon_scn_time;
+
+//查看闪回restore_point
+select scn, STORAGE_SIZE ,to_char(time,'yyyy-mm-dd hh24:mi:ss') time,NAME from v$restore_point;
+```
+
+### 闪回操作
+
+```plsql
+//闪回数据库
+FLASHBACK DATABASE TO TIMESTAMP to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd HH24:MI:SS');;
+flashback database to scn 16813234;
+　　
+//闪回DROP	其中table_name可以是删除表名称，也可以是别名
+flashback table table_name to before drop;
+flashback table table_name to before drop rename to table_name_new;
+
+//闪回表
+flashback table table_name to scn scn_number;
+flashback table table_name to timestamp to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd hh24:mi:ss');
+
+//闪回查询
+select * from table_name as of timestamp to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd hh24:mi:ss');
+select * from scott.dept as of scn 16801523;
+
+//闪回快照
+create restore point before_201712151111 guarantee flashback database;
+flashback database to restore point before_201712151111;
+```
+
