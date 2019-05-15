@@ -1,4 +1,4 @@
-#           HighGo巡检脚本
+#           Oracle巡检脚本
 **操作系统检查**
 
 ----
@@ -13,6 +13,12 @@
 crontab -l
 crontab -u oracle  -l
 crontab -u grid -l
+
+/etc/cron.deny 表示不能使用 crontab 命令的用户
+/etc/cron.allow 表示能使用 crontab 的用户。
+如果两个文件同时存在，那么/etc/cron.allow 优先。
+如果两个文件都不存在，那么只有超级用户可以安排作业。
+每个用户都会生成一个自己的 crontab 文件。这些文件在/var/spool/cron 目录下,查看这些文件，里面的内容和对应用户显示的 crontab -l 一致。
 ```
 **HP-UX、Solaris、AIX**
 
@@ -780,7 +786,15 @@ select num,name,value FROM V$PARAMETER where isdefault='FALSE';
 
 select NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE' OR ismodified != 'FALSE';
 ```
-#### **隐藏参数**
+### 查看已废弃参数
+
+```plsql
+SELECT name from v$parameter WHERE isdeprecated = 'TRUE' ORDER BY name;
+```
+
+
+
+### **隐藏参数**
 
 ```plsql
 set linesize 200
@@ -851,87 +865,7 @@ HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-v
 alter system set control_file_record_keep_time =31;
 ```
 
-### 12c数据库管理
-
-```
-查看当前属于哪个容器
-show con_name;
-select sys_context('USERENV','CON_NAME') from dual;
-alter session set container=cdb$root;
-
-//如果在PDB中可以使用如下语法：
-ALTER PLUGGABLE DATABASE OPEN READ WRITE [RESTRICTED] [FORCE];
-ALTER PLUGGABLE DATABASE OPEN READ ONLY [RESTRICTED] [FORCE];
-ALTER PLUGGABLE DATABASE OPEN UPGRADE [RESTRICTED];
-ALTER PLUGGABLE DATABASE CLOSE [IMMEDIATE];
-
-//如果是在CDB中，可以使用如下语法：
-ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN READ WRITE [RESTRICTED][FORCE];
-ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN READ ONLY [RESTRICTED] [FORCE];
-ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN UPGRADE [RESTRICTED];
-ALTER PLUGGABLE DATABASE <pdd-name-clause> CLOSE [IMMEDIATE];
-<pdd-name-clause>表示的是多个PDB，如果有多个，用逗号分开。 也可以使用ALL或者ALL EXCEPT关键字来替代。其中：ALL：表示所有的PDBS;ALLEXCEPT 表示需要排除的PDBS。
-
-//查看是否为cdb
-select name,log_mode,open_mode,cdb from v$database;
- 
-//查看容器数据库中的pdb
-col pdb_name for a30
-select pdb_id,pdb_name,dbid,status from dba_pdbs;
-select con_id,dbid,name,open_mode from v$pdbs;
-
-//inmemory检查确认未开启
-col value for a20
-col name for a40
-select name,value from v$parameter where name like '%inm%';
-//设置in内存大小
-alter system set inmemory_size=600m scope=spfile;
-//设置加载到内存的进程数量
-alter system set inmemory_max_populate_servers=2 scope=both;
-
-//查看PDB信息（在CDB模式下）
-show pdbs   --查看所有pdb
-select name,open_mode from v$pdbs;  --v$pdbs为PDB信息视图
-select con_id, dbid, guid, name , open_mode from v$pdbs;
-
-//切换容器
-alter session set container=orcl1   --切换到PDBorcl1容器
-alter session set container=CDB$ROOT    --切换到CDB容器
-
-//查看当前属于哪个容器
-select sys_context('USERENV','CON_NAME') from dual; --使用sys_context查看属于哪个容器
-show con_name   --用show查看当前属于哪个容器
-
-//创建或克隆前要指定文件映射的位置（需要CBD下sysdba权限
-alter system set db_create_file_dest='/u01/app/oracle/oradata/orcl/orcl2';
-
-//创建一个新的PDB：（需要CBD下sysdba权限）
-create pluggable database test admin user admin identified by admin;    
-alter pluggable database test_pdb open;    --将test_pdb 打开
-
-//克隆PDB（需要CBD下sysdba权限）
-create pluggable database orcl2 from orcl1;   --test_pdb必须是打开的，才可以被打开
-alter pluggable database orcl2 open;   --然后打开这个pdb
-
-//删除PDB（需要CBD下sysdba权限）
-alter pluggable database  orcl2 close;  --关闭之后才能删除
-drop pluggable database orcl2 including datafiles;  --删除PDB orcl2
---设置CDB启动PDB自动启动（在这里使用的是触发器）
-
-CREATE OR REPLACE TRIGGER open_pdbs
-AFTER STARTUP ON DATABASE
-BEGIN
-EXECUTE IMMEDIATE 'ALTER PLUGGABLE DATABASE ALL OPEN';
-END open_pdbs;
-/
-
-//连接pdb
- sqlplus system/oracle@localhost:1521/orclpdb1
- //连接cdb
- sqlplus system/oracle@localhost:1521/orcl
-```
-
-
+### 数据库profile
 
 ```
 set pagesize 200
@@ -2035,7 +1969,7 @@ orapwd file=$ORACLE_HOME/database/PWD<local ORACLE_SID>.ora password=<sys passwo
 
 ## 8.5 闪回
 
-### 闪回信息查询
+### 8.5.1 闪回信息查询
 
 ```plsql
 //查看数据库状态
@@ -2057,7 +1991,35 @@ select scn,to_char(time_dp,'yyyy-mm-dd hh24:mi:ss')from sys.smon_scn_time;
 select scn, STORAGE_SIZE ,to_char(time,'yyyy-mm-dd hh24:mi:ss') time,NAME from v$restore_point;
 ```
 
-### 闪回操作
+### 8.5.2开启/关闭闪回
+
+```plsql
+//确保数据库处于归档模式，如果为非归档模式，将数据库转换成归档模式
+archive log list;
+
+//设置闪回区大小：
+alter system set db_recovery_file_dest_size=80g scope=spfile;
+设置闪回区位置：
+alter system set db_recovery_file_dest='/workdb/account_flashback_area' scope=spfile;
+设置闪回目标为5天，以分钟为单位，每天为1440分钟：
+alter system set db_flashback_retention_target=7200 scope=spfile;
+
+//打开闪回功能
+shutdown immediate;
+startup mount;
+alter database flashback on;
+alter database open;
+
+//关闭闪回功能
+shutdown immediate;
+startup mount;
+alter database flashback off;
+alter database open;
+```
+
+
+
+### 8.5.3 闪回操作
 
 ```plsql
 //闪回数据库
@@ -2079,5 +2041,110 @@ select * from scott.dept as of scn 16801523;
 //闪回快照
 create restore point before_201712151111 guarantee flashback database;
 flashback database to restore point before_201712151111;
+```
+
+## 8.6 打开关闭归档
+
+```plsql
+//设置归档路径
+alter system set log_archive_dest_1='location=/oracle/ora9/oradata/arch1' scope=spfile;
+alter system set log_archive_dest_2='location=/oracle/ora9/oradata/arch2' scope=spfile;
+#如果归档到两个位置，则可以通过上边方法实现
+
+//设置归档日记文件名格式
+alter system set log_archive_format='arch_%d_%t_%r_%s.log';
+
+//开启归档
+shutdown immediate;
+startup mount;    
+alter database archivelog;
+alter database open; 
+
+//关闭归档
+shutdown immediate; 
+startup mount; 
+alter database noarchivelog; 
+alter database open; 
+```
+
+## 12c数据库管理
+
+```
+//查看当前属于哪个容器
+show con_name;
+select sys_context('USERENV','CON_NAME') from dual;
+alter session set container=cdb$root;
+
+//如果在PDB中可以使用如下语法：
+ALTER PLUGGABLE DATABASE OPEN READ WRITE [RESTRICTED] [FORCE];
+ALTER PLUGGABLE DATABASE OPEN READ ONLY [RESTRICTED] [FORCE];
+ALTER PLUGGABLE DATABASE OPEN UPGRADE [RESTRICTED];
+ALTER PLUGGABLE DATABASE CLOSE [IMMEDIATE];
+
+//如果是在CDB中，可以使用如下语法：
+ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN READ WRITE [RESTRICTED][FORCE];
+ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN READ ONLY [RESTRICTED] [FORCE];
+ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN UPGRADE [RESTRICTED];
+ALTER PLUGGABLE DATABASE <pdd-name-clause> CLOSE [IMMEDIATE];
+<pdd-name-clause>表示的是多个PDB，如果有多个，用逗号分开。 也可以使用ALL或者ALL EXCEPT关键字来替代。其中：ALL：表示所有的PDBS;ALLEXCEPT 表示需要排除的PDBS。
+
+//查看是否为cdb
+select name,log_mode,open_mode,cdb from v$database;
+ 
+//查看容器数据库中的pdb
+col pdb_name for a30
+select pdb_id,pdb_name,dbid,status from dba_pdbs;
+select con_id,dbid,name,open_mode from v$pdbs;
+
+//inmemory检查确认未开启
+col value for a20
+col name for a40
+select name,value from v$parameter where name like '%inm%';
+//设置in内存大小
+alter system set inmemory_size=600m scope=spfile;
+//设置加载到内存的进程数量
+alter system set inmemory_max_populate_servers=2 scope=both;
+
+//查看PDB信息（在CDB模式下）
+show pdbs   --查看所有pdb
+select name,open_mode from v$pdbs;  --v$pdbs为PDB信息视图
+select con_id, dbid, guid, name , open_mode from v$pdbs;
+
+//切换容器
+alter session set container=orcl1   --切换到PDBorcl1容器
+alter session set container=CDB$ROOT    --切换到CDB容器
+
+//查看当前属于哪个容器
+select sys_context('USERENV','CON_NAME') from dual; --使用sys_context查看属于哪个容器
+show con_name   --用show查看当前属于哪个容器
+
+//创建或克隆前要指定文件映射的位置（需要CBD下sysdba权限
+alter system set db_create_file_dest='/u01/app/oracle/oradata/orcl/orcl2';
+
+//创建一个新的PDB：（需要CBD下sysdba权限）
+create pluggable database test admin user admin identified by admin;    
+alter pluggable database test_pdb open;    --将test_pdb 打开
+
+//克隆PDB（需要CBD下sysdba权限）
+create pluggable database orcl2 from orcl1;   --test_pdb必须是打开的，才可以被打开
+alter pluggable database orcl2 open;   --然后打开这个pdb
+
+//删除PDB（需要CBD下sysdba权限）
+alter pluggable database  orcl2 close;  --关闭之后才能删除
+drop pluggable database orcl2 including datafiles;  --删除PDB orcl2
+--设置CDB启动PDB自动启动（在这里使用的是触发器）
+
+//容器自启
+CREATE OR REPLACE TRIGGER open_pdbs
+AFTER STARTUP ON DATABASE
+BEGIN
+EXECUTE IMMEDIATE 'ALTER PLUGGABLE DATABASE ALL OPEN';
+END open_pdbs;
+/
+
+//连接pdb
+ sqlplus system/oracle@localhost:1521/orclpdb1
+ //连接cdb
+ sqlplus system/oracle@localhost:1521/orcl
 ```
 

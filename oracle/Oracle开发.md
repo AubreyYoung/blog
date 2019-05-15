@@ -32,6 +32,7 @@ alter tablespace tablesapce_name read only/read write;
 alter tablespace tablesapce_name add datafile '+DATA' size 30g autoextend on;
 alter tablespace tablesapce_name drop datafile '(数据文件名,可以不添加路径*/)';
 /*不能删除表空间第一个数据文件,若要删除必须删除表空间*/
+drop tablespace tablespace_name including contents and datafiles;
 drop tablesapce tablesapce_name including contents;
 //如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
 drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;

@@ -1,6 +1,6 @@
-### 高水位
+## 1.1 高水位
 
-```
+```plsql
 SELECT table_name,
        ROUND((blocks * 8), 2) "高水位空间 k",
        ROUND((num_rows * avg_row_len / 1024), 2) "真实使用空间 k",
@@ -15,15 +15,15 @@ SELECT table_name,
  ORDER BY 5 DESC;
 ```
 
-### rman校验
+## 1.2 rman校验
 
-```
+```plsql
 restore validate database; 
 ```
 
-###
+## 1.3 report_sql
 
-```
+```plsql
 set long 99999
 set pages 0
 set linesize 200
@@ -33,8 +33,9 @@ col module format a20
 col program format a20
 col sql_id format a20
 col sql_text format a50
-select STATUS  ,  USERNAME  ,  MODULE ,   PROGRAM,    SQL_ID  ,  SQL_TEXT from v$sql_monitor ;
-找到对应的sql和sqlid
+select STATUS,USERNAME,MODULE,PROGRAM,SQL_ID,SQL_TEXT from v$sql_monitor;
+
+//找到对应的sql和sqlid
 SET LONG 1000000
 SET LONGCHUNKSIZE 1000000
 SET LINESIZE 1000
@@ -54,27 +55,28 @@ spool off
 或者跑一下sqltrpt 
 ```
 
-### 分区表
+## 1.4 分区表
 
-```
+```plsql
 select partition_name from DBA_tab_partitions where table_name='WBXT'
 ```
 
-### 长事务
+## 1.5 长事务
 
-```
+```plsql
 v$session_longops
 ```
-### SQL_ID、SQL文本
-```
+## 1.6 SQL_ID、SQL文本
+
+```plsql
 ####SELECT SID FROM V$MYSTAT WHERE ROWNUM =1;
 跑SQL
 select SID,USERNAME,SQL_ID,SOFAR,TOTALWORK,START_TIME from v$session_longops where sid=xxx;
 ```
 
-### 收集统计信息
+## 1.7 收集统计信息
 
-```
+```plsql
 查看统计信息收集情况
 select table_name,partition_name,num_rows,last_analyzed from dba_tab_partitions where table_name='B_JY_REC_HIS';
 
@@ -92,9 +94,10 @@ EXEC DBMS_STATS.GATHER_SCHEMA_STATS(OWNNAME=>'SCOTT',ESTIMATE_PERCENT=>30,,CASCA
 注：DEGREE=>4 开启并行
 ```
 
-### Oracle hint
+## 1.8 Oracle hint
 
-#### NO_INDEX
+### NO_INDEX
+
 NO_INDEX Hint的格式
 - **/*+ NO_INDEX(目标表 目标索引) */**
 select /*+ no_index(emp pk_emp) */empno,ename,sal,job from emp where empno=7369 and mgr=7902 and deptno=20;
@@ -234,10 +237,9 @@ Statistics
 1  rows processed
 ```
 
+## 1.9 SQLPLUS配置
 
-### SQLPLUS
-
-```
+```plsql
 1. SHOW
 03:43:23 sys@EE> show linesize
 linesize 80
@@ -270,11 +272,11 @@ set timing on
 set time on
 ```
 
-### 开启并行
+## 1.10 开启并行
 
-1. 更改表的并行
+### 更改表的并行
 
-```
+```plsql
 方法一：alter table table_name parallel;
 06:26:19 scott@EE> select table_name,degree from dba_tables where table_name='EMP';
 TABLE_NAME                     DEGREE
@@ -290,9 +292,9 @@ EMP                            DEFAULT
 方法二：alter table table_name parallel n;
 ```
 
-2. 并行hint
+### 并行hint
 
-```
+```plsql
 a) /* PARALLEL(table,<degree>) */
 b) /* NO_PARALLEL(table) */
 c) /* PARALLEL_INDEX(table,[index,<degree>]) */
@@ -366,9 +368,9 @@ Statistics
 0  sorts (disk)
 1  rows processed
 ```
-3. alter session
+### alter session
 
-```
+```plsql
 a)alter session force parallel query;
 b)alter session force parallel query parallel n;
 c)alter session force parallel dml;
@@ -377,7 +379,7 @@ e)alter session enable parallel dml;
   /*+ hint DML */
 ```
 
-### 清空缓存
+## 1.11 清空缓存
 
 **alter system flush shared_pool**
 
@@ -412,7 +414,7 @@ The `FLUSH` `REDO` clause must be issued on a mounted, but not open, primary dat
 
 ALTER SYSTEM FLUSH REDO TO target_db_name [[NO] CONFIRM APPLY]
 
-```
+```plsql
 //清空shared_pool
 alter system flush shared_pool;
 //清空buffer cache
@@ -421,5 +423,32 @@ alter system flush buffer_cache
 alter system flush global context;
 //清空备机redo
 ALTER SYSTEM FLUSH REDO TO target_db_name [[NO] CONFIRM APPLY]；
+```
+
+## 1.12 重建控制文件
+
+```plsql
+create controlfile reuse database dave noresetlogs archivelog
+LOGFILE
+GROUP 1 '/u01/app/oracle/oradata/dave/redo01.log',
+GROUP 2 '/u01/app/oracle/oradata/dave/redo02.log',
+GROUP 3 '/u01/app/oracle/oradata/dave/redo03.log'
+DATAFILE
+'/u01/app/oracle/oradata/dave/sysaux01.dbf',
+'/u01/app/oracle/oradata/dave/system01.dbf',
+'/u01/app/oracle/oradata/dave/undotbs01.dbf',
+'/u01/app/oracle/oradata/dave/users01.dbf'
+CHARACTER SET ZHS16GBK;
+```
+
+## 1.13 EXPDP/IMPDP
+
+```PLSQL
+expdp scott/tiger directory=dump_dir dumpfile=tab.dmp logfile=exp.log;
+
+expdp newccs/hfccs123 directory=dump_backup_dir dumpfile=customer_551.dmp
+tables=custaddr,custcontact,customer,custphone logfile=551.log parallel=3;
+
+impdp newccs/hfccs123 directory=dump_backup_dir dumpfile=customer_551.dmp tables=custaddr,custcontact,customer,custphone logfile=551.log parallel=3;
 ```
 
