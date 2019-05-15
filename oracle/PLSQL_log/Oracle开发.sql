@@ -794,3 +794,4 @@ SELECT '周四',d4 FROM test3 UNION ALL
 SELECT '周五',d5 FROM test3;
 
 ALTER TABLE EMP ADD dname VARCHAR2(50) DEFAULT 'noname';
+
