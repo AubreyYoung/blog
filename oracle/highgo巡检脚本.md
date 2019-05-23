@@ -52,7 +52,7 @@ uname -m
 uname -sr                          <!--HP-UX操作系统及版本-->
 
 cat /etc/redhat-release
-cat /etc/issue
+
 lsb_release
 lsb_release -a
 ```
@@ -1561,6 +1561,8 @@ select inst_id,machine ,count(*) from gv$session group by machine,inst_id order 
 ## 5.18  检查15天内归档的生成情况
 ```plsql
 set numw 4
+set pagesize 500
+set line 500
 SELECT  trunc(first_time) "Date",
 to_char(first_time, 'Dy') "Day",
 count(1) "Total",

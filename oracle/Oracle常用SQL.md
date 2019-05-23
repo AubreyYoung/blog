@@ -450,5 +450,8 @@ expdp newccs/hfccs123 directory=dump_backup_dir dumpfile=customer_551.dmp
 tables=custaddr,custcontact,customer,custphone logfile=551.log parallel=3;
 
 impdp newccs/hfccs123 directory=dump_backup_dir dumpfile=customer_551.dmp tables=custaddr,custcontact,customer,custphone logfile=551.log parallel=3;
+
+//table_exists_action，system，sysaux表空间存在业务数据可先建表，再使用此参数导入数据
+table_exists_action=truncate append
 ```
 
