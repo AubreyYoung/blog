@@ -455,3 +455,78 @@ impdp newccs/hfccs123 directory=dump_backup_dir dumpfile=customer_551.dmp tables
 table_exists_action=truncate append
 ```
 
+## 1.14 RMAN change tracking
+
+```plsql
+select filename from v$block_change_tracking;
+alter database enable block change tracking using file '*.bct';
+```
+
+## 1.15 Oracle 修改会话日期格式
+
+```plsql
+alter session set nls_date_format='YYYY/MM/DD';
+show parameter nls_date_format
+alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
+```
+
+## 1.16 解锁、锁定用户
+
+```plsql
+//解锁用户
+alter user scott account unlock;
+//锁定用户
+alter user test account lock;
+```
+
+## 1.17 11g创建sample schema
+
+```plsql
+SQL>?/rdbms/admin/utlsampl.sql
+注：12C有单独example schema安装包
+```
+
+## 1.18 CRSD调整debug级别
+
+```plsql
+#<crs_home>/bin/crsctl debug log crs CRSUI:4,CRSRES:4,CRSCOMM:4
+```
+
+## 1.19 Oracle 基表
+
+```plsql
+v$session ------x$ksuse
+v$resource_limit中标记为temporary_table_locks的项-------x$ktatl
+```
+
+## 1.20 视图别名
+
+```plsql
+//Oracle常用视图别名
+cat ---user_catalog
+syn ---user_synonyms
+tab ---user_tables
+ind ---user_indexes
+```
+
+## 1.21 查询LOB字段信息
+
+```plsql
+dba_lobs
+```
+
+## 1. 22 Oracle可执行文件的权限和属主重新配置
+
+```plsql
+<gi_home>/bin/setasmgidwrap -o <rdbms_home>/bin/oracle
+<oracle_home>/bin/setasmgidwrap -o <rdbms_home>/bin/oracle
+```
+
+## 1.23 drop database
+
+```plsql
+alter database mount exclusive;
+alter system enable restricted session;
+drop database;
+```
+

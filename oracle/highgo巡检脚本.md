@@ -946,7 +946,15 @@ select group#,status,type,IS_RECOVERY_DEST_FILE,member from v$logfile;
 col status format a10;
 select inst_id,thread#, GROUP#,SEQUENCE#,BYTES/1024/1024,STATUS,FIRST_TIME from gv$log;
 ```
-## 5.7 归档情况
+```plsql
+//清空redo
+ALTER DATABASE CLEAR LOGFILE GROUP 1;
+```
+
+
+
+## 5.7 归档情况 
+
 ```plsql
 archive log list;
 select log_mode from v$database;
@@ -2149,4 +2157,6 @@ END open_pdbs;
  //连接cdb
  sqlplus system/oracle@localhost:1521/orcl
 ```
+
+## 激活备库
 
