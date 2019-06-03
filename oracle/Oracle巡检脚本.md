@@ -1,5 +1,8 @@
 #           Oracle巡检脚本
-**操作系统检查**
+
+[TOC]
+
+# **操作系统检查**
 
 ----
 
@@ -485,7 +488,7 @@ UltraPath CLI #1 >show vlun
 ```
 ----
 
-**Oracle数据库检查**
+# **Oracle数据库检查**
 
 ##  3.4 Oracle实例运行时间
 
@@ -2161,6 +2164,4 @@ END open_pdbs;
  //连接cdb
  sqlplus system/oracle@localhost:1521/orcl
 ```
-
-## 激活备库
 
