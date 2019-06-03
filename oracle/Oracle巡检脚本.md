@@ -52,9 +52,10 @@ uname -m
 uname -sr                          <!--HP-UX操作系统及版本-->
 
 cat /etc/redhat-release
+cat /proc/version         //suse
 
-lsb_release
-lsb_release -a
+lsb_release			//suse、redhat
+lsb_release -a    //suse、Redhat
 ```
 **Windows**
 
@@ -74,6 +75,7 @@ ipconfig>ip.txt
 ```
 cat /etc/hosts
 ifconfig -a
+ethtool eth1
 ip addr    <!--linux-->
 netstat -in
 netstat -r
@@ -278,7 +280,9 @@ last -n 100
 lastlog
 lastb
 tail -1000  /var/log/secure
-cat /var/log/boot.log
+cat /var/log/boot.log   //redhat
+cat /var/log/boot.msg    //suse
+cat /var/log/boot.omsg		//suse
 ```
 **Solaris**
 
