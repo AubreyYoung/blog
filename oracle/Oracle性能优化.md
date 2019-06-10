@@ -406,3 +406,15 @@ oradebug setospid <spid> <stid>oradebug unlimit
 tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 ```
 
+## 统计信息
+
+```plsql
+//查看表统计信息
+select * from DBA_TABLES where OWNER = 'HR' and TABLE_NAME = 'TEST';
+select * from DBA_TAB_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+//查看列统计信息
+select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+//查看索引统计信息
+select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+```
+

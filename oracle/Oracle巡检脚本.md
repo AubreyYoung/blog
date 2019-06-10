@@ -589,6 +589,7 @@ find / -name "alert*.log*" | xargs du -sk
 crs_stat -t -v											//10g
 crs_stat -t												//10g
 crsctl status res -t									 //11g
+crsctl status res -t -init
 crsctl check crs                                             //10g或11g
 crsctl check cluster                                         //11g
 olsnodes -n
@@ -1587,8 +1588,8 @@ select inst_id,machine ,count(*) from gv$session group by machine,inst_id order 
 set numw 4
 set pagesize 500
 set line 500
-col Date for 20
-col Day for 10
+col Date for a20
+col Day for a20
 SELECT  trunc(first_time) "Date",
 to_char(first_time, 'Dy') "Day",
 count(1) "Total",
@@ -1677,8 +1678,15 @@ select owner,object_name,created from dba_objects where object_name like 'DBMS_S
 ```plsql
 select t.owner,t.index_name,t.table_name,blevel,t.num_rows,t.leaf_blocks,t.distinct_keys  from dba_indexes t
 where status = 'UNUSABLE'
-and  table_owner not in ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB')
+and  table_owner not in ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES')
 and owner in (select username from dba_users where account_status='OPEN');
+
+//分区索引
+SELECT T.INDEX_OWNER ,T.INDEX_NAME,T.PARTITION_NAME,BLEVEL,T.NUM_ROWS,T.LEAF_BLOCKS,T.DISTINCT_KEYS
+  FROM DBA_IND_PARTITIONS T
+ WHERE STATUS = 'UNUSABLE'
+   AND INDEX_OWNER NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES')
+   and INDEX_OWNER  IN (select username from dba_users where account_status='OPEN');
 ```
 ## 5.26 Index(es) of blevel>=3
 ```plsql
@@ -2095,7 +2103,7 @@ alter database noarchivelog;
 alter database open; 
 ```
 
-## 12c数据库管理
+## 8.7 12c数据库管理
 
 ```
 //查看当前属于哪个容器
@@ -2174,5 +2182,17 @@ END open_pdbs;
  sqlplus system/oracle@localhost:1521/orclpdb1
  //连接cdb
  sqlplus system/oracle@localhost:1521/orcl
+```
+
+## 8.8 11g AUTOTASK
+
+```plsql
+//执行历史
+select client_name,job_name,job_start_time from dba_autotask_job_history;
+//AUTOTASK
+SELECT client_name,status FROM dba_autotask_client;
+//维护窗口
+select * from dba_autotask_window_clients;
+select * from dba_scheduler_windows;
 ```
 
