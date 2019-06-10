@@ -208,8 +208,8 @@ SELECT server "连接类型",s.MACHINE,s.username,s.osuser,sn.NAME,VALUE/1024/10
       s.serial#,p.spid "操作系统进程ID",p.PGA_USED_MEM,p.PGA_ALLOC_MEM,p.PGA_FREEABLE_MEM, 
       p.PGA_MAX_MEM 
 FROM v$session s, v$sesstat st, v$statname sn, v$process p 
-WHERE st.SID = s.SID AND st.statistic# = sn.statistic# AND sn.NAME LIKE 'session pga memory' 
-     AND p.addr = s.paddr and rownum<20
+WHERE st.SID = s.SID AND st.statistic# = sn.statistic#  
+     AND p.addr = s.paddr
 ORDER BY VALUE DESC ;
 
 SELECT s.inst_id,s.username,s.MACHINE,s.osuser,VALUE/1024/1024 "占用内存MB",s.SID "会话ID",

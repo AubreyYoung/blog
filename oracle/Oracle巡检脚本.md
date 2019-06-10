@@ -275,6 +275,7 @@ last
 
 ```
 cat /var/log/messages
+tail -n 2000 /var/log/messages
 dmesg
 dmesg | grep -i SCSI
 dmesg |grep fail
@@ -693,6 +694,9 @@ local_only=FALSE
 
 //通过strings命令查看votedisk内容
 # strings voting_disk.bak |sort -u
+
+//数据库自启
+srvctl disable database -d doudou
 ```
 
 ## 4.3 检查节点vip资源
@@ -769,9 +773,9 @@ select inst_id,name,value from gv$parameter where value is not null;
 //数据库时区
 select dbtimezone from dual ;  
 //看会话时区
-select sessiontimezone from dual ; 
+select sessiontimezone from dual;; 
 //查看当前时间和时区 
-SQL> select systimestamp from dual; 
+select systimestamp from dual; 
 //修改数据时区 
 alter database set time_zone='+8:00'; 
 
@@ -1301,10 +1305,15 @@ select username,account_status,default_tablespace,temporary_tablespace,CREATED f
 ```
 ### 临时表空间使用
 ```plsql
+col Name for a30
+col "Size (M) for  a30
+col "HWM (M)" for a30
+col "Using (M)" for a30
+col "Using %" for a30
 SELECT d.tablespace_name "Name",
 TO_CHAR(NVL(a.bytes / 1024 / 1024, 0),'99,999,990.900') "Size (M)",
 TO_CHAR(NVL(t.hwm, 0)/1024/1024,'99999999.999')  "HWM (M)",
-TO_CHAR(NVL(t.hwm / a.bytes * 100, 0), '990.00') "HWM % " ,
+TO_CHAR(NVL(t.hwm / a.bytes * 100, 0), '990.00') "HWM %" ,
 TO_CHAR(NVL(t.bytes/1024/1024, 0),'99999999.999') "Using (M)",
 TO_CHAR(NVL(t.bytes / a.bytes * 100, 0), '990.00') "Using %"
 FROM sys.dba_tablespaces d,
@@ -1578,6 +1587,8 @@ select inst_id,machine ,count(*) from gv$session group by machine,inst_id order 
 set numw 4
 set pagesize 500
 set line 500
+col Date for 20
+col Day for 10
 SELECT  trunc(first_time) "Date",
 to_char(first_time, 'Dy') "Day",
 count(1) "Total",
