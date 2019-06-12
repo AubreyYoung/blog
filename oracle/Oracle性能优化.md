@@ -418,3 +418,12 @@ select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 ```
 
+## 表nologging
+
+```plsql
+alter session enable parallel dml;
+ALTER TABLE PPCMGR.PFP_ACCT_SNP_FCT NOLOGGING;  
+DELETE /*+parallel(a,4)*/ FROM PPCMGR.PFP_ACCT_SNP_FCT a where time_key >=20151223;
+ALTER TABLE PPCMGR.PFP_ACCT_SNP_FCT LOGGING; 
+```
+

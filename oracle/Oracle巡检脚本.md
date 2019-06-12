@@ -2196,3 +2196,13 @@ select * from dba_autotask_window_clients;
 select * from dba_scheduler_windows;
 ```
 
+## 8.9 锁定对象处理(ORA-04021)
+
+```plsql
+SELECT OBJECT_ID, SESSION_ID, inst_id FROM GV$LOCKED_OBJECT WHERE OBJECT_ID in (select object_id FROM dba_objects where object_name='IND_M5_42' AND OWNER='PM4H_DB');
+
+select SERIAL# from gv$session where sid=4276 and INST_ID=1;
+
+alter system kill session '4276,6045,@1' immediate;
+```
+
