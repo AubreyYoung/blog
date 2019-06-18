@@ -512,6 +512,8 @@ from v$instance;
 **查询session_cached_cursors和 open_cursors 的使用率(每个实例)**
 
 ```plsql
+col value for a15
+col usage for a15
 select 'session_cached_cursors' parameter,
 lpad(value, 5) value,
 decode(value, 0, ' n/a', to_char(100 * used / value, '990') || '%') usage
@@ -564,7 +566,13 @@ col group_name format a10
 col name format a20
 select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from v$asm_disk a,v$asm_diskgroup b where a.group_number=b.group_number;
 ```
-lsdg
+```plsql
+alter diskgroup data mount;
+asmcmd> lsdg
+```
+
+
+
 ## 3.9 检查监听日志及alert日志文件大小
 **Windows**
 进入监听文件及alert目录，检查listener.log大小
@@ -796,7 +804,7 @@ Col name for a20
 Col value for a40
 select num,name,value FROM V$PARAMETER where isdefault='FALSE';
 
-select NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE' OR ismodified != 'FALSE';
+select inst_id,NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE' OR ismodified != 'FALSE' order by inst_id;
 ```
 ### 查看已废弃参数
 
@@ -1405,7 +1413,7 @@ select substr(object_name,1,40) object_name,substr(owner,1,15) owner,object_type
 
 select owner,object_type,count(*) from dba_objects where status='INVALID' group by owner,object_type order by owner,object_type ;
 ```
-### 非SYS
+### SYS
 
 ```plsql
 set linesize 200
@@ -1424,6 +1432,7 @@ alter package <schema name>.<package_name> compile;
 alter package <schema name>.<package_name> compile body;
 alter view <schema name>.<view_name> compile;
 alter trigger <schema).<trigger_name> compile;
+alter procedure sys.LOGMNR_KRVRDLUID3 compile;
 ```
 
 [^参考文章]: How to Diagnose Invalid or Missing Data Dictionary (SYS) Objects (文档 ID 554520.1)

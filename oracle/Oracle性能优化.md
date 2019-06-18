@@ -110,6 +110,17 @@ and s.username <> ' ';
 select p.pid, p.spid, s.username  
         from v$process p, v$session s  
         where p.addr = s.paddr;
+ //方法三       
+ select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||'inst_id: '||s.inst_id||' '||
+  s.osuser || ' ' ||s.machine ||' '||s.username ||' '||s.program line
+from gv$session s , v$process p
+where p.addr = s.paddr
+and s.username <> ' '
+and s.sid=851;
+
+LINE
+--------------------------------------------------------------------------------
+ospid: 15749 # '851,27493' inst_id: 1 acrosspm SPCIS-PRFHWI-SGR07 PM4H_HW alarmM
 ```
 ##  数据库当前的等待事件
 ```
