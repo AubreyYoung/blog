@@ -404,6 +404,7 @@ df -hi
 df -i
 fdisk -l
 mount |column -t
+cat /etc/fstab
 ```
 **AIX**
 
@@ -506,6 +507,10 @@ MOD(TRUNC(86400 *
 ((SYSDATE - STARTUP_TIME) - TRUNC(SYSDATE - startup_time))),
 60) || 's' running
 from v$instance;
+
+//RAC
+alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
+select INSTANCE_NUMBER,INSTANCE_NAME,HOST_NAME,STARTUP_TIME ,STATUS from sys.v_$instance; 
 ```
 ##  3.5  查看cursors
 
@@ -567,11 +572,10 @@ col name format a20
 select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from v$asm_disk a,v$asm_diskgroup b where a.group_number=b.group_number;
 ```
 ```plsql
+//挂在磁盘组
 alter diskgroup data mount;
 asmcmd> lsdg
 ```
-
-
 
 ## 3.9 检查监听日志及alert日志文件大小
 **Windows**
@@ -721,7 +725,7 @@ select inst_id, count(*) from gv$session where status='ACTIVE' group by inst_id;
 select * from v$version;
 select dbid from v$database;
 ```
-#### **补丁安装情况1**
+### **补丁安装情况1**
 
 ```
 su - oracle/su - grid
@@ -731,7 +735,8 @@ $ORA_CRS_HOME/OPatch/opatch lsinventory  -oh $ORA_CRS_HOME
 ./opatch lsinventory -oh $ORACLE_CRS_HOME                               //10g
 ./opatch lsinventory -oh $ORACLE_HOME                      //10g
 ```
-#### **补丁安装情况2**​
+### **补丁安装情况2**​
+
 ```
 set pages 100 lines 120
 set echo on
@@ -746,14 +751,14 @@ select * from dba_registry_history;
 ```
 
 ## 5.2 数据库基本配置信息
-**数据库基本信息**
+### **数据库基本信息**
 
 ```plsql
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
 col PLATFORM_NAME format a30
 select dbid,name,platform_name,created, log_mode  from v$database;
 ```
-#### **查看数据库强制日志、最小补充日志、闪回功能开启情况**
+### **查看数据库强制日志、最小补充日志、闪回功能开启情况**
 
 ```plsql
 col FLASHBACK_ON format a2
@@ -765,18 +770,16 @@ select supplemental_log_data_min from gv$database;
 ```
 ---alter database add supplemental log data;
 
-#### **查看数据库当前session连接数，以及曾经达到最高的连接个数**
-
-```plsql
+### 数据库连接数
+```
+col name format a10
+col value format a10
 select inst_id, sessions_current,sessions_highwater from  gv$license;
 
-Set pagesize 1000
-set linesize 100
-column name format a30
-column value format a40
-select inst_id,name,value from gv$parameter where value is not null;
+select name,value from v$parameter where name='processes';
 ```
-#### 数据库时区
+
+### 数据库时区
 
 ```
 //数据库时区
@@ -795,9 +798,17 @@ where c.type# = 231
    and u.user# = o.owner#;
 ```
 
+### 数据库参数
 
+```plsql
+Set pagesize 1000
+set linesize 100
+column name format a30
+column value format a40
+select inst_id,name,value from gv$parameter where value is not null;
+```
 
-#### **非默认参数**
+### **非默认参数**
 
 ```plsql
 Col name for a20
@@ -811,8 +822,6 @@ select inst_id,NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE
 ```plsql
 SELECT name from v$parameter WHERE isdeprecated = 'TRUE' ORDER BY name;
 ```
-
-
 
 ### **隐藏参数**
 
@@ -835,7 +844,7 @@ x.ksppinm LIKE '/_%' escape '/'
 order by
 translate(x.ksppinm, ' _', ' ');
 ```
-#### **查看参数**
+### **查看参数**
 
 ```
 show parameter audit_trail
@@ -894,13 +903,13 @@ col RESOURCE_NAME format a25
 col LIMIT format a15
 select * from dba_profiles;
 ```
-#### **数据库字符集**
+### **数据库字符集**
 
 ```plsql
 select userenv('language') from dual;
 select * from NLS_DATABASE_PARAMETERS;
 ```
-#### **数据库实例状态**
+### **数据库实例状态**
 
 ```plsql
 col host_name  format a20
@@ -922,19 +931,23 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 
 ```
 select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
-
-//查看表大小
-Select Segment_Name,Sum(bytes)/1024/1024 From User_Extents Group By Segment_Name
 ```
+### 查看表大小
+```plsql
+
+Select Segment_Name,Sum(bytes)/1024/1024 From dba_Extents Group By Segment_Name
+```
+
 ## 5.5 控制文件
-**控制文件**
+
+### **查看控制文件**
 
 ```plsql
 Set linesize 200
 Col name format a55
 Select * from v$controlfile;
 ```
-#### **生成控制文件**
+### **生成控制文件**
 ```
 alter session set tracefile_identifier='bak_control';
 alter database backup controlfile to trace;
@@ -971,8 +984,6 @@ select inst_id,thread#, GROUP#,SEQUENCE#,BYTES/1024/1024,STATUS,FIRST_TIME from 
 ALTER DATABASE CLEAR LOGFILE GROUP 1;
 ```
 
-
-
 ## 5.7 归档情况 
 
 ```plsql
@@ -984,7 +995,7 @@ col value  format a40
 select inst_id,name,value from gv$parameter where name ='log_archive_dest_1';
 ```
 ## 5.8 表空间使用情况
-**查看表空间使用信息**
+### **查看表空间使用信息**
 
 ```plsql
 set linesize 150
@@ -1000,7 +1011,7 @@ from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by ta
 where f.tablespace_name= d.tablespace_name
 order by used_percent desc;
 ```
-#### **查看表空间自动扩展情况下的使用信息**
+### **查看表空间自动扩展情况下的使用信息**
 
 ```plsql
 set linesize 150 pagesize 500
@@ -1019,127 +1030,8 @@ order by  used_percent_with_extend desc;
 
 select tablespace_name,logging,status from dba_tablespaces;
 ```
-#### **相关数据文件（可扩展性）**
+### **表空间使用状态（计算扩展）**
 
-```plsql
-Set pagesize 300
-Set linesize 300
-col file_name format a60
-select file_id,tablespace_name,file_name,bytes/1024/1024,status,autoextensible,maxbytes/1024/1024 from dba_data_files;
-
-col file_name format a60
-select file_id, file_name,tablespace_name,bytes/1024/1024 as MB ,autoextensible,maxbytes,user_bytes,online_status from dba_data_files;
-```
-#### **Displays Space Usage for Each Datafile**
-
-```
---
--- Displays Space Usage for Each Datafile.
---
- 
-SET PAUSE ON
-SET PAUSE 'Press Return to Continue'
-SET PAGESIZE 60
-SET LINESIZE 300
-COLUMN "Tablespace Name" FORMAT A20
-COLUMN "File Name" FORMAT A80
- 
-SELECT  Substr(df.tablespace_name,1,20) "Tablespace Name",
-        Substr(df.file_name,1,80) "File Name",
-        Round(df.bytes/1024/1024,0) "Size (M)",
-        decode(e.used_bytes,NULL,0,Round(e.used_bytes/1024/1024,0)) "Used (M)",
-        decode(f.free_bytes,NULL,0,Round(f.free_bytes/1024/1024,0)) "Free (M)",
-        decode(e.used_bytes,NULL,0,Round((e.used_bytes/df.bytes)*100,0)) "% Used"
-FROM    DBA_DATA_FILES DF,
-       (SELECT file_id,
-               sum(bytes) used_bytes
-        FROM dba_extents
-        GROUP by file_id) E,
-       (SELECT sum(bytes) free_bytes,
-               file_id
-        FROM dba_free_space
-        GROUP BY file_id) f
-WHERE    e.file_id (+) = df.file_id
-AND      df.file_id  = f.file_id (+)
-ORDER BY df.tablespace_name,
-         df.file_name
-/
-```
-**查看数据库是否存在数据库文件处于需要还原状态**
-select * from v$recover_file;
-
-#### 占用空间最多的10个object
-
-```
-col owner format a15
-col Segment_Name format a36
-col segment_type format a15
-col tablespace_name format a15
-select owner, Segment_Name,segment_type,tablespace_name,MB from
- (Select owner, Segment_Name,segment_type,tablespace_name,Sum(bytes)/1024/1024 as MB From dba_Extents  group by owner,Segment_Name,segment_type,tablespace_name order by MB desc);
-where rownum < 11;
-```
-**This query lists all tablespaces, the datafiles they use and some usage measurements:**
-```
-set linesize 133
-set pagesize 500
-
-clear break
-
-col TSname format a25 
-col TSname heading 'TSpace|Name|'
-col FName format a55 
-col FName heading 'File|Name|'
-col FStatus format a9 
-col FStatus heading 'File|Status|'
-col FSizeMb format 99999 
-col FSizeMb heading 'File|Size|Mb'
-col FileFreeMb format 99999
-col FileFreeMb heading 'File|Free|Mb'
-col FileFreePrct format 999
-col FileFreePrct heading 'File|Free|%'
-col AutoExt format a6 
-col AutoExt heading 'Auto|Extend|?'
-col ExtbyMb format a6
-col ExtbyMb heading 'Ext by|?|Mb'
-col FMaxSizeMb format a8
-col FMaxSizeMb heading 'File|Max Size|Mb'
-break on TSname skip 1
-
-SELECT
-  ddf.tablespace_name as "TSname",
-  ddf.file_name as "FName",
-  ddf.status as "FStatus",
-  ROUND(ddf.bytes/1024/1024,2) as "FSizeMb",
-  ROUND(SUM(dfs.bytes)/1024/1024,2) as "FileFreeMb",
-  ROUND(SUM(dfs.bytes)/SUM(ddf.bytes)*100,0) as "FileFreePrct",
-  ddf.autoextensible as "AutoExt",
-  CASE 
-    WHEN ddf.increment_by = 0 THEN '-' ELSE TO_CHAR(ROUND((ddf.increment_by * dt.block_size)/1024/1024,2))
-  END as "ExtbyMb",
-  CASE 
-    WHEN ddf.maxbytes = 0 THEN '-' ELSE TO_CHAR(ROUND(ddf.maxbytes/1024/1024,2))
-  END as "FMaxSizeMb"
-FROM 
-  sys.dba_data_files ddf,
-  sys.dba_tablespaces dt,
-  sys.dba_free_space dfs
-WHERE ddf.tablespace_name = dt.tablespace_name
-AND ddf.file_id = dfs.file_id(+)
-GROUP BY
-  ddf.tablespace_name,
-  ddf.file_name,
-  ddf.status,
-  ddf.bytes,
-  ddf.autoextensible,
-  ddf.increment_by,
-  dt.block_size,
-  ddf.maxbytes
-ORDER BY
-  ddf.tablespace_name
-;
-```
-**This query lists all Tablespaces, their status an some usage measurements:**
 ```
 set lines 112
 set pages 10000
@@ -1245,57 +1137,6 @@ AND dt.tablespace_name = tte.tablespace_name(+)
 ORDER BY ttsp.tablespace_name
 ;
 ```
-**This query lists all segments of a tablespace, their status an some usage measurements:**
-```
-set lines 137
-set pages 10000
-
-clear break
-
-col TSname heading 'TSpace|Name|'
-col TSname format a25
-col SgmntOwner heading 'Sgmnt|Owner|'
-col SgmntOwner format a15
-col SgmntType heading 'Sgmnt|Type|'
-col SgmntType format a15
-col SgmntName heading 'Sgmnt|Name|'
-col SgmntName format a35
-col MinExt heading 'Min|No of|Ext'
-col MinExt format 99999999999
-col MaxExt heading 'Max|No of|Ext'
-col MaxExt format 99999999999
-col SgmntSize heading 'Sgmnt|Size|Mb'
-col SgmntSize format 9999
-col SgmntExentNo heading 'No of|Extent|'
-col SgmntExentNo format 9999999999
-
-SELECT
-  ds.tablespace_name as "TSname",
-  ds.owner as "SgmntOwner",
-  ds.segment_type as "SgmntType",
-  ds.segment_name as "SgmntName",
-  ds.min_extents as "MinExt",
-  ds.max_extents as "MaxExt",
-  ROUND(ds.bytes/1024/1024,0) as "SgmntSize",
-  SUM(ds.extents) as "SgmntExentNo"
-FROM
-  dba_segments ds
-WHERE tablespace_name = 'SYSAUX'
-GROUP BY
-  ds.tablespace_name,
-  ds.owner,
-  ds.segment_type,
-  ds.segment_name,
-  ds.min_extents,
-  ds.max_extents,
-  ds.bytes
-ORDER BY
-  ds.tablespace_name,
-  ds.owner,
-  ds.segment_type,
-  ds.segment_name
-;
-```
 
 ## 5.9 临时表空间及账户状态
 **用户使用临时表空间情况**
@@ -1312,7 +1153,8 @@ col default_tablespace format a19;
 col temporary_tablespace format a10;
 select username,account_status,default_tablespace,temporary_tablespace,CREATED from dba_users order by account_status,created;
 ```
-### 临时表空间使用
+临时表空间使用
+
 ```plsql
 col Name for a30
 col "Size (M) for  a30
@@ -1334,6 +1176,7 @@ AND d.extent_management like 'LOCAL'
 AND d.contents like 'TEMPORARY';
 ```
 ### 临时数据文件大小
+
 ```plsql
 Set pagesize 100
 Set linesize 200
@@ -1341,21 +1184,14 @@ col file_name format a55
 select tablespace_name,file_name,bytes/1024/1024,autoextensible,maxbytes/1024/1024 from dba_temp_files;
 ```
 ## 5.10 SCHEMA使用情况
-**每个schema使用情况**
+**schema大小**
 
 ```plsql
 select owner, count(*),sum(bytes)/1024/1024/1024 as GB from dba_segments group by owner order by GB desc;
 ```
-### 数据库连接数
-```
-col name format a10
-col value format a10
-select sessions_current,sessions_highwater from  gv$license;
-
-select name,value from v$parameter where name='processes';
-```
 ## 5.11  RMAN 备份情况
 **查看数据库是否存在备份实效情况**
+
 ```plsql
 col INPUT_BYTES_PER_SEC_DISPLAY format a15;
 col OUTPUT_BYTES_PER_SEC_DISPLAY format a15;
@@ -1413,7 +1249,7 @@ select substr(object_name,1,40) object_name,substr(owner,1,15) owner,object_type
 
 select owner,object_type,count(*) from dba_objects where status='INVALID' group by owner,object_type order by owner,object_type ;
 ```
-### SYS
+### SYS用户无效对象
 
 ```plsql
 set linesize 200
@@ -1437,16 +1273,7 @@ alter procedure sys.LOGMNR_KRVRDLUID3 compile;
 
 [^参考文章]: How to Diagnose Invalid or Missing Data Dictionary (SYS) Objects (文档 ID 554520.1)
 [^参考文章]: Debug and Validate Invalid Objects (文档 ID 300056.1)
-### 占用空间最多的10个object
-```plsql
-col owner format a15
-col Segment_Name format a36
-col segment_type format a15
-col tablespace_name format a15
-select owner, Segment_Name,segment_type,tablespace_name,MB from
-(Select owner, Segment_Name,segment_type,tablespace_name,Sum(bytes)/1024/1024 as MB From dba_Extents  group by owner,Segment_Name,segment_type,tablespace_name order by MB desc)
-where rownum < 11;
-```
+
 ## 5.15  数据库scn headroom问题检查
 ```plsql
 Rem
@@ -1579,20 +1406,19 @@ end;
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
 ```
-**查询每个客户端连接每个实例的连接数**
+
+## 5.17 客户端连接分布
+### **查询每个客户端连接每个实例的连接数**
 
 ```
+col MACHINE format a20
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
 ```
 
-## 5.17 客户端连接分布
-```plsql
-col MACHINE format a20
-select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
-```
 ## 5.18  检查15天内归档的生成情况
+
 ```plsql
 set numw 4
 set pagesize 500
@@ -1648,7 +1474,7 @@ select
 trunc(completion_time) as "Date"
 ,count(*) as "Count"
 ,((sum(blocks * block_size)) /1024 /1024) as "MB"
-from gv$archived_log where  STANDBY_DEST  ='NO'
+from v$archived_log where  STANDBY_DEST  ='NO'
 group by trunc(completion_time) order by trunc(completion_time) ;
 ```
 ## 5.21  检查数据库中DBA权限的用户
@@ -1708,16 +1534,22 @@ select t.owner,t.table_name,t.index_name,t.index_type,t.status,t.blevel,t.leaf_b
 where index_type in ('BITMAP', 'FUNCTION-BASED NORMAL', 'NORMAL/REV')
 and owner not in ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS') and owner in (select username from dba_users where account_status='OPEN');
 ```
-## 5.28 Any Business data in system tablespace 
+## 5.28 SYSTEM表空间业务数据
 ```plsql
 select * from (select owner, segment_name, segment_type,tablespace_name
   from dba_segments where tablespace_name in('SYSTEM','SYSAUX'))
 where  owner not in ('MTSSYS','ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS') and owner in (select username from dba_users where account_status='OPEN');
 ```
-## 5.29 Table(s) of degree
+## 5.29 表的并行度
+```plsql
 select owner,table_name name,status,degree from dba_tables where degree>1;
-## 5.30 Index(es) of degree 
+```
+
+## 5.30 索引并行度
+```plsql
 select owner,index_name name,status,degree from dba_indexes where degree>'1';
+```
+
 ## 5.31 Disabled Trigger(es)
 ```plsql
 SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE status = 'DISABLED' and owner in (select username from dba_users where account_status='OPEN');
@@ -1727,7 +1559,7 @@ SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE status = 
 SELECT owner, constraint_name, table_name, constraint_type, status 
 FROM dba_constraints WHERE status ='DISABLE' and constraint_type='P' and owner in (select username from dba_users where account_status='OPEN');
 ```
-## 5.33  Foreign Key no index
+## 5.33  外键无索引
 ```plsql
 select c.owner,d.table_name,d.CONSTRAINT_NAME,d.columns from DBA_CONS_COLUMNS c,
 (SELECT TABLE_NAME,
@@ -2062,8 +1894,6 @@ alter database flashback off;
 alter database open;
 ```
 
-
-
 ### 8.5.3 闪回操作
 
 ```plsql
@@ -2203,6 +2033,67 @@ SELECT client_name,status FROM dba_autotask_client;
 //维护窗口
 select * from dba_autotask_window_clients;
 select * from dba_scheduler_windows;
+//任务执行情况
+col job_name for a30
+col ACTUAL_START_DATE for a40
+col RUN_DURATION for a30
+set lines 180 pages 100
+select owner, job_name, status, ACTUAL_START_DATE, RUN_DURATION from dba_scheduler_job_run_details where job_name like 'ORA$AT_OS_OPT_S%' order by 4;
+
+//启动自动维护任务
+--启动sql tuning advisor
+BEGIN
+  DBMS_AUTO_TASK_ADMIN.enable(
+    client_name => 'sql tuning advisor',
+    operation   => NULL,
+    window_name => NULL);
+END;
+/
+
+--启动auto space advisor
+BEGIN
+  DBMS_AUTO_TASK_ADMIN.enable(
+    client_name => 'auto space advisor',
+    operation   => NULL,
+    window_name => NULL);
+END;
+/
+--启动自动统计信息收集
+BEGIN
+  DBMS_AUTO_TASK_ADMIN.enable(
+    client_name => 'auto optimizer stats collection',
+    operation => NULL,
+    window_name => NULL);
+END;
+/
+
+//关闭自动维护任务
+--关闭sql tuning advisor,避免消耗过多的资源
+BEGIN
+  DBMS_AUTO_TASK_ADMIN.disable(
+    client_name => 'sql tuning advisor',
+    operation   => NULL,
+    window_name => NULL);
+END;
+/
+
+--关闭auto space advisor,避免消耗过多的IO，还有避免出现这个任务引起的library cache lock
+BEGIN
+  DBMS_AUTO_TASK_ADMIN.disable(
+    client_name => 'auto space advisor',
+    operation   => NULL,
+    window_name => NULL);
+END;
+/
+
+--光闭自动统计信息收集，（慎用，除非有其他手工收集统计信息的完整方案，否则不建议关闭）
+BEGIN
+  DBMS_AUTO_TASK_ADMIN.disable(
+    client_name => 'auto optimizer stats collection',
+    operation => NULL,
+    window_name => NULL);
+END;
+/
 ```
 
 ## 8.9 锁定对象处理(ORA-04021)
@@ -2213,5 +2104,254 @@ SELECT OBJECT_ID, SESSION_ID, inst_id FROM GV$LOCKED_OBJECT WHERE OBJECT_ID in (
 select SERIAL# from gv$session where sid=4276 and INST_ID=1;
 
 alter system kill session '4276,6045,@1' immediate;
+```
+
+## 8.10数据库文件
+
+### **数据文件**
+
+```plsql
+Set pagesize 300
+Set linesize 300
+col file_name format a60
+select file_id,tablespace_name,file_name,bytes/1024/1024,status,autoextensible,maxbytes/1024/1024 from dba_data_files;
+
+col file_name format a60
+select file_id, file_name,tablespace_name,bytes/1024/1024 as MB ,autoextensible,maxbytes,user_bytes,online_status from dba_data_files;
+```
+
+### 数据文件需要还原
+
+```plsql
+select THREAD#,SEQUENCE# SEQUENCE#,TIME "TIME"from v$recovery_log;
+
+select file#,online_status "STATUS",change# "SCN",time"TIME" from v$recover_file;
+
+SELECT a.recid,a.thread#,a.sequence#, a.name, a.first_change#,a.NEXT_CHANGE#,a.archived,a.deleted,a.completion_time FROM v$archived_log a,v$recovery_log l WHERE a.thread# = l.thread# AND a.sequence# = l.sequence#;
+```
+
+### 数据文件使用率方法一
+
+**Displays Space Usage for Each Datafile**
+
+```
+--
+-- Displays Space Usage for Each Datafile.
+--
+ 
+SET PAUSE ON
+SET PAUSE 'Press Return to Continue'
+SET PAGESIZE 60
+SET LINESIZE 300
+COLUMN "Tablespace Name" FORMAT A20
+COLUMN "File Name" FORMAT A80
+ 
+SELECT  Substr(df.tablespace_name,1,20) "Tablespace Name",
+        Substr(df.file_name,1,80) "File Name",
+        Round(df.bytes/1024/1024,0) "Size (M)",
+        decode(e.used_bytes,NULL,0,Round(e.used_bytes/1024/1024,0)) "Used (M)",
+        decode(f.free_bytes,NULL,0,Round(f.free_bytes/1024/1024,0)) "Free (M)",
+        decode(e.used_bytes,NULL,0,Round((e.used_bytes/df.bytes)*100,0)) "% Used"
+FROM    DBA_DATA_FILES DF,
+       (SELECT file_id,
+               sum(bytes) used_bytes
+        FROM dba_extents
+        GROUP by file_id) E,
+       (SELECT sum(bytes) free_bytes,
+               file_id
+        FROM dba_free_space
+        GROUP BY file_id) f
+WHERE    e.file_id (+) = df.file_id
+AND      df.file_id  = f.file_id (+)
+ORDER BY df.tablespace_name,
+         df.file_name
+/
+```
+
+### 数据文件使用率方法二
+
+**This query lists all tablespaces, the datafiles they use and some usage measurements:**
+
+```
+set linesize 133
+set pagesize 500
+
+clear break
+
+col TSname format a25 
+col TSname heading 'TSpace|Name|'
+col FName format a55 
+col FName heading 'File|Name|'
+col FStatus format a9 
+col FStatus heading 'File|Status|'
+col FSizeMb format 99999 
+col FSizeMb heading 'File|Size|Mb'
+col FileFreeMb format 99999
+col FileFreeMb heading 'File|Free|Mb'
+col FileFreePrct format 999
+col FileFreePrct heading 'File|Free|%'
+col AutoExt format a6 
+col AutoExt heading 'Auto|Extend|?'
+col ExtbyMb format a6
+col ExtbyMb heading 'Ext by|?|Mb'
+col FMaxSizeMb format a8
+col FMaxSizeMb heading 'File|Max Size|Mb'
+break on TSname skip 1
+
+SELECT
+  ddf.tablespace_name as "TSname",
+  ddf.file_name as "FName",
+  ddf.status as "FStatus",
+  ROUND(ddf.bytes/1024/1024,2) as "FSizeMb",
+  ROUND(SUM(dfs.bytes)/1024/1024,2) as "FileFreeMb",
+  ROUND(SUM(dfs.bytes)/SUM(ddf.bytes)*100,0) as "FileFreePrct",
+  ddf.autoextensible as "AutoExt",
+  CASE 
+    WHEN ddf.increment_by = 0 THEN '-' ELSE TO_CHAR(ROUND((ddf.increment_by * dt.block_size)/1024/1024,2))
+  END as "ExtbyMb",
+  CASE 
+    WHEN ddf.maxbytes = 0 THEN '-' ELSE TO_CHAR(ROUND(ddf.maxbytes/1024/1024,2))
+  END as "FMaxSizeMb"
+FROM 
+  sys.dba_data_files ddf,
+  sys.dba_tablespaces dt,
+  sys.dba_free_space dfs
+WHERE ddf.tablespace_name = dt.tablespace_name
+AND ddf.file_id = dfs.file_id(+)
+GROUP BY
+  ddf.tablespace_name,
+  ddf.file_name,
+  ddf.status,
+  ddf.bytes,
+  ddf.autoextensible,
+  ddf.increment_by,
+  dt.block_size,
+  ddf.maxbytes
+ORDER BY
+  ddf.tablespace_name
+;
+```
+### segment使用状态
+
+This query lists all segments of a tablespace, their status an some usage measurements
+
+```
+set lines 137
+set pages 10000
+
+clear break
+
+col TSname heading 'TSpace|Name|'
+col TSname format a25
+col SgmntOwner heading 'Sgmnt|Owner|'
+col SgmntOwner format a15
+col SgmntType heading 'Sgmnt|Type|'
+col SgmntType format a15
+col SgmntName heading 'Sgmnt|Name|'
+col SgmntName format a35
+col MinExt heading 'Min|No of|Ext'
+col MinExt format 99999999999
+col MaxExt heading 'Max|No of|Ext'
+col MaxExt format 99999999999
+col SgmntSize heading 'Sgmnt|Size|Mb'
+col SgmntSize format 9999
+col SgmntExentNo heading 'No of|Extent|'
+col SgmntExentNo format 9999999999
+
+SELECT
+  ds.tablespace_name as "TSname",
+  ds.owner as "SgmntOwner",
+  ds.segment_type as "SgmntType",
+  ds.segment_name as "SgmntName",
+  ds.min_extents as "MinExt",
+  ds.max_extents as "MaxExt",
+  ROUND(ds.bytes/1024/1024,0) as "SgmntSize",
+  SUM(ds.extents) as "SgmntExentNo"
+FROM
+  dba_segments ds
+WHERE tablespace_name = 'SYSAUX'
+GROUP BY
+  ds.tablespace_name,
+  ds.owner,
+  ds.segment_type,
+  ds.segment_name,
+  ds.min_extents,
+  ds.max_extents,
+  ds.bytes
+ORDER BY
+  ds.tablespace_name,
+  ds.owner,
+  ds.segment_type,
+  ds.segment_name
+;
+```
+
+## 8.11 占用空间最多的10个object
+
+```plsql
+col owner format a15
+col Segment_Name format a36
+col segment_type format a15
+col tablespace_name format a15
+select owner, Segment_Name,segment_type,tablespace_name,MB from
+(Select owner, Segment_Name,segment_type,tablespace_name,Sum(bytes)/1024/1024 as MB From dba_Extents  group by owner,Segment_Name,segment_type,tablespace_name order by MB desc)
+where rownum < 11;
+```
+
+## 9.1 统计信息
+
+```plsql
+//查看表统计信息
+select * from DBA_TABLES where OWNER = 'HR' and TABLE_NAME = 'TEST';
+
+select * from DBA_TABLES where OWNER in('PM4H_DB', 'PM4H_MO', 'PM4H_HW');
+
+select * from DBA_TAB_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+//查看列统计信息
+select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+//查看索引统计信息
+select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+```
+
+## 9.2 分区表信息
+
+```plsql
+//该表是否是分区表，分区表的分区类型是什么，是否有子分区，分区总数有多少
+select OWNER,table_name,partitioning_type,subpartitioning_type,partition_count from dba_part_tables where table_name ='RANGE_PART_TAB';
+
+//该分区表在哪一列上建分区,有无多列联合建分区
+col owner for a20
+col name for a30
+col column_name for a30
+col object_type for a30
+select owner,name,column_name,object_type,column_position from dba_part_key_columns where name ='RANGE_PART_TAB';
+ 
+ //该分区表有多大
+ select sum(bytes)/1024/1024 from dba_segments where segment_name ='RANGE_PART_TAB';
+ 
+ //该分区表各分区分别有多大，各个分区名是什么。
+select partition_name, segment_type, bytes from dba_segments where segment_name ='RANGE_PART_TAB';
+ 
+ //该分区表的统计信息收集情况
+select table_name,partition_name,last_analyzed,partition_position,num_rows from dba_tab_statistics where table_name ='RANGE_PART_TAB';
+
+//查该分区表有无索引，分别什么类型,全局索引是否失效，此外还可看统计信息收集情况。
+--(其中status值为N/A 表示分区索引，分区索引是否失效是在dba_ind_partitions中查看)
+select table_name,index_name,last_analyzed,blevel,num_rows,leaf_blocks,distinct_keys,status
+from dba_indexes where table_name ='RANGE_PART_TAB';
+
+//该分区表在哪些列上建了索引
+select index_name,column_name,column_position from dba_ind_columns where table_name='RANGE_PART_TAB';
+
+//该分区表上的各索引分别有多大。   
+select segment_name,segment_type,sum(bytes)/1024/1024 from dba_segments
+where segment_name in(select index_name from dba_indexes where table_name='RANGE_PART_TAB')
+group by segment_name,segment_type;
+
+//该分区表的索引段的分配情况
+select segment_name,partition_name,segment_type,bytes from dba_segments where segment_name in (select index_name from dba_indexes where table_name='RANGE_PART_TAB');
+  
+//分区索引相关信息及统计信息、是否失效查看。
+select t2.table_name,t1.index_name,t1.partition_name,t1.last_analyzed,t1.blevel,t1.num_rows,t1.leaf_blocks,t1.status from dba_ind_partitions t1, dba_indexes t2 where t1.index_name = t2.index_name and t2.table_name='RANGE_PART_TAB';    
 ```
 
