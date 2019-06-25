@@ -1,6 +1,6 @@
 # Oracle性能优化
 
-## AWR、ASH
+## 1. AWR、ASH
 
 **脚本目录  $ORACLE_HOME/rdbms/admin**
 
@@ -94,7 +94,7 @@ DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
 DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
 
-## 查看会话ID、OSPID
+## 2. 查看会话ID、OSPID
 
 ```
 //方法一：
@@ -122,11 +122,11 @@ LINE
 --------------------------------------------------------------------------------
 ospid: 15749 # '851,27493' inst_id: 1 acrosspm SPCIS-PRFHWI-SGR07 PM4H_HW alarmM
 ```
-##  数据库当前的等待事件
+##  3. 数据库当前的等待事件
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
 ```
-## **查询每个客户端连接每个实例的连接数**
+## 4. **查询每个客户端连接每个实例的连接数**
 
 ```
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
@@ -134,7 +134,7 @@ select inst_id,machine ,count(*) from gv$session group by machine,inst_id order 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
 ```
 
-##  查询oracle正在执行的sql以及session
+##  5. 查询oracle正在执行的sql以及session
 
 ```
 select
@@ -167,7 +167,21 @@ and s.sql_address=y.address
 order by s.sid,s.serial#,s.username,s.status
 ```
 
-## 查杀会话
+```plsql
+--会话信息
+select machine , event ,SERIAL#, TERMINAL, PROGRAM, ACTION,TYPE, SQL_ID, LOGON_TIME
+from gv$session where sid=1568 and INST_ID=2;
+
+--阻塞会话
+select inst_id,sid,serial#,status,sql_id,sql_exec_start,module,blocking_session from gv$session where machine='spcis-prfhwi-sdb01' and module like 'sqlplus%'; 
+
+select inst_id,sid,sql_id,event,module,machine,blocking_session  from gv$session where module ='PL/SQL Developer';
+
+```
+
+
+
+## 6. 查杀会话
 
 ```
 SELECT 'Lock' "Status",
@@ -193,13 +207,13 @@ AND f.database_status = 'ACTIVE'
 order by b.ctime;
 ```
 
-## 根据sid查询已经执行过的sql 
+## 7. 根据sid查询已经执行过的sql 
 
 ```
 select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid; 
 ```
 
-## 查看ASH信息
+## 8. 查看ASH信息
 
 ```
 select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
@@ -212,7 +226,7 @@ select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLO
 //Enter value for minute: 1  /* How many minutes activity you want to see */
 ```
 
-## **查看内存占用大的会话**
+## 9. **查看内存占用大的会话**
 
 ```
 SELECT server "连接类型",s.MACHINE,s.username,s.osuser,sn.NAME,VALUE/1024/1024 "占用内存MB",s.SID "会话ID",
@@ -239,7 +253,7 @@ WHERE st.SID = s.SID AND st.statistic# = sn.statistic# AND sn.NAME LIKE 'session
 alter system kill session '1568,27761,@2' immediate; 
 ```
 
-## oradebug
+## 10. oradebug
 
 ```
 11:33:20 sys@ORCL> oradebug help
@@ -295,7 +309,7 @@ CORE                                     Dump core without crashing process
 PROCSTAT                                 Dump process statistics
 ```
 
-## 查看长事务
+## 11. 查看长事务
 
 ```
 set linesize 200
@@ -332,7 +346,7 @@ order by t.diff desc
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
 
-## 查询SQL语句的SQL_ID
+## 12. 查询SQL语句的SQL_ID
 
 ```
 SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
@@ -341,7 +355,7 @@ SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE 
 select s.username from v$active_session_history t,dba_users s  where t.USER_ID=s.user_id and t.SQL_ID='0nx7fbv1w5xg2';
  
 //查询并获取当前sql的杀会话语句
-select 'alter system kill session '''|| t.SID||','||t.SERIAL#||''';' from v$session t where t.SQL_ID='0nx7fbv1w5xg2';
+select 'alter system kill session '''|| t.SID||','||t.SERIAL#||',@'||t.inst_id||''' immediate;' from gv$session t where t.SQL_ID='c6yz84stnau9b';
 
 //查询并获取当前会话的执行计划清空过程语句
 select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, invalidations from v$sqlarea  where sql_id='0nx7fbv1w5xg2';
@@ -349,13 +363,13 @@ select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, inv
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 
-## 查看表的并行度
+## 13. 查看表的并行度
 
 ```
 select owner,table_name,degree from dba_tables where table_name='EMP';
 ```
 
-## 收集10046Trace
+## 14. 收集10046Trace
 
 ```
 //在Session级打开trace
@@ -417,7 +431,7 @@ oradebug setospid <spid> <stid>oradebug unlimit
 tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 ```
 
-## 统计信息
+## 15. 统计信息
 
 ```plsql
 //查看表统计信息
@@ -429,12 +443,86 @@ select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 ```
 
-## 表nologging
+## 16.表nologging
 
 ```plsql
 alter session enable parallel dml;
 ALTER TABLE PPCMGR.PFP_ACCT_SNP_FCT NOLOGGING;  
 DELETE /*+parallel(a,4)*/ FROM PPCMGR.PFP_ACCT_SNP_FCT a where time_key >=20151223;
 ALTER TABLE PPCMGR.PFP_ACCT_SNP_FCT LOGGING; 
+```
+
+## 17.SQL执行进度
+
+```plsql
+select a.username,
+       a.target,
+       a.sid,
+       a.SERIAL#,
+       a.opname,
+       round(a.sofar * 100 / a.totalwork, 0) || '%' as progress, --进度条
+       time_remaining second, --剩余时间：秒
+       trunc(a.time_remaining / 60, 2) minute,--剩余时间：分钟
+       b.sql_text,
+       b.LAST_ACTIVE_TIME
+  from v$session_longops a, v$sqlarea b
+ where a.time_remaining <> 0
+   and a.sql_address = b.address
+   and a.sql_hash_value = b.hash_value
+   and a.username = 'GGS';
+
+select  target,SOFAR  /  TOTALWORK *100 from V$session_longops order by SOFAR desc;
+
+
+SELECT SE.SID,  
+OPNAME,  
+TRUNC(SOFAR / TOTALWORK * 100, 2) || '%' AS PCT_WORK,  
+ELAPSED_SECONDS ELAPSED,  
+ROUND(ELAPSED_SECONDS * (TOTALWORK - SOFAR) / SOFAR) REMAIN_TIME,  
+SQL_TEXT  
+FROM V$SESSION_LONGOPS SL, V$SQLAREA SA, V$SESSION SE  
+WHERE SL.SQL_HASH_VALUE = SA.HASH_VALUE  
+AND SL.SID = SE.SID  
+AND SOFAR != TOTALWORK  
+ORDER BY START_TIME;  
+```
+
+## 18.行锁等待时间
+
+```plsql
+select t.SEQ#,
+(max(t.SAMPLE_TIME) - min(t.SAMPLE_TIME)) "持续时间",
+t.SESSION_ID "当前会话id",
+t.SESSION_SERIAL# "当前会话SERIAL#",
+t.event "等待事件",
+t.BLOCKING_SESSION "阻塞会话id",
+t.BLOCKING_SESSION_SERIAL# "阻塞会话SERIAL#"
+from dba_hist_active_sess_history t
+where sample_time between
+to_date('2019-06-21 9:30:00', 'yyyy-mm-dd hh24:mi:ss') and
+to_date('2019-06-21 10:45:00', 'yyyy-mm-dd hh24:mi:ss')
+group by t.SESSION_ID,
+t.SESSION_SERIAL#,
+t.BLOCKING_SESSION,
+t.BLOCKING_SESSION_SERIAL#,
+t.EVENT,
+t.SEQ#;
+```
+
+## 19.高水位、空间碎片
+
+```plsql
+--查看块总数
+SELECT SEGMENT_NAME, EXTENTS, BLOCKS
+  FROM USER_SEGMENTS
+ WHERE SEGMENT_NAME = 'GJDS_BUS_OIL_LOG';
+--查看高水位
+SELECT BLOCKS, EMPTY_BLOCKS
+  FROM DBA_TABLES
+ WHERE TABLE_NAME = 'GJDS_BUS_OIL_LOG'
+   AND OWNER = 'BUS';
+--查看实际用了多少块
+SELECT COUNT(DISTINCT DBMS_ROWID.ROWID_BLOCK_NUMBER(ROWID)) USED_BLOCK
+  FROM GJDS_BUS_OIL_LOG S;
 ```
 

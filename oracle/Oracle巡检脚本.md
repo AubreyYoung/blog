@@ -995,6 +995,19 @@ col value  format a40
 select inst_id,name,value from gv$parameter where name ='log_archive_dest_1';
 ```
 ## 5.8 表空间使用情况
+### 查看SYSAUX使用信息
+
+```plsql
+col Schema for a25;
+col Item for a25;
+SELECT occupant_name "Item",space_usage_kbytes / 1048576 "Space Used (GB)",schema_name "Schema",move_procedure "Move Procedure" FROM v$sysaux_occupants ORDER BY 1 ;
+
+//awrinfo
+@?/rdbms/admin/awrinfo.sql   
+```
+
+
+
 ### **查看表空间使用信息**
 
 ```plsql
@@ -1673,6 +1686,9 @@ select * from v$archive_gap;
 @?/rdbms/admin/ashrpt.sql
 ```
 ```
+//查看快照保留期限，11g默认为8天
+SELECT retention FROM dba_hist_wr_control;
+
 //修改快照时间间隔
 EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
 //手动生成快照
@@ -2311,6 +2327,25 @@ select * from DBA_TAB_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 //查看索引统计信息
 select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+
+//查看统计信息过期的表
+SELECT OWNER, TABLE_NAME, PARTITION_NAME, 
+       OBJECT_TYPE, STALE_STATS, LAST_ANALYZED 
+  FROM DBA_TAB_STATISTICS
+ WHERE (STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL)
+   -- STALE_STATS = 'YES' 表示统计信息过期：当对象有超过10%的rows被修改时
+   -- LAST_ANALYZED IS NULL 表示该对象从未进行过收集统计信息
+   AND OWNER NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
+   -- 系统用户表的统计信息状态不做统计，根据需求打开或关闭
+   AND TABLE_NAME NOT LIKE 'BIN%'
+   -- 回收站中的表不做统计
+  order by 1,2;
 ```
 
 ## 9.2 分区表信息
