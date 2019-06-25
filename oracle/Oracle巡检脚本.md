@@ -934,9 +934,17 @@ select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
 ```
 ### 查看表大小
 ```plsql
-
 Select Segment_Name,Sum(bytes)/1024/1024 From dba_Extents Group By Segment_Name
 ```
+
+### 审计日志大小
+
+```plsql
+col segment_name FOR a10
+SELECT owner,segment_name,tablespace_name,bytes/1024/1024/1024 GB FROM dba_segments WHERE segment_name ='AUD$' AND owner='SYS';
+```
+
+
 
 ## 5.5 控制文件
 
