@@ -176,7 +176,6 @@ from gv$session where sid=1568 and INST_ID=2;
 select inst_id,sid,serial#,status,sql_id,sql_exec_start,module,blocking_session from gv$session where machine='spcis-prfhwi-sdb01' and module like 'sqlplus%'; 
 
 select inst_id,sid,sql_id,event,module,machine,blocking_session  from gv$session where module ='PL/SQL Developer';
-
 ```
 
 

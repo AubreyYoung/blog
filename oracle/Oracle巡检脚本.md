@@ -1049,6 +1049,34 @@ from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by ta
 where f.tablespace_name= d.tablespace_name
 order by  used_percent_with_extend desc;
 
+//大于80%
+select *
+  from (
+  select tablespace_name,
+               count(file_id),
+               sum(round(bytes / (1024 * 1024 * 1024), 2)) total_space_GB,
+               sum(round(MAXBYTES / (1024 * 1024 * 1024), 2)) max_space_GB,
+               round(sum(bytes) / sum(MAXBYTES) * 100) space_usage_percent
+          from dba_data_files
+                    group by tablespace_name
+         order by space_usage_percent desc) t
+where space_usage_percent > 80
+and (instr(t.TABLESPACE_NAME,'_DAT_')>0 or instr(t.TABLESPACE_NAME,'_IDX_')>0)
+and regexp_substr(t.TABLESPACE_NAME,'\d{6}')>to_char(trunc(sysdate-30),'yymmdd')
+union all
+select *
+  from (
+  select tablespace_name,
+               count(file_id),
+               sum(round(bytes / (1024 * 1024 * 1024), 2)) total_space_GB,
+               sum(round(MAXBYTES / (1024 * 1024 * 1024), 2)) max_space_GB,
+               round(sum(bytes) / sum(MAXBYTES) * 100) space_usage_percent
+          from dba_data_files
+                    group by tablespace_name
+         order by space_usage_percent desc) t
+where space_usage_percent > 80
+and (instr(t.TABLESPACE_NAME,'_DAT_')<= 0 and  instr(t.TABLESPACE_NAME,'_IDX_')<=0);
+
 select tablespace_name,logging,status from dba_tablespaces;
 ```
 ### **表空间使用状态（计算扩展）**
@@ -1543,6 +1571,27 @@ SELECT T.INDEX_OWNER ,T.INDEX_NAME,T.PARTITION_NAME,BLEVEL,T.NUM_ROWS,T.LEAF_BLO
  WHERE STATUS = 'UNUSABLE'
    AND INDEX_OWNER NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES')
    and INDEX_OWNER  IN (select username from dba_users where account_status='OPEN');
+   
+//子分区索引
+SELECT T.INDEX_OWNER ,T.INDEX_NAME,T.PARTITION_NAME,BLEVEL,T.NUM_ROWS,T.LEAF_BLOCKS,T.DISTINCT_KEYS
+  FROM DBA_IND_SUBPARTITIONS T
+ WHERE STATUS = 'UNUSABLE'
+   AND INDEX_OWNER NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES')
+   and INDEX_OWNER  IN (select username from dba_users where account_status='OPEN');
+
+
+//online重建索引
+alter index PM4H_DB.IDX_IND_H_3723 rebuild online;
+alter index PM4H_DB.IDX_IND_H_3723 rebuild partition PD_IND_H_3723_190501 online;
+
+-- Rebuild index
+Select 'alter index '||owner||'.'||index_name||' rebuild ONLINE;' from dba_indexes d where D.TABLE_NAME ='PROVIDE_TABLE_NAME' and D.OWNER='PROVIDE_OWNER';
+
+-- Rebuild Partition index
+Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||partition_name||' ONLINE;' from dba_ind_partitions where INDEX_NAME='PROVIDE_INDEX_NAME';
+
+-- Rebuild Sub Partition index
+Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where INDEX_NAME='PROVIDE_INDEX_NAME';
 ```
 ## 5.26 Index(es) of blevel>=3
 ```plsql
@@ -2395,6 +2444,8 @@ group by segment_name,segment_type;
 select segment_name,partition_name,segment_type,bytes from dba_segments where segment_name in (select index_name from dba_indexes where table_name='RANGE_PART_TAB');
   
 //分区索引相关信息及统计信息、是否失效查看。
-select t2.table_name,t1.index_name,t1.partition_name,t1.last_analyzed,t1.blevel,t1.num_rows,t1.leaf_blocks,t1.status from dba_ind_partitions t1, dba_indexes t2 where t1.index_name = t2.index_name and t2.table_name='RANGE_PART_TAB';    
+select t2.table_name,t1.index_name,t1.partition_name,t1.last_analyzed,t1.blevel,t1.num_rows,t1.leaf_blocks,t1.status from dba_ind_partitions t1, dba_indexes t2 where t1.index_name = t2.index_name and t2.table_name='RANGE_PART_TAB';   
+
+//自分区
 ```
 
