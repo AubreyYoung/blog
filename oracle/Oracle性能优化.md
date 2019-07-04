@@ -121,6 +121,32 @@ and s.sid=851;
 LINE
 --------------------------------------------------------------------------------
 ospid: 15749 # '851,27493' inst_id: 1 acrosspm SPCIS-PRFHWI-SGR07 PM4H_HW alarmM
+
+//方法四
+set line 500
+col sid format 9999
+col s# format 99999
+col username format a10
+col event format a30
+col machine format a20
+col p123 format a18
+col wt format 999
+col SQL_ID for a18
+alter session set cursor_sharing=force;
+SELECT /* XJ LEADING(S) FIRST_ROWS */
+ S.SID,
+ S.SERIAL# S#,
+ P.SPID,
+ NVL(S.USERNAME, SUBSTR(P.PROGRAM, LENGTH(P.PROGRAM) - 6)) USERNAME,
+ S.MACHINE,
+ S.EVENT,
+ S.P1 || '/' || S.P2 || '/' || S.P3 P123,
+ S.WAIT_TIME WT,
+ NVL(SQL_ID, S.PREV_SQL_ID) SQL_ID
+  FROM V$PROCESS P, V$SESSION S
+ WHERE P.ADDR = S.PADDR
+   AND S.STATUS = 'ACTIVE'
+   AND P.BACKGROUND IS NULL;
 ```
 ##  3. 数据库当前的等待事件
 ```
@@ -523,5 +549,37 @@ SELECT BLOCKS, EMPTY_BLOCKS
 --查看实际用了多少块
 SELECT COUNT(DISTINCT DBMS_ROWID.ROWID_BLOCK_NUMBER(ROWID)) USED_BLOCK
   FROM GJDS_BUS_OIL_LOG S;
+```
+
+## 20. 查看执行较高的SQL/模块
+
+```plsql
+set linesize 150
+col sql_t format a50;
+SELECT SUBSTR(SQL_TEXT, 1, 50) AS SQL_T,
+       TRIM(PROGRAM),
+       MIN(SQL_ID),
+       COUNT(*)
+  FROM (SELECT SQL_TEXT, A.SQL_ID, PROGRAM
+          FROM V$SESSION A, V$SQLAREA B
+         WHERE A.SQL_ID = B.SQL_ID
+           AND A.STATUS = 'ACTIVE'
+           AND A.SQL_ID IS NOT NULL
+        UNION ALL
+        SELECT SQL_TEXT, A.PREV_SQL_ID AS SQL_ID, PROGRAM
+          FROM V$SESSION A, V$SQLAREA B
+         WHERE A.SQL_ID IS NULL
+           AND A.PREV_SQL_ID = B.SQL_ID
+           AND A.STATUS = 'ACTIVE')
+ GROUP BY SUBSTR(SQL_TEXT, 1, 50), TRIM(PROGRAM)
+ ORDER BY 1;
+ 
+ SQL_T                                              TRIM(PROGRAM)                    MIN(SQL_ID)     COUNT(*)
+-------------------------------------------------- ------------------------------------------------ ------------- ----------
+select 1 from sys.aq$_subscriber_table where rownu oracle@mapy (Q001)                               cv959u044n88s          1
+select 1 from sys.aq$_subscriber_table where rownu oracle@mapy (Q004)                               cv959u044n88s          1
+select f.file#, f.block#, f.ts#, f.length from fet oracle@mapy (SMON)                               chsyr0gssbuqf          1
+select file# from file$ where ts#=:1          oracle@mapy (MMNL)                               bsa0wjtftg3uw          1
+select grantee#, privilege#, max(nvl(option$,0)) f oracle@mapy (DBRM)                               8wxxddd1nswfw          1
 ```
 

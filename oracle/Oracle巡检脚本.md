@@ -510,7 +510,7 @@ from v$instance;
 
 //RAC
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
-select INSTANCE_NUMBER,INSTANCE_NAME,HOST_NAME,STARTUP_TIME ,STATUS from sys.v_$instance; 
+select INSTANCE_NUMBER,INSTANCE_NAME,HOST_NAME,STARTUP_TIME ,STATUS from sys.gv_$instance; 
 ```
 ##  3.5  查看cursors
 
@@ -929,12 +929,66 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 ## 5.4 数据量大小
 ### **查看数据库段空间统计**
 
-```
+```plsql
 select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
+
+//dba_segments slow优化
+select /*+ optimizer_features_enable('11.2.0.2')*/  sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
+
+-- Total Size of the database
+Also accounting for controlfiles and mirrored redolog files.
+
+select (a.data_size+b.temp_size+c.redo_size+d.cont_size)/1024/1024/1024/1024 "total_size TB"
+from ( select sum(bytes) data_size
+       from dba_data_files ) a,
+     ( select nvl(sum(bytes),0) temp_size
+       from dba_temp_files ) b,
+     ( select sum(bytes) redo_size
+       from sys.v_$logfile lf, sys.v_$log l
+       where lf.group# = l.group#) c,
+     ( select sum(block_size*file_size_blks) cont_size
+       from v$controlfile ) d;
 ```
 ### 查看表大小
 ```plsql
-Select Segment_Name,Sum(bytes)/1024/1024 From dba_Extents Group By Segment_Name
+Select Segment_Name,Sum(bytes)/1024/1024 From dba_Extents Group By Segment_Name;
+
+//查看表/索引的大小
+set linesize 120
+col owner format a10
+col segment_name for a30
+alter session set cursor_sharing=force;
+SELECT /*+ SHSNC */
+ OWNER,
+ SEGMENT_NAME,
+ SEGMENT_TYPE,
+ SUM(BYTES) / 1048576 SIZE_MB,
+ MAX(INITIAL_EXTENT) INIEXT,
+ MAX(NEXT_EXTENT) MAXEXT
+  FROM DBA_SEGMENTS
+ WHERE SEGMENT_NAME = UPPER('$2')
+   AND ('$3' IS NULL OR UPPER(OWNER) = UPPER('$3'))
+   AND SEGMENT_TYPE LIKE 'TABLE%'
+ GROUP BY OWNER, SEGMENT_NAME, SEGMENT_TYPE
+UNION ALL
+SELECT OWNER,
+       SEGMENT_NAME,
+       SEGMENT_TYPE,
+       SUM(BYTES) / 1048576 SIZE_MB,
+       MAX(INITIAL_EXTENT) INIEXT,
+       MAX(NEXT_EXTENT) MAXEXT
+  FROM DBA_SEGMENTS
+ WHERE (OWNER, SEGMENT_NAME) IN
+       (SELECT OWNER, INDEX_NAME
+          FROM DBA_INDEXES
+         WHERE TABLE_NAME = UPPER('$2')
+           AND ('$3' IS NULL OR UPPER(OWNER) = UPPER('$3'))
+        UNION
+        SELECT OWNER, SEGMENT_NAME
+          FROM DBA_LOBS
+         WHERE TABLE_NAME = UPPER('$2')
+           AND ('$3' IS NULL OR UPPER(OWNER) = UPPER('$3')))
+ GROUP BY OWNER, SEGMENT_NAME, SEGMENT_TYPE;
 ```
 
 ### 审计日志大小
@@ -1579,19 +1633,18 @@ SELECT T.INDEX_OWNER ,T.INDEX_NAME,T.PARTITION_NAME,BLEVEL,T.NUM_ROWS,T.LEAF_BLO
    AND INDEX_OWNER NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES')
    and INDEX_OWNER  IN (select username from dba_users where account_status='OPEN');
 
+-- Rebuild index
+Select 'alter index '||owner||'.'||index_name||' rebuild ONLINE;' from dba_indexes d where  status = 'UNUSABLE';
+
+-- Rebuild Partition index
+Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||partition_name||' ONLINE;' from dba_ind_partitions where  status = 'UNUSABLE'；
+
+-- Rebuild Sub Partition index
+Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where  status = 'UNUSABLE'；
 
 //online重建索引
 alter index PM4H_DB.IDX_IND_H_3723 rebuild online;
 alter index PM4H_DB.IDX_IND_H_3723 rebuild partition PD_IND_H_3723_190501 online;
-
--- Rebuild index
-Select 'alter index '||owner||'.'||index_name||' rebuild ONLINE;' from dba_indexes d where D.TABLE_NAME ='PROVIDE_TABLE_NAME' and D.OWNER='PROVIDE_OWNER';
-
--- Rebuild Partition index
-Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||partition_name||' ONLINE;' from dba_ind_partitions where INDEX_NAME='PROVIDE_INDEX_NAME';
-
--- Rebuild Sub Partition index
-Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where INDEX_NAME='PROVIDE_INDEX_NAME';
 ```
 ## 5.26 Index(es) of blevel>=3
 ```plsql
@@ -1741,6 +1794,8 @@ select * from v$archive_gap;
 @?/rdbms/admin/addmrpt.sql
 @?/rdbms/admin/awrrpt.sql
 @?/rdbms/admin/ashrpt.sql
+
+@?/rdbms/admin/awrsqrpt.sql
 ```
 ```
 //查看快照保留期限，11g默认为8天
@@ -2446,6 +2501,6 @@ select segment_name,partition_name,segment_type,bytes from dba_segments where se
 //分区索引相关信息及统计信息、是否失效查看。
 select t2.table_name,t1.index_name,t1.partition_name,t1.last_analyzed,t1.blevel,t1.num_rows,t1.leaf_blocks,t1.status from dba_ind_partitions t1, dba_indexes t2 where t1.index_name = t2.index_name and t2.table_name='RANGE_PART_TAB';   
 
-//自分区
+//子分区
 ```
 
