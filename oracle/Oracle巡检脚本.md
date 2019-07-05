@@ -577,7 +577,7 @@ alter diskgroup data mount;
 asmcmd> lsdg
 ```
 
-## 3.9 检查监听日志及alert日志文件大小
+## 3.9 检查监听日志及alert日志文件大小,审计日志
 **Windows**
 进入监听文件及alert目录，检查listener.log大小
 **Linux**,Solrias
@@ -596,7 +596,19 @@ HP-UX
 find / -name "*listener*.log*" | xargs du -sk
 find / -name "alert*.log*" | xargs du -sk
 ```
+**清理审计日志**
+
+```plsql
+//audit目录
+cd $ORACLE_BASE/admin/{SID}/adump
+//删除audit日志
+find . -name '*.aud' -print0 | xargs -0 rm -f
+```
+
+
+
 ## 4.1 查看集群运行状态
+
 ```
 crs_stat -t -v											//10g
 crs_stat -t												//10g
@@ -1286,7 +1298,48 @@ Set linesize 200
 col file_name format a55
 select tablespace_name,file_name,bytes/1024/1024,autoextensible,maxbytes/1024/1024 from dba_temp_files;
 ```
+### 查看临时表空间对应的临时文件的使用情况
+
+```plsql
+SELECT TABLESPACE_NAME         AS TABLESPACE_NAME    ,
+    BYTES_USED/1024/1024/1024    AS TABLESAPCE_USED  ,
+    BYTES_FREE/1024/1024/1024  AS TABLESAPCE_FREE
+FROM V$TEMP_SPACE_HEADER
+ORDER BY 1 DESC;
+```
+
+### 查找消耗临时表空间资源比较多的SQL语句
+
+```plsql
+SELECT   se.username,
+         se.sid,
+         su.extents,
+         su.blocks * to_number(rtrim(p.value)) as Space,
+         tablespace,
+         segtype,
+         sql_text
+FROM v$sort_usage su, v$parameter p, v$session se, v$sql s
+   WHERE p.name = 'db_block_size'
+     AND su.session_addr = se.saddr
+     AND s.hash_value = su.sqlhash
+     AND s.address = su.sqladdr
+ORDER BY se.username, se.sid;
+```
+
+### 收缩临时表空间
+
+排序等操作使用的临时段，使用完成后会被标记为空闲，表示可以重用，占用的空间不会立即释放，有时候临时表空间会变得非常大，此时可以通过收缩临时表空间来释放没有使用的空间。收缩临时表空间是ORACLE 11g新增的功能。
+
+```plsql
+ALTER TABLESPACE TEMP SHRINK SPACE KEEP 8G;
+ 
+ALTER TABLESPACE TEMP SHRINK TEMPFILE '/u01/app/oracle/oradata/GSP/temp02.dbf'
+```
+
+
+
 ## 5.10 SCHEMA使用情况
+
 **schema大小**
 
 ```plsql
