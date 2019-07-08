@@ -1077,10 +1077,8 @@ col Item for a25;
 SELECT occupant_name "Item",space_usage_kbytes / 1048576 "Space Used (GB)",schema_name "Schema",move_procedure "Move Procedure" FROM v$sysaux_occupants ORDER BY 1 ;
 
 //awrinfo
-@?/rdbms/admin/awrinfo.sql   
+@?/rdbms/admin/awrinfo.sql
 ```
-
-
 
 ### **查看表空间使用信息**
 
@@ -2483,15 +2481,12 @@ where rownum < 11;
 
 ```plsql
 //查看表统计信息
-select * from DBA_TABLES where OWNER = 'HR' and TABLE_NAME = 'TEST';
-
-select * from DBA_TABLES where OWNER in('PM4H_DB', 'PM4H_MO', 'PM4H_HW');
-
-select * from DBA_TAB_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
 //查看列统计信息
-select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
+;
 //查看索引统计信息
-select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
+select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
 
 //查看统计信息过期的表
 SELECT OWNER, TABLE_NAME, PARTITION_NAME, 
