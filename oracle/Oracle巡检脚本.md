@@ -36,7 +36,10 @@ crontab -l oracle
 uptime
 w
 who
+who -b
+who -r
 whoami
+cat /proc/uptime
 ```
 ### 2.1.3 查看OS内核信息
 **AIX**
@@ -404,6 +407,7 @@ df -hi
 df -i
 fdisk -l
 mount |column -t
+cat /etc/mtab |column -t
 cat /etc/fstab
 ```
 **AIX**
@@ -943,6 +947,9 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 
 ```plsql
 select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
+
+
+select sum(bytes)/1024/1024 as Mb from  Dba_Segments where owner='ENRIQ';
 
 //dba_segments slow优化
 select /*+ optimizer_features_enable('11.2.0.2')*/  sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
