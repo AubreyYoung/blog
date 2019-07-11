@@ -6,6 +6,20 @@
 
 ----
 
+## 1.1 OS性能监控
+
+```shell
+vmstat 1 3
+mpstat -P ALL 1 3
+```
+
+```shell
+cat /proc/sys/kernel/tainted   //内核模块
+ps -elf|egrep " D| Z"        //僵尸进程
+```
+
+
+
 ## 2.1 操作系统版本/架构
 
 ### 2.1.1 查看定时任务
@@ -59,6 +73,8 @@ uname -sr                          <!--HP-UX操作系统及版本-->
 
 cat /etc/redhat-release
 cat /proc/version         //suse
+cat /etc/SuSE-release			//suse
+cat /etc/lsb-release
 
 lsb_release			//suse、redhat
 lsb_release -a    //suse、Redhat
@@ -157,6 +173,12 @@ lslpp -l abos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.pe
 lslpp -l bos.adt.base bos.adt.lib bos.adt.libm bos.perf.libperfstat bos.perf.perfstat bos.perf.proctools xlC.aix61.rte xlC.rte
 ```
 **Linux**
+
+```shell
+/bin/rpm -qa --queryformat "%{DISTRIBUTION}\n" | sort | uniq
+```
+
+
 
 **11.2 OL7 or RHEL7 (x86-64)**
 
