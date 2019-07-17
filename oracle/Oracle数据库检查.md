@@ -367,6 +367,17 @@ set linesize 100
 column name format a30
 column value format a40
 select inst_id,name,value from gv$parameter where value is not null;
+
+//某个参数
+set linesize 120
+col NAME format a40
+COL VALUE FORMAT A40
+SELECT /* SHSNC */
+ NAME, ISDEFAULT, ISSES_MODIFIABLE SESMOD, ISSYS_MODIFIABLE SYSMOD, VALUE
+  FROM V$PARAMETER
+ WHERE NAME LIKE '%' || LOWER('process') || '%'
+   AND NAME <> 'control_files'
+   AND NAME <> 'rollback_segments';
 ```
 
 ### 2.5.1 **非默认参数**
@@ -405,6 +416,15 @@ x.indx = y.indx and
 x.ksppinm LIKE '/_%' escape '/'
 order by
 translate(x.ksppinm, ' _', ' ');
+
+//关键字隐藏参数
+SELECT /* SHSNC */
+ P.KSPPINM NAME, V.KSPPSTVL VALUE
+  FROM SYS.X$KSPPI P, SYS.X$KSPPSV V
+ WHERE P.INDX = V.INDX
+   AND V.INST_ID = USERENV('Instance')
+   AND SUBSTR(P.KSPPINM, 1, 1) = '_'
+   AND ('PROCESS' IS NULL OR P.KSPPINM LIKE '%' || LOWER('process') || '%');
 ```
 
 ### 2.5.3 **查看参数**
@@ -529,12 +549,13 @@ from ( select sum(bytes) data_size
 
 ```plsql
 Select Segment_Name,Sum(bytes)/1024/1024 From dba_Extents Group By Segment_Name;
+```
+### 2.10.3 查看表的大小
 
-//查看表/索引的大小
+```PLSQL
 set linesize 120
 col owner format a10
 col segment_name for a30
-alter session set cursor_sharing=force;
 SELECT /*+ SHSNC */
  OWNER,
  SEGMENT_NAME,
@@ -543,8 +564,8 @@ SELECT /*+ SHSNC */
  MAX(INITIAL_EXTENT) INIEXT,
  MAX(NEXT_EXTENT) MAXEXT
   FROM DBA_SEGMENTS
- WHERE SEGMENT_NAME = UPPER('$2')
-   AND ('$3' IS NULL OR UPPER(OWNER) = UPPER('$3'))
+ WHERE SEGMENT_NAME = UPPER('TESTTABLE')
+   AND ('SCOTT' IS NULL OR UPPER(OWNER) = UPPER('SCOTT'))
    AND SEGMENT_TYPE LIKE 'TABLE%'
  GROUP BY OWNER, SEGMENT_NAME, SEGMENT_TYPE
 UNION ALL
@@ -558,17 +579,17 @@ SELECT OWNER,
  WHERE (OWNER, SEGMENT_NAME) IN
        (SELECT OWNER, INDEX_NAME
           FROM DBA_INDEXES
-         WHERE TABLE_NAME = UPPER('$2')
-           AND ('$3' IS NULL OR UPPER(OWNER) = UPPER('$3'))
+         WHERE TABLE_NAME = UPPER('TESTTABLE')
+           AND ('SCOTT' IS NULL OR UPPER(OWNER) = UPPER('SCOTT'))
         UNION
         SELECT OWNER, SEGMENT_NAME
           FROM DBA_LOBS
-         WHERE TABLE_NAME = UPPER('$2')
-           AND ('$3' IS NULL OR UPPER(OWNER) = UPPER('$3')))
+         WHERE TABLE_NAME = UPPER('TESTTABLE')
+           AND ('SCOTT' IS NULL OR UPPER(OWNER) = UPPER('SCOTT')))
  GROUP BY OWNER, SEGMENT_NAME, SEGMENT_TYPE;
 ```
 
-### 2.10.3 审计日志大小
+### 2.10.5 审计日志大小
 
 ```plsql
 col segment_name FOR a10
@@ -719,6 +740,17 @@ where space_usage_percent > 80
 and (instr(t.TABLESPACE_NAME,'_DAT_')<= 0 and  instr(t.TABLESPACE_NAME,'_IDX_')<=0);
 
 select tablespace_name,logging,status from dba_tablespaces;
+set linesize 120
+SELECT /* SHSNC */
+ TABLESPACE_NAME   TS_NAME,
+ INITIAL_EXTENT    INI_EXT,
+ NEXT_EXTENT       NXT_EXT,
+ STATUS,
+ CONTENTS,
+ EXTENT_MANAGEMENT EXT_MGR,
+ ALLOCATION_TYPE   ALLOC_TYPE
+  FROM DBA_TABLESPACES
+ ORDER BY TABLESPACE_NAME
 ```
 
 ### 2.14.4 **查看表空间使用信息3**
@@ -829,6 +861,53 @@ AND dt.tablespace_name = ttse.tablespace_name(+)
 AND dt.tablespace_name = tte.tablespace_name(+)
 ORDER BY ttsp.tablespace_name;
 ```
+
+### 2.14.4 查看表空间使用信息4
+
+```PLSQL
+SET LINESIZE 500
+SET PAGESIZE 1000
+col FREE_SPACE(M) for 999999999
+col USED_SPACE(M) for 999999999
+col TABLESPACE_NAME for a15
+SELECT D.TABLESPACE_NAME,
+       SPACE "SUM_SPACE(M)",
+       SPACE - NVL(FREE_SPACE, 0) "USED_SPACE(M)",
+       ROUND((1 - NVL(FREE_SPACE, 0) / SPACE) * 100, 2) "USED_RATE(%)",
+       FREE_SPACE "FREE_SPACE(M)",
+       CASE
+         WHEN FREE_SPACE = REA_FREE_SPACE THEN
+          NULL
+         ELSE
+          ROUND((1 - NVL(REA_FREE_SPACE, 0) / SPACE) * 100, 2)
+       END "REA_USED_RATE(%)",
+       CASE
+         WHEN FREE_SPACE = REA_FREE_SPACE THEN
+          NULL
+         ELSE
+          REA_FREE_SPACE
+       END "REA_FREE_SPACE(M)"
+  FROM (SELECT TABLESPACE_NAME, ROUND(SUM(BYTES) / (1024 * 1024), 2) SPACE
+          FROM DBA_DATA_FILES
+         GROUP BY TABLESPACE_NAME) D,
+       (SELECT F1.TABLESPACE_NAME,
+               F1.FREE_SPACE - NVL(F2.FREE_SPACE, 0) REA_FREE_SPACE,
+               F1.FREE_SPACE
+          FROM (SELECT TABLESPACE_NAME,
+                       ROUND(SUM(BYTES) / (1024 * 1024), 2) FREE_SPACE
+                  FROM DBA_FREE_SPACE
+                 GROUP BY TABLESPACE_NAME) F1,
+               (SELECT TS_NAME TABLESPACE_NAME,
+                       ROUND(SUM(SPACE) * 8 / 1024, 2) FREE_SPACE
+                  FROM DBA_RECYCLEBIN
+                 GROUP BY TS_NAME) F2
+         WHERE F1.TABLESPACE_NAME = F2.TABLESPACE_NAME(+)) F
+ WHERE D.TABLESPACE_NAME = F.TABLESPACE_NAME(+)
+   AND ('USERS' IS NULL OR D.TABLESPACE_NAME = UPPER('USERS'))
+ ORDER BY 1 - NVL(REA_FREE_SPACE, 0) / SPACE DESC;
+```
+
+
 
 ## 2.15 临时表空间及账户状态
 
@@ -1320,6 +1399,36 @@ Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||s
 //online重建索引
 alter index PM4H_DB.IDX_IND_H_3723 rebuild online;
 alter index PM4H_DB.IDX_IND_H_3723 rebuild partition PD_IND_H_3723_190501 online;
+
+//重建索引
+set linesize 120
+col GRANTEE format a12
+col owner   format a12
+col GRANTOR format a12
+col PRIVILEGE format a20
+COL VALUE FORMAT A40
+alter session set cursor_sharing=force;
+SELECT /* SHSNC */
+ 'ALTER INDEX ' || OWNER || '.' || INDEX_NAME || ' REBUILD ONLINE;' UNUSABLE_INDEXES
+  FROM ALL_INDEXES
+ WHERE (TABLE_OWNER = UPPER('SCOTT') OR 'SCOTT' IS NULL)
+   AND STATUS = 'UNUSABLE'
+UNION ALL
+SELECT 'ALTER INDEX ' || IP.INDEX_OWNER || '.' || IP.INDEX_NAME ||
+       ' REBUILD PARTITION ' || IP.PARTITION_NAME || ' ONLINE;'
+  FROM ALL_IND_PARTITIONS IP, ALL_INDEXES I
+ WHERE IP.INDEX_OWNER = I.OWNER
+   AND IP.INDEX_NAME = I.INDEX_NAME
+   AND (I.TABLE_OWNER = UPPER('SCOTT') OR 'SCOTT' IS NULL)
+   AND IP.STATUS = 'UNUSABLE'
+UNION ALL
+SELECT 'ALTER INDEX ' || IP.INDEX_OWNER || '.' || IP.INDEX_NAME ||
+       ' REBUILD SUBPARTITION ' || IP.PARTITION_NAME || ' ONLINE;'
+  FROM ALL_IND_SUBPARTITIONS IP, ALL_INDEXES I
+ WHERE IP.INDEX_OWNER = I.OWNER
+   AND IP.INDEX_NAME = I.INDEX_NAME
+   AND (I.TABLE_OWNER = UPPER('SCOTT') OR 'SCOTT' IS NULL)
+   AND IP.STATUS = 'UNUSABLE';
 ```
 
 ## 2.27 Index(es) of blevel>=3
@@ -1952,6 +2061,23 @@ select file_id,tablespace_name,file_name,bytes/1024/1024,status,autoextensible,m
 
 col file_name format a60
 select file_id, file_name,tablespace_name,bytes/1024/1024 as MB ,autoextensible,maxbytes,user_bytes,online_status from dba_data_files;
+
+//某个表空间数据文件
+set linesize 120
+col name format a60
+col file# format 9999
+col size_mb format 99999
+alter session set cursor_sharing=force;
+SELECT /* SHSNC */ /*+ RULE */
+ F.FILE#,
+ F.NAME,
+ TRUNC(F.BYTES / 1048576, 2) SIZE_MB,
+ F.CREATION_TIME,
+ STATUS
+  FROM V$DATAFILE F, V$TABLESPACE T
+ WHERE F.TS# = T.TS#
+   AND T.NAME = NVL(UPPER('USERS'), 'SYSTEM')
+ ORDER BY F.CREATION_TIME;
 ```
 
 ### 3.12.2 数据文件需要还原
@@ -2066,7 +2192,199 @@ ORDER BY
   ddf.tablespace_name;
 ```
 
-### 3.12.5 segment使用状态
+## 3.13 占用空间最多的10个object
+
+```plsql
+col owner format a15
+col Segment_Name format a36
+col segment_type format a15
+col tablespace_name format a15
+select owner, Segment_Name,segment_type,tablespace_name,MB from
+(Select owner, Segment_Name,segment_type,tablespace_name,Sum(bytes)/1024/1024 as MB From dba_Extents  group by owner,Segment_Name,segment_type,tablespace_name order by MB desc)
+where rownum < 11;
+```
+
+## 3.14 统计信息
+
+```plsql
+//查看表统计信息
+select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
+//查看列统计信息
+select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
+;
+//查看索引统计信息
+select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
+
+//查看统计信息过期的表
+SELECT OWNER, TABLE_NAME, PARTITION_NAME, 
+       OBJECT_TYPE, STALE_STATS, LAST_ANALYZED 
+  FROM DBA_TAB_STATISTICS
+ WHERE (STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL)
+   -- STALE_STATS = 'YES' 表示统计信息过期：当对象有超过10%的rows被修改时
+   -- LAST_ANALYZED IS NULL 表示该对象从未进行过收集统计信息
+   AND OWNER NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
+   -- 系统用户表的统计信息状态不做统计，根据需求打开或关闭
+   AND TABLE_NAME NOT LIKE 'BIN%'
+   -- 回收站中的表不做统计
+  order by 1,2;
+```
+
+## 3.15 分区表信息
+
+### 3.15.1 是否分区表
+
+该表是否是分区表，分区表的分区类型是什么，是否有子分区，分区总数有多少
+
+```plsql
+select OWNER,table_name,partitioning_type,subpartitioning_type,partition_count from dba_part_tables where table_name ='RANGE_PART_TAB';
+
+//方法二
+set linesize 120
+col USERNAME format a12
+col MACHINE format a16
+col TABLESPACE format a10
+SELECT /* SHSNC */
+ PARTITION_POSITION NO#,
+ PARTITION_NAME,
+ TABLESPACE_NAME TS_NAME,
+ INITIAL_EXTENT / 1024 INI_K,
+ NEXT_EXTENT / 1024 NEXT_K,
+ PCT_INCREASE PCT,
+ FREELISTS FLS,
+ FREELIST_GROUPS FLGS
+  FROM ALL_TAB_PARTITIONS
+ WHERE TABLE_OWNER = 'SCOTT'
+   AND TABLE_NAME LIKE '%GPS%'
+ ORDER BY 1;
+```
+### 3.15.2 分区键
+
+该分区表在哪一列上建分区,有无多列联合建分区
+
+```PLSQL
+col owner for a20
+col name for a30
+col column_name for a30
+col object_type for a30
+select owner,name,column_name,object_type,column_position from dba_part_key_columns where name ='RANGE_PART_TAB';
+```
+### 3.15.3 分区表大小
+
+```PLSQL
+select sum(bytes)/1024/1024 from dba_segments where segment_name ='RANGE_PART_TAB';
+```
+### 3.15.4 各分区大小
+
+ 该分区表各分区分别有多大，各个分区名是什么。
+
+```PLSQL
+select partition_name, segment_type, bytes from dba_segments where segment_name ='RANGE_PART_TAB';
+```
+### 3.15.5 分区表统计信息收集情况
+
+```PLSQL
+select table_name,partition_name,last_analyzed,partition_position,num_rows from dba_tab_statistics where table_name ='RANGE_PART_TAB';
+```
+### 3.15.6分区表索引
+
+查该分区表有无索引，分别什么类型,全局索引是否失效，此外还可看统计信息收集情况。
+
+其中status值为N/A 表示分区索引，分区索引是否失效是在dba_ind_partitions中查看
+
+```PLSQL
+select table_name,index_name,last_analyzed,blevel,num_rows,leaf_blocks,distinct_keys,status
+from dba_indexes where table_name ='RANGE_PART_TAB';
+```
+### 3.15.7 分区表索引键
+
+```PLSQL
+select index_name,column_name,column_position from dba_ind_columns where table_name='RANGE_PART_TAB';
+```
+### 3.15.8 分区表上的各索引大小
+
+```PLSQL
+select segment_name,segment_type,sum(bytes)/1024/1024 from dba_segments
+where segment_name in(select index_name from dba_indexes where table_name='RANGE_PART_TAB')
+group by segment_name,segment_type;
+```
+### 3.15.9 分区表索引段的分配情况
+
+```PLSQL
+select segment_name,partition_name,segment_type,bytes from dba_segments where segment_name in (select index_name from dba_indexes where table_name='RANGE_PART_TAB');
+```
+### 3.15.10 分区索引统计信息
+
+```PLSQL
+select t2.table_name,t1.index_name,t1.partition_name,t1.last_analyzed,t1.blevel,t1.num_rows,t1.leaf_blocks,t1.status from dba_ind_partitions t1, dba_indexes t2 where t1.index_name = t2.index_name and t2.table_name='RANGE_PART_TAB'; 
+```
+## 3.16 索引状态
+
+```plsql
+SET linesize 500
+col INDEX_COL  FOR a30
+col INDEX_TYPE FOR a22
+col INDEX_NAME FOR a32
+col table_name FOR a32
+SELECT B.OWNER || '.' || B.INDEX_NAME INDEX_NAME,
+       A.INDEX_COL,
+       B.INDEX_TYPE || '-' || B.UNIQUENESS INDEX_TYPE,
+       B.PARTITIONED
+  FROM (SELECT TABLE_OWNER,
+               TABLE_NAME,
+               INDEX_NAME,
+               SUBSTR(MAX(SYS_CONNECT_BY_PATH(COLUMN_NAME, ',')), 2) INDEX_COL
+          FROM (SELECT TABLE_OWNER,
+                       TABLE_NAME,
+                       INDEX_NAME,
+                       COLUMN_NAME,
+                       ROW_NUMBER() OVER(PARTITION BY TABLE_OWNER, TABLE_NAME, INDEX_NAME ORDER BY TABLE_OWNER, INDEX_NAME, COLUMN_POSITION, COLUMN_NAME) RN
+                  FROM DBA_IND_COLUMNS
+                 WHERE TABLE_NAME = UPPER('TEST')
+                   AND TABLE_OWNER = UPPER('SCOTT'))
+         START WITH RN = 1
+        CONNECT BY PRIOR RN = RN - 1
+               AND PRIOR TABLE_NAME = TABLE_NAME
+               AND PRIOR INDEX_NAME = INDEX_NAME
+               AND PRIOR TABLE_OWNER = TABLE_OWNER
+         GROUP BY TABLE_NAME, INDEX_NAME, TABLE_OWNER
+         ORDER BY TABLE_OWNER, TABLE_NAME, INDEX_NAME) A,
+       (SELECT *
+          FROM DBA_INDEXES
+         WHERE TABLE_NAME = UPPER('TEST')
+           AND TABLE_OWNER = UPPER('SCOTT')) B
+ WHERE A.TABLE_OWNER = B.TABLE_OWNER
+   AND A.TABLE_NAME = B.TABLE_NAME
+   AND A.INDEX_NAME = B.INDEX_NAME;
+```
+
+## 3.17 Segment查看
+
+### 3.17.1 segment大小
+
+```plsql
+set linesize 120
+col USERNAME format a12
+col MACHINE format a16
+col TABLESPACE format a10
+SELECT /* SHSNC */ /*+ RULE */
+ SEGMENT_TYPE,
+ OWNER SEGMENT_OWNER,
+ SEGMENT_NAME,
+ TRUNC(SUM(BYTES) / 1024 / 1024, 1) SIZE_MB
+  FROM DBA_SEGMENTS
+ WHERE OWNER NOT IN ('SYS', 'SYSTEM')
+ GROUP BY SEGMENT_TYPE, OWNER, SEGMENT_NAME
+HAVING SUM(BYTES) > 100 * 1048576
+ ORDER BY 1, 2, 3, 4 DESC;
+```
+
+### 3.17.2 某个表空间 segment
 
 This query lists all segments of a tablespace, their status an some usage measurements
 
@@ -2121,88 +2439,4 @@ ORDER BY
 ;
 ```
 
-## 3.13 占用空间最多的10个object
-
-```plsql
-col owner format a15
-col Segment_Name format a36
-col segment_type format a15
-col tablespace_name format a15
-select owner, Segment_Name,segment_type,tablespace_name,MB from
-(Select owner, Segment_Name,segment_type,tablespace_name,Sum(bytes)/1024/1024 as MB From dba_Extents  group by owner,Segment_Name,segment_type,tablespace_name order by MB desc)
-where rownum < 11;
-```
-
-## 3.14 统计信息
-
-```plsql
-//查看表统计信息
-select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
-//查看列统计信息
-select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
-;
-//查看索引统计信息
-select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
-
-//查看统计信息过期的表
-SELECT OWNER, TABLE_NAME, PARTITION_NAME, 
-       OBJECT_TYPE, STALE_STATS, LAST_ANALYZED 
-  FROM DBA_TAB_STATISTICS
- WHERE (STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL)
-   -- STALE_STATS = 'YES' 表示统计信息过期：当对象有超过10%的rows被修改时
-   -- LAST_ANALYZED IS NULL 表示该对象从未进行过收集统计信息
-   AND OWNER NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
-                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
-                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
-                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
-                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
-                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
-                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
-   -- 系统用户表的统计信息状态不做统计，根据需求打开或关闭
-   AND TABLE_NAME NOT LIKE 'BIN%'
-   -- 回收站中的表不做统计
-  order by 1,2;
-```
-
-## 3.15 分区表信息
-
-```plsql
-//该表是否是分区表，分区表的分区类型是什么，是否有子分区，分区总数有多少
-select OWNER,table_name,partitioning_type,subpartitioning_type,partition_count from dba_part_tables where table_name ='RANGE_PART_TAB';
-
-//该分区表在哪一列上建分区,有无多列联合建分区
-col owner for a20
-col name for a30
-col column_name for a30
-col object_type for a30
-select owner,name,column_name,object_type,column_position from dba_part_key_columns where name ='RANGE_PART_TAB';
- 
- //该分区表有多大
- select sum(bytes)/1024/1024 from dba_segments where segment_name ='RANGE_PART_TAB';
- 
- //该分区表各分区分别有多大，各个分区名是什么。
-select partition_name, segment_type, bytes from dba_segments where segment_name ='RANGE_PART_TAB';
- 
- //该分区表的统计信息收集情况
-select table_name,partition_name,last_analyzed,partition_position,num_rows from dba_tab_statistics where table_name ='RANGE_PART_TAB';
-
-//查该分区表有无索引，分别什么类型,全局索引是否失效，此外还可看统计信息收集情况。
---(其中status值为N/A 表示分区索引，分区索引是否失效是在dba_ind_partitions中查看)
-select table_name,index_name,last_analyzed,blevel,num_rows,leaf_blocks,distinct_keys,status
-from dba_indexes where table_name ='RANGE_PART_TAB';
-
-//该分区表在哪些列上建了索引
-select index_name,column_name,column_position from dba_ind_columns where table_name='RANGE_PART_TAB';
-
-//该分区表上的各索引分别有多大。   
-select segment_name,segment_type,sum(bytes)/1024/1024 from dba_segments
-where segment_name in(select index_name from dba_indexes where table_name='RANGE_PART_TAB')
-group by segment_name,segment_type;
-
-//该分区表的索引段的分配情况
-select segment_name,partition_name,segment_type,bytes from dba_segments where segment_name in (select index_name from dba_indexes where table_name='RANGE_PART_TAB');
-  
-//分区索引相关信息及统计信息、是否失效查看。
-select t2.table_name,t1.index_name,t1.partition_name,t1.last_analyzed,t1.blevel,t1.num_rows,t1.leaf_blocks,t1.status from dba_ind_partitions t1, dba_indexes t2 where t1.index_name = t2.index_name and t2.table_name='RANGE_PART_TAB';   
-```
-
+## 

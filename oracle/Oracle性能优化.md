@@ -234,8 +234,15 @@ order by b.ctime;
 
 ## 7. 根据sid查询已经执行过的sql 
 
-```
-select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid; 
+```plsql
+select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid;
+
+set line 120;
+SELECT 'ps -ef|grep ' || TO_CHAR(SPID) ||
+       '|grep LOCAL=NO|awk ''{print " -9 "\$2}''|xargs kill' KILL_SH
+  FROM GV$PROCESS P, GV$SESSION S
+ WHERE S.PADDR = P.ADDR
+   AND S.SQL_ID = '$2';
 ```
 
 ## 8. 查看ASH信息
@@ -367,6 +374,22 @@ where s.inst_id = t.inst_id
 and s.saddr = t.ses_addr
 order by t.diff desc
 /
+
+//Get long run query 方法2
+set linesize 120
+col MESSAGE format a30
+col opname for a20
+col username for a20
+set pagesize 1000
+SELECT OPNAME,
+       TIME_REMAINING  REMAIN,
+       ELAPSED_SECONDS ELAPSE,
+       MESSAGE,
+       SQL_ID,
+       SID,
+       USERNAME
+  FROM V$SESSION_LONGOPS
+ WHERE TIME_REMAINING > 0;
 ```
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
@@ -581,5 +604,780 @@ select 1 from sys.aq$_subscriber_table where rownu oracle@mapy (Q004)           
 select f.file#, f.block#, f.ts#, f.length from fet oracle@mapy (SMON)                               chsyr0gssbuqf          1
 select file# from file$ where ts#=:1          oracle@mapy (MMNL)                               bsa0wjtftg3uw          1
 select grantee#, privilege#, max(nvl(option$,0)) f oracle@mapy (DBRM)                               8wxxddd1nswfw          1
+```
+
+## 21. 调优工具包DBMS_SQLTUNE
+
+```plsql
+SELECT * FROM TESTTABLE WHERE ID BETWEEN 200 AND 400;
+
+SELECT * FROM V$SQLTEXT T WHERE T.SQL_TEXT LIKE '%TESTTABLE%';
+
+DECLARE
+  MY_TASK_NAME VARCHAR2(50);
+BEGIN
+  MY_TASK_NAME := DBMS_SQLTUNE.CREATE_TUNING_TASK(SQL_ID     => '0j3ypx51zud1r',
+                                  SCOPE      => 'COMPREHENSIVE',
+                                  TIME_LIMIT   => 60,
+                                  TASK_NAME   => 'Lunar_tunning_0j3ypx51zud1r',
+                                  DESCRIPTION  => 'Task to tune a query on bjgduva68mbqm by Lunar');
+  DBMS_SQLTUNE.EXECUTE_TUNING_TASK(MY_TASK_NAME);
+  DBMS_OUTPUT.PUT_LINE(MY_TASK_NAME);
+END;
+/
+
+SELECT DBMS_SQLTUNE.REPORT_TUNING_TASK('&task_name') FROM DUAL;
+
+EXEC DBMS_SQLTUNE.DROP_TUNING_TASK('Lunar_tunning_0j3ypx51zud1r');
+```
+## 22.Get the max contiguous free space of tablespace
+
+```plsql
+set line 200;
+SELECT T.TABLESPACE_NAME,
+       SUM(D.BYTES) / 1024 / 1024 / 1024 "表空间大小(G)",
+       T.FREE "最大连续段大小(G)"
+  FROM (SELECT TABLESPACE_NAME, MAX(FREE_SPACE) FREE
+          FROM (SELECT F.TABLESPACE_NAME,
+                       F.FILE_ID,
+                       BLOCK_ID,
+                       SUM(F.BYTES) / 1024 / 1024 / 1024 FREE_SPACE
+                  FROM DBA_FREE_SPACE F, DBA_TABLESPACES T
+                 WHERE T.TABLESPACE_NAME = F.TABLESPACE_NAME
+                   AND T.ALLOCATION_TYPE = 'SYSTEM'
+                   AND T.CONTENTS <> 'UNDO'
+                   AND T.TABLESPACE_NAME NOT IN
+                       ('SYSAUX', 'SYSTEM', 'USERS', 'TIVOLIORTS')
+                 GROUP BY F.TABLESPACE_NAME, F.FILE_ID, BLOCK_ID) T
+         GROUP BY T.TABLESPACE_NAME) T,
+       DBA_DATA_FILES D
+ WHERE T.TABLESPACE_NAME = D.TABLESPACE_NAME
+ GROUP BY T.TABLESPACE_NAME, T.FREE
+HAVING T.FREE < 2;
+```
+
+## 23. Get top5 sql for the last n hours
+
+```plsql
+set line 300;
+set pagesize 300;
+col module for a30;
+col PARSING_SCHEMA_NAME for a10;
+SELECT TO_CHAR(A.BEGIN_TIME, 'yyyymmdd hh24:mi'),
+       TO_CHAR(A.END_TIME, 'yyyymmdd hh24:mi'),
+       A.INSTANCE_NUMBER,
+       A.PARSING_SCHEMA_NAME,
+       A.MODULE,
+       A.SQL_ID,
+       A.BUFFER_GETS_DELTA,
+       A.CPU_TIME_DELTA / B.VALUE * 100 CPU_PCT
+  FROM (SELECT *
+          FROM (SELECT SS.SNAP_ID,
+                       SN.BEGIN_INTERVAL_TIME BEGIN_TIME,
+                       SN.END_INTERVAL_TIME END_TIME,
+                       SN.INSTANCE_NUMBER,
+                       PARSING_SCHEMA_NAME,
+                       MODULE,
+                       SQL_ID,
+                       BUFFER_GETS_DELTA,
+                       CPU_TIME_DELTA,
+                       RANK() OVER(PARTITION BY SS.SNAP_ID, SN.INSTANCE_NUMBER ORDER BY CPU_TIME_DELTA DESC) RANK
+                  FROM DBA_HIST_SQLSTAT SS, DBA_HIST_SNAPSHOT SN
+                 WHERE SN.SNAP_ID = SS.SNAP_ID
+                   AND SN.BEGIN_INTERVAL_TIME BETWEEN SYSDATE - N / 24 AND
+                       SYSDATE
+                   AND SS.INSTANCE_NUMBER = SN.INSTANCE_NUMBER)
+         WHERE RANK < 6) A,
+       DBA_HIST_SYSSTAT B
+ WHERE A.SNAP_ID = B.SNAP_ID
+   AND A.INSTANCE_NUMBER = B.INSTANCE_NUMBER
+   AND B.STAT_ID = 3649082374
+ ORDER BY 1, 3 ASC, 8 DESC;
+```
+
+## 24. Get fragment table
+
+```plsql
+set line 300
+set pagesize 300
+col table_name for a35
+col owner for a6
+col tab_size for 999999.999999
+col safe_space for 999999.999999
+SELECT OWNER,
+       TABLE_NAME,
+       BLOCKS * 8 / 1024 TAB_SIZE,
+       (AVG_ROW_LEN * NUM_ROWS + INI_TRANS * 24) / (BLOCKS * 8 * 1024) * 100 USED_PCT,
+       ((BLOCKS * 8 * 1024) - (AVG_ROW_LEN * NUM_ROWS + INI_TRANS * 24)) / 1024 / 1024 * 0.9 SAFE_SPACE
+  FROM DBA_TABLES
+ WHERE (OWNER LIKE '__YY' OR OWNER LIKE '__ZW' OR OWNER = 'COMMON')
+   AND BLOCKS > 1024 * 10
+   AND (AVG_ROW_LEN * NUM_ROWS + INI_TRANS * 24) / (BLOCKS * 8 * 1024) * 100 < 50
+ ORDER BY 4;
+```
+
+## 25.get top top_value process of consume by cpu
+
+```plsql
+col username for a10
+col program for a50
+col event for a30
+set line 300
+SELECT S.INST_ID,
+       S.USERNAME,
+       S.PROGRAM,
+       S.SQL_ID,
+       S.EVENT,
+       P.SPID,
+       SQL.CPU_TIME / 1000000 / DECODE(EXECUTIONS, 0, 1, EXECUTIONS) CPU,
+       SQL.BUFFER_GETS / DECODE(EXECUTIONS, 0, 1, EXECUTIONS) BUFF
+  FROM GV$SQL SQL, GV$SESSION S, GV$PROCESS P
+ WHERE S.SQL_ID = SQL.SQL_ID
+   AND S.STATUS = 'ACTIVE'
+   AND WAIT_CLASS# <> 6
+   AND S.PADDR = P.ADDR
+ ORDER BY 6 DESC;
+```
+
+## 26.Get session info of cost more than cost_value
+
+```plsql
+SELECT DISTINCT SESS.USERNAME,
+                NVL(DECODE(NVL(SESS.MODULE, SESS.PROGRAM),
+                                 'SQL*Plus',
+                                 SESS.PROGRAM,
+                                 SESS.MODULE),
+                    SESS.MACHINE || ':' || SESS.PROCESS) PROGRAM,
+                SESS.SQL_ID,
+                P.SPID,
+                SESS.EVENT,
+                PLAN.COST
+  FROM V$SESSION SESS, V$SQL_PLAN PLAN, V$PROCESS P
+ WHERE SESS.SQL_ID = PLAN.SQL_ID
+   AND PLAN.ID = 0
+   AND COST > 3
+   AND SESS.STATUS = 'ACTIVE'
+   AND P.ADDR = SESS.PADDR
+ ORDER BY COST DESC;
+```
+
+## 27.Get Active Session
+
+```plsql
+set linesize 140
+col sid format 9999
+col s# format 99999
+col username format a10
+col event format a30
+col machine format a20
+col p123 format a18
+col wt format 999
+col SQL_ID for a18
+alter session set cursor_sharing=force;
+SELECT /* XJ LEADING(S) FIRST_ROWS */
+ S.SID,
+ S.SERIAL# S#,
+ P.SPID,
+ NVL(S.USERNAME, SUBSTR(P.PROGRAM, LENGTH(P.PROGRAM) - 6)) USERNAME,
+ S.MACHINE,
+ S.EVENT,
+ S.P1 || '/' || S.P2 || '/' || S.P3 P123,
+ S.WAIT_TIME WT,
+ NVL(SQL_ID, S.PREV_SQL_ID) SQL_ID
+  FROM V$PROCESS P, V$SESSION S
+ WHERE P.ADDR = S.PADDR
+   AND S.STATUS = 'ACTIVE'
+   AND P.BACKGROUND IS NULL;
+```
+
+## 28.get hight pararllel module
+
+```plsql
+set linesize 150
+col sql_t format a50;
+SELECT SUBSTR(SQL_TEXT, 1, 50) AS SQL_T,
+       TRIM(PROGRAM),
+       MIN(SQL_ID),
+       COUNT(*)
+  FROM (SELECT SQL_TEXT, A.SQL_ID, PROGRAM
+          FROM V$SESSION A, V$SQLAREA B
+         WHERE A.SQL_ID = B.SQL_ID
+           AND A.STATUS = 'ACTIVE'
+           AND A.SQL_ID IS NOT NULL
+        UNION ALL
+        SELECT SQL_TEXT, A.PREV_SQL_ID AS SQL_ID, PROGRAM
+          FROM V$SESSION A, V$SQLAREA B
+         WHERE A.SQL_ID IS NULL
+           AND A.PREV_SQL_ID = B.SQL_ID
+           AND A.STATUS = 'ACTIVE')
+ GROUP BY SUBSTR(SQL_TEXT, 1, 50), TRIM(PROGRAM)
+ ORDER BY 1;
+```
+
+## 29.Get lock information by sid
+
+```plsql
+set linesize 120
+col type format a12
+col hold format a12
+col request format a12
+col BLOCK_OTHERS format a16
+alter session set cursor_sharing=force;
+SELECT /* SHSNC */ /*+ RULE */
+ SID,
+ DECODE(TYPE,
+        'MR',
+        'Media Recovery',
+        'RT',
+        'Redo Thread',
+        'UN',
+        'User Name',
+        'TX',
+        'Transaction',
+        'TM',
+        'DML',
+        'UL',
+        'PL/SQL User Lock',
+        'DX',
+        'Distributed Xaction',
+        'CF',
+        'Control File',
+        'IS',
+        'Instance State',
+        'FS',
+        'File Set',
+        'IR',
+        'Instance Recovery',
+        'ST',
+        'Disk Space Transaction',
+        'TS',
+        'Temp Segment',
+        'IV',
+        'Library Cache Invalidation',
+        'LS',
+        'Log Start or Switch',
+        'RW',
+        'Row Wait',
+        'SQ',
+        'Sequence Number',
+        'TE',
+        'Extend Table',
+        'TT',
+        'Temp Table',
+        'TC',
+        'Thread Checkpoint',
+        'SS',
+        'Sort Segment',
+        'JQ',
+        'Job Queue',
+        'PI',
+        'Parallel operation',
+        'PS',
+        'Parallel operation',
+        'DL',
+        'Direct Index Creation',
+        TYPE) TYPE,
+ DECODE(LMODE,
+        0,
+        'None',
+        1,
+        'Null',
+        2,
+        'Row-S (SS)',
+        3,
+        'Row-X (SX)',
+        4,
+        'Share',
+        5,
+        'S/Row-X (SSX)',
+        6,
+        'Exclusive',
+        TO_CHAR(LMODE)) HOLD,
+ DECODE(REQUEST,
+        0,
+        'None',
+        1,
+        'Null',
+        2,
+        'Row-S (SS)',
+        3,
+        'Row-X (SX)',
+        4,
+        'Share',
+        5,
+        'S/Row-X (SSX)',
+        6,
+        'Exclusive',
+        TO_CHAR(REQUEST)) REQUEST,
+ ID1,
+ ID2,
+ CTIME,
+ DECODE(BLOCK,
+        0,
+        'Not Blocking',
+        1,
+        'Blocking',
+        2,
+        'Global',
+        TO_CHAR(BLOCK)) BLOCK_OTHERS
+  FROM V$LOCK
+ WHERE TYPE <> 'MR'
+   AND TO_CHAR(SID) = NVL('$2', TO_CHAR(SID));
+--$2为SID
+```
+
+## 30.查看表结构
+
+```plsql
+set linesize 120
+col name format a30
+col nullable format a8
+col type format a30
+alter session set cursor_sharing=force;
+SELECT /* SHSNC D5 */
+ COLUMN_ID NO#,
+ COLUMN_NAME NAME,
+ DECODE(NULLABLE, 'N', 'NOT NULL', '') NULLABLE,
+ (CASE
+   WHEN DATA_TYPE = 'CHAR' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'VARCHAR' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'VARCHAR2' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'NCHAR' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'NVARCHAR' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'NVARCHAR2' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'RAW' THEN
+    DATA_TYPE || '(' || DATA_LENGTH || ')'
+   WHEN DATA_TYPE = 'NUMBER' THEN
+    (CASE
+      WHEN DATA_SCALE IS NULL AND DATA_PRECISION IS NULL THEN
+       'NUMBER'
+      WHEN DATA_SCALE <> 0 THEN
+       'NUMBER(' || NVL(DATA_PRECISION, 38) || ',' || DATA_SCALE || ')'
+      ELSE
+       'NUMBER(' || NVL(DATA_PRECISION, 38) || ')'
+    END)
+   ELSE
+    (CASE
+      WHEN DATA_TYPE_OWNER IS NOT NULL THEN
+       DATA_TYPE_OWNER || '.' || DATA_TYPE
+      ELSE
+       DATA_TYPE
+    END)
+ END) TYPE
+  FROM ALL_TAB_COLUMNS
+ WHERE UPPER(OWNER) = UPPER(NVL('SCOTT', OWNER))
+   AND TABLE_NAME = UPPER('TESTTABLE')
+ ORDER BY 1;
+```
+
+## 31.get DDL
+
+```plsql
+set long 49000
+set longc 9999
+set line 150
+set pagesize 10000
+SELECT dbms_metadata.get_ddl('INDEX','TESTTABLE','SCOTT') from dual;
+```
+
+## 32.Get grant information
+
+```plsql
+set linesize 120
+col GRANTEE format a12
+col owner   format a12
+col GRANTOR format a12
+col PRIVILEGE format a20
+COL VALUE FORMAT A40
+SELECT /* SHSNC */
+ *
+  FROM DBA_TAB_PRIVS
+ WHERE OWNER = 'SCOTT')
+   AND TABLE_NAME = 'T10';
+```
+
+## 33.Get Get Execute Plan 
+
+## 34.List view by name pattern
+
+```plsql
+set linesize 120
+col TYPE_NAME format a30
+SELECT /* SHSNC */
+ OWNER,
+ VIEW_NAME,
+ DECODE(VIEW_TYPE_OWNER, NULL, NULL, VIEW_TYPE_OWNER || '.' || VIEW_TYPE) TYPE_NAME
+  FROM ALL_VIEWS
+ WHERE OWNER = '$3'
+   AND VIEW_NAME LIKE '%A%'
+   AND OWNER NOT IN ('SYS', 'SYSTEM', 'CTXSYS', 'WMSYS');
+```
+
+## 35.查看Sequence
+
+```plsql
+set linesize 120
+col owner format a12
+col MAX_VALUE format 999999999999
+SELECT /* SHSNC */
+ SEQUENCE_OWNER OWNER,
+ SEQUENCE_NAME,
+ MIN_VALUE      LOW,
+ MAX_VALUE      HIGH,
+ INCREMENT_BY   STEP,
+ CYCLE_FLAG     CYC,
+ ORDER_FLAG     ORD,
+ CACHE_SIZE     CACHE,
+ LAST_NUMBER    CURVAL
+  FROM ALL_SEQUENCES
+ WHERE SEQUENCE_OWNER = 'SCOTT'
+   AND SEQUENCE_NAME LIKE '$2';
+```
+
+## 37.排序操作
+
+```plsql
+set linesize 120
+col USERNAME format a12
+col MACHINE format a16
+col TABLESPACE format a10
+SELECT /* SHSNC */ /*+ ordered */
+ B.SID,
+ B.SERIAL#,
+ B.USERNAME,
+ B.MACHINE,
+ A.BLOCKS,
+ A.TABLESPACE,
+ A.SEGTYPE,
+ A.SEGFILE#   FILE#,
+ A.SEGBLK#    BLOCK#
+  FROM V$SORT_USAGE A, V$SESSION B
+ WHERE A.SESSION_ADDR = B.SADDR;
+```
+
+## 38.Who have lock on given object?
+
+```plsql
+set linesize 120
+col USERNAME format a16
+col MACHINE format a20
+SELECT /* SHSNC */ /*+ RULE */
+ S.SID, S.SERIAL#, P.SPID, S.USERNAME, S.MACHINE, S.STATUS
+  FROM V$PROCESS P, V$SESSION S, V$LOCKED_OBJECT O
+ WHERE P.ADDR = S.PADDR
+   AND O.SESSION_ID = S.SID
+   AND S.USERNAME IS NOT NULL
+   AND O.OBJECT_ID = TO_NUMBER('$2');
+```
+
+## 39.Get latch name by latch id
+
+```plsql
+set linesize 120
+SELECT /* SHSNC */ NAME FROM V$LATCHNAME WHERE LATCH#=TO_NUMBER('$2');
+```
+
+## 40.Get dependency information
+
+```plsql
+set linesize 120
+SELECT /* SHSNC */
+ TYPE,
+ REFERENCED_OWNER     D_OWNER,
+ REFERENCED_NAME      D_NAME,
+ REFERENCED_TYPE      D_TYPE,
+ REFERENCED_LINK_NAME DBLINK,
+ DEPENDENCY_TYPE      DEPEND
+  FROM ALL_DEPENDENCIES
+ WHERE OWNER = '$3'
+   AND NAME = '$2';
+	 
+SELECT /* SHSNC */
+ REFERENCED_TYPE TYPE,
+ OWNER           R_OWNER,
+ NAME            R_NAME,
+ TYPE            R_TYPE,
+ DEPENDENCY_TYPE DEPEND
+  FROM ALL_DEPENDENCIES
+ WHERE REFERENCED_OWNER = '$3'
+   AND REFERENCED_NAME = '$2'
+   AND REFERENCED_LINK_NAME IS NULL;
+```
+
+## 41.Get all the transactions
+
+```plsql
+set linesize 120
+col USERNAME format a12
+col rbs format a12
+col BLKS_RECS format a16
+col START_TIME format a17
+col LOGIO format 99999
+col PHY_IO FORMAT 99999
+COL CRGET FORMAT 99999
+COL CRMOD FORMAT 99999
+SELECT /* SHSNC */ /* RULE */
+ S.SID,
+ S.SERIAL#,
+ S.USERNAME,
+ R.NAME RBS,
+ T.START_TIME,
+ TO_CHAR(T.USED_UBLK) || ',' || TO_CHAR(T.USED_UREC) BLKS_RECS,
+ T.LOG_IO LOGIO,
+ T.PHY_IO PHYIO,
+ T.CR_GET CRGET,
+ T.CR_CHANGE CRMOD
+  FROM V$TRANSACTION T, V$SESSION S, V$ROLLNAME R, V$ROLLSTAT RS
+ WHERE T.SES_ADDR(+) = S.SADDR
+   AND T.XIDUSN = R.USN
+   AND S.USERNAME IS NOT NULL
+   AND R.USN = RS.USN;
+```
+
+## 42.Get SQLs by object name
+
+```plsql
+set linesize 120
+col vers format 999
+SELECT /* SHSNC */
+ HASH_VALUE,
+ OPEN_VERSIONS  VERS,
+ SORTS,
+ EXECUTIONS     EXECS,
+ DISK_READS     READS,
+ BUFFER_GETS    GETS,
+ ROWS_PROCESSED ROWCNT
+  FROM V$SQL
+ WHERE EXECUTIONS > 10
+   AND HASH_VALUE IN
+       (SELECT /*+ NL_SJ */
+        DISTINCT HASH_VALUE
+          FROM V$SQL_PLAN
+         WHERE OBJECT_NAME = UPPER('$2')
+           AND NVL(OBJECT_OWNER, 'A') = UPPER(NVL('$3', 'A')));
+```
+
+## 43.Get lock requestor/blocker
+
+```plsql
+set linesize 180
+col HOLD_SID format 99999
+col WAIT_SID format 99999
+col type format a20
+col hold format a12
+col request format a12
+SELECT /* SHSNC */ /*+ ORDERED USE_HASH(H,R) */
+ H.SID HOLD_SID,
+ R.SID WAIT_SID,
+ DECODE(H.TYPE,
+        'MR',
+        'Media Recovery',
+        'RT',
+        'Redo Thread',
+        'UN',
+        'User Name',
+        'TX',
+        'Transaction',
+        'TM',
+        'DML',
+        'UL',
+        'PL/SQL User Lock',
+        'DX',
+        'Distributed Xaction',
+        'CF',
+        'Control File',
+        'IS',
+        'Instance State',
+        'FS',
+        'File Set',
+        'IR',
+        'Instance Recovery',
+        'ST',
+        'Disk Space Transaction',
+        'TS',
+        'Temp Segment',
+        'IV',
+        'Library Cache Invalidation',
+        'LS',
+        'Log Start or Switch',
+        'RW',
+        'Row Wait',
+        'SQ',
+        'Sequence Number',
+        'TE',
+        'Extend Table',
+        'TT',
+        'Temp Table',
+        'TC',
+        'Thread Checkpoint',
+        'SS',
+        'Sort Segment',
+        'JQ',
+        'Job Queue',
+        'PI',
+        'Parallel operation',
+        'PS',
+        'Parallel operation',
+        'DL',
+        'Direct Index Creation',
+        H.TYPE) TYPE,
+ DECODE(H.LMODE,
+        0,
+        'None',
+        1,
+        'Null',
+        2,
+        'Row-S (SS)',
+        3,
+        'Row-X (SX)',
+        4,
+        'Share',
+        5,
+        'S/Row-X (SSX)',
+        6,
+        'Exclusive',
+        TO_CHAR(H.LMODE)) HOLD,
+ DECODE(R.REQUEST,
+        0,
+        'None',
+        1,
+        'Null',
+        2,
+        'Row-S (SS)',
+        3,
+        'Row-X (SX)',
+        4,
+        'Share',
+        5,
+        'S/Row-X (SSX)',
+        6,
+        'Exclusive',
+        TO_CHAR(R.REQUEST)) REQUEST,
+ R.ID1,
+ R.ID2,
+ R.CTIME
+  FROM V $LOCK H, V $LOCK R
+ WHERE H.BLOCK = 1
+   AND R.REQUEST > 0
+   AND H.SID <> R.SID
+   AND H.TYPE <> 'MR'
+   AND R.TYPE <> 'MR'
+   AND H.ID1 = R.ID1
+   AND H.ID2 = R.ID2
+   AND H.TYPE = R.TYPE
+   AND H.LMODE > 0
+   AND R.REQUEST > 0
+ ORDER BY 1, 2;
+```
+
+## 44.Get top5 sql for the last n hours
+
+```plsql
+set line 300;
+set pagesize 300;
+col module for a30;
+col PARSING_SCHEMA_NAME for a10;
+SELECT TO_CHAR(A.BEGIN_TIME, 'yyyymmdd hh24:mi'),
+       TO_CHAR(A.END_TIME, 'yyyymmdd hh24:mi'),
+       A.INSTANCE_NUMBER,
+       A.PARSING_SCHEMA_NAME,
+       A.MODULE,
+       A.SQL_ID,
+       A.BUFFER_GETS_DELTA,
+       A.CPU_TIME_DELTA / B.VALUE * 100 CPU_PCT
+  FROM (SELECT *
+          FROM (SELECT SS.SNAP_ID,
+                       SN.BEGIN_INTERVAL_TIME BEGIN_TIME,
+                       SN.END_INTERVAL_TIME END_TIME,
+                       SN.INSTANCE_NUMBER,
+                       PARSING_SCHEMA_NAME,
+                       MODULE,
+                       SQL_ID,
+                       BUFFER_GETS_DELTA,
+                       CPU_TIME_DELTA,
+                       RANK() OVER(PARTITION BY SS.SNAP_ID, SN.INSTANCE_NUMBER ORDER BY CPU_TIME_DELTA DESC) RANK
+                  FROM DBA_HIST_SQLSTAT SS, DBA_HIST_SNAPSHOT SN
+                 WHERE SN.SNAP_ID = SS.SNAP_ID
+                   AND SN.BEGIN_INTERVAL_TIME BETWEEN SYSDATE - $2 / 24 AND
+                       SYSDATE
+                   AND SS.INSTANCE_NUMBER = SN.INSTANCE_NUMBER)
+         WHERE RANK < 6) A,
+       DBA_HIST_SYSSTAT B
+ WHERE A.SNAP_ID = B.SNAP_ID
+   AND A.INSTANCE_NUMBER = B.INSTANCE_NUMBER
+   AND B.STAT_ID = 3649082374
+ ORDER BY 1, 3 ASC, 8 DESC;
+```
+
+## 45.DB 资源使用
+
+```plsql
+SELECT INSTANCE_NUMBER,
+       SNAP_ID,
+       MIN(BEGIN_TIME) AS 快照开始时间,
+       MAX(END_TIME) AS 快照停止时间,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Host CPU Utilization (%)' THEN
+                    AVERAGE
+                 END)) AS CPU使用率,
+       SUM(CASE METRIC_NAME
+             WHEN 'Current OS Load' THEN
+              MAXVAL
+           END) AS 最大OS负载,
+       SUM(CASE METRIC_NAME
+             WHEN 'Current OS Load' THEN
+              AVERAGE
+           END) AS 平均OS负载,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'User Transaction Per Sec' THEN
+                    AVERAGE
+                 END)) AS 每秒事务数,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Executions Per Sec' THEN
+                    AVERAGE
+                 END)) AS 每秒SQL执行次数,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Logical Reads Per Sec' THEN
+                    AVERAGE
+                 END)) AS 每秒逻辑读总量,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Physical Read Total IO Requests Per Sec' THEN
+                    AVERAGE
+                 END)) AS 物理读IOPS,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Physical Write Total IO Requests Per Sec' THEN
+                    AVERAGE
+                 END)) AS 物理写IOPS,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Redo Writes Per Sec' THEN
+                    AVERAGE
+                 END)) AS REDO_IOPS,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Physical Read Total Bytes Per Sec' THEN
+                    AVERAGE / 1024 / 1024
+                 END)) AS 物理读MBPS,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Physical Write Total Bytes Per Sec' THEN
+                    AVERAGE / 1024 / 1024
+                 END)) AS 物理写MBPS,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Redo Generated Per Sec' THEN
+                    AVERAGE / 1024 / 1024
+                 END)) AS REDO_MBPS,
+       ROUND(SUM(CASE METRIC_NAME
+                   WHEN 'Network Traffic Volume Per Sec' THEN
+                    AVERAGE / 1024 / 1024
+                 END)) AS 每秒网络流量_MB
+  FROM DBA_HIST_SYSMETRIC_SUMMARY T
+ WHERE T.INSTANCE_NUMBER IN (1 /*, 2*/)
+   AND BEGIN_TIME >= TRUNC(SYSDATE)
+ GROUP BY INSTANCE_NUMBER, SNAP_ID
+ ORDER BY SNAP_ID DESC, INSTANCE_NUMBER;
 ```
 
