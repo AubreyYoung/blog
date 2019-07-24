@@ -1,3 +1,5 @@
+[TOC]
+
 # **Oracle数据库检查**
 
 ## 1.1 Oracle实例运行时间
@@ -275,7 +277,7 @@ select * from v$version;
 select dbid from v$database;
 ```
 
-### 2.2.2 **补丁安装情况1**
+### 2.2.2 补丁安装情况1
 
 ```
 su - oracle/su - grid
@@ -286,7 +288,7 @@ $ORA_CRS_HOME/OPatch/opatch lsinventory  -oh $ORA_CRS_HOME
 ./opatch lsinventory -oh $ORACLE_HOME                      //10g
 ```
 
-### 2.2.3 **补丁安装情况2**​
+### 2.2.3 补丁安装情况2​
 
 ```
 set pages 100 lines 120
@@ -303,7 +305,7 @@ select * from dba_registry_history;
 
 ## 2.2 数据库基本配置信息
 
-### **2.2.1 数据库基本信息**
+### 2.2.1 数据库基本信息
 
 ```plsql
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
@@ -335,7 +337,7 @@ alter database add supplemental log data;
 ```
 col name format a10
 col value format a10
-select inst_id, sessions_current,sessions_highwater from  gv$license;
+select inst_id, sessions_current,sessions_highwater,SESSIONS_MAX,SESSIONS_WARNING ,USERS_MAX from  gv$license;
 
 select name,value from v$parameter where name='processes';
 ```
@@ -380,7 +382,7 @@ SELECT /* SHSNC */
    AND NAME <> 'rollback_segments';
 ```
 
-### 2.5.1 **非默认参数**
+### 2.5.1 非默认参数
 
 ```plsql
 Col name for a20
@@ -396,7 +398,7 @@ select inst_id,NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE
 SELECT name from v$parameter WHERE isdeprecated = 'TRUE' ORDER BY name;
 ```
 
-### 2.5.3 **隐藏参数**
+### 2.5.3 隐藏参数
 
 ```plsql
 set linesize 200
@@ -427,7 +429,7 @@ SELECT /* SHSNC */
    AND ('PROCESS' IS NULL OR P.KSPPINM LIKE '%' || LOWER('process') || '%');
 ```
 
-### 2.5.3 **查看参数**
+### 2.5.3 查看参数
 
 ```
 show parameter audit_trail
@@ -489,7 +491,7 @@ col LIMIT format a15
 select * from dba_profiles;
 ```
 
-### 2.7 **数据库字符集**
+### 2.7 数据库字符集
 
 ```plsql
 select userenv('language') from dual;
@@ -497,7 +499,7 @@ select userenv('language') from dual;
 select * from NLS_DATABASE_PARAMETERS;
 ```
 
-### 2.8 **数据库实例状态**
+### 2.8 数据库实例状态
 
 ```plsql
 col host_name  format a20
@@ -519,7 +521,7 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 
 ## 2.10 数据量大小
 
-### 2.10.1 **查看数据库段空间统计**
+### 2.10.1 查看数据库段空间统计
 
 ```plsql
 select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
@@ -598,7 +600,7 @@ SELECT owner,segment_name,tablespace_name,bytes/1024/1024/1024 GB FROM dba_segme
 
 ## 2.11 控制文件
 
-### **2.11.1 查看控制文件**
+### 2.11.1 查看控制文件
 
 ```plsql
 Set linesize 200
@@ -606,7 +608,7 @@ Col name format a55
 Select * from v$controlfile;
 ```
 
-### 2.11.2 **生成控制文件**
+### 2.11.2 生成控制文件
 
 ```
 alter session set tracefile_identifier='bak_control';
@@ -675,7 +677,7 @@ SELECT occupant_name "Item",space_usage_kbytes / 1048576 "Space Used (GB)",schem
 @?/rdbms/admin/awrinfo.sql
 ```
 
-### **2.14.2 查看表空间使用信息1**
+### 2.14.2 查看表空间使用信息1
 
 ```plsql
 set linesize 150
@@ -753,7 +755,7 @@ SELECT /* SHSNC */
  ORDER BY TABLESPACE_NAME
 ```
 
-### 2.14.4 **查看表空间使用信息3**
+### 2.14.4 查看表空间使用信息3
 
 查看表空间自动扩展情况下的使用信息
 
@@ -911,7 +913,7 @@ SELECT D.TABLESPACE_NAME,
 
 ## 2.15 临时表空间及账户状态
 
-### 2.15.1 **用户使用临时表空间情况**
+### 2.15.1 用户使用临时表空间情况
 
 ```plsql
 column username format a25
@@ -1087,7 +1089,7 @@ to_char(LAST_DDL_TIME,'yyyy-mm-dd,hh24:mi:ss') LAST_DDL_TIME,STATUS
 FROM  dba_objects where status<>'VALID' and owner='SYS' order by last_ddl_time;
 ```
 
-### **2.18.3 编译无效对象**
+### 2.18.3 编译无效对象
 
 ```
 alter package <schema name>.<package_name> compile;
@@ -1238,7 +1240,7 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
 
 ## 5.17 客户端连接分布
 
-### **查询每个客户端连接每个实例的连接数**
+### 查询每个客户端连接每个实例的连接数
 
 ```
 col MACHINE format a20
@@ -1579,7 +1581,7 @@ rman> catalog start with '/u01/archlog/';
 CONFIGURE ARCHIVELOG DELETION POLICY TO APPLIED ON ALL STANDBY;
 ```
 
-### 2.36.3 **同步状态**
+### 2.36.3 同步状态
 
 ```plsql
 col name for a30
@@ -2051,7 +2053,7 @@ alter system kill session '4276,6045,@1' immediate;
 
 ## 3.12 数据库文件
 
-### 3.12.1 **数据文件**
+### 3.12.1 数据文件
 
 ```plsql
 Set pagesize 300
