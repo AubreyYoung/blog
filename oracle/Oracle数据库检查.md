@@ -552,7 +552,7 @@ from ( select sum(bytes) data_size
 ```plsql
 Select Segment_Name,Sum(bytes)/1024/1024 From dba_Extents Group By Segment_Name;
 ```
-### 2.10.3 查看表的大小
+### 2.10.3 查看表的大小(分配)
 
 ```PLSQL
 set linesize 120
@@ -589,6 +589,31 @@ SELECT OWNER,
          WHERE TABLE_NAME = UPPER('TESTTABLE')
            AND ('SCOTT' IS NULL OR UPPER(OWNER) = UPPER('SCOTT')))
  GROUP BY OWNER, SEGMENT_NAME, SEGMENT_TYPE;
+ 
+//How to Compute the Size of a Table containing Outline CLOBs and BLOBs (文档 ID 118531.1)
+ACCEPT SCHEMA PROMPT 'Table Owner: '
+ACCEPT TABNAME PROMPT 'Table Name:  '
+SELECT
+ (SELECT SUM(S.BYTES)                                                                                                 -- The Table Segment size
+  FROM DBA_SEGMENTS S
+  WHERE S.OWNER = UPPER('&SCHEMA') AND
+       (S.SEGMENT_NAME = UPPER('&TABNAME'))) +
+ (SELECT SUM(S.BYTES)                                                                                                 -- The Lob Segment Size
+  FROM DBA_SEGMENTS S, DBA_LOBS L
+  WHERE S.OWNER = UPPER('&SCHEMA') AND
+       (L.SEGMENT_NAME = S.SEGMENT_NAME AND L.TABLE_NAME = UPPER('&TABNAME') AND L.OWNER = UPPER('&SCHEMA'))) +
+ (SELECT SUM(S.BYTES)                                                                                                 -- The Lob Index size
+  FROM DBA_SEGMENTS S, DBA_INDEXES I
+  WHERE S.OWNER = UPPER('&SCHEMA') AND
+       (I.INDEX_NAME = S.SEGMENT_NAME AND I.TABLE_NAME = UPPER('&TABNAME') AND INDEX_TYPE = 'LOB' AND I.OWNER = UPPER('&SCHEMA')))
+  "TOTAL TABLE SIZE"
+FROM DUAL;
+```
+
+### 2.10.4估算表大小(实际)
+
+```plsql
+Select num_rows*avg_row_len/1024/1024 from dba_tables where table_name='<table_name>' ;
 ```
 
 ### 2.10.5 审计日志大小
@@ -908,8 +933,6 @@ SELECT D.TABLESPACE_NAME,
    AND ('USERS' IS NULL OR D.TABLESPACE_NAME = UPPER('USERS'))
  ORDER BY 1 - NVL(REA_FREE_SPACE, 0) / SPACE DESC;
 ```
-
-
 
 ## 2.15 临时表空间及账户状态
 
