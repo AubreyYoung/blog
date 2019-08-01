@@ -1381,3 +1381,20 @@ SELECT INSTANCE_NUMBER,
  ORDER BY SNAP_ID DESC, INSTANCE_NUMBER;
 ```
 
+## 46.查看SQL占用undo
+
+```plsql
+SELECT r.name "rollname",
+s.sid,
+s.serial#,
+s.username,
+t.status,
+t.used_ublk * 8 / 1024 "used_bytes(M)",
+t.noundo,
+s.program
+FROM v$session s, v$transaction t, v$rollname r
+WHERE t.addr = s.taddr
+and t.xidusn = r.usn
+ORDER BY t.used_ublk * 8 / 1024 desc;
+```
+

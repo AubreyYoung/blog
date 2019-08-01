@@ -80,7 +80,7 @@ select * from v$version
 Set pagesize 100
 Set linesize 180
 Col name format a15
-select GROUP_NUMBER,NAME,STATE,TYPE,TOTAL_MB,FREE_MB,USABLE_FILE_MB from v$asm_diskgroup;
+select GROUP_NUMBER,NAME,STATE,TYPE,TOTAL_MB/1024,FREE_MB/1024,USABLE_FILE_MB/1024 from v$asm_diskgroup;
 
 set pagesize 200
 set linesize 150
@@ -491,7 +491,7 @@ col LIMIT format a15
 select * from dba_profiles;
 ```
 
-### 2.7 数据库字符集
+## 2.7 数据库字符集
 
 ```plsql
 select userenv('language') from dual;
@@ -499,7 +499,7 @@ select userenv('language') from dual;
 select * from NLS_DATABASE_PARAMETERS;
 ```
 
-### 2.8 数据库实例状态
+## 2.8 数据库实例状态
 
 ```plsql
 col host_name  format a20
@@ -717,26 +717,6 @@ from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by ta
 (select tablespace_name,sum(bytes) sumbytes from dba_data_files group by tablespace_name) d
 where f.tablespace_name= d.tablespace_name
 order by used_percent desc;
-```
-
-### 2.14.3 查看表空间使用信息2
-
- **查看表空间自动扩展情况下的使用信息**
-
-```plsql
-set linesize 150 pagesize 500
-select f.tablespace_name tablespace_name,
-round((d.sumbytes/1024/1024/1024),2) total_without_extend_GB,
-round(((d.sumbytes+d.extend_bytes)/1024/1024/1024),2) total_with_extend_GB,
-round((f.sumbytes+d.Extend_bytes)/1024/1024/1024,2) free_with_extend_GB,
-round((d.sumbytes-f.sumbytes)/1024/1024/1024,2) used_GB,
-round((d.sumbytes-f.sumbytes)*100/(d.sumbytes+d.extend_bytes),2) used_percent_with_extend
-from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by tablespace_name) f,
-(select tablespace_name,sum(aa.bytes) sumbytes,sum(aa.extend_bytes) extend_bytes from
-(select  nvl(case  when autoextensible ='YES' then (case when (maxbytes-bytes)>=0 then (maxbytes-bytes) end) end,0) Extend_bytes
-,tablespace_name,bytes  from dba_data_files) aa group by tablespace_name) d
-where f.tablespace_name= d.tablespace_name
-order by  used_percent_with_extend desc;
 
 //大于80%
 select *
@@ -767,6 +747,28 @@ where space_usage_percent > 80
 and (instr(t.TABLESPACE_NAME,'_DAT_')<= 0 and  instr(t.TABLESPACE_NAME,'_IDX_')<=0);
 
 select tablespace_name,logging,status from dba_tablespaces;
+```
+
+### 2.14.3 查看表空间使用信息2
+
+ **查看表空间自动扩展情况下的使用信息**
+
+```plsql
+set linesize 150 pagesize 500
+select f.tablespace_name tablespace_name,
+round((d.sumbytes/1024/1024/1024),2) total_without_extend_GB,
+round(((d.sumbytes+d.extend_bytes)/1024/1024/1024),2) total_with_extend_GB,
+round((f.sumbytes+d.Extend_bytes)/1024/1024/1024,2) free_with_extend_GB,
+round((d.sumbytes-f.sumbytes)/1024/1024/1024,2) used_GB,
+round((d.sumbytes-f.sumbytes)*100/(d.sumbytes+d.extend_bytes),2) used_percent_with_extend
+from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by tablespace_name) f,
+(select tablespace_name,sum(aa.bytes) sumbytes,sum(aa.extend_bytes) extend_bytes from
+(select  nvl(case  when autoextensible ='YES' then (case when (maxbytes-bytes)>=0 then (maxbytes-bytes) end) end,0) Extend_bytes
+,tablespace_name,bytes  from dba_data_files) aa group by tablespace_name) d
+where f.tablespace_name= d.tablespace_name
+order by  used_percent_with_extend desc;
+
+
 set linesize 120
 SELECT /* SHSNC */
  TABLESPACE_NAME   TS_NAME,
@@ -778,6 +780,25 @@ SELECT /* SHSNC */
  ALLOCATION_TYPE   ALLOC_TYPE
   FROM DBA_TABLESPACES
  ORDER BY TABLESPACE_NAME
+ 
+ //大于90
+ set linesize 150 pagesize 500
+SELECT tablespace_name,total_space_GB,max_space_GB,space_usage_percent FROM (
+select f.tablespace_name tablespace_name,
+round((d.sumbytes/1024/1024/1024),2) total_without_extend_GB,
+round(((d.sumbytes+d.extend_bytes)/1024/1024/1024),2) max_space_GB,
+round((f.sumbytes+d.Extend_bytes)/1024/1024/1024,2) free_with_extend_GB,
+round((d.sumbytes-f.sumbytes)/1024/1024/1024,2) total_space_GB,
+round((d.sumbytes-f.sumbytes)*100/(d.sumbytes+d.extend_bytes),2) space_usage_percent
+from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by tablespace_name) f,
+(select tablespace_name,sum(aa.bytes) sumbytes,sum(aa.extend_bytes) extend_bytes from
+(select  nvl(case  when autoextensible ='YES' then (case when (maxbytes-bytes)>=0 then (maxbytes-bytes) end) end,0) Extend_bytes
+,tablespace_name,bytes  from dba_data_files) aa group by tablespace_name) d
+where f.tablespace_name= d.tablespace_name
+and ( instr(f.tablespace_name, '_DAT_') <= 0
+                  AND instr(f.tablespace_name, '_IDX_') <= 0 ))
+where space_usage_percent > 90
+order by  space_usage_percent desc;
 ```
 
 ### 2.14.4 查看表空间使用信息3
@@ -889,7 +910,7 @@ AND dt.tablespace_name = tte.tablespace_name(+)
 ORDER BY ttsp.tablespace_name;
 ```
 
-### 2.14.4 查看表空间使用信息4
+### 2.14.5 查看表空间使用信息4
 
 ```PLSQL
 SET LINESIZE 500
@@ -1326,7 +1347,7 @@ select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log whe
 //删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
 RMAN> delete force archivelog until time "sysdate-1";
 //删除3天前的归档日志
-delete  archivelog until time "sysdate-1";
+delete  archivelog until time "sysdate";
 ```
 
 ## 2.21 数据库所有实例每天生成的归档大小
@@ -2464,4 +2485,79 @@ ORDER BY
 ;
 ```
 
-## 
+## 3.18 查看UNDO表空间
+
+### 3.18.1 查看UNDO表空间
+
+查看UNDO表空间的大小、可用空间
+
+```plsql
+select * from (select
+     a.tablespace_name,
+     sum(a.bytes)/(1024*1024*1024) total_space_GB,
+     round(b.free,2) Free_space_GB,
+     round(b.free/(sum(a.bytes)/(1024*1024*1024))* 100,2) percent_free
+    from dba_data_files a,
+     (select tablespace_name,sum(bytes)/(1024*1024*1024) free  from dba_free_space
+     group by tablespace_name) b
+   where a.tablespace_name = b.tablespace_name(+)
+     group by a.tablespace_name,b.free)
+ where tablespace_name like 'UNDO%';
+```
+### 2.18.2 查看详细的UNDO信息
+
+```plsql
+//通过v$UNDOSTAT来查看详细的UNDO信息
+SELECT TO_CHAR(BEGIN_TIME, 'MM/DD/YYYY HH24:MI:SS') BEGIN_TIME,TO_CHAR(END_TIME, 'MM/DD/YYYY HH24:MI:SS') END_TIME,UNDOTSN, UNDOBLKS, TXNCOUNT, MAXCONCURRENCY AS "MAXCON" FROM v$UNDOSTAT WHERE rownum <= 100;
+
+BEGIN_TIME表示每条记录UNDO事务开始的时间
+END_TIMEE表示每条记录UNDO事务结束的时间
+上面每条记录的间隔是10分钟
+UNDOTSN 在这段时间undo事务的数量
+UNDOBLKS在这段时间占用的undo块的数量
+TXNCOUNT事务的总数量
+MAXCON这些UNDO事务过程中的最大数据库连接数
+
+//查看各个undo段的使用信息
+select a.name,b.extents,b.rssize,b.writes,b.xacts,b.wraps from v$rollname a,v$rollstat b where a.usn=b.usn;
+
+//确定哪些用户正在使用undo段
+select a.username,b.name,c.used_ublk from v$session a,v$rollname b,v$transaction c where a.saddr=c.ses_addr and b.usn=c.xidusn;
+
+//每秒生成的UNDO量
+SELECT (SUM(undoblks))/ SUM((end_time - begin_time) * 86400) FROM v$undostat;
+
+//当前undo表空间使用状态
+SELECT DISTINCT STATUS,SUM(BYTES),COUNT(*) FROM DBA_UNDO_EXTENTS GROUP BY STATUS;
+
+//查看活动事务v$transaction
+SELECT A.SID, A.USERNAME, B.XIDUSN, B.USED_UREC, B.USED_UBLK FROM V$SESSION A, V$TRANSACTION B WHERE A.SADDR=B.SES_ADDR;
+
+SELECT XID AS "txn_id", XIDUSN AS "undo_seg", USED_UBLK "used_undo_blocks",XIDSLOT AS "slot", XIDSQN AS "seq", STATUS AS "txn_status" FROM V$TRANSACTION;
+
+//查询事务使用的UNDO段及大小。
+select s.sid,s.serial#,s.sql_id,v.usn,segment_name,r.status, v.rssize/1024/1024 mb
+From dba_rollback_segs r, v$rollstat v,v$transaction t,v$session s
+Where r.segment_id = v.usn and v.usn=t.xidusn and t.addr=s.taddr
+order by segment_name ;
+
+select usn,xacts,rssize/1024/1024/1024,hwmsize/1024/1024/1024,shrinks
+from v$rollstat order by rssize;
+```
+### 3.18.3 UNDO表空间管理
+
+```plsql
+//创建UNDO表空间：
+create undo tablespace undotbs3 datafile '/data1/oradata/undotbs03_1.dbf' size 100M autoextend on next 20M maxsize 500M;
+
+上面命令中，指定UNDO表空间名称、对应数据文件、初始大小、自动扩展、每次扩展大小、最大扩展到多大
+
+//给UNDO表空间增加数据文件：
+ALTER TABLESPACE UNDOTBS3 ADD DATAFILE ''/data1/oradata/undotbs03_2.dbf' SIZE 1024M AUTOEXTEND ON NEXT 100M MAXSIZE 2048M;
+
+//切换默认UNDO表空间：
+alter system set undo_tablespace = UNDOTBS3;
+
+//更改UNDO RETENTION
+alter system set UNDO_RETENTION = 1800;
+```
