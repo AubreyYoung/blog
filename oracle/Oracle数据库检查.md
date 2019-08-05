@@ -127,7 +127,7 @@ find / -name "alert*.log*" | xargs du -sk
 //audit目录
 cd $ORACLE_BASE/admin/{SID}/adump
 //删除audit日志
-find . -name '*.aud' -print0 | xargs -0 rm -f
+find /u01/app/oracle/admin/orcl/adump -name "*.aud" -print0 |xargs -0 rm -f
 ```
 
 ## 1.6 查看集群运行状态
