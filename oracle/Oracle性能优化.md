@@ -11,9 +11,9 @@
 ```
 
 ```
-//修改快照时间间隔
+-- 修改快照时间间隔
 EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
-//手动生成快照
+-- 手动生成快照
 EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
 或
 BEGIN 
@@ -21,7 +21,7 @@ BEGIN
 END; 
 /
 
-//生成 AWR 基线：
+-- 生成 AWR 基线：
 BEGIN 
   DBMS_WORKLOAD_REPOSITORY.create_baseline ( 
     start_snap_id => 10,  
@@ -30,7 +30,7 @@ BEGIN
 END; 
 /
 
-//生成 AWR 基线(11g)：
+-- 生成 AWR 基线(11g)：
 BEGIN
 DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
 start_time => to_date('&start_date_time','&start_date_time_format'),
@@ -41,7 +41,7 @@ expiration => NULL ) ;
 END;
 /
 
-//基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
+-- 基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
 BEGIN
 DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
 day_of_week => 'MONDAY',
@@ -55,7 +55,7 @@ expiration => 30 );
 END;
 /
 
-//删除 AWR 基线：
+-- 删除 AWR 基线：
 BEGIN
     DBMS_WORKLOAD_REPOSITORY.DROP_BASELINE (baseline_name => 'AWR First baseline');
 END;
@@ -97,7 +97,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ## 2. 查看会话ID、OSPID
 
 ```
-//方法一：
+-- 方法一：
 column line format a79
 set heading off
 select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||
@@ -106,11 +106,11 @@ from v$session s , v$process p
 where p.addr = s.paddr
 and s.username <> ' ';
 
-//方法二
+-- 方法二
 select p.pid, p.spid, s.username  
         from v$process p, v$session s  
         where p.addr = s.paddr;
- //方法三       
+ -- 方法三       
  select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||'inst_id: '||s.inst_id||' '||
   s.osuser || ' ' ||s.machine ||' '||s.username ||' '||s.program line
 from gv$session s , v$process p
@@ -122,7 +122,7 @@ LINE
 --------------------------------------------------------------------------------
 ospid: 15749 # '851,27493' inst_id: 1 acrosspm SPCIS-PRFHWI-SGR07 PM4H_HW alarmM
 
-//方法四
+-- 方法四
 set line 500
 col sid format 9999
 col s# format 99999
@@ -253,9 +253,9 @@ select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLO
        where ash.event#=enm.event# 
        and SESSION_ID=&SID and SAMPLE_TIME>=(sysdate-&minute/(24*60));
 
-//Input is:
-//Enter value for sid: 15 
-//Enter value for minute: 1  /* How many minutes activity you want to see */
+-- Input is:
+-- Enter value for sid: 15 
+-- Enter value for minute: 1  /* How many minutes activity you want to see */
 ```
 
 ## 9. **查看内存占用大的会话**
@@ -375,7 +375,7 @@ and s.saddr = t.ses_addr
 order by t.diff desc
 /
 
-//Get long run query 方法2
+-- Get long run query 方法2
 set linesize 120
 col MESSAGE format a30
 col opname for a20
@@ -399,13 +399,13 @@ SELECT OPNAME,
 ```
 SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
 
-//根据SQL 查询到操作用户
+-- 根据SQL 查询到操作用户
 select s.username from v$active_session_history t,dba_users s  where t.USER_ID=s.user_id and t.SQL_ID='0nx7fbv1w5xg2';
  
-//查询并获取当前sql的杀会话语句
+-- 查询并获取当前sql的杀会话语句
 select 'alter system kill session '''|| t.SID||','||t.SERIAL#||',@'||t.inst_id||''' immediate;' from gv$session t where t.SQL_ID='c6yz84stnau9b';
 
-//查询并获取当前会话的执行计划清空过程语句
+-- 查询并获取当前会话的执行计划清空过程语句
 select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, invalidations from v$sqlarea  where sql_id='0nx7fbv1w5xg2';
 
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
@@ -420,7 +420,7 @@ select owner,table_name,degree from dba_tables where table_name='EMP';
 ## 14. 收集10046Trace
 
 ```
-//在Session级打开trace
+-- 在Session级打开trace
 适用于SQL语句可以在新的session创建后再运行。
 在session级收集10046 trace：
 alter session set tracefile_identifier='10046'; 
@@ -438,7 +438,7 @@ alter session set events '10046 trace name context off';
 注意，如果session没有被彻底地关闭并且跟踪被停止了，某些重要的trace信息的可能会丢失。
 注意：这里我们将"statistics_level"设置为all，这是因为有可能这个参数在系统级不是默认值"TYPICAL"（比如 BASIC）。为了收集性能相关问题的信息我们需要打开某个级别的statistics。我们推荐在 session 级将这个参数设置成 ALL 以便于收集更多的信息，尽管这不是必须的。
  
-//跟踪一个已经开始的进程
+-- 跟踪一个已经开始的进程
 如果需要跟踪一个已经存在session，可以用 oradebug连接到session上，并发起10046 trace。
 首先，用某种方法找到需要被跟踪的session.
 例如，在SQL*Plus里，找出目标session的OS的进程ID(spid):
@@ -482,12 +482,12 @@ tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 ## 15. 统计信息
 
 ```plsql
-//查看表统计信息
+-- 查看表统计信息
 select * from DBA_TABLES where OWNER = 'HR' and TABLE_NAME = 'TEST';
 select * from DBA_TAB_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
-//查看列统计信息
+-- 查看列统计信息
 select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
-//查看索引统计信息
+-- 查看索引统计信息
 select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
 ```
 

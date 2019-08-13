@@ -18,7 +18,7 @@ MOD(TRUNC(86400 *
 60) || 's' running
 from v$instance;
 
-//RAC
+-- RAC
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
 select INSTANCE_NUMBER,INSTANCE_NAME,HOST_NAME,STARTUP_TIME ,STATUS from sys.gv_$instance; 
 ```
@@ -91,7 +91,7 @@ select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from
 ```
 
 ```plsql
-//挂在磁盘组
+-- 挂在磁盘组
 alter diskgroup data mount;
 asmcmd> lsdg
 ```
@@ -124,25 +124,25 @@ find / -name "alert*.log*" | xargs du -sk
 **清理审计日志**
 
 ```plsql
-//audit目录
+-- audit目录
 cd $ORACLE_BASE/admin/{SID}/adump
-//删除audit日志
+-- 删除audit日志
 find /u01/app/oracle/admin/orcl/adump -name "*.aud" -print0 |xargs -0 rm -f
 ```
 
 ## 1.6 查看集群运行状态
 
 ```
-crs_stat -t -v											//10g
-crs_stat -t												//10g
-crsctl status res -t									 //11g
+crs_stat -t -v											-- 10g
+crs_stat -t												-- 10g
+crsctl status res -t									 -- 11g
 crsctl status res -t -init
-crsctl check crs                                             //10g或11g
-crsctl check cluster                                         //11g
+crsctl check crs                                             -- 10g或11g
+crsctl check cluster                                         -- 11g
 olsnodes -n
 或
 olsnodes -n -i -s -t 
-srvctl status asm -a                                         //11g
+srvctl status asm -a                                         -- 11g
 srvctl status database -d sdbip
 srvctl status diskgroup -g DGDATA1
 gpnptool get
@@ -161,16 +161,16 @@ crsctl stat res ora.LISTENER_SCAN1.lsnr -p
 ## 1.7 RAC自启
 
 ```
-//11g
+-- 11g
 crsctl disable crs
 crsctl enable crs
-//11gRAC启动、关闭
+-- 11gRAC启动、关闭
 crsctl start cluster -all
 crsctl stop cluster -all
-//10g
+-- 10g
 /etc/init.d/init.crs enable随操作系统的启动而启动
 /etc/init.d/init.crs disable不随操作系统的启动而启动
-//10g RAC启动、关闭
+-- 10g RAC启动、关闭
 /etc/init.d/init.crs stop停止CRS主进程
 /etc/init.d/init.crs start启动CRS主进程
 ```
@@ -191,20 +191,20 @@ oifcfg [-help]
 <subnet> - subnet address of the interface
 <if_type> - type of the interface { cluster_interconnect | public | storage }
 
-$ oifcfg iflist									  //查看网卡对应的网段，oracle网卡配置工具
+$ oifcfg iflist									  -- 查看网卡对应的网段，oracle网卡配置工具
 eth0 192.168.1.0
 eth1 192.168.2.0
 eth2 192.168.61.0
 
-$ oifcfg getif									  //没有配置之前是什么内容也没有
+$ oifcfg getif									  -- 没有配置之前是什么内容也没有
 
-$ oifcfg setif -global eth0/192.168.1.0:public		 //oracle网卡配置工具指定公有网卡
+$ oifcfg setif -global eth0/192.168.1.0:public		 -- oracle网卡配置工具指定公有网卡
 
 $ oifcfg setif -global eth1/192.168.2.0:cluster_interconnectoracle网卡配置工具指定私有网
 
-[oracle@rac1 init.d]$ oifcfg getif					 //获取配置结果
-eth0 192.168.1.0 global public						//eth0是全局公共网卡
-eth1 192.168.2.0 global cluster_interconnect		 //eth1是全局私有网卡
+[oracle@rac1 init.d]$ oifcfg getif					 -- 获取配置结果
+eth0 192.168.1.0 global public						-- eth0是全局公共网卡
+eth1 192.168.2.0 global cluster_interconnect		 -- eth1是全局私有网卡
 ```
 
 ## 1.9 检查vote、ocr磁盘状态
@@ -226,29 +226,29 @@ ocrconfig -showbackup
 ```
 
 ```
-//使用ocrdump命令查看OCR内容，但这个命令不能用于OCR的备份恢复只可以用于阅读
+-- 使用ocrdump命令查看OCR内容，但这个命令不能用于OCR的备份恢复只可以用于阅读
 RACDB1@rac1 /home/oracle$ ocrdump -stdout | more
 
-//导出OCR磁盘内容，一旦有问题可以导入恢复
+-- 导出OCR磁盘内容，一旦有问题可以导入恢复
 OCR手动导出:ocrconfig -export /tmp/ocr_bak
 OCR手动导入:ocrconfig -import /tmp/ocr_bak
 恢复OCR ocrconfig -restore /opt/product/10.2.0.1/crs/cdata/crs/backup01.ocr
 
-//创建用于镜像OCR的RAW设备,比如为:/dev/raw/ocrcopied用ocrconfig –export 导出OCR的信息,编辑/etc/oracle/ocr.loc文件,添加ocrmirrorconfig_loc行
+-- 创建用于镜像OCR的RAW设备,比如为:/dev/raw/ocrcopied用ocrconfig –export 导出OCR的信息,编辑/etc/oracle/ocr.loc文件,添加ocrmirrorconfig_loc行
 $ cat ocr.loc
 ocrconfig_loc=/dev/raw/raw2
 ocrmirrorconfig_loc=/dev/raw/ocrcopied
 local_only=FALSE
 用ocrconfig –import 导入OCR的信息
 
-//我们的表决磁盘使用的是裸设备，因此使用裸设备的dd命令来备份表决磁盘，使用root用户
+-- 我们的表决磁盘使用的是裸设备，因此使用裸设备的dd命令来备份表决磁盘，使用root用户
 备份votedisk: dd if=/dev/raw/votediskcopied of=/dev/raw/raw1
 恢复votedisk: dd if=/dev/raw/raw1 of=/dev/raw/votediskcopied
 
-//通过strings命令查看votedisk内容
+-- 通过strings命令查看votedisk内容
 # strings voting_disk.bak |sort -u
 
-//数据库自启
+-- 数据库自启
 srvctl disable database -d doudou
 ```
 
@@ -284,8 +284,8 @@ su - oracle/su - grid
 $ORACLE_HOME/OPatch/opatch lsinventory -oh $ORACLE_HOME
 $ORACLE_CRS_HOME/OPatch/opatch lsinventory  -oh $ORACLE_CRS_HOME
 $ORA_CRS_HOME/OPatch/opatch lsinventory  -oh $ORA_CRS_HOME
-./opatch lsinventory -oh $ORACLE_CRS_HOME                               //10g
-./opatch lsinventory -oh $ORACLE_HOME                      //10g
+./opatch lsinventory -oh $ORACLE_CRS_HOME                               -- 10g
+./opatch lsinventory -oh $ORACLE_HOME                      -- 10g
 ```
 
 ### 2.2.3 补丁安装情况2​
@@ -345,13 +345,13 @@ select name,value from v$parameter where name='processes';
 ### 2.4 数据库时区
 
 ```
-//数据库时区
+-- 数据库时区
 select dbtimezone from dual ;  
-//看会话时区
+-- 看会话时区
 select sessiontimezone from dual; 
-//查看当前时间和时区 
+-- 查看当前时间和时区 
 select systimestamp from dual; 
-//修改数据时区 
+-- 修改数据时区 
 alter database set time_zone='+8:00'; 
 
 select u.name || '.' || o.name || '.' || c.name TSLTZcolumn
@@ -370,7 +370,7 @@ column name format a30
 column value format a40
 select inst_id,name,value from gv$parameter where value is not null;
 
-//某个参数
+-- 某个参数
 set linesize 120
 col NAME format a40
 COL VALUE FORMAT A40
@@ -419,7 +419,7 @@ x.ksppinm LIKE '/_%' escape '/'
 order by
 translate(x.ksppinm, ' _', ' ');
 
-//关键字隐藏参数
+-- 关键字隐藏参数
 SELECT /* SHSNC */
  P.KSPPINM NAME, V.KSPPSTVL VALUE
   FROM SYS.X$KSPPI P, SYS.X$KSPPSV V
@@ -529,7 +529,7 @@ select sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
 
 select sum(bytes)/1024/1024 as Mb from  Dba_Segments where owner='ENRIQ';
 
-//dba_segments slow优化
+-- dba_segments slow优化
 select /*+ optimizer_features_enable('11.2.0.2')*/  sum(bytes)/1024/1024/1024 as gb from  Dba_Segments;
 
 -- Total Size of the database
@@ -590,7 +590,7 @@ SELECT OWNER,
            AND ('SCOTT' IS NULL OR UPPER(OWNER) = UPPER('SCOTT')))
  GROUP BY OWNER, SEGMENT_NAME, SEGMENT_TYPE;
  
-//How to Compute the Size of a Table containing Outline CLOBs and BLOBs (文档 ID 118531.1)
+-- How to Compute the Size of a Table containing Outline CLOBs and BLOBs (文档 ID 118531.1)
 ACCEPT SCHEMA PROMPT 'Table Owner: '
 ACCEPT TABNAME PROMPT 'Table Name:  '
 SELECT
@@ -718,7 +718,7 @@ from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by ta
 where f.tablespace_name= d.tablespace_name
 order by used_percent desc;
 
-//大于80%
+-- 大于80%
 select *
   from (
   select tablespace_name,
@@ -781,7 +781,7 @@ SELECT /* SHSNC */
   FROM DBA_TABLESPACES
  ORDER BY TABLESPACE_NAME
  
- //大于90
+ -- 大于90
  set linesize 150 pagesize 500
 SELECT tablespace_name,total_space_GB,max_space_GB,space_usage_percent FROM (
 select f.tablespace_name tablespace_name,
@@ -1345,9 +1345,9 @@ select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log whe
 ### 2.20.2 删除归档
 
 ```
-//删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
+-- 删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
 RMAN> delete force archivelog until time "sysdate-1";
-//删除3天前的归档日志
+-- 删除3天前的归档日志
 delete  archivelog until time "sysdate";
 ```
 
@@ -1443,11 +1443,11 @@ Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||part
 -- Rebuild Sub Partition index
 Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where  status = 'UNUSABLE';
 
-//online重建索引
+-- online重建索引
 alter index PM4H_DB.IDX_IND_H_3723 rebuild online;
 alter index PM4H_DB.IDX_IND_H_3723 rebuild partition PD_IND_H_3723_190501 online;
 
-//重建索引
+-- 重建索引
 set linesize 120
 col GRANTEE format a12
 col owner   format a12
@@ -1617,12 +1617,12 @@ archive log all；
 ### 2.36.2 应用归档
 
 ```plsql
-//单个或少量
+-- 单个或少量
 SQL> alter database register logfile '/u01/archlog/1_132735_893238304.arc';
-//大量
+-- 大量
 rman> catalog start with '/u01/archlog/';
 
-//rman 
+-- rman 
 CONFIGURE ARCHIVELOG DELETION POLICY TO APPLIED ON ALL STANDBY;
 ```
 
@@ -1656,12 +1656,12 @@ select * from v$archive_gap;
 ### 3.1.2 快照、基线
 
 ```
-//查看快照保留期限，11g默认为8天
+-- 查看快照保留期限，11g默认为8天
 SELECT retention FROM dba_hist_wr_control;
 
-//修改快照时间间隔
+-- 修改快照时间间隔
 EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
-//手动生成快照
+-- 手动生成快照
 EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
 或
 BEGIN 
@@ -1669,7 +1669,7 @@ BEGIN
 END; 
 /
 
-//生成 AWR 基线：
+-- 生成 AWR 基线：
 BEGIN 
   DBMS_WORKLOAD_REPOSITORY.create_baseline ( 
     start_snap_id => 10,  
@@ -1678,7 +1678,7 @@ BEGIN
 END; 
 /
 
-//生成 AWR 基线(11g)：
+-- 生成 AWR 基线(11g)：
 BEGIN
 DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
 start_time => to_date('&start_date_time','&start_date_time_format'),
@@ -1689,7 +1689,7 @@ expiration => NULL ) ;
 END;
 /
 
-//基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
+-- 基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
 BEGIN
 DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
 day_of_week => 'MONDAY',
@@ -1703,7 +1703,7 @@ expiration => 30 );
 END;
 /
 
-//删除 AWR 基线：
+-- 删除 AWR 基线：
 BEGIN
     DBMS_WORKLOAD_REPOSITORY.DROP_BASELINE (baseline_name => 'AWR First baseline');
 END;
@@ -1755,10 +1755,10 @@ create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solari
 ## 3.3 JOB状态查询
 
 ```
-//主端查看当前DBMS_JOB 的状态
+-- 主端查看当前DBMS_JOB 的状态
 SELECT * FROM DBA_JOBS_RUNNING;
 
-//主端查看当前DBMS_SCHEDULER的状态
+-- 主端查看当前DBMS_SCHEDULER的状态
 select owner,job_name,session_id,slave_process_id,running_instance from dba_scheduler_running_jobs;
 ```
 
@@ -1825,10 +1825,10 @@ oradim.exe -new -sid HISSERVER -startmode auto -srvcstart system -spfile
 ## 3.6  密码文件创建
 
 ```
-//UNIX
+-- UNIX
 orapwd file=$ORACLE_HOME/dbs/orapw<local ORACLE_SID> password=<sys password> entries=5
 
-//Windows
+-- Windows
 orapwd file=$ORACLE_HOME/database/PWD<local ORACLE_SID>.ora password=<sys password> entries=5
 ```
 
@@ -1837,45 +1837,45 @@ orapwd file=$ORACLE_HOME/database/PWD<local ORACLE_SID>.ora password=<sys passwo
 ### 3.7.1 闪回信息查询
 
 ```plsql
-//查看数据库状态
+-- 查看数据库状态
 select NAME,OPEN_MODE ,DATABASE_ROLE,CURRENT_SCN,FLASHBACK_ON from v$database;
 
-//获取当前数据库的系统时间和SCN
+-- 获取当前数据库的系统时间和SCN
 select to_char(systimestamp,'yyyy-mm-dd HH24:MI:SS') as sysdt , dbms_flashback.get_system_change_number scn from dual;
 
-//查看数据库可恢复的时间点
+-- 查看数据库可恢复的时间点
 select * from V$FLASHBACK_DATABASE_LOG;
 
-//查看闪回日志空间情况
+-- 查看闪回日志空间情况
 select * from V$flashback_database_stat;
 
-//SCN和timestamp转换关系查询
+-- SCN和timestamp转换关系查询
 select scn,to_char(time_dp,'yyyy-mm-dd hh24:mi:ss')from sys.smon_scn_time;
 
-//查看闪回restore_point
+-- 查看闪回restore_point
 select scn, STORAGE_SIZE ,to_char(time,'yyyy-mm-dd hh24:mi:ss') time,NAME from v$restore_point;
 ```
 
 ### 3.7.2 开启/关闭闪回
 
 ```plsql
-//确保数据库处于归档模式，如果为非归档模式，将数据库转换成归档模式
+-- 确保数据库处于归档模式，如果为非归档模式，将数据库转换成归档模式
 archive log list;
 
-//设置闪回区大小：
+-- 设置闪回区大小：
 alter system set db_recovery_file_dest_size=80g scope=spfile;
 设置闪回区位置：
 alter system set db_recovery_file_dest='/workdb/account_flashback_area' scope=spfile;
 设置闪回目标为5天，以分钟为单位，每天为1440分钟：
 alter system set db_flashback_retention_target=7200 scope=spfile;
 
-//打开闪回功能
+-- 打开闪回功能
 shutdown immediate;
 startup mount;
 alter database flashback on;
 alter database open;
 
-//关闭闪回功能
+-- 关闭闪回功能
 shutdown immediate;
 startup mount;
 alter database flashback off;
@@ -1885,23 +1885,23 @@ alter database open;
 ### 3.7.3 闪回操作
 
 ```plsql
-//闪回数据库
+-- 闪回数据库
 FLASHBACK DATABASE TO TIMESTAMP to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd HH24:MI:SS');;
 flashback database to scn 16813234;
 　　
-//闪回DROP	其中table_name可以是删除表名称，也可以是别名
+-- 闪回DROP	其中table_name可以是删除表名称，也可以是别名
 flashback table table_name to before drop;
 flashback table table_name to before drop rename to table_name_new;
 
-//闪回表
+-- 闪回表
 flashback table table_name to scn scn_number;
 flashback table table_name to timestamp to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd hh24:mi:ss');
 
-//闪回查询
+-- 闪回查询
 select * from table_name as of timestamp to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd hh24:mi:ss');
 select * from scott.dept as of scn 16801523;
 
-//闪回快照
+-- 闪回快照
 create restore point before_201712151111 guarantee flashback database;
 flashback database to restore point before_201712151111;
 ```
@@ -1909,21 +1909,21 @@ flashback database to restore point before_201712151111;
 ## 3.8 开启关闭归档
 
 ```plsql
-//设置归档路径
+-- 设置归档路径
 alter system set log_archive_dest_1='location=/oracle/ora9/oradata/arch1' scope=spfile;
 alter system set log_archive_dest_2='location=/oracle/ora9/oradata/arch2' scope=spfile;
 #如果归档到两个位置，则可以通过上边方法实现
 
-//设置归档日记文件名格式
+-- 设置归档日记文件名格式
 alter system set log_archive_format='arch_%d_%t_%r_%s.log';
 
-//开启归档
+-- 开启归档
 shutdown immediate;
 startup mount;    
 alter database archivelog;
 alter database open; 
 
-//关闭归档
+-- 关闭归档
 shutdown immediate; 
 startup mount; 
 alter database noarchivelog; 
@@ -1934,71 +1934,71 @@ alter database open;
 ## 3.9 12c数据库管理
 
 ```
-//查看当前属于哪个容器
+-- 查看当前属于哪个容器
 show con_name;
 select sys_context('USERENV','CON_NAME') from dual;
 alter session set container=cdb$root;
 
-//如果在PDB中可以使用如下语法：
+-- 如果在PDB中可以使用如下语法：
 ALTER PLUGGABLE DATABASE OPEN READ WRITE [RESTRICTED] [FORCE];
 ALTER PLUGGABLE DATABASE OPEN READ ONLY [RESTRICTED] [FORCE];
 ALTER PLUGGABLE DATABASE OPEN UPGRADE [RESTRICTED];
 ALTER PLUGGABLE DATABASE CLOSE [IMMEDIATE];
 
-//如果是在CDB中，可以使用如下语法：
+-- 如果是在CDB中，可以使用如下语法：
 ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN READ WRITE [RESTRICTED][FORCE];
 ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN READ ONLY [RESTRICTED] [FORCE];
 ALTER PLUGGABLE DATABASE <pdd-name-clause> OPEN UPGRADE [RESTRICTED];
 ALTER PLUGGABLE DATABASE <pdd-name-clause> CLOSE [IMMEDIATE];
 <pdd-name-clause>表示的是多个PDB，如果有多个，用逗号分开。 也可以使用ALL或者ALL EXCEPT关键字来替代。其中：ALL：表示所有的PDBS;ALLEXCEPT 表示需要排除的PDBS。
 
-//查看是否为cdb
+-- 查看是否为cdb
 select name,log_mode,open_mode,cdb from v$database;
  
-//查看容器数据库中的pdb
+-- 查看容器数据库中的pdb
 col pdb_name for a30
 select pdb_id,pdb_name,dbid,status from dba_pdbs;
 select con_id,dbid,name,open_mode from v$pdbs;
 
-//inmemory检查确认未开启
+-- inmemory检查确认未开启
 col value for a20
 col name for a40
 select name,value from v$parameter where name like '%inm%';
-//设置in内存大小
+-- 设置in内存大小
 alter system set inmemory_size=600m scope=spfile;
-//设置加载到内存的进程数量
+-- 设置加载到内存的进程数量
 alter system set inmemory_max_populate_servers=2 scope=both;
 
-//查看PDB信息（在CDB模式下）
+-- 查看PDB信息（在CDB模式下）
 show pdbs   --查看所有pdb
 select name,open_mode from v$pdbs;  --v$pdbs为PDB信息视图
 select con_id, dbid, guid, name , open_mode from v$pdbs;
 
-//切换容器
+-- 切换容器
 alter session set container=orcl1   --切换到PDBorcl1容器
 alter session set container=CDB$ROOT    --切换到CDB容器
 
-//查看当前属于哪个容器
+-- 查看当前属于哪个容器
 select sys_context('USERENV','CON_NAME') from dual; --使用sys_context查看属于哪个容器
 show con_name   --用show查看当前属于哪个容器
 
-//创建或克隆前要指定文件映射的位置（需要CBD下sysdba权限
+-- 创建或克隆前要指定文件映射的位置（需要CBD下sysdba权限
 alter system set db_create_file_dest='/u01/app/oracle/oradata/orcl/orcl2';
 
-//创建一个新的PDB：（需要CBD下sysdba权限）
+-- 创建一个新的PDB：（需要CBD下sysdba权限）
 create pluggable database test admin user admin identified by admin;    
 alter pluggable database test_pdb open;    --将test_pdb 打开
 
-//克隆PDB（需要CBD下sysdba权限）
+-- 克隆PDB（需要CBD下sysdba权限）
 create pluggable database orcl2 from orcl1;   --test_pdb必须是打开的，才可以被打开
 alter pluggable database orcl2 open;   --然后打开这个pdb
 
-//删除PDB（需要CBD下sysdba权限）
+-- 删除PDB（需要CBD下sysdba权限）
 alter pluggable database  orcl2 close;  --关闭之后才能删除
 drop pluggable database orcl2 including datafiles;  --删除PDB orcl2
 --设置CDB启动PDB自动启动（在这里使用的是触发器）
 
-//容器自启
+-- 容器自启
 CREATE OR REPLACE TRIGGER open_pdbs
 AFTER STARTUP ON DATABASE
 BEGIN
@@ -2006,30 +2006,30 @@ EXECUTE IMMEDIATE 'ALTER PLUGGABLE DATABASE ALL OPEN';
 END open_pdbs;
 /
 
-//连接pdb
+-- 连接pdb
  sqlplus system/oracle@localhost:1521/orclpdb1
- //连接cdb
+ -- 连接cdb
  sqlplus system/oracle@localhost:1521/orcl
 ```
 
 ## 3.10 11g AUTOTASK
 
 ```plsql
-//执行历史
+-- 执行历史
 select client_name,job_name,job_start_time from dba_autotask_job_history;
-//AUTOTASK
+-- AUTOTASK
 SELECT client_name,status FROM dba_autotask_client;
-//维护窗口
+-- 维护窗口
 select * from dba_autotask_window_clients;
 select * from dba_scheduler_windows;
-//任务执行情况
+-- 任务执行情况
 col job_name for a30
 col ACTUAL_START_DATE for a40
 col RUN_DURATION for a30
 set lines 180 pages 100
 select owner, job_name, status, ACTUAL_START_DATE, RUN_DURATION from dba_scheduler_job_run_details where job_name like 'ORA$AT_OS_OPT_S%' order by 4;
 
-//启动自动维护任务
+-- 启动自动维护任务
 --启动sql tuning advisor
 BEGIN
   DBMS_AUTO_TASK_ADMIN.enable(
@@ -2056,7 +2056,7 @@ BEGIN
 END;
 /
 
-//关闭自动维护任务
+-- 关闭自动维护任务
 --关闭sql tuning advisor,避免消耗过多的资源
 BEGIN
   DBMS_AUTO_TASK_ADMIN.disable(
@@ -2109,7 +2109,7 @@ select file_id,tablespace_name,file_name,bytes/1024/1024,status,autoextensible,m
 col file_name format a60
 select file_id, file_name,tablespace_name,bytes/1024/1024 as MB ,autoextensible,maxbytes,user_bytes,online_status from dba_data_files;
 
-//某个表空间数据文件
+-- 某个表空间数据文件
 set linesize 120
 col name format a60
 col file# format 9999
@@ -2254,15 +2254,15 @@ where rownum < 11;
 ## 3.14 统计信息
 
 ```plsql
-//查看表统计信息
+-- 查看表统计信息
 select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
-//查看列统计信息
+-- 查看列统计信息
 select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
 ;
-//查看索引统计信息
+-- 查看索引统计信息
 select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
 
-//查看统计信息过期的表
+-- 查看统计信息过期的表
 SELECT OWNER, TABLE_NAME, PARTITION_NAME, 
        OBJECT_TYPE, STALE_STATS, LAST_ANALYZED 
   FROM DBA_TAB_STATISTICS
@@ -2291,7 +2291,7 @@ SELECT OWNER, TABLE_NAME, PARTITION_NAME,
 ```plsql
 select OWNER,table_name,partitioning_type,subpartitioning_type,partition_count from dba_part_tables where table_name ='RANGE_PART_TAB';
 
-//方法二
+-- 方法二
 set linesize 120
 col USERNAME format a12
 col MACHINE format a16
@@ -2508,7 +2508,7 @@ select * from (select
 ### 2.18.2 查看详细的UNDO信息
 
 ```plsql
-//通过v$UNDOSTAT来查看详细的UNDO信息
+-- 通过v$UNDOSTAT来查看详细的UNDO信息
 SELECT TO_CHAR(BEGIN_TIME, 'MM/DD/YYYY HH24:MI:SS') BEGIN_TIME,TO_CHAR(END_TIME, 'MM/DD/YYYY HH24:MI:SS') END_TIME,UNDOTSN, UNDOBLKS, TXNCOUNT, MAXCONCURRENCY AS "MAXCON" FROM v$UNDOSTAT WHERE rownum <= 100;
 
 BEGIN_TIME表示每条记录UNDO事务开始的时间
@@ -2519,24 +2519,24 @@ UNDOBLKS在这段时间占用的undo块的数量
 TXNCOUNT事务的总数量
 MAXCON这些UNDO事务过程中的最大数据库连接数
 
-//查看各个undo段的使用信息
+-- 查看各个undo段的使用信息
 select a.name,b.extents,b.rssize,b.writes,b.xacts,b.wraps from v$rollname a,v$rollstat b where a.usn=b.usn;
 
-//确定哪些用户正在使用undo段
+-- 确定哪些用户正在使用undo段
 select a.username,b.name,c.used_ublk from v$session a,v$rollname b,v$transaction c where a.saddr=c.ses_addr and b.usn=c.xidusn;
 
-//每秒生成的UNDO量
+-- 每秒生成的UNDO量
 SELECT (SUM(undoblks))/ SUM((end_time - begin_time) * 86400) FROM v$undostat;
 
-//当前undo表空间使用状态
+-- 当前undo表空间使用状态
 SELECT DISTINCT STATUS,SUM(BYTES),COUNT(*) FROM DBA_UNDO_EXTENTS GROUP BY STATUS;
 
-//查看活动事务v$transaction
+-- 查看活动事务v$transaction
 SELECT A.SID, A.USERNAME, B.XIDUSN, B.USED_UREC, B.USED_UBLK FROM V$SESSION A, V$TRANSACTION B WHERE A.SADDR=B.SES_ADDR;
 
 SELECT XID AS "txn_id", XIDUSN AS "undo_seg", USED_UBLK "used_undo_blocks",XIDSLOT AS "slot", XIDSQN AS "seq", STATUS AS "txn_status" FROM V$TRANSACTION;
 
-//查询事务使用的UNDO段及大小。
+-- 查询事务使用的UNDO段及大小。
 select s.sid,s.serial#,s.sql_id,v.usn,segment_name,r.status, v.rssize/1024/1024 mb
 From dba_rollback_segs r, v$rollstat v,v$transaction t,v$session s
 Where r.segment_id = v.usn and v.usn=t.xidusn and t.addr=s.taddr
@@ -2548,17 +2548,17 @@ from v$rollstat order by rssize;
 ### 3.18.3 UNDO表空间管理
 
 ```plsql
-//创建UNDO表空间：
+-- 创建UNDO表空间：
 create undo tablespace undotbs3 datafile '/data1/oradata/undotbs03_1.dbf' size 100M autoextend on next 20M maxsize 500M;
 
 上面命令中，指定UNDO表空间名称、对应数据文件、初始大小、自动扩展、每次扩展大小、最大扩展到多大
 
-//给UNDO表空间增加数据文件：
+-- 给UNDO表空间增加数据文件：
 ALTER TABLESPACE UNDOTBS3 ADD DATAFILE ''/data1/oradata/undotbs03_2.dbf' SIZE 1024M AUTOEXTEND ON NEXT 100M MAXSIZE 2048M;
 
-//切换默认UNDO表空间：
+-- 切换默认UNDO表空间：
 alter system set undo_tablespace = UNDOTBS3;
 
-//更改UNDO RETENTION
+-- 更改UNDO RETENTION
 alter system set UNDO_RETENTION = 1800;
 ```
