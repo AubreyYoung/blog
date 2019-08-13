@@ -1398,3 +1398,33 @@ and t.xidusn = r.usn
 ORDER BY t.used_ublk * 8 / 1024 desc;
 ```
 
+## 47.内存参数优化
+
+```plsql
+-- Memory Target
+select * from v$memory_target_advice order by memory_size;
+
+-- SGA Target
+select * from v$sga_target_advice order by sga_size;
+
+-- PGA Target
+select * from V$PGA_TARGET_ADVICE order by pga_target_for_estimate;
+```
+
+- 工具专题
+
+  ![1565082784251](Oracle性能优化.assets/1565082784251.png)
+
+-  索引专题
+
+- 执行计划专题
+
+-  统计信息专题
+
+-  Hint专题
+
+- 并行专题
+
+- 开发与设计
+
+- OLAP/数仓技术

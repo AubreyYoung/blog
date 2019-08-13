@@ -348,7 +348,7 @@ select name,value from v$parameter where name='processes';
 //数据库时区
 select dbtimezone from dual ;  
 //看会话时区
-select sessiontimezone from dual;; 
+select sessiontimezone from dual; 
 //查看当前时间和时区 
 select systimestamp from dual; 
 //修改数据时区 
@@ -535,7 +535,7 @@ select /*+ optimizer_features_enable('11.2.0.2')*/  sum(bytes)/1024/1024/1024 as
 -- Total Size of the database
 Also accounting for controlfiles and mirrored redolog files.
 
-select (a.data_size+b.temp_size+c.redo_size+d.cont_size)/1024/1024/1024/1024 "total_size TB"
+select (a.data_size+b.temp_size+c.redo_size+d.cont_size)/1024/1024/1024 "total_size GB"
 from ( select sum(bytes) data_size
        from dba_data_files ) a,
      ( select nvl(sum(bytes),0) temp_size
@@ -977,8 +977,9 @@ select username,account_status,default_tablespace,temporary_tablespace,CREATED f
 
 ```plsql
 col Name for a30
-col "Size (M) for  a30
+col "Size (M)" for  a30
 col "HWM (M)" for a30
+col "HWM %" for a30
 col "Using (M)" for a30
 col "Using %" for a30
 SELECT d.tablespace_name "Name",
@@ -1437,10 +1438,10 @@ SELECT T.INDEX_OWNER ,T.INDEX_NAME,T.PARTITION_NAME,BLEVEL,T.NUM_ROWS,T.LEAF_BLO
 Select 'alter index '||owner||'.'||index_name||' rebuild ONLINE;' from dba_indexes d where  status = 'UNUSABLE';
 
 -- Rebuild Partition index
-Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||partition_name||' ONLINE;' from dba_ind_partitions where  status = 'UNUSABLE'；
+Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||partition_name||' ONLINE;' from dba_ind_partitions where  status = 'UNUSABLE';
 
 -- Rebuild Sub Partition index
-Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where  status = 'UNUSABLE'；
+Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where  status = 'UNUSABLE';
 
 //online重建索引
 alter index PM4H_DB.IDX_IND_H_3723 rebuild online;
@@ -1747,7 +1748,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 
 ```
 create pfile='C:\Users\Administrator\Desktop\pfile20170109.ora' from spfile;
-create pfile='/home/oracle/pfile20190123.ora' from spfile;
+create pfile='/opt/oracle/pfile20190805.ora' from spfile;
 create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solaris-->
 ```
 
