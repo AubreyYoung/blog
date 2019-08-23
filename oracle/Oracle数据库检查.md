@@ -1379,7 +1379,6 @@ SELECT 'CREATE '||DECODE(U.NAME,'PUBLIC','public ')||'DATABASE LINK '||CHR(10)
 ||chr(10)||';' TEXT
 FROM SYS.LINK$ L, SYS.USER$ U
 WHERE L.OWNER# = U.USER#;
-
 ```
 
 ## 2.24   检查object_id的最大值
@@ -1749,6 +1748,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
 create pfile='C:\Users\Administrator\Desktop\pfile20170109.ora' from spfile;
 create pfile='/opt/oracle/pfile20190805.ora' from spfile;
+create pfile='/home/oracle/pfile20190822.ora' from spfile;
 create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solaris-->
 ```
 
@@ -1910,7 +1910,7 @@ flashback database to restore point before_201712151111;
 
 ```plsql
 -- 设置归档路径
-alter system set log_archive_dest_1='location=/oracle/ora9/oradata/arch1' scope=spfile;
+alter system set log_archive_dest_1='location=+DATA/FRA/' scope=spfile;
 alter system set log_archive_dest_2='location=/oracle/ora9/oradata/arch2' scope=spfile;
 #如果归档到两个位置，则可以通过上边方法实现
 
