@@ -73,7 +73,7 @@ OK
 
 ## 4. 命名规范
 
-![img](en-resource://database/8031:0)
+![1566872878482](Redis常用命令.assets/1566872878482.png)
 
 ## 5. keys
 
@@ -414,7 +414,7 @@ string
 
 ## 22. lrem
 
-![img](en-resource://database/8030:0)
+![1566872902772](Redis常用命令.assets/1566872902772.png)
 
 
 
