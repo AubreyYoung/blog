@@ -1515,7 +1515,7 @@ select owner,index_name name,status,degree from dba_indexes where degree>'1';
 ## 2.32 Disabled Trigger(es)
 
 ```plsql
-SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE status = 'DISABLED' and owner in (select username from dba_users where account_status='OPEN');
+SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
 ```
 
 ## 2.33 Disabled Constraint(s) 
