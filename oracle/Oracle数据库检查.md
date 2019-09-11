@@ -334,7 +334,7 @@ alter database add supplemental log data;
 
 ## 2.3 数据库连接数
 
-```
+```plsql
 col name format a10
 col value format a10
 select inst_id, sessions_current,sessions_highwater,SESSIONS_MAX,SESSIONS_WARNING ,USERS_MAX from  gv$license;
@@ -344,7 +344,7 @@ select name,value from v$parameter where name='processes';
 
 ### 2.4 数据库时区
 
-```
+```plsql
 -- 数据库时区
 select dbtimezone from dual ;  
 -- 看会话时区
@@ -1287,7 +1287,7 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
 
 ### 查询每个客户端连接每个实例的连接数
 
-```
+```plsql
 col MACHINE format a20
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
