@@ -501,7 +501,7 @@ ALTER SYSTEM SET "_kgl_hot_object_copies"=2 SCOPE=SPFILE;
 ALTER SYSTEM SET audit_trail='none' SCOPE=SPFILE;
 ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
 ALTER SYSTEM SET db_cache_size=56g SCOPE=SPFILE;
-ALTER SYSTEM SET pga_aggregate_target=10g SCOPE=SPFILE;   ？
+ALTER SYSTEM SET pga_aggregate_target=10g SCOPE=SPFILE;   
 ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
 ALTER SYSTEM SET "_enable_NUMA_support"=false;
 ALTER SYSTEM SET PLSQL_CODE_TYPE=NATIVE SCOPE=SPFILE;    ---把plsql存储过程编译成本地代码的过程，不会导致任何解释器开销
@@ -513,9 +513,15 @@ alter system set commit_write='immediate,nowait';    异步提交
 //11g
 alter system set commit_logging ='immediate';
 alter system set commit_wait ='nowait' ;
-
+alter system set db_file_multiblock_read_count = 128 ;
 alter system set java_jit_enabled=false scope=spfile;
 alter system set cursor_sharing=force scope=spfile;
+
+待定参数
+alter system set "_disk_sector_size_override" = true scope=spfile;
+alter system set "_ash_size" = 100M scope=spfile;
+alter system set "_gc_read_mostly_locking"=FALSE scope=spfile;
+alter system set "_gc_policy_time"=0 scope=spfile;
 ```
 
 [^注]: 将可选的 vm.hugetlb_shm_group 参数设置为有权使用 HugePages 的操作系统组。默认情况下，此参数设置为 0，从而允许所有组使用 HugePages。可以将此参数设置为 Oracle
@@ -541,6 +547,12 @@ PARALLEL_MAX_SEVERS参数设置并行执行可用的最大进程数量，该参�
 | _lm_rcvr_hang_allow_time    | 140   | FALSE     | receiver hang allow time in seconds                     | FALSE | FALSE |
 | _optim_peek_user_binds      | FALSE | FALSE     | enable peeking of user binds                            | FALSE | FALSE |
 | _use_adaptive_log_file_sync | FALSE | FALSE     | Adaptively switch between post/wait and polling         | FALSE | FALSE |
+
+### 2.5.6 ASM隐藏参数
+
+```plsql
+select ksppinm,ksppstvl,ksppdesc from x$ksppi x,x$ksppcv y where x.indx = y.indx and ksppinm='_asm_hbeatiowait';
+```
 
 
 
@@ -717,7 +729,7 @@ ORA-00244: concurrent control file backup operation in progress
 
 ## 2.12 redo log文件
 
-## 2.12.1 查看redo
+### 2.12.1 查看redo
 
 ```plsql
 col status format a10;
@@ -739,6 +751,56 @@ select inst_id,thread#, GROUP#,SEQUENCE#,BYTES/1024/1024,STATUS,FIRST_TIME from 
 ```plsql
 --清空redo
 ALTER DATABASE CLEAR LOGFILE GROUP 1;
+```
+
+### 2.12.3 查看REDO切换频率
+
+```plsql
+Select round(FIRST_TIME, 'DD'), THREAD#, Count(SEQUENCE#)
+From v$log_history
+Group By round(FIRST_TIME, 'DD'), THREAD#
+Order By 1, 2
+```
+
+### 2.12.4 检查15天内归档的生成情况
+
+```plsql
+set numw 4
+set pagesize 500
+set line 500
+col Date for a20
+col Day for a20
+SELECT  trunc(first_time) "Date",
+to_char(first_time, 'Dy') "Day",
+count(1) "Total",
+SUM(decode(to_char(first_time, 'hh24'),'00',1,0)) "h0",
+SUM(decode(to_char(first_time, 'hh24'),'01',1,0)) "h1",
+SUM(decode(to_char(first_time, 'hh24'),'02',1,0)) "h2",
+SUM(decode(to_char(first_time, 'hh24'),'03',1,0)) "h3",
+SUM(decode(to_char(first_time, 'hh24'),'04',1,0)) "h4",
+SUM(decode(to_char(first_time, 'hh24'),'05',1,0)) "h5",
+SUM(decode(to_char(first_time, 'hh24'),'06',1,0)) "h6",
+SUM(decode(to_char(first_time, 'hh24'),'07',1,0)) "h7",
+SUM(decode(to_char(first_time, 'hh24'),'08',1,0)) "h8",
+SUM(decode(to_char(first_time, 'hh24'),'09',1,0)) "h9",
+SUM(decode(to_char(first_time, 'hh24'),'10',1,0)) "h10",
+SUM(decode(to_char(first_time, 'hh24'),'11',1,0)) "h11",
+SUM(decode(to_char(first_time, 'hh24'),'12',1,0)) "h12",
+SUM(decode(to_char(first_time, 'hh24'),'13',1,0)) "h13",
+SUM(decode(to_char(first_time, 'hh24'),'14',1,0)) "h14",
+SUM(decode(to_char(first_time, 'hh24'),'15',1,0)) "h15",
+SUM(decode(to_char(first_time, 'hh24'),'16',1,0)) "h16",
+SUM(decode(to_char(first_time, 'hh24'),'17',1,0)) "h17",
+SUM(decode(to_char(first_time, 'hh24'),'18',1,0)) "h18",
+SUM(decode(to_char(first_time, 'hh24'),'19',1,0)) "h19",
+SUM(decode(to_char(first_time, 'hh24'),'20',1,0)) "h20",
+SUM(decode(to_char(first_time, 'hh24'),'21',1,0)) "h21",
+SUM(decode(to_char(first_time, 'hh24'),'22',1,0)) "h22",
+SUM(decode(to_char(first_time, 'hh24'),'23',1,0)) "h23"
+FROM    V$log_history where to_date(first_time)>to_date(sysdate-15)
+group by trunc(first_time), to_char(first_time, 'Dy')
+Order by 1;
+set numw 10
 ```
 
 ## 2.13 归档情况 
@@ -1074,8 +1136,8 @@ select tablespace_name,file_name,bytes/1024/1024,autoextensible,maxbytes/1024/10
 查看临时表空间对应的临时文件的使用情况
 
 ```plsql
-SELECT TABLESPACE_NAME         AS TABLESPACE_NAME    ,
-    BYTES_USED/1024/1024/1024    AS TABLESAPCE_USED  ,
+SELECT TABLESPACE_NAME         AS TABLESPACE_NAME,
+    BYTES_USED/1024/1024/1024    AS TABLESAPCE_USED,
     BYTES_FREE/1024/1024/1024  AS TABLESAPCE_FREE
 FROM V$TEMP_SPACE_HEADER
 ORDER BY 1 DESC;
@@ -1093,7 +1155,7 @@ SELECT   se.username,
          tablespace,
          segtype,
          sql_text
-FROM v$sort_usage su, v$parameter p, v$session se, v$sql s
+FROM gv$sort_usage su, gv$parameter p, gv$session se, gv$sql s
    WHERE p.name = 'db_block_size'
      AND su.session_addr = se.saddr
      AND s.hash_value = su.sqlhash
@@ -1346,56 +1408,15 @@ end;
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
 ```
 
-## 5.17 客户端连接分布
+## 5.21 客户端连接分布
 
-### 查询每个客户端连接每个实例的连接数
+查询每个客户端连接每个实例的连接数
 
 ```plsql
 col MACHINE format a20
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
-```
-
-## 2.21  检查15天内归档的生成情况
-
-```plsql
-set numw 4
-set pagesize 500
-set line 500
-col Date for a20
-col Day for a20
-SELECT  trunc(first_time) "Date",
-to_char(first_time, 'Dy') "Day",
-count(1) "Total",
-SUM(decode(to_char(first_time, 'hh24'),'00',1,0)) "h0",
-SUM(decode(to_char(first_time, 'hh24'),'01',1,0)) "h1",
-SUM(decode(to_char(first_time, 'hh24'),'02',1,0)) "h2",
-SUM(decode(to_char(first_time, 'hh24'),'03',1,0)) "h3",
-SUM(decode(to_char(first_time, 'hh24'),'04',1,0)) "h4",
-SUM(decode(to_char(first_time, 'hh24'),'05',1,0)) "h5",
-SUM(decode(to_char(first_time, 'hh24'),'06',1,0)) "h6",
-SUM(decode(to_char(first_time, 'hh24'),'07',1,0)) "h7",
-SUM(decode(to_char(first_time, 'hh24'),'08',1,0)) "h8",
-SUM(decode(to_char(first_time, 'hh24'),'09',1,0)) "h9",
-SUM(decode(to_char(first_time, 'hh24'),'10',1,0)) "h10",
-SUM(decode(to_char(first_time, 'hh24'),'11',1,0)) "h11",
-SUM(decode(to_char(first_time, 'hh24'),'12',1,0)) "h12",
-SUM(decode(to_char(first_time, 'hh24'),'13',1,0)) "h13",
-SUM(decode(to_char(first_time, 'hh24'),'14',1,0)) "h14",
-SUM(decode(to_char(first_time, 'hh24'),'15',1,0)) "h15",
-SUM(decode(to_char(first_time, 'hh24'),'16',1,0)) "h16",
-SUM(decode(to_char(first_time, 'hh24'),'17',1,0)) "h17",
-SUM(decode(to_char(first_time, 'hh24'),'18',1,0)) "h18",
-SUM(decode(to_char(first_time, 'hh24'),'19',1,0)) "h19",
-SUM(decode(to_char(first_time, 'hh24'),'20',1,0)) "h20",
-SUM(decode(to_char(first_time, 'hh24'),'21',1,0)) "h21",
-SUM(decode(to_char(first_time, 'hh24'),'22',1,0)) "h22",
-SUM(decode(to_char(first_time, 'hh24'),'23',1,0)) "h23"
-FROM    V$log_history where to_date(first_time)>to_date(sysdate-15)
-group by trunc(first_time), to_char(first_time, 'Dy')
-Order by 1;
-set numw 10
 ```
 
 ## 2.22 未删除归档
@@ -1405,7 +1426,7 @@ set numw 10
 ```
 select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log where  STANDBY_DEST  ='NO'  and deleted='NO';
 ```
-### 2.20.2 删除归档
+### 2.22.2 删除归档
 
 ```
 -- 删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
@@ -2316,6 +2337,8 @@ where rownum < 11;
 
 ## 3.14 统计信息
 
+### 3.14.1 查看统计信息
+
 ```plsql
 -- 查看表统计信息
 select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
@@ -2343,7 +2366,44 @@ SELECT OWNER, TABLE_NAME, PARTITION_NAME,
    AND TABLE_NAME NOT LIKE 'BIN%'
    -- 回收站中的表不做统计
   order by 1,2;
+  
+-- 统计信息脚本
+select 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>''' ||owner||'''' || ', tabname=> ''' || table_name || ''''||',estimate_percent =>10' || ',method_opt=> ' ||'''FOR ALL COLUMNS SIZE AUTO'''||', degree => 2'|| ', cascade => TRUE ); '
+  from DBA_TAB_STATISTICS
+ where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
+and  (STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL) AND TABLE_NAME NOT LIKE 'BIN%';
 ```
+
+### 3.14.2 收集统计信息
+
+```plsql
+select distinct 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>''' ||owner||'''' || ', tabname=> ''' || table_name || ''''||',estimate_percent =>0.01' || ',method_opt=> ' ||'''FOR ALL COLUMNS SIZE AUTO'''||', degree => 2'|| ', cascade => TRUE ); '
+  from DBA_TAB_STATISTICS
+ where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
+and  ( LAST_ANALYZED IS NULL) AND TABLE_NAME NOT LIKE 'BIN%'
+and rownum <= 100;
+
+select DISTINCT 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>''' ||owner||'''' || ', tabname=> ''' || table_name ||''''||',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE' || ',method_opt=> ' ||'''FOR ALL COLUMNS SIZE AUTO'''||', degree => 10'|| ', cascade => TRUE ); '
+  from DBA_TAB_STATISTICS
+ where owner ='PM4H_DB'
+and  ( STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL ) AND TABLE_NAME NOT LIKE 'BIN%'
+and last_analyzed <=  TO_DATE('2019-09-26 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+and  last_analyzed >= TO_DATE('2019-09-21 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+```
+
+
 
 ## 3.15 分区表信息
 
@@ -2549,6 +2609,12 @@ ORDER BY
 ;
 ```
 
+### 3.17.3 查看表的并行度
+
+```
+select owner,table_name,degree from dba_tables where table_name='EMP';
+```
+
 ## 3.18 查看UNDO表空间
 
 ### 3.18.1 查看UNDO表空间
@@ -2622,6 +2688,159 @@ ALTER TABLESPACE UNDOTBS3 ADD DATAFILE '/data1/oradata/undotbs03_2.dbf' SIZE 102
 -- 切换默认UNDO表空间：
 alter system set undo_tablespace = UNDOTBS3;
 
+
+```
+
+### 3.18.4 UNDO参数
+
+```plsql
+show parameter undo
+
 -- 更改UNDO RETENTION
 alter system set UNDO_RETENTION = 1800;
+
+SELECT TO_CHAR(BEGIN_TIME, 'YYYY-MM-DD HH24:MI:SS') BEGIN_TIME,TUNED_UNDORETENTION FROM V$UNDOSTAT;
 ```
+
+### 3.18.5 UNDO参数建议
+
+```plsql
+set serveroutput on;
+DECLARE
+tablespacename        varchar2(30);
+tablespacesize        number;
+autoextend            boolean;
+autoextendtf          char(5);
+undoretention         number;
+retentionguarantee    boolean;
+retentionguaranteetf  char(5);
+autotuneenabled       boolean;
+autotuneenabledtf     char(5);
+longestquery          number;
+requiredretention     number;
+bestpossibleretention number;
+requireundosize       number;
+
+
+problem               varchar2(100);
+recommendation        varchar2(100);
+rationale             varchar2(100);
+retention             number;
+utbsize               number;
+nbr                   number;
+undoadvisor           varchar2(100);
+instancenumber        number;
+ret                   boolean;
+rettf                 char(5);
+BEGIN
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_info');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   ret := dbms_undo_adv.undo_info(tablespacename,
+tablespacesize,
+          autoextend, undoretention,
+retentionguarantee);
+   if ret then rettf := 'TRUE'; else rettf :=
+'FALSE'; end if;
+   if autoextend then autoextendtf := 'TRUE';
+      else autoextendtf := 'FALSE'; end if;
+   if retentionguarantee then retentionguaranteetf
+:= 'TRUE';
+      else retentionguaranteetf := 'FALSE'; end if;
+   dbms_output.put_line ('Information Valid    :
+'||rettf);
+   dbms_output.put_line ('Tablespace Name      :
+'||tablespacename);
+   dbms_output.put_line ('Tablespace Size      :
+'||tablespacesize);
+   dbms_output.put_line ('Extensiable          :
+'||autoextendtf);
+   dbms_output.put_line ('undo_retention       :
+'||undoretention);
+   dbms_output.put_line ('Guaranteed Retention :
+'||retentionguaranteetf);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_health');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   nbr := dbms_undo_adv.undo_health(problem,
+recommendation, rationale, retention, utbsize);
+   dbms_output.put_line ('Information Valid    :
+'||nbr);
+   dbms_output.put_line ('Problem              :
+'||problem);
+   dbms_output.put_line ('Recommendation       :
+'||recommendation);
+   dbms_output.put_line ('Rationale            :
+'||rationale);
+   dbms_output.put_line ('Retention            :
+'||retention);
+   dbms_output.put_line ('UTBSize              :
+'||utbsize);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_advisor');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   select instance_number into instancenumber from
+v$instance;
+   undoadvisor :=
+dbms_undo_adv.undo_advisor(instancenumber);
+   dbms_output.put_line ('Undo Advisor         :
+'||undoadvisor);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_autotune');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   ret :=
+dbms_undo_adv.undo_autotune(autotuneenabled);
+   if autotuneenabled then autotuneenabledtf :=
+'TRUE';
+       else autotuneenabledtf := 'FALSE'; end if;
+   dbms_output.put_line ('Auto Tuning Enabled  :
+'||autotuneenabledtf);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--longest_query');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   longestquery :=
+dbms_undo_adv.longest_query(sysdate-1,sysdate);
+   dbms_output.put_line ('Longest Run Query    :
+'||longestquery);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--required_retention');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   requiredretention :=
+dbms_undo_adv.required_retention;
+   dbms_output.put_line ('Required Retention   :
+'||requiredretention);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+  
+dbms_output.put_line('--best_possible_retention');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   bestpossibleretention :=
+dbms_undo_adv.best_possible_retention;
+   dbms_output.put_line ('Best Retention       :
+'||bestpossibleretention);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--required_undo_size');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   requireundosize := dbms_undo_adv.required_undo_size(444);
+   dbms_output.put_line ('Required Undo Size   :
+'||requireundosize);
+
+END;
+/
+```
+
+
+

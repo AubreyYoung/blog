@@ -2,6 +2,8 @@
 
 ## 1. AWR、ASH
 
+### 1.1 生成AWR、ASH、ADDM
+
 **脚本目录  $ORACLE_HOME/rdbms/admin**
 
 ```
@@ -9,7 +11,7 @@
 @?/rdbms/admin/awrrpt.sql
 @?/rdbms/admin/ashrpt.sql
 ```
-
+### 1.2 快照设置
 ```
 -- 修改快照时间间隔
 EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
@@ -61,7 +63,7 @@ BEGIN
 END;
 /
 ```
-
+### 1.3 其他AWR脚本
 ```
 awrrpt.sql 
 展示一段时间范围两个快照之间的数据库性能指标。
@@ -77,7 +79,8 @@ awrddrpi.sql
 用于在特定的数据库和特定实例上，比较两个指定的时间段之间的数据库详细性能指标和配置情况。
 ```
 
-**AWR 相关的视图**
+### 1.4 AWR 相关的视图
+
 如下系统视图与 AWR 相关：
 
 ```
@@ -93,8 +96,22 @@ DBA_HIST_SNAPSHOT - 展示 AWR 快照信息。
 DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
 DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
+### 1.5 查看ASH信息
 
-## 2. 查看会话ID、OSPID
+```
+select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
+       from v$active_session_history ash, v$event_name enm 
+       where ash.event#=enm.event# 
+       and SESSION_ID=&SID and SAMPLE_TIME>=(sysdate-&minute/(24*60));
+
+-- Input is:
+-- Enter value for sid: 15 
+-- Enter value for minute: 1  /* How many minutes activity you want to see */
+```
+
+## 2. 会话相关
+
+### 2.1 查看查询SID、SPID
 
 ```
 -- 方法一：
@@ -148,19 +165,28 @@ SELECT /* XJ LEADING(S) FIRST_ROWS */
    AND S.STATUS = 'ACTIVE'
    AND P.BACKGROUND IS NULL;
 ```
-##  3. 数据库当前的等待事件
-```
-select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
-```
-## 4. **查询每个客户端连接每个实例的连接数**
+### 2.2 表相关SQL、SID、SPID
 
+```plsql
+--- 单实例
+select
+substr(s.username,1,18) username,
+P.spid,
+s.sid,s.serial#,s.machine,y.sql_text,
+'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''';' "kill Session "
+from gv$session s,
+v$process p,v$transaction t,v$rollstat r,v$rollname n,gv$sql y
+where 
+s.paddr = p.addr
+and s.taddr = t.addr (+)
+and t.xidusn = r.usn (+)
+and r.usn = n.usn (+)
+and s.username is not null
+and s.sql_address=y.address
+and sql_text like '%IND_TOH_19666_4%'
 ```
-select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
-select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
-```
-
-##  5. 查询oracle正在执行的sql以及session
+###  2.3 查询SQL以及session
 
 ```
 select
@@ -174,7 +200,6 @@ and t.xidusn = r.usn (+)
 and r.usn = n.usn (+)
 and s.username is not null
 and s.sql_address=y.address
-and s.sid=2065
 order by s.sid,s.serial#,s.username,s.status
 ```
 
@@ -204,9 +229,7 @@ select inst_id,sid,serial#,status,sql_id,sql_exec_start,module,blocking_session 
 select inst_id,sid,sql_id,event,module,machine,blocking_session  from gv$session where module ='PL/SQL Developer';
 ```
 
-
-
-## 6. 查杀会话
+### 2.4 查杀会话
 
 ```
 SELECT 'Lock' "Status",
@@ -232,7 +255,7 @@ AND f.database_status = 'ACTIVE'
 order by b.ctime;
 ```
 
-## 7. 根据sid查询已经执行过的sql 
+### 2.5 根据SID查询SQL
 
 ```plsql
 select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid;
@@ -245,20 +268,7 @@ SELECT 'ps -ef|grep ' || TO_CHAR(SPID) ||
    AND S.SQL_ID = '$2';
 ```
 
-## 8. 查看ASH信息
-
-```
-select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
-       from v$active_session_history ash, v$event_name enm 
-       where ash.event#=enm.event# 
-       and SESSION_ID=&SID and SAMPLE_TIME>=(sysdate-&minute/(24*60));
-
--- Input is:
--- Enter value for sid: 15 
--- Enter value for minute: 1  /* How many minutes activity you want to see */
-```
-
-## 9. **查看内存占用大的会话**
+### 2.6 内存占用大的会话
 
 ```
 SELECT server "连接类型",s.MACHINE,s.username,s.osuser,sn.NAME,VALUE/1024/1024 "占用内存MB",s.SID "会话ID",
@@ -285,7 +295,128 @@ WHERE st.SID = s.SID AND st.statistic# = sn.statistic# AND sn.NAME LIKE 'session
 alter system kill session '1568,27761,@2' immediate; 
 ```
 
-## 10. oradebug
+### 2.7 查询SQL语句的SQL_ID
+
+```
+SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
+
+-- 根据SQL 查询到操作用户
+select s.username from v$active_session_history t,dba_users s  where t.USER_ID=s.user_id and t.SQL_ID='0nx7fbv1w5xg2';
+ 
+-- 查询并获取当前sql的杀会话语句
+select 'alter system kill session '''|| t.SID||','||t.SERIAL#||',@'||t.inst_id||''' immediate;' from gv$session t where t.SQL_ID='c6yz84stnau9b';
+
+-- 查询并获取当前会话的执行计划清空过程语句
+select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, invalidations from v$sqlarea  where sql_id='0nx7fbv1w5xg2';
+
+call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
+```
+
+##  3.等待事件
+
+###  3.1  数据库当前的等待事件
+
+```
+select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
+```
+### 3.2 等待事件
+
+```plsql
+-- 查询数据库等待时间和实际执行时间的相对百分比
+select *
+from v$sysmetric a
+where a.METRIC_NAME in
+      ('Database CPU Time Ratio', 'Database Wait Time Ratio')
+  and a.INTSIZE_CSEC = (select max(intsize_csec) from v$sysmetric);
+  
+-- 查询数据库中过去30分钟引起最多等待的sql语句
+select ash.USER_ID,
+      u.username,
+      sum(ash.WAIT_TIME) ttl_wait_time,
+      s.SQL_TEXT
+from v$active_session_history ash, v$sqlarea s, dba_users u
+where ash.SAMPLE_TIME between sysdate - 60 / 2880 and sysdate
+  and ash.SQL_ID = s.SQL_ID
+  and ash.USER_ID = u.user_id
+group by ash.USER_ID, s.SQL_TEXT, u.username
+order by ttl_wait_time desc
+
+
+-- 查询数据库过去15分钟最重要的等待事件
+select ash.EVENT, sum(ash.WAIT_TIME + ash.TIME_WAITED) total_wait_time
+from v$active_session_history ash
+where ash.SAMPLE_TIME between sysdate - 30 / 2880 and sysdate
+group by event
+order by total_wait_time desc
+
+-- 在过去15分钟哪些用户经历了等待
+select s.SID,
+      s.USERNAME,
+      sum(ash.WAIT_TIME + ash.TIME_WAITED) total_wait_time
+from v$active_session_history ash, v$session s
+where ash.SAMPLE_TIME between sysdate - 30 / 2880 and sysdate
+  and ash.SESSION_ID = s.SID
+group by s.SID, s.USERNAME
+order by total_wait_time desc;
+
+-- 查询等待时间最长的对象
+select a.CURRENT_OBJ#,
+      d.object_name,
+      d.object_type,
+      a.EVENT,
+      sum(a.WAIT_TIME + a.TIME_WAITED) total_wait_time
+from v$active_session_history a, dba_objects d
+where a.SAMPLE_TIME between sysdate - 30 / 2880 and sysdate
+  and a.CURRENT_OBJ# = d.object_id
+group by a.CURRENT_OBJ#, d.object_name, d.object_type, a.EVENT
+order by total_wait_time desc;
+
+-- 查询过去15分钟等待时间最长的sql语句
+select a.USER_ID,
+      u.username,
+      s.SQL_TEXT,
+      sum(a.WAIT_TIME + a.TIME_WAITED) total_wait_time
+from v$active_session_history a, v$sqlarea s, dba_users u
+where a.SAMPLE_TIME between sysdate - 30 / 2880 and sysdate
+  and a.SQL_ID = s.SQL_ID
+  and a.USER_ID = u.user_id
+group by a.USER_ID, s.SQL_TEXT, u.username
+order by total_wait_time desc;
+
+-- 那些SQL消耗更多的IO
+select *
+from (select s.PARSING_SCHEMA_NAME,
+              s.DIRECT_WRITES,
+              substr(s.SQL_TEXT, 1, 500),
+              s.DISK_READS
+        from v$sql s
+        order by s.DISK_READS desc)
+where rownum < 20
+-- 查看哪些会话正在等待IO资源
+SELECT username, program, machine, sql_id
+FROM V$SESSION
+WHERE EVENT LIKE 'db file%read';
+
+-- 查看正在等待IO资源的对象
+SELECT d.object_name, d.object_type, d.owner
+FROM V$SESSION s, dba_objects d
+WHERE EVENT LIKE 'db file%read'
+　　and s.ROW_WAIT_OBJ# = d.object_id
+```
+
+
+
+## 4. **查询每个客户端连接每个实例的连接数**
+
+```
+select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
+
+select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
+```
+
+
+
+## 5. oradebug
 
 ```
 11:33:20 sys@ORCL> oradebug help
@@ -341,7 +472,7 @@ CORE                                     Dump core without crashing process
 PROCSTAT                                 Dump process statistics
 ```
 
-## 11. 查看长事务
+## 6. 查看长事务
 
 ```
 set linesize 200
@@ -394,30 +525,7 @@ SELECT OPNAME,
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
 
-## 12. 查询SQL语句的SQL_ID
-
-```
-SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
-
--- 根据SQL 查询到操作用户
-select s.username from v$active_session_history t,dba_users s  where t.USER_ID=s.user_id and t.SQL_ID='0nx7fbv1w5xg2';
- 
--- 查询并获取当前sql的杀会话语句
-select 'alter system kill session '''|| t.SID||','||t.SERIAL#||',@'||t.inst_id||''' immediate;' from gv$session t where t.SQL_ID='c6yz84stnau9b';
-
--- 查询并获取当前会话的执行计划清空过程语句
-select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, invalidations from v$sqlarea  where sql_id='0nx7fbv1w5xg2';
-
-call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
-```
-
-## 13. 查看表的并行度
-
-```
-select owner,table_name,degree from dba_tables where table_name='EMP';
-```
-
-## 14. 收集10046Trace
+## 7. 10046Trace
 
 ```
 -- 在Session级打开trace
@@ -479,19 +587,11 @@ oradebug setospid <spid> <stid>oradebug unlimit
 tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 ```
 
-## 15. 统计信息
+## 8. 10053Trace
 
-```plsql
--- 查看表统计信息
-select * from DBA_TABLES where OWNER = 'HR' and TABLE_NAME = 'TEST';
-select * from DBA_TAB_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
--- 查看列统计信息
-select * from DBA_TAB_COL_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
--- 查看索引统计信息
-select * from DBA_IND_STATISTICS where OWNER = 'HR' and TABLE_NAME = 'TEST';
-```
 
-## 16.表nologging
+
+## 9. 表nologging
 
 ```plsql
 alter session enable parallel dml;
@@ -500,7 +600,7 @@ DELETE /*+parallel(a,4)*/ FROM PPCMGR.PFP_ACCT_SNP_FCT a where time_key >=201512
 ALTER TABLE PPCMGR.PFP_ACCT_SNP_FCT LOGGING; 
 ```
 
-## 17.SQL执行进度
+## 10. SQL执行进度
 
 ```plsql
 select a.username,
@@ -535,7 +635,7 @@ AND SOFAR != TOTALWORK
 ORDER BY START_TIME;  
 ```
 
-## 18.行锁等待时间
+## 11.行锁等待时间
 
 ```plsql
 select t.SEQ#,
@@ -557,7 +657,7 @@ t.EVENT,
 t.SEQ#;
 ```
 
-## 19.高水位、空间碎片
+## 12.高水位、空间碎片
 
 ```plsql
 --查看块总数
@@ -574,7 +674,7 @@ SELECT COUNT(DISTINCT DBMS_ROWID.ROWID_BLOCK_NUMBER(ROWID)) USED_BLOCK
   FROM GJDS_BUS_OIL_LOG S;
 ```
 
-## 20. 查看执行较高的SQL/模块
+## 13. 查看执行较高的SQL模块
 
 ```plsql
 set linesize 150
@@ -606,7 +706,7 @@ select file# from file$ where ts#=:1          oracle@mapy (MMNL)                
 select grantee#, privilege#, max(nvl(option$,0)) f oracle@mapy (DBRM)                               8wxxddd1nswfw          1
 ```
 
-## 21. 调优工具包DBMS_SQLTUNE
+## 14. 调优工具包DBMS_SQLTUNE
 
 ```plsql
 SELECT * FROM TESTTABLE WHERE ID BETWEEN 200 AND 400;
@@ -630,7 +730,7 @@ SELECT DBMS_SQLTUNE.REPORT_TUNING_TASK('&task_name') FROM DUAL;
 
 EXEC DBMS_SQLTUNE.DROP_TUNING_TASK('Lunar_tunning_0j3ypx51zud1r');
 ```
-## 22.Get the max contiguous free space of tablespace
+## 15.Get the max contiguous free space of tablespace
 
 ```plsql
 set line 200;
@@ -656,7 +756,7 @@ SELECT T.TABLESPACE_NAME,
 HAVING T.FREE < 2;
 ```
 
-## 23. Get top5 sql for the last n hours
+## 16. Get top5 sql for the last n hours
 
 ```plsql
 set line 300;
@@ -695,7 +795,7 @@ SELECT TO_CHAR(A.BEGIN_TIME, 'yyyymmdd hh24:mi'),
  ORDER BY 1, 3 ASC, 8 DESC;
 ```
 
-## 24. Get fragment table
+## 17. Get fragment table
 
 ```plsql
 set line 300
@@ -716,7 +816,7 @@ SELECT OWNER,
  ORDER BY 4;
 ```
 
-## 25.get top top_value process of consume by cpu
+## 18.get top top_value process of consume by cpu
 
 ```plsql
 col username for a10
@@ -975,34 +1075,6 @@ SELECT /* SHSNC D5 */
    AND TABLE_NAME = UPPER('TESTTABLE')
  ORDER BY 1;
 ```
-
-## 31.get DDL
-
-```plsql
-set long 49000
-set longc 9999
-set line 150
-set pagesize 10000
-SELECT dbms_metadata.get_ddl('INDEX','TESTTABLE','SCOTT') from dual;
-```
-
-## 32.Get grant information
-
-```plsql
-set linesize 120
-col GRANTEE format a12
-col owner   format a12
-col GRANTOR format a12
-col PRIVILEGE format a20
-COL VALUE FORMAT A40
-SELECT /* SHSNC */
- *
-  FROM DBA_TAB_PRIVS
- WHERE OWNER = 'SCOTT')
-   AND TABLE_NAME = 'T10';
-```
-
-## 33.Get Get Execute Plan 
 
 ## 34.List view by name pattern
 
@@ -1379,23 +1451,6 @@ SELECT INSTANCE_NUMBER,
    AND BEGIN_TIME >= TRUNC(SYSDATE)
  GROUP BY INSTANCE_NUMBER, SNAP_ID
  ORDER BY SNAP_ID DESC, INSTANCE_NUMBER;
-```
-
-## 46.查看SQL占用undo
-
-```plsql
-SELECT r.name "rollname",
-s.sid,
-s.serial#,
-s.username,
-t.status,
-t.used_ublk * 8 / 1024 "used_bytes(M)",
-t.noundo,
-s.program
-FROM v$session s, v$transaction t, v$rollname r
-WHERE t.addr = s.taddr
-and t.xidusn = r.usn
-ORDER BY t.used_ublk * 8 / 1024 desc;
 ```
 
 ## 47.内存参数优化
