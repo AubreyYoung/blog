@@ -2419,6 +2419,66 @@ select DISTINCT 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>'
 and  ( STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL ) AND TABLE_NAME NOT LIKE 'BIN%'
 and last_analyzed <=  TO_DATE('2019-09-26 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
 and  last_analyzed >= TO_DATE('2019-09-21 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+
+-- 收集表统计信息
+exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZ,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 4, cascade => TRUE ); 
+
+-- 收集表分区统计信息
+exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',partname => 'P21989_2_20190926',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 10, cascade => TRUE ); 
+
+-- 只收集表的统计信息
+exec dbms_stats.gather_table_stats(ownname => 'PM4H_DB', tabname =>'IND_TOH_20688', estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE, method_opt => 'FOR TABLE',degree => 4);
+
+```
+
+### 3.14.3 统计信息管理
+
+```plsql
+--- 还原统计信息
+select TABLE_NAME, STATS_UPDATE_TIME from dba_tab_stats_history where table_name=upper('IND_ORG_20686');
+
+select TABLE_NAME, PARTITION_NAME,STATS_UPDATE_TIME from dba_tab_stats_history where table_name=upper('MO_MOENTITY');
+
+execute dbms_stats.restore_table_stats ('PM4H_AD','MO_MOENTITY','25-SEP-19 02.26.47.499595 PM +07:00');
+
+-- 删除列统计信息
+exec dbms_stats.gather_table_stats('PM4H_DB','IND_TOH_20688',method_opt=>'for columns owner size 1');
+
+exec dbms_stats.delete_column_stats(ownname=>'PM4H_DB',tabname=>'QTM_MODATA',colname=> NULL)
+
+-- 删除表的统计信息
+analyze table  table_name delete statistics;
+
+DBMS_STATS.DELETE_TABLE_STATS (
+   ownname          VARCHAR2, 
+   tabname          VARCHAR2, 
+   partname         VARCHAR2 DEFAULT NULL,
+   stattab          VARCHAR2 DEFAULT NULL, 
+   statid           VARCHAR2 DEFAULT NULL,
+   cascade_parts    BOOLEAN  DEFAULT TRUE, 
+   cascade_columns  BOOLEAN  DEFAULT TRUE,
+   cascade_indexes  BOOLEAN  DEFAULT TRUE,
+   statown          VARCHAR2 DEFAULT NULL,
+   no_invalidate    BOOLEAN  DEFAULT to_no_invalidate_type (
+                                     get_param('NO_INVALIDATE')),
+   force            BOOLEAN DEFAULT FALSE);
+   
+exec dbms_stats.delete_table_stats(ownname=>'PM4H_DB',tabname=>'IND_TOH_20688') 
+
+-- 删除索引统计信息
+DBMS_STATS.DELETE_INDEX_STATS (
+   ownname          VARCHAR2, 
+   indname          VARCHAR2,
+   partname         VARCHAR2 DEFAULT NULL,
+   stattab          VARCHAR2 DEFAULT NULL, 
+   statid           VARCHAR2 DEFAULT NULL,
+   cascade_parts    BOOLEAN  DEFAULT TRUE,
+   statown          VARCHAR2 DEFAULT NULL,
+   no_invalidate    BOOLEAN  DEFAULT to_no_invalidate_type (
+                                     get_param('NO_INVALIDATE')),
+   force            BOOLEAN DEFAULT FALSE);
+   
+exec DBMS_STATS.DELETE_INDEX_STATS(ownname=>'PM4H_AD', indname=>'MO_MOENTITY_IDX11')
 ```
 
 
