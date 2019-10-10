@@ -266,6 +266,19 @@ srvctl config nodeapps -n jaxnh1 -a        #10g
 select inst_id, count(*) from gv$session where status='ACTIVE' group by inst_id;
 ```
 
+## 1.12 清空缓存
+
+```plsql
+----清空shared pool
+alter system flush shared_pool;
+
+----清空buffer cache
+alter system flush buffer_cache;
+
+----清空SGA连接池信息
+alter system flush global context
+```
+
 
 
 ## 2.1 数据库版本和补丁安装情况
@@ -751,6 +764,8 @@ select inst_id,thread#, GROUP#,SEQUENCE#,BYTES/1024/1024,STATUS,FIRST_TIME from 
 ```plsql
 --清空redo
 ALTER DATABASE CLEAR LOGFILE GROUP 1;
+--非归档清空redo
+ALTER DATABASE CLEAR UNARCHIVED LOGFILE GROUP 3;
 ```
 
 ### 2.12.3 查看REDO切换频率
@@ -1688,7 +1703,7 @@ SELECT PROCESS,STATUS,THREAD#,SEQUENCE#,BLOCK#,BLOCKS,DELAY_MINS FROM V$MANAGED_
 
 ### 2.36.1 切换归档日志
 
-```
+```plsql
 ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
 ALTER DATABASE OPEN READ ONLY;
 RECOVER MANAGED STANDBY DATABASE DISCONNECT USING CURRENT LOGFILE;
@@ -1696,6 +1711,9 @@ ALTER SYSTEM SWITCH LOGFILE;
 ALTER SYSTEM ARCHIVE LOG CURRENT;
 
 archive log all；
+
+---Flush any unsent redo from the primary database to the target standby database.
+SQL> ALTER SYSTEM FLUSH REDO TO target_db_name;
 ```
 ### 2.36.2 应用归档
 

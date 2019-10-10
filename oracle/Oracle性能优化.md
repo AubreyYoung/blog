@@ -183,7 +183,7 @@ and t.xidusn = r.usn (+)
 and r.usn = n.usn (+)
 and s.username is not null
 and s.sql_address=y.address
-and sql_text like '%IND_TOH_19666_4%'
+and sql_text like '%IND_TOH_39251_1%'
 ```
 
 ###  2.3 查询SQL以及session
@@ -339,7 +339,7 @@ where ash.SAMPLE_TIME between sysdate - 60 / 2880 and sysdate
   and ash.SQL_ID = s.SQL_ID
   and ash.USER_ID = u.user_id
 group by ash.USER_ID, s.SQL_TEXT, u.username
-order by ttl_wait_time desc
+order by ttl_wait_time desc;
 
 
 -- 查询数据库过去15分钟最重要的等待事件
