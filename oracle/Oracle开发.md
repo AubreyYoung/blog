@@ -67,6 +67,9 @@ update table table_name set XX=XX where  ...
 //删除
 DELETE EMP4;
 DELETE * FROM EMP5;
+
+ALTER TABLE <tablename> STORAGE (BUFFER POOL KEEP);
+ALTER INDEX <indexname> STORAGE (BUFFER_POOL KEEP);
 ```
 #### 约束在表中的作用
 

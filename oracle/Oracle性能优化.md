@@ -98,7 +98,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
 ### 1.5 查看ASH信息
 
-```
+```plsql
 select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
        from v$active_session_history ash, v$event_name enm 
        where ash.event#=enm.event# 
@@ -107,6 +107,41 @@ select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLO
 -- Input is:
 -- Enter value for sid: 15 
 -- Enter value for minute: 1  /* How many minutes activity you want to see */
+
+
+-- ASH
+-- Most Active SQL in the Previous Hour	desc gv$active_session_history
+
+SELECT sql_id,COUNT(*),ROUND(COUNT(*)/SUM(COUNT(*)) OVER(), 2) PCTLOAD
+FROM gv$active_session_history ash
+WHERE ash.sample_time > SYSDATE - 1/24
+AND ash.session_type = 'BACKGROUND'
+GROUP BY ash.sql_id
+ORDER BY COUNT(*) DESC;
+
+SELECT ash.sql_id,COUNT(*),ROUND(COUNT(*)/SUM(COUNT(*)) OVER(), 2) PCTLOAD
+FROM gv$active_session_history ash
+WHERE ash.sample_time > SYSDATE - 1/24
+AND ash.session_type = 'FOREGROUND'
+GROUP BY ash.sql_id
+ORDER BY COUNT(*) DESC;
+-- Most Active I/O	
+SELECT DISTINCT wait_class
+FROM gv$event_name
+ORDER BY 1;
+
+SELECT sql_id, COUNT(*)
+FROM gv$active_session_history ash, v$event_name evt
+WHERE ash.sample_time > SYSDATE - 3/24
+AND ash.session_state = 'WAITING'
+AND ash.event_id = evt.event_id
+AND evt.wait_class = 'System I/O'
+GROUP BY sql_id
+ORDER BY COUNT(*) DESC;
+
+-- modify the above query, if necessary, until the condition yields a SQL_ID
+set linesize 121
+SELECT * FROM TABLE(dbms_xplan.display_cursor('424h0nf7bhqzd'));
 ```
 
 ## 2. 会话相关
@@ -183,10 +218,33 @@ and t.xidusn = r.usn (+)
 and r.usn = n.usn (+)
 and s.username is not null
 and s.sql_address=y.address
-and sql_text like '%IND_TOH_39251_1%'
+and y.sql_text like '%IND_TOH_39251_1%'
 ```
 
 ###  2.3 查询SQL以及session
+
+```plsql
+-- 查询执行最慢的sql
+
+select *
+ from (select sa.SQL_TEXT,
+        sa.SQL_FULLTEXT,
+        sa.EXECUTIONS "执行次数",
+        round(sa.ELAPSED_TIME / 1000000, 2) "总执行时间",
+        round(sa.ELAPSED_TIME / 1000000 / sa.EXECUTIONS, 2) "平均执行时间",
+        sa.COMMAND_TYPE,
+        sa.PARSING_USER_ID "用户ID",
+        u.username "用户名",
+        sa.HASH_VALUE
+     from v$sqlarea sa
+     left join all_users u
+      on sa.PARSING_USER_ID = u.user_id
+     where sa.EXECUTIONS > 0
+     order by (sa.ELAPSED_TIME / sa.EXECUTIONS) desc)
+ where rownum <= 50;
+```
+
+
 
 ```
 select
@@ -319,7 +377,61 @@ call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
 ```
-### 3.2 等待事件
+### 3.2 查看等待事件
+
+```plsql
+--查询等待的会话ID ， 阻塞的等待时间类型、事件ID 、 SQLID 等等信息
+
+select *
+  from v$active_session_history h
+where sample_time > trunc(sysdate)
+  and session_state = 'WAITING'
+  and exists(
+        select 1 from v$sql s 
+          where upper(s.sql_text) like '%T_USER%'
+            and s.sql_id = h.sql_id     
+  )
+  order by sample_time desc;
+
+--会话阻塞的事件查询
+
+select * from v$session_wait where sid = 148;
+
+--会话发生过的所有等待事件查询
+
+select s.time_waited/1000,s.* from v$session_event s where sid = 148;
+
+--被锁了之后，查看持有该锁的会话查询
+
+select a.sid blocker_sid,
+       a.serial#, 
+       a.username as blocker_username,
+       b.type,
+       decode(b.lmode,0,'None',1,'Null',2,'Row share',3,'Row Exclusive',4,'Share',5,'Share Row Exclusive',6,'Exclusive') lock_mode,
+       b.ctime as time_held,
+       c.sid as waiter_sid,
+       decode(c.request,0,'None',1,'Null',2,'Row share',3,'Row Exclusive',4,'Share',5,'Share Row Exclusive',6,'Exclusive') request_mode,
+       c.ctime time_waited  
+from   v$lock b, v$enqueue_lock c, v$session a  
+where  a.sid = b.sid  
+  and  b.id1= c.id1(+)
+  and  b.id2 = c.id2(+)
+  and  c.type(+) = 'TX'
+  and  b.type = 'TX' 
+  and  b.block   = 1
+  and  c.sid = 148
+order by time_held, time_waited;
+
+--查询持有锁的会话执行了的SQL
+
+select s.sql_text,h.* from v$active_session_history h,v$sql s
+ where h.sql_id = s.sql_id
+   and h.session_id = 150;
+```
+
+
+
+### 3.3 等待时间
 
 ```plsql
 -- 查询数据库等待时间和实际执行时间的相对百分比
@@ -404,11 +516,33 @@ WHERE EVENT LIKE 'db file%read'
 　　and s.ROW_WAIT_OBJ# = d.object_id
 ```
 
+### 3.4 等待事件相关视图
+```plsql
+几个视图的总结
 
+V$SESSION 代表数据库活动的开始，视为源起。
 
-## 4. **查询每个客户端连接每个实例的连接数**
+V$SESSION_WAIT 视图用以实时记录活动SESSION的等待情况，是当前信息。
 
+V$SESSION_WAIT_HISTORY 是对V$SESSION_WAIT的简单增强，记录活动SESSION的最近10次等待。
+
+V$ACTIVE_SESSION_HISTORY 是ASH的核心，用以记录活动SESSION的历史等待信息，每秒采样一次，这部分内容记录在内存中，期望值是记录一个小时的内容。
+
+WRH#_ACTIVE_SESSION_HISTORY 是V$ACTIVE_SESSION_HISTORY在AWR的存储地。
+
+V$ACTIVE_SESSION_HISTORY中的信息会被定期(每小时一次)的刷新到负载库中，并缺省保留一个星期用于分析。
+
+DBA_HIST_ACTIVE_SESS_HISTORY视图是WRH#_ACTIVE_SESSION_HISTORY视图和其他几个视图的联合展现，通常通过这个视图进行历史数据的访问。
+
+V$SYSTEM_EVENT 由于V$SESSION记录的是动态信息，和SESSION的生命周期相关，而并不记录历史信息，所以ORACLE提供视图V$SYSTEM_EVENT来记录数据库自启动以来所有等待事件的汇总信息。通过这个视图，用户可以迅速获得数据库运行的总体概况。
+
+V$SQLTEXT 当数据库出现瓶颈时，通常可以从V$SESSION_WAIT找到那些正在等待资源的SESSION，通过SESSION的SID，联合V$SESSION和V$SQLTEXT视图就可以捕获这些SESSION正在执行的SQL语句。
 ```
+
+## 4.  连接数/连接客户端
+
+```plsql
+-- 查询每个客户端连接每个实例的连接数
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
