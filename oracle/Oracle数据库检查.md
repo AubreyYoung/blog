@@ -1419,9 +1419,73 @@ end;
 
 ## 2.20 数据库当前的等待事件
 
-```
+### 2.20.1 数据库等待事件
+
+```plsql
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
+
+
+-- "查询结果中，15分钟内“EVENT”列中不包含以下等待事件：
+ read by other session、buffer busy waits
+ control file parallel write
+ enqueue
+ latch free
+ log file sync
+ log file switch（checkpoint incomplete）
+ log file switch（archiving needed）
+ global cache busy、gc current block busy、gc cr block busy
+ log buffer space
+ log file parallel write
+ cursor: mutex S
+ cursor: mutex X
+ cursor: pin S
+ cursor: pin S wait on X
+ cursor: pin X
+ DFS lock handle
+ library cache lock
+ library cache pin
+ row cache lock
+如果15分钟内“EVENT”列包括以上等待事件，但等待次数小于或等于30次，则检查通过。例如，15分钟内“log file sync”总共等待16次。
+"
+
+select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
+
+### 5.20.2 检查锁与library闩锁等待
+
+```plsql
+1. 查询锁等待。
+   SQL> select 'session ' || c.locker || ' lock ' || c.locked ||
+    ', alter system kill session ' || '''' || c.locker || ',' ||
+    d.serial# || '''' || ', OS:kill -9 ' || e.spid as "result"
+    from (select a.sid locked, b.sid locker
+    from v$lock a, v$lock b
+    where a.request > 0
+    and a.id1 = b.id1
+    and a.id2 = b.ID2
+    and a.type = b.type
+    and a.addr <> b.addr) c,
+    v$session d,
+    v$process e
+   where c.locker = d.sid
+    and d.paddr = e.addr;
+   如果返回结果为空，则表示系统无锁等待事件。
+2. 查询library闩锁等待。
+   SQL> select 'session ' || d.locker || ' lock ' || d.locked ||
+    ', alter system kill session ' || '''' || d.locker || ',' ||
+    d.serial# || '''' || ', OS:kill -9 ' || d.os as "result"
+    from (select distinct s.sid locker, s.serial#, p.spid os, w.sid locked
+    from dba_kgllock k, v$session s, v$session_wait w, v$process p
+    where w.event like 'library cache%'
+    and k.kgllkhdl = w.p1raw
+    and k.kgllkuse = s.saddr
+    and s.sid <> w.sid
+    and s.paddr = p.addr) d
+   order by d.locker;
+   如果返回结果为空，则表示系统无library闩锁等待事件
+```
+
+
 
 ## 5.21 客户端连接分布
 
