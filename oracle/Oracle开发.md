@@ -2,9 +2,9 @@ Oracle开发
 
 # 一、SQL基础
 
-## 1.1 用户与表空间
+## 1. 用户与表空间
 
-### 用户
+### 1.1 用户
 
 ```plsql
 show user
@@ -17,7 +17,7 @@ alter user username  default temporary tablespace tablesapce_name;
 //删除user
 drop user ×× cascade
 ```
-### 表空间
+### 1.2 表空间
 
 ```plsql
 create tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
@@ -38,9 +38,9 @@ drop tablesapce tablesapce_name including contents;
 //如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
 drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;
 ```
-## 1.2 表与约束
+## 2. 表与约束
 
-#### 表
+### 2.1 表
 
 ```plsql
 alter table tablename add column_nmae datatype;
@@ -71,7 +71,7 @@ DELETE * FROM EMP5;
 ALTER TABLE <tablename> STORAGE (BUFFER POOL KEEP);
 ALTER INDEX <indexname> STORAGE (BUFFER_POOL KEEP);
 ```
-#### 约束在表中的作用
+### 2.2 约束在表中的作用
 
 ```plsql
 create table tablename(
@@ -127,9 +127,13 @@ VALUES
 ORA-01402: view WITH CHECK OPTION where-clause violation
 ```
 
-## 1.3 查询语句
+## 3 查询
 
-查询的作用,强大的select
+
+
+
+
+### 3.1 简单查询
 
 ```plsql
 select  distinct .. from tablename where ...;
@@ -208,7 +212,7 @@ GREATEST(1,NULL)
 ----------------
 ````
 
-### **NULL转换为0**
+### 3.2 NULL转换为0
 
 ```plsql
 SQL> select coalesce(comm,0) from emp;
@@ -261,7 +265,7 @@ NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
 3
 ```
 
-### **过滤条件加括号,便于查看**
+### 3.3 过滤条件加括号,便于查看
 
 ```plsql
 select *
@@ -271,14 +275,14 @@ select *
     or (DEPTNO = 20 and sal <= 2000));
 ```
 
-### **别名作为where条件**
+### 3.4 别名作为where条件
 
 ```plsql
 select  * from (select ename as 姓名,sal as 薪水,comm as 提成 from emp) x 
 where 薪水 > 3000;
 ```
 
-### **拼接字符**
+### 3.5 拼接字符
 
 ```plsql
 select 'truncate table '||owner||'.'||table_name||';' as 清空表 from all_tables where owner ='SCOTT';
@@ -289,7 +293,7 @@ select 'select table_name from all_tables where owner =''SCOTT'';' from dual;
 3.单引号一定成对出现,否者这个字符串出错,因为字符串不知道哪个单引号负责结束
 ```
 
-### **select条件逻辑**
+### 3.6 select条件逻辑
 
 ```plsql
 select ename as 姓名,
@@ -371,13 +375,13 @@ SQL> SELECT 档次, COUNT(*)
 4000-5000            1
 ```
 
-### **取第二行数据**
+### 3.7 取第二行数据
 
 ```plsql
 SELECT * FROM (SELECT ROWNUM AS SN, EMP.* FROM EMP) WHERE SN = 2;
 ```
 
-### **随机读取数据**
+### 3.8 随机读取数据
 
 ```plsql
 SQL> SELECT empno,ename FROM (SELECT empno,ename FROM emp ORDER BY dbms_random.value()) WHERE ROWNUM <= 3;
@@ -388,7 +392,7 @@ EMPNO ENAME
  7934 MILLER
  7654 MARTIN
 ```
-### **转义字符**
+### 3.9 转义字符
 
 ```plsql
 CREATE OR REPLACE VIEW v2 AS
@@ -407,7 +411,7 @@ SELECT * FROM v2 WHERE vname LIKE '_BCD%';
 SELECT * FROM v2 WHERE vname LIKE '\_BCD%' ESCAPE '\';
 SELECT * FROM v2 WHERE vname LIKE '_\\BCD%' ESCAPE '\';
 ```
-### **排序**
+### 3.10 排序
 
 ```plsql
 SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
@@ -423,7 +427,7 @@ SELECT LAST_NAME AS 名称,
  ORDER BY 4;
 ```
 
-### **TRANSLATE**
+### 3.11 TRANSLATE
 
 ```plsql
 SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
@@ -448,7 +452,7 @@ NEW_STR
 -------
 您好
 ```
-### **部分字段排序**
+### 3.12 部分字段排序
 
 ```plsql
 CREATE OR REPLACE VIEW V3 AS SELECT EMPNO || ' ' ||ename AS DATA FROM emp;
@@ -478,14 +482,14 @@ DATA                                                ENAME
 14 rows selected
 ```
 
-### **处理排序空值**
+### 3.13 处理排序空值
 
 ```plsql
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS FIRST;
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS LAST;
 ```
 
-### **部分值排序**
+### 3.14 部分值排序
 
 ```plsql
 SELECT EMPNO AS 编码,
@@ -514,7 +518,7 @@ SELECT EMPNO AS 编码,
        END,3;
 ```
 
-### **UNION ALL 和空值**
+### 3.15 UNION ALL 和空值
 
 ```plsql
 SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
@@ -536,7 +540,7 @@ C1
 --
 ```
 
-### **UNION 与 OR**
+### 3.16 UNION 与 OR
 
 ```plsql
 SQL> SELECT empno,ename FROM emp WHERE empno = 7788 OR ename = 'SCOTT';
@@ -605,7 +609,7 @@ Predicate Information (identified by operation id):
 
 20 rows selected.
 ```
-### **inner join**
+### 3.17  INNER JOIN
 
 ```plsql
 SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
@@ -653,7 +657,7 @@ Note
 20 rows selected
 ```
 
-###  **IN**
+###  3.18 IN
 
 ```plsql
 SQL> EXPLAIN PLAN FOR
@@ -688,7 +692,7 @@ Predicate Information (identified by operation id):
 19 rows selected
 ```
 
-### **exists**
+### 3.19 EXISTS
 
 ```plsql
 SQL> EXPLAIN PLAN FOR
@@ -727,7 +731,7 @@ Predicate Information (identified by operation id):
 19 rows selected
 ```
 
-### **表连接**
+### 3.20 表连接
 
 ```plsql
 DROP TABLE L PURGE;
@@ -811,7 +815,7 @@ SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
 select index_name,column_name,index_type,uniqueness from user_indexes natural join user_ind_columns where table_name='CUSTOMERS';
 ```
 
-### **自关联**
+### 3.21 自关联
 
 ```plsql
 /*自关联*/
@@ -840,7 +844,7 @@ SELECT 员工.EMPNO AS 职工编码,
  ORDER BY 1;
 ```
 
-### **NOT IN,NOT EXISTS 和LEFT JOIN**
+### 3.22 NOT IN,NOT EXISTS ,LEFT JOIN
 
 ```PLSQL
 /*NOT IN*/
@@ -940,7 +944,7 @@ Predicate Information (identified by operation id):
 20 rows selected
 ```
 
-### **GROUP BY不显示0行**
+### 3.23 GROUP BY不显示0行
 
 ```plsql
 SQL> SELECT COUNT(*) FROM EMP GROUP BY DEPTNO;
@@ -958,7 +962,7 @@ SQL> SELECT COUNT(*) FROM EMP WHERE DEPTNO = 40;
          0
 ```
 
-### **LEFT JOIN的条件**
+### 3.24 LEFT JOIN的条件
 
 ```plsql
 SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
@@ -1099,7 +1103,7 @@ Predicate Information (identified by operation id):
 * 4 - filter("R"."STATUS"(+)=1 AND "STATUS"(+)=1)
 ```
 
-### **比对表数据**
+### 3.25 比对表数据
 
 ```plsql
 CREATE OR REPLACE VIEW V4 AS
@@ -1145,7 +1149,7 @@ EMPNO ENAME             CNT EMPNO ENAME             CNT
  7788 SCOTT               2                  
 ```
 
-### **聚集与内连接**
+### 3.26 聚集与内连接
 
 ```plsql
 SQL> SELECT E.DEPTNO,
@@ -1172,7 +1176,7 @@ DEPTNO  TOTAL_SAL TOLTAL_BONUS
     10       6300         1890
 ```
 
-### **聚集与外连接**
+### 3.27 聚集与外连接
 
 ```plsql
 SQL> SELECT E.DEPTNO,
@@ -1200,7 +1204,7 @@ DEPTNO  TOTAL_SAL TOLTAL_BONUS
     10       8750         1890
 ```
 
-### **空值连接**
+### 3.28 空值连接
 
 ```plsql
 SQL> SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
@@ -1240,7 +1244,7 @@ SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
     ON DEPT.DEPTNO = EMP.DEPTNO;
 ```
 
-### **空值转换**
+### 3.29 空值转换
 
 ```plsql
 SQL> SELECT A.ENAME, A.COMM
@@ -1275,9 +1279,9 @@ SQL> SELECT COUNT(*)
          1
 ```
 
-## 1.4  插入、更新与删除
+## 4 插入、更新与删除
 
-### **插入**
+### 4.1 插入
 
 ```plsql
  CREATE TABLE test1 (
@@ -1308,7 +1312,7 @@ INSERT INTO v_test1(c1,c2,c3) VALUES(DEFAULT,NULL,'不能改c4')
 ORA-32575: Explicit column default is not supported for modifying views
 ```
 
-### **复制数据**
+### 4.2 复制数据
 
 ```plsql
 CREATE TABLE test2 AS SELECT * FROM test1;
@@ -1328,7 +1332,7 @@ INSERT INTO test2 SELECT * FROM test1;
 
 [^注]:复制的表不包含默认值等约束信息,使用这种方式复制表后,需重建默认值及索引和约束.
 
-### **无条件INSTER INTO**
+### 4.3 无条件INSTER INTO
 
 ```plsql
 CREATE TABLE EMP4 AS
@@ -1347,7 +1351,7 @@ VALUES
   SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP WHERE DEPTNO IN (10, 20);
 ```
 
-### **有条件INSTER INTO**
+### 4.4 有条件INSTER INTO
 
 ```plsql
 INSERT ALL WHEN JOB IN
@@ -1362,7 +1366,7 @@ VALUES
   SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP;
 ```
 
-### **INSTER FIRST**
+### 4.5 INSTER FIRST
 
 ```PLSQL
 /*INSERT FIRST*/
@@ -1380,7 +1384,7 @@ VALUES
   SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP;
 ```
 
-### **转置INSTER**
+### 4.6 转置INSTER
 
 ```plsql
 /*转置 INSERT*/
@@ -1434,7 +1438,7 @@ SELECT '周四',d4 FROM test3 UNION ALL
 SELECT '周五',d5 FROM test3;
 ```
 
-### 批量更新
+### 4.7 批量更新
 
 ```plsql
 ALTER TABLE EMP ADD DNAME VARCHAR2(50) DEFAULT 'noname';
@@ -1490,18 +1494,18 @@ SELECT EMPNO, ENAME, DEPTNO, DNAME FROM EMP;
 
 
 
-## 二、SQL函数
+# 二、函数
 
-### 2.1 函数的作用
+## 1. 函数的作用
 
 - 方便数据的统计 
 - 处理查询结果
 
-### 2.2 函数的分类
+## 2. 函数的分类
 
-- 数值函数
+### 2.1 数值函数
 
-### **四舍五入round(n[,m])**
+**四舍五入round(n[,m])**
 
 省略m:0;m>0:小数点后m位;m>0:小数点前m位
 
@@ -1513,7 +1517,7 @@ ROUND(23.4) ROUND(23.4,1) ROUND(23.4,-1)
          23          23.4             20
 ```
 
-### 	**取整函数**
+**取整函数**
 
 ceil(n),floor(n)
 
@@ -1525,7 +1529,7 @@ CEIL(23.45) FLOOR(23.45)
          24           23
 ```
 
-### 常用计算
+**常用计算**
 
 abs(n),mod(n,m),power(n,m),sqrt(16)
 
@@ -1554,27 +1558,27 @@ SQL> select sqrt(16) from dual;
          4
 ```
 
-### 三角函数
+**三角函数**
 
 sin(n)、asin(n)、cos(n)、acos(n)、tan(n)、atan(n)
 
-### 字符函数
+### 2.2 字符函数
 
-upper(char),lower(char), initcap(char)  ----首字母大写
+**upper(char),lower(char), initcap(char)  ----首字母大写**
 
-substr(char,n[m])
+**substr(char,n[m])**
 
-length(char)
+**length(char)**
 
-concat(char1,char2):与||操作符作用一样,字符串拼接
+**concat(char1,char2):与||操作符作用一样,字符串拼接**
 
-trim(c2 from c1)  去除字符两边的一个字符,trim(char) 去除字符两边的所有空格
+**trim(c2 from c1)  去除字符两边的一个字符,trim(char) 去除字符两边的所有空格**
 
-ltrim(c2 from c1)
+**ltrim(c2 from c1)**
 
-rtrim(c2 from c1)
+**rtrim(c2 from c1)**
 
-replace(char,s_string[,r_string])
+**replace(char,s_string[,r_string])**
 
 ```
 SQL> select substr('oracle',4),substr('oracle',0,4),substr('oracle',-5,4) from dual;
@@ -1614,26 +1618,26 @@ REPLACE('ORACLE','AC','R')
 orRle
 ```
 
-### 日期函数
+### 2.3 日期函数
 
-系统时间sysdate
+**系统时间sysdate**
 
 ```
 alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.ff';
 select sysdate from dual
 ```
 
-​	日期操作
+​	**日期操作**
 
-​	add_months(date,i)
+​	**add_months(date,i)**
 
-​	next_day(date,char)
+​	**next_day(date,char)**
 
-​	last_day(date) 返回该月的最后一天
+​	**last_day(date) 返回该月的最后一天**
 
-​	month_between(date1,date2)
+​	**month_between(date1,date2)**
 
-​	extract(date from datetime)
+​	**extract(date from datetime)**
 
 ```
 SQL> select add_months(sysdate,1),add_months(sysdate,-1) from dual;
@@ -1655,9 +1659,9 @@ EXTRACT(YEARFROMSYSDATE)
                     2019
 ```
 
-### 转换函数
+### 2.4 转换函数
 
-日期转字符to_char(date[,fmt[,params])
+**日期转字符to_char(date[,fmt[,params])**
 
 ```
 SQL> select to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') from dual;
@@ -1677,19 +1681,19 @@ TO_DATE('2019-09-10','YYYY-MM-DDHH24:MI:SS')
 2019/9/10
 ```
 
-数字转字符to_char(number,fmt[,params])
+**数字转字符to_char(number,fmt[,params])**
 
-​		9:显示数字并忽略前面的0
+​		**9:显示数字并忽略前面的0**
 
-​		0:显示数字,位数不足,用0补齐
+​		**0:显示数字,位数不足,用0补齐**
 
-​		.或D:显示小数点
+​		**.或D:显示小数点**
 
-​		,或G:显示千位符
+​		**,或G:显示千位符**
 
-​		$:美元符号
+​		**$:美元符号**
 
-​		S:加正负号(前后都可以)
+​		**S:加正负号(前后都可以)**
 
 ```
 SQL> select to_char(122232.324,'$99,999,999.99') from dual;
@@ -1706,7 +1710,7 @@ TO_CHAR(122232.324,'S99,999,999.99')
 
 ```
 
-字符转数字to_number(char[,fmt])
+**字符转数字to_number(char[,fmt])**
 
 ```
 SQL> select to_number('$122,322.233','$999,999.999') from dual;
@@ -1716,7 +1720,11 @@ TO_NUMBER('$122,322.233','$999,999.999')
                               122322.233
 ```
 
-## 三、Oracle触发器
+# 三、PL/SQL
+
+
+
+# 四、Oracle触发器
 
 ### 3.1 什么是触发器
 
@@ -1768,3 +1776,4 @@ PLSQL块
 
 ```
 
+# 

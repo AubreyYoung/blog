@@ -370,14 +370,85 @@ select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, inv
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 
+### 2.8  等待事件的历史会话信息
+
+```plsql
+select user_id,sql_id,count(*) from  dba_hist_active_sess_history a
+where sample_time > to_date('2019-10-29 08:00:00','yyyy-mm-dd hh24:mi:ss')
+and sample_time < to_date('2019-10-29 09:00:00','yyyy-mm-dd hh24:mi:ss')
+and a.instance_number =1 and a.event ='latch: cache buffers chains'
+group by user_id,sql_id
+order by 3;
+```
+
 ##  3.等待事件
 
 ###  3.1  数据库当前的等待事件
 
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
+
+-- "查询结果中，15分钟内“EVENT”列中不包含以下等待事件：
+ read by other session、buffer busy waits
+ control file parallel write
+ enqueue
+ latch free
+ log file sync
+ log file switch（checkpoint incomplete）
+ log file switch（archiving needed）
+ global cache busy、gc current block busy、gc cr block busy
+ log buffer space
+ log file parallel write
+ cursor: mutex S
+ cursor: mutex X
+ cursor: pin S
+ cursor: pin S wait on X
+ cursor: pin X
+ DFS lock handle
+ library cache lock
+ library cache pin
+ row cache lock
+如果15分钟内“EVENT”列包括以上等待事件，但等待次数小于或等于30次，则检查通过。例如，15分钟内“log file sync”总共等待16次。
+"
+
+select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
-### 3.2 查看等待事件
+
+### 3.2 检查锁与library闩锁等待
+
+```plsql
+1. 查询锁等待。
+   SQL> select 'session ' || c.locker || ' lock ' || c.locked ||
+    ', alter system kill session ' || '''' || c.locker || ',' ||
+    d.serial# || '''' || ', OS:kill -9 ' || e.spid as "result"
+    from (select a.sid locked, b.sid locker
+    from v$lock a, v$lock b
+    where a.request > 0
+    and a.id1 = b.id1
+    and a.id2 = b.ID2
+    and a.type = b.type
+    and a.addr <> b.addr) c,
+    v$session d,
+    v$process e
+   where c.locker = d.sid
+    and d.paddr = e.addr;
+   如果返回结果为空，则表示系统无锁等待事件。
+2. 查询library闩锁等待。
+   SQL> select 'session ' || d.locker || ' lock ' || d.locked ||
+    ', alter system kill session ' || '''' || d.locker || ',' ||
+    d.serial# || '''' || ', OS:kill -9 ' || d.os as "result"
+    from (select distinct s.sid locker, s.serial#, p.spid os, w.sid locked
+    from dba_kgllock k, v$session s, v$session_wait w, v$process p
+    where w.event like 'library cache%'
+    and k.kgllkhdl = w.p1raw
+    and k.kgllkuse = s.saddr
+    and s.sid <> w.sid
+    and s.paddr = p.addr) d
+   order by d.locker;
+   如果返回结果为空，则表示系统无library闩锁等待事件
+```
+
+### 3.3 查看会话等待事件
 
 ```plsql
 --查询等待的会话ID ， 阻塞的等待时间类型、事件ID 、 SQLID 等等信息
@@ -429,9 +500,7 @@ select s.sql_text,h.* from v$active_session_history h,v$sql s
    and h.session_id = 150;
 ```
 
-
-
-### 3.3 等待时间
+### 3.3 等待时间统计
 
 ```plsql
 -- 查询数据库等待时间和实际执行时间的相对百分比
@@ -539,6 +608,69 @@ V$SYSTEM_EVENT 由于V$SESSION记录的是动态信息，和SESSION的生命周�
 V$SQLTEXT 当数据库出现瓶颈时，通常可以从V$SESSION_WAIT找到那些正在等待资源的SESSION，通过SESSION的SID，联合V$SESSION和V$SQLTEXT视图就可以捕获这些SESSION正在执行的SQL语句。
 ```
 
+## 4. SQL统计报告
+
+### 4.1 SQL ordered by Elapsed Time
+
+```plsql
+define DBID=1478953437
+define beg_snap=1677
+define end_snap=1679
+define INST_NUM=1
+select *
+  from (select nvl((sqt.elap / 1000000), to_number(null)),
+               nvl((sqt.cput / 1000000), to_number(null)),
+               sqt.exec,
+               decode(sqt.exec,
+                      0,
+                      to_number(null),
+                      (sqt.elap / sqt.exec / 1000000)),
+               (100 *
+               (sqt.elap / (SELECT sum(e.VALUE) - sum(b.value)
+                               FROM DBA_HIST_SYSSTAT b, DBA_HIST_SYSSTAT e
+                              WHERE B.SNAP_ID = &beg_snap
+                                AND E.SNAP_ID = &end_snap
+                                AND B.DBID = &DBID
+                                AND E.DBID = &DBID
+                                AND B.INSTANCE_NUMBER = &INST_NUM
+                                AND E.INSTANCE_NUMBER = &INST_NUM
+                                and e.STAT_NAME = 'DB time'
+                                and b.stat_name = 'DB time'))) norm_val,
+               sqt.sql_id,
+               to_clob(decode(sqt.module,
+                              null,
+                              null,
+                              'Module: ' || sqt.module)),
+               nvl(st.sql_text, to_clob(' ** SQL Text Not Available ** '))
+          from (select sql_id,
+                       max(module) module,
+                       sum(elapsed_time_delta) elap,
+                       sum(cpu_time_delta) cput,
+                       sum(executions_delta) exec
+                  from dba_hist_sqlstat
+                 where dbid = &dbid
+                   and instance_number = &inst_num
+                   and &beg_snap < snap_id
+                   and snap_id <= &end_snap
+                 group by sql_id) sqt,
+               dba_hist_sqltext st
+         where st.sql_id(+) = sqt.sql_id
+           and st.dbid(+) = &dbid
+         order by nvl(sqt.elap, -1) desc, sqt.sql_id)
+ where rownum < 65
+   and (rownum <=10 or norm_val > 1);
+```
+
+
+
+
+
+
+
+
+
+
+
 ## 4.  连接数/连接客户端
 
 ```plsql
@@ -547,8 +679,6 @@ select inst_id,machine ,count(*) from gv$session group by machine,inst_id order 
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
 ```
-
-
 
 ## 5. oradebug
 

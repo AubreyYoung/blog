@@ -1485,7 +1485,26 @@ select * from (select a.event, count(*) from v$active_session_history a  where a
    如果返回结果为空，则表示系统无library闩锁等待事件
 ```
 
+### 5.20.3 等待事件信息
 
+```plsql
+select * from v$event_name B where b.name ='latch: cache buffers chains';
+
+--引起等待事件的会话
+select user_id,sql_id,count(*) from  sys.wrh$_active_session_history a
+where sample_time > to_date('2019-10-29 08:00:00','yyyy-mm-dd hh24:mi:ss')
+and sample_time < to_date('2019-10-29 09:00:00','yyyy-mm-dd hh24:mi:ss')
+and a.instance_number =1 and a.event_id=2779959231
+group by user_id,sql_id
+order by 3;
+
+select sql_id,p1,count(*) from  sys.wrh$_active_session_history 
+where sample_time > to_date('2019-10-29 08:00:00','yyyy-mm-dd hh24:mi:ss')
+and sample_time < to_date('2019-10-29 09:00:00','yyyy-mm-dd hh24:mi:ss')
+and instance_number =1 and event_id=2779959231
+group by sql_id,p1
+order by 3 desc;
+```
 
 ## 5.21 客户端连接分布
 
@@ -2543,6 +2562,10 @@ DBMS_STATS.DELETE_INDEX_STATS (
    force            BOOLEAN DEFAULT FALSE);
    
 exec DBMS_STATS.DELETE_INDEX_STATS(ownname=>'PM4H_AD', indname=>'MO_MOENTITY_IDX11')
+
+--11g统计信息收集新特性：扩展统计信息收集
+
+exec DBMS_STATS.GATHER_TABLE_STATS(ownname=>‘xxx',tabname=>‘DEALREC_ERR_201608',method_opt=>'for columns (substr(other_class, 1, 3)) size skewonly',estimate_percent=>10,no_invalidate=>false,cascade=>true,degree => 10);
 ```
 
 
