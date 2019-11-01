@@ -1,8 +1,6 @@
-# Oracle性能优化
+# 1. AWR、ASH
 
-## 1. AWR、ASH
-
-### 1.1 生成AWR、ASH、ADDM
+## 1.1 生成AWR、ASH、ADDM
 
 **脚本目录  $ORACLE_HOME/rdbms/admin**
 
@@ -11,7 +9,7 @@
 @?/rdbms/admin/awrrpt.sql
 @?/rdbms/admin/ashrpt.sql
 ```
-### 1.2 快照设置
+## 1.2 快照设置
 ```
 -- 修改快照时间间隔
 EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
@@ -63,7 +61,7 @@ BEGIN
 END;
 /
 ```
-### 1.3 其他AWR脚本
+## 1.3 其他AWR脚本
 ```
 awrrpt.sql 
 展示一段时间范围两个快照之间的数据库性能指标。
@@ -79,7 +77,7 @@ awrddrpi.sql
 用于在特定的数据库和特定实例上，比较两个指定的时间段之间的数据库详细性能指标和配置情况。
 ```
 
-### 1.4 AWR 相关的视图
+## 1.4 AWR 相关的视图
 
 如下系统视图与 AWR 相关：
 
@@ -96,7 +94,7 @@ DBA_HIST_SNAPSHOT - 展示 AWR 快照信息。
 DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
 DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
-### 1.5 查看ASH信息
+## 1.5 查看ASH信息
 
 ```plsql
 select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
@@ -144,9 +142,9 @@ set linesize 121
 SELECT * FROM TABLE(dbms_xplan.display_cursor('424h0nf7bhqzd'));
 ```
 
-## 2. 会话相关
+# 2. 会话相关
 
-### 2.1 查看查询SID、SPID
+## 2.1 查看查询SID、SPID
 
 ```
 -- 方法一：
@@ -200,7 +198,7 @@ SELECT /* XJ LEADING(S) FIRST_ROWS */
    AND S.STATUS = 'ACTIVE'
    AND P.BACKGROUND IS NULL;
 ```
-### 2.2 表相关SQL、SID、SPID
+## 2.2 表相关SQL、SID、SPID
 
 ```plsql
 --- 单实例
@@ -221,7 +219,7 @@ and s.sql_address=y.address
 and y.sql_text like '%IND_TOH_39251_1%'
 ```
 
-###  2.3 查询SQL以及session
+##  2.3 查询SQL以及session
 
 ```plsql
 -- 查询执行最慢的sql
@@ -287,7 +285,7 @@ select inst_id,sid,serial#,status,sql_id,sql_exec_start,module,blocking_session 
 select inst_id,sid,sql_id,event,module,machine,blocking_session  from gv$session where module ='PL/SQL Developer';
 ```
 
-### 2.4 查杀会话
+## 2.4 查杀会话
 
 ```
 SELECT 'Lock' "Status",
@@ -313,7 +311,7 @@ AND f.database_status = 'ACTIVE'
 order by b.ctime;
 ```
 
-### 2.5 根据SID查询SQL
+## 2.5 根据SID查询SQL
 
 ```plsql
 select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid;
@@ -326,34 +324,51 @@ SELECT 'ps -ef|grep ' || TO_CHAR(SPID) ||
    AND S.SQL_ID = '$2';
 ```
 
-### 2.6 内存占用大的会话
+## 2.6 会话资源占用
+sessions with highest CPU consumption
 
+```plsql
+SELECT s.sid, s.serial#, p.spid as "OS PID",s.username, s.module, st.value/100 as "CPU sec"
+FROM v$sesstat st, v$statname sn, v$session s, v$process p
+WHERE sn.name = 'CPU used by this session' -- CPU
+AND st.statistic# = sn.statistic#
+AND st.sid = s.sid
+AND s.paddr = p.addr
+AND s.last_call_et < 1800 -- active within last 1/2 hour
+AND s.logon_time > (SYSDATE - 240/1440) -- sessions logged on within 4 hours
+ORDER BY st.value;
 ```
-SELECT server "连接类型",s.MACHINE,s.username,s.osuser,sn.NAME,VALUE/1024/1024 "占用内存MB",s.SID "会话ID",
-      s.serial#,p.spid "操作系统进程ID",p.PGA_USED_MEM,p.PGA_ALLOC_MEM,p.PGA_FREEABLE_MEM, 
-      p.PGA_MAX_MEM 
-FROM v$session s, v$sesstat st, v$statname sn, v$process p 
-WHERE st.SID = s.SID AND st.statistic# = sn.statistic#  
-     AND p.addr = s.paddr
-ORDER BY VALUE DESC ;
+ sessions with the highest time for a certain wait
 
-SELECT s.inst_id,s.username,s.MACHINE,s.osuser,VALUE/1024/1024 "占用内存MB",s.SID "会话ID",
-      s.serial#,p.spid "操作系统进程ID",p.PGA_USED_MEM,p.PGA_FREEABLE_MEM, 
-      p.PGA_MAX_MEM 
-FROM gv$session s, v$sesstat st, v$statname sn, v$process p 
-WHERE st.SID = s.SID AND st.statistic# = sn.statistic# AND sn.NAME LIKE 'session pga memory' 
-     AND p.addr = s.paddr and rownum<20 and s.username is not null
-ORDER BY VALUE DESC ;
+```plsql
+SELECT s.sid, s.serial#, p.spid as "OS PID", s.username, s.module, se.time_waited
+FROM v$session_event se, v$session s, v$process p
+WHERE se.event = '&event_name' 
+AND s.last_call_et < 1800 -- active within last 1/2 hour
+AND s.logon_time > (SYSDATE - 240/1440) -- sessions logged on within 4 hours
+AND se.sid = s.sid
+AND s.paddr = p.addr
+ORDER BY se.time_waited;
+```
+sessions with highest DB Time usage (10g or higher)
 
-SELECT sum(VALUE/1024/1024) "占用内存MB" 
-FROM v$session s, v$sesstat st, v$statname sn, v$process p 
-WHERE st.SID = s.SID AND st.statistic# = sn.statistic# AND sn.NAME LIKE 'session pga memory' 
-     AND p.addr = s.paddr and s.username is not null;
-
-alter system kill session '1568,27761,@2' immediate; 
+```plsql
+SELECT s.sid, s.serial#, p.spid as "OS PID", s.username, s.module, st.value/100 as "DB Time (sec)"
+, stcpu.value/100 as "CPU Time (sec)", round(stcpu.value / st.value * 100,2) as "% CPU"
+FROM v$sesstat st, v$statname sn, v$session s, v$sesstat stcpu, v$statname sncpu, v$process p
+WHERE sn.name = 'DB time' -- CPU
+AND st.statistic# = sn.statistic#
+AND st.sid = s.sid
+AND  sncpu.name = 'CPU used by this session' -- CPU
+AND stcpu.statistic# = sncpu.statistic#
+AND stcpu.sid = st.sid
+AND s.paddr = p.addr
+AND s.last_call_et < 1800 -- active within last 1/2 hour
+AND s.logon_time > (SYSDATE - 240/1440) -- sessions logged on within 4 hours
+AND st.value > 0;
 ```
 
-### 2.7 查询SQL语句的SQL_ID
+## 2.7 查询SQL语句的SQL_ID
 
 ```
 SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
@@ -370,7 +385,282 @@ select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, inv
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 
-### 2.8  等待事件的历史会话信息
+# 3. Top SQL
+
+## 3.1 SQL ordered by Elapsed Time
+
+方法一: 来源AWR
+
+```plsql
+define DBID=1478953437
+define beg_snap=1677
+define end_snap=1679
+define INST_NUM=1
+select *
+  from (select nvl((sqt.elap / 1000000), to_number(null)),
+               nvl((sqt.cput / 1000000), to_number(null)),
+               sqt.exec,
+               decode(sqt.exec,
+                      0,
+                      to_number(null),
+                      (sqt.elap / sqt.exec / 1000000)),
+               (100 *
+               (sqt.elap / (SELECT sum(e.VALUE) - sum(b.value)
+                               FROM DBA_HIST_SYSSTAT b, DBA_HIST_SYSSTAT e
+                              WHERE B.SNAP_ID = &beg_snap
+                                AND E.SNAP_ID = &end_snap
+                                AND B.DBID = &DBID
+                                AND E.DBID = &DBID
+                                AND B.INSTANCE_NUMBER = &INST_NUM
+                                AND E.INSTANCE_NUMBER = &INST_NUM
+                                and e.STAT_NAME = 'DB time'
+                                and b.stat_name = 'DB time'))) norm_val,
+               sqt.sql_id,
+               to_clob(decode(sqt.module,
+                              null,
+                              null,
+                              'Module: ' || sqt.module)),
+               nvl(st.sql_text, to_clob(' ** SQL Text Not Available ** '))
+          from (select sql_id,
+                       max(module) module,
+                       sum(elapsed_time_delta) elap,
+                       sum(cpu_time_delta) cput,
+                       sum(executions_delta) exec
+                  from dba_hist_sqlstat
+                 where dbid = &dbid
+                   and instance_number = &inst_num
+                   and &beg_snap < snap_id
+                   and snap_id <= &end_snap
+                 group by sql_id) sqt,
+               dba_hist_sqltext st
+         where st.sql_id(+) = sqt.sql_id
+           and st.dbid(+) = &dbid
+         order by nvl(sqt.elap, -1) desc, sqt.sql_id)
+ where rownum < 65
+   and (rownum <=10 or norm_val > 1);
+```
+
+方法二:
+
+```plsql
+/*** SQL Script to get the top SQLs ordered by Elapsed time ***/
+
+set head on
+column module format a20
+set lines 200
+prompt SQL Ordered by Elapsed time
+
+select * from (
+select sql_id, module,
+sum(ELAPSED_TIME_DELTA)/1000000 "Elapsed Time(s)",
+sum(CPU_TIME_DELTA)/1000000 "CPU Time(s)",
+sum(executions_delta) "Executions",
+sum(ROWS_PROCESSED_DELTA) rows1,
+sum(BUFFER_GETS_DELTA) "Buffer Gets",
+sum(DISK_READS_DELTA) "Physical Reads",
+sum(iowait_delta)/1000000 "IO Wait",
+sum(ccwait_delta)/1000000 cc_wait,
+sum(apwait_delta)/1000000 ap_wait,
+sum(clwait_delta)/1000000 cl_wait,
+sum(BUFFER_GETS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA), 0, 1, sum(ROWS_PROCESSED_DELTA)) gets_per_row,
+sum(DISK_READS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA), 0, 1, sum(ROWS_PROCESSED_DELTA)) prds_per_row,
+sum(BUFFER_GETS_DELTA)/decode(sum(executions_delta), 0, 1, sum(executions_delta)) gets_per_exec
+from dba_hist_sqlstat
+where snap_id between &min_snap_id and &max_snap_id
+group by sql_id, module
+order by 3 desc
+) where rownum <= &rnum;
+```
+
+[NOTE]():
+Provide the BEGIN & END SNAP_ID and no.of top N SQLs to be displayed.
+The Same script can be modified to get the Top SQLs ordered by CPU Time, Buffer gets etc.
+
+## 3.2 Top 10 by Buffer Gets
+
+```plsql
+set linesize 100
+set pagesize 100
+SELECT * FROM
+(SELECT substr(sql_text,1,40) sql,
+        buffer_gets, executions, buffer_gets/executions "Gets/Exec",
+        hash_value,address
+   FROM V$SQLAREA
+  WHERE buffer_gets > 10000
+ ORDER BY buffer_gets DESC)
+WHERE rownum <=10
+;
+```
+
+## 3.3 Top 10 by Physical Reads
+
+```plsql
+set linesize 100
+set pagesize 100
+SELECT * FROM
+(SELECT substr(sql_text,1,40) sql,
+        disk_reads, executions, disk_reads/executions "Reads/Exec",
+        hash_value,address
+   FROM V$SQLAREA
+  WHERE disk_reads > 1000
+ ORDER BY disk_reads DESC)
+WHERE rownum  <=10
+;
+```
+
+## 3.4 Top 10 by Executions
+
+```plsql
+set linesize 100
+set pagesize 100
+SELECT * FROM
+(SELECT substr(sql_text,1,40) sql,
+        executions, rows_processed, rows_processed/executions "Rows/Exec",
+        hash_value,address
+   FROM V$SQLAREA
+  WHERE executions > 100
+ ORDER BY executions DESC)
+WHERE rownum  <=10
+;
+```
+
+## 3.5 Top 10 by Parse Calls
+
+```plsql
+set linesize 100
+set pagesize 100
+SELECT * FROM
+(SELECT substr(sql_text,1,40) sql,
+        parse_calls, executions, hash_value,address
+   FROM V$SQLAREA
+  WHERE parse_calls > 1000
+ ORDER BY parse_calls DESC)
+WHERE rownum  <=10
+;
+```
+
+## 3.6 Top 10 by Sharable Memory
+
+```plsql
+set linesize 100
+set pagesize 100
+SELECT * FROM 
+(SELECT substr(sql_text,1,40) sql,
+        sharable_mem, executions, hash_value,address
+   FROM V$SQLAREA
+  WHERE sharable_mem > 1048576
+ ORDER BY sharable_mem DESC)
+WHERE rownum  <=10
+;
+```
+
+## 3.7 Top 10 by Version Count
+
+```plsql
+set linesize 100
+set pagesize 100
+SELECT * FROM 
+(SELECT substr(sql_text,1,40) sql,
+        version_count, executions, hash_value,address
+   FROM V$SQLAREA
+  WHERE version_count > 20
+ ORDER BY version_count DESC)
+WHERE rownum  <=10
+;
+```
+
+## 3.8  SQL Ordered by Reloads or Invalidations
+
+**SQL Ordered by Reloads**
+
+```plsql
+set lines 200
+column FIRST_LOAD_TIME format a20
+column LAST_LOAD_TIME format a20
+select * from (select sql_id, address, hash_value, loads, first_load_time, last_load_time from v$sql where loads>0  order by 4 desc) where rownum<=10;
+```
+
+**SQL Ordered by Invalidations**
+
+```plsql
+ set lines 200
+ column FIRST_LOAD_TIME format a20
+ column LAST_LOAD_TIME format a20
+ select * from (select sql_id, address, hash_value, invalidations, loads, first_load_time, last_load_time from v$sql where invalidations>0 order by 4 desc) where rownum<=10;
+```
+
+The following script can be used to identify the top 10 SQLs ordered by reloads & invalidations from AWR.
+
+[NOTE:]() Identify the range of SNAP_IDs using DBA_HIST_SNAPSHOT during which you want to find the top SQLs by reloads & invalidations.
+ **SQL Ordered by reloads from AWR**
+
+```plsql
+ set lines 200
+ select * from (select sql_id, LOADS_TOTAL,LOADS_DELTA from dba_hist_sqlstat where snap_id between &begin_snap and &end_snap and LOADS_DELTA>0 order by 3 desc) where rownum<=10;
+```
+
+**SQL Ordered by invalidations from AWR**
+
+```plsql
+ set lines 200
+ select * from (select sql_id, INVALIDATIONS_TOTAL, INVALIDATIONS_DELTA from dba_hist_sqlstat where snap_id between &begin_snap and &end_snap and INVALIDATIONS_DELTA>0 order by 3 desc) where rownum<=10;
+```
+
+## 3.9 SQL执行历史
+
+**From Memory**
+
+```plsql
+set pages 1000 lines 200
+col first_load_time for a20
+col last_load_time for a20
+col outline_category for a20
+col sql_profile for a32
+select sql_id, child_number, plan_hash_value, first_load_time, last_load_time,
+outline_category, sql_profile, executions,
+trunc(decode(executions, 0, 0, rows_processed/executions)) rows_avg,
+trunc(decode(executions, 0, 0, fetches/executions)) fetches_avg,
+trunc(decode(executions, 0, 0, disk_reads/executions)) disk_reads_avg,
+trunc(decode(executions, 0, 0, buffer_gets/executions)) buffer_gets_avg,
+trunc(decode(executions, 0, 0, cpu_time/executions)) cpu_time_avg,
+trunc(decode(executions, 0, 0, elapsed_time/executions)) elapsed_time_avg,
+trunc(decode(executions, 0, 0, application_wait_time/executions)) apwait_time_avg,
+trunc(decode(executions, 0, 0, concurrency_wait_time/executions)) cwait_time_avg,
+trunc(decode(executions, 0, 0, cluster_wait_time/executions)) clwait_time_avg,
+trunc(decode(executions, 0, 0, user_io_wait_time/executions)) iowait_time_avg,
+trunc(decode(executions, 0, 0, plsql_exec_time/executions)) plsexec_time_avg,
+trunc(decode(executions, 0, 0, java_exec_time/executions)) javexec_time_avg
+from v$sql
+where sql_id = '&sql_id'
+order by sql_id, child_number;
+```
+
+**From AWR**
+
+```plsql
+set pages 1000 lines 200
+col sql_profile for a32
+select sql_id, snap_id, plan_hash_value, sql_profile, executions_total,
+trunc(decode(executions_total, 0, 0, rows_processed_total/executions_total)) rows_avg,
+trunc(decode(executions_total, 0, 0, fetches_total/executions_total)) fetches_avg,
+trunc(decode(executions_total, 0, 0, disk_reads_total/executions_total)) disk_reads_avg,
+trunc(decode(executions_total, 0, 0, buffer_gets_total/executions_total)) buffer_gets_avg,
+trunc(decode(executions_total, 0, 0, cpu_time_total/executions_total)) cpu_time_avg,
+trunc(decode(executions_total, 0, 0, elapsed_time_total/executions_total)) elapsed_time_avg,
+trunc(decode(executions_total, 0, 0, iowait_total/executions_total)) iowait_time_avg,
+trunc(decode(executions_total, 0, 0, clwait_total/executions_total)) clwait_time_avg,
+trunc(decode(executions_total, 0, 0, apwait_total/executions_total)) apwait_time_avg,
+trunc(decode(executions_total, 0, 0, ccwait_total/executions_total)) ccwait_time_avg,
+trunc(decode(executions_total, 0, 0, plsexec_time_total/executions_total)) plsexec_time_avg,
+trunc(decode(executions_total, 0, 0, javexec_time_total/executions_total)) javexec_time_avg
+from dba_hist_sqlstat
+where sql_id = '&sql_id'
+order by sql_id, snap_id;
+```
+
+#  3.等待事件
+
+## 3.1  等待事件的历史会话信息
 
 ```plsql
 select user_id,sql_id,count(*) from  dba_hist_active_sess_history a
@@ -381,9 +671,7 @@ group by user_id,sql_id
 order by 3;
 ```
 
-##  3.等待事件
-
-###  3.1  数据库当前的等待事件
+##  3.2  数据库当前的等待事件
 
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
@@ -414,11 +702,11 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
 select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
 
-### 3.2 检查锁与library闩锁等待
+## 3.3 检查锁与library闩锁等待
 
 ```plsql
 1. 查询锁等待。
-   SQL> select 'session ' || c.locker || ' lock ' || c.locked ||
+    select 'session ' || c.locker || ' lock ' || c.locked ||
     ', alter system kill session ' || '''' || c.locker || ',' ||
     d.serial# || '''' || ', OS:kill -9 ' || e.spid as "result"
     from (select a.sid locked, b.sid locker
@@ -434,7 +722,7 @@ select * from (select a.event, count(*) from v$active_session_history a  where a
     and d.paddr = e.addr;
    如果返回结果为空，则表示系统无锁等待事件。
 2. 查询library闩锁等待。
-   SQL> select 'session ' || d.locker || ' lock ' || d.locked ||
+    select 'session ' || d.locker || ' lock ' || d.locked ||
     ', alter system kill session ' || '''' || d.locker || ',' ||
     d.serial# || '''' || ', OS:kill -9 ' || d.os as "result"
     from (select distinct s.sid locker, s.serial#, p.spid os, w.sid locked
@@ -448,7 +736,7 @@ select * from (select a.event, count(*) from v$active_session_history a  where a
    如果返回结果为空，则表示系统无library闩锁等待事件
 ```
 
-### 3.3 查看会话等待事件
+## 3.4 查看会话等待事件
 
 ```plsql
 --查询等待的会话ID ， 阻塞的等待时间类型、事件ID 、 SQLID 等等信息
@@ -500,7 +788,7 @@ select s.sql_text,h.* from v$active_session_history h,v$sql s
    and h.session_id = 150;
 ```
 
-### 3.3 等待时间统计
+## 3.5 等待时间统计
 
 ```plsql
 -- 查询数据库等待时间和实际执行时间的相对百分比
@@ -585,7 +873,7 @@ WHERE EVENT LIKE 'db file%read'
 　　and s.ROW_WAIT_OBJ# = d.object_id
 ```
 
-### 3.4 等待事件相关视图
+## 3.6 等待事件相关视图
 ```plsql
 几个视图的总结
 
@@ -608,70 +896,132 @@ V$SYSTEM_EVENT 由于V$SESSION记录的是动态信息，和SESSION的生命周�
 V$SQLTEXT 当数据库出现瓶颈时，通常可以从V$SESSION_WAIT找到那些正在等待资源的SESSION，通过SESSION的SID，联合V$SESSION和V$SQLTEXT视图就可以捕获这些SESSION正在执行的SQL语句。
 ```
 
-## 4. SQL统计报告
+# 4. 追踪数据库修改
 
-### 4.1 SQL ordered by Elapsed Time
+## 4.1 DDLs/New objects
+
+The following script can be used to track the changes (**DDLs or new objects**) that are implemented to the schema objects in 30 days.
 
 ```plsql
-define DBID=1478953437
-define beg_snap=1677
-define end_snap=1679
-define INST_NUM=1
-select *
-  from (select nvl((sqt.elap / 1000000), to_number(null)),
-               nvl((sqt.cput / 1000000), to_number(null)),
-               sqt.exec,
-               decode(sqt.exec,
-                      0,
-                      to_number(null),
-                      (sqt.elap / sqt.exec / 1000000)),
-               (100 *
-               (sqt.elap / (SELECT sum(e.VALUE) - sum(b.value)
-                               FROM DBA_HIST_SYSSTAT b, DBA_HIST_SYSSTAT e
-                              WHERE B.SNAP_ID = &beg_snap
-                                AND E.SNAP_ID = &end_snap
-                                AND B.DBID = &DBID
-                                AND E.DBID = &DBID
-                                AND B.INSTANCE_NUMBER = &INST_NUM
-                                AND E.INSTANCE_NUMBER = &INST_NUM
-                                and e.STAT_NAME = 'DB time'
-                                and b.stat_name = 'DB time'))) norm_val,
-               sqt.sql_id,
-               to_clob(decode(sqt.module,
-                              null,
-                              null,
-                              'Module: ' || sqt.module)),
-               nvl(st.sql_text, to_clob(' ** SQL Text Not Available ** '))
-          from (select sql_id,
-                       max(module) module,
-                       sum(elapsed_time_delta) elap,
-                       sum(cpu_time_delta) cput,
-                       sum(executions_delta) exec
-                  from dba_hist_sqlstat
-                 where dbid = &dbid
-                   and instance_number = &inst_num
-                   and &beg_snap < snap_id
-                   and snap_id <= &end_snap
-                 group by sql_id) sqt,
-               dba_hist_sqltext st
-         where st.sql_id(+) = sqt.sql_id
-           and st.dbid(+) = &dbid
-         order by nvl(sqt.elap, -1) desc, sqt.sql_id)
- where rownum < 65
-   and (rownum <=10 or norm_val > 1);
+ SET LINES 120
+ SET PAGES 100
+ COLUMN OWNER FORMAT A15
+ COLUMN OBJECT_NAME FORMAT A25
+ COLUMN OBJECT_TYPE FORMAT A10
+ SPOOL SCHEMA_CHANGES.LOG
+ SELECT OWNER, OBJECT_NAME, OBJECT_TYPE, CREATED, LAST_DDL_TIME, TIMESTAMP,STATUS FROM DBA_OBJECTS WHERE (CREATED>=SYSDATE-30 OR LAST_DDL_TIME>=SYSDATE-30) AND OWNER NOT IN ('SYS','SYSTEM','SYSMAN','DBSNMP') ORDER BY LAST_DDL_TIME DESC;
+ SPOOL OFF
+```
+## 4.2 Parameters
+
+The following script can be used to identify the **database parameters** that are modified at system level or session level.
+
+[Note]():This script ONLY gives the information about the parameter changes after the instance startup.
+
+```plsql
+ column name format a40
+ column value format a15
+ select name, value, ISMODIFIED from v$parameter where name in (select nam.ksppinm NAME from x$ksppi nam, x$ksppsv val where nam.indx = val.indx) and ISMODIFIED!='FALSE';
+```
+**[NOTE]():**
+
+1. If the value of ISMODIFIED shows "SYSTEM_MOD" then the parameter is modified at SYSTEM level.
+2. If the value of ISMODIFIED shows "MODIFIED" then the parameter is modified at SESSION level.
+
+3. The following script can be used to identify the database parameters that are modified before the instance startup. This is achieved through the DBA_HIST* views.
+
+[Note](): Identify the range of SNAP_IDs using DBA_HIST_SNAPSHOT during which you want to find the parameter changes.
+
+```plsql
+ column parameter_name format a40
+ select snap_id,parameter_name, value, ISMODIFIED from dba_hist_parameter where parameter_name in (select nam.ksppinm NAME from x$ksppi nam, x$ksppsv val where nam.indx = val.indx) and ISMODIFIED!='FALSE' and snap_id between &begin_snap and &end_snap;
 ```
 
+[NOTE]():
+1. If the value of ISMODIFIED shows "SYSTEM_MOD" then the parameter is modified at SYSTEM level.
+2. If the value of ISMODIFIED shows "MODIFIED" then the parameter is modified at SESSION level.
 
+ALERT_LOG can be used to identify the parameter and DB configuration changes that are done at SYSTEM level in past as V$PARAMETER stores only the information from the last instance startup.
 
+## 4.3 CBO Parameters
 
+The following script can be used to identify the OPTIMIZER parameters that are modified from default value at session level. This tells the SID of the sessions that have undergone the modifications.
 
+```plsql
+ column name format a40
+ column value format a10
+ column ISDEFAULT format a10
+ column SQL_FEATURE format a20
+ set lines 120
+ select sid,name,value,SQL_FEATURE,ISDEFAULT from v$SES_OPTIMIZER_ENV where ISDEFAULT='NO';
 
+-- For 10g, use the following.
 
+ select sid,name,value,ISDEFAULT from v$SES_OPTIMIZER_ENV where ISDEFAULT='NO';
+```
 
+[NOTE](): IS_DEFAULT => Indicates whether the parameter is set to the default value (YES) or not (NO)
 
+The following script can be used to identify the OPTIMIZER parameters that are modified from default value at SYSTEM level.
 
+```plsql
+ column name format a40
+ column value format a10
+ column ISDEFAULT format a10
+ column SQL_FEATURE format a20
+ set lines 120
+ select name,value,SQL_FEATURE, ISDEFAULT from v$SYS_OPTIMIZER_ENV where ISDEFAULT='NO';
 
-## 4.  连接数/连接客户端
+-- For 10g, use the following.
+
+ select name,value, ISDEFAULT from v$SYS_OPTIMIZER_ENV where ISDEFAULT='NO';
+```
+
+[NOTE](): IS_DEFAULT => Indicates whether the parameter is set to the default value (YES) or not (NO)
+
+## 4.4 Fix control
+
+The following script can be used to identify the optimizer "_FIX_CONTROL" parameters that are modified from default value at SESSION level. This tells the SID of the session that has undergone the modifications.
+
+```plsql
+ column bugno format a15
+ column value format a30
+ column ISDEFAULT format a10
+ column SQL_FEATURE format a20
+ set lines 120
+ select session_id, bugno,value,SQL_FEATURE, OPTIMIZER_FEATURE_ENABLE, IS_DEFAULT from v$session_fix_control where IS_DEFAULT=0;
+
+-- For 10g, use the following.
+
+ select session_id, bugno, value, OPTIMIZER_FEATURE_ENABLE, IS_DEFAULT from v$session_fix_control where IS_DEFAULT=0;
+```
+[NOTE](): IS_DEFAULT => Indicates whether the current value is the same as the default (1) or not (0)
+
+The following script can be used to identify the optimizer "_FIX_CONTROL" parameters that are modified from default value at SYSTEM level.
+
+```plsql
+ column bugno format a15
+ column value format a30
+ column ISDEFAULT format a10
+ column SQL_FEATURE format a20
+ set lines 120
+ select bugno,value,SQL_FEATURE, OPTIMIZER_FEATURE_ENABLE, IS_DEFAULT from v$system_fix_control where IS_DEFAULT=0;
+
+-- For 10g, use the following.
+
+ select bugno, value, OPTIMIZER_FEATURE_ENABLE, IS_DEFAULT from v$system_fix_control where IS_DEFAULT=0;
+```
+[NOTE](): IS_DEFAULT => Indicates whether the current value is the same as the default (1) or not (0)
+
+**Benefit / Impact:**
+
+1. Changes to schema objects & parameters could lead to bad execution plan for the SQL statements affecting the performance.
+2. Investigating the changes may help in identifying the root cause behind the sudden change in the execution plan for the SQL statements or slow application performance.
+
+**Action / Repair:**
+Check with DBAs or Application Developers about the changes to the schema objects or parameters and take corrective actions such as reverting back and monitor the performance.
+
+# 5.  连接数/连接客户端
 
 ```plsql
 -- 查询每个客户端连接每个实例的连接数
@@ -680,7 +1030,7 @@ select inst_id,machine ,count(*) from gv$session group by machine,inst_id order 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
 ```
 
-## 5. oradebug
+# 6. oradebug
 
 ```
 11:33:20 sys@ORCL> oradebug help
@@ -736,7 +1086,7 @@ CORE                                     Dump core without crashing process
 PROCSTAT                                 Dump process statistics
 ```
 
-## 6. 查看长事务
+# 7. 查看长事务
 
 ```
 set linesize 200
@@ -789,7 +1139,7 @@ SELECT OPNAME,
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
 
-## 7. 10046Trace
+# 8. 10046Trace
 
 ```
 -- 在Session级打开trace
@@ -851,7 +1201,7 @@ oradebug setospid <spid> <stid>oradebug unlimit
 tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 ```
 
-## 8. 10053Trace
+# 9. 10053Trace
 
 
 
