@@ -355,7 +355,7 @@ select inst_id, sessions_current,sessions_highwater,SESSIONS_MAX,SESSIONS_WARNIN
 select name,value from v$parameter where name='processes';
 ```
 
-### 2.4 数据库时区
+## 2.4 数据库时区
 
 ```plsql
 -- 数据库时区
