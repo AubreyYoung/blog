@@ -29,13 +29,14 @@ select * from v$datafile;
 --修改表空间
 alter tablespace tablesapce_name off/online;
 alter tablespace tablesapce_name read only/read write;
---修改数据文件
+-- 修改数据文件
 alter tablespace tablesapce_name add datafile '+DATA' size 30g autoextend on;
+--删除数据文件
 alter tablespace tablesapce_name drop datafile '(数据文件名,可以不添加路径*/)';
 /*不能删除表空间第一个数据文件,若要删除必须删除表空间*/
 drop tablespace tablespace_name including contents and datafiles;
 drop tablesapce tablesapce_name including contents;
-//如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
+-- 如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
 drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;
 ```
 ## 2. 表与约束
@@ -44,7 +45,7 @@ drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRA
 
 ```plsql
 alter table tablename add column_nmae datatype;
---修改数据类型
+-- 修改数据类型
 alter table tablename modify column_nmae datatype not null/null;
 
 alter table tablename drop column colume_name;

@@ -567,8 +567,6 @@ PARALLEL_MAX_SEVERS参数设置并行执行可用的最大进程数量，该参�
 select ksppinm,ksppstvl,ksppdesc from x$ksppi x,x$ksppcv y where x.indx = y.indx and ksppinm='_asm_hbeatiowait';
 ```
 
-
-
 ## 2.6 数据库profile
 
 ```
@@ -774,7 +772,7 @@ ALTER DATABASE CLEAR UNARCHIVED LOGFILE GROUP 3;
 Select round(FIRST_TIME, 'DD'), THREAD#, Count(SEQUENCE#)
 From v$log_history
 Group By round(FIRST_TIME, 'DD'), THREAD#
-Order By 1, 2
+Order By 1, 2;
 ```
 
 ### 2.12.4 检查15天内归档的生成情况
@@ -1116,12 +1114,12 @@ select username,account_status,default_tablespace,temporary_tablespace,CREATED f
 ### 2.15.2 临时表空间使用
 
 ```plsql
-col Name for a30
-col "Size (M)" for  a30
-col "HWM (M)" for a30
-col "HWM %" for a30
-col "Using (M)" for a30
-col "Using %" for a30
+col Name for a10
+col "Size (M)" for  a20
+col "HWM (M)" for a20
+col "HWM %" for a20
+col "Using (M)" for a20
+col "Using %" for a20
 SELECT d.tablespace_name "Name",
 TO_CHAR(NVL(a.bytes / 1024 / 1024, 0),'99,999,990.900') "Size (M)",
 TO_CHAR(NVL(t.hwm, 0)/1024/1024,'99999999.999')  "HWM (M)",
@@ -1530,7 +1528,7 @@ select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log whe
 -- 删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
 RMAN> delete force archivelog until time "sysdate-1";
 -- 删除3天前的归档日志
-delete  archivelog until time "sysdate";
+delete  archivelog until time "sysdate -3";
 ```
 
 ## 2.21 数据库所有实例每天生成的归档大小

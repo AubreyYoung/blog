@@ -7,6 +7,10 @@
 ```
 docker images
 docker image ls
+## 重命名镜像
+docker tag IMAGEID(镜像id) REPOSITORY:TAG（仓库：标签）
+#例子
+docker tag ca1b6b825289 registry.cn-hangzhou.aliyuncs.com/xxxxxxx:v1.0
 ```
 
 ### ps
@@ -45,6 +49,9 @@ $ docker exec -it oracle11g bash
 the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty'
 $ winpty docker  exec -it oracle11g bash
 [root@c4a469a9a784 /]# 
+
+## oracle官方镜像切换root用户
+ docker exec --interactive --tty --user root --workdir / oracle12 bash
 ```
 
 ### create
