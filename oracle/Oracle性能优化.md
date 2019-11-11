@@ -675,7 +675,7 @@ order by 3;
 
 ```
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
-
+ 
 -- "查询结果中，15分钟内“EVENT”列中不包含以下等待事件：
  read by other session、buffer busy waits
  control file parallel write
@@ -1086,7 +1086,9 @@ CORE                                     Dump core without crashing process
 PROCSTAT                                 Dump process statistics
 ```
 
-# 7. 查看长事务
+# 7. 查看长事务/全表扫描
+
+### 7.1 长事务
 
 ```
 set linesize 200
@@ -1139,10 +1141,29 @@ SELECT OPNAME,
 
 [^注]: set transaction 只命名、配置事务，并不开启事务，随后的SQL才开启事务
 
+### 7.2 全表扫描
+
+```plsql
+SELECT
+    t.inst_id,
+    t.sid,
+    t.serial#,
+    target,
+    t.sql_exec_start,
+    t.username,
+    t.sql_id
+FROM
+    gv$session_longops t
+WHERE
+    t.sql_plan_operation = 'TABLE ACCESS'
+    AND sql_plan_options = 'FULL';
+```
+
 # 8. 10046Trace
 
-```
--- 在Session级打开trace
+### 8.1 在Session级打开trace
+
+```plsql
 适用于SQL语句可以在新的session创建后再运行。
 在session级收集10046 trace：
 alter session set tracefile_identifier='10046'; 
@@ -1160,7 +1181,11 @@ alter session set events '10046 trace name context off';
 注意，如果session没有被彻底地关闭并且跟踪被停止了，某些重要的trace信息的可能会丢失。
 注意：这里我们将"statistics_level"设置为all，这是因为有可能这个参数在系统级不是默认值"TYPICAL"（比如 BASIC）。为了收集性能相关问题的信息我们需要打开某个级别的statistics。我们推荐在 session 级将这个参数设置成 ALL 以便于收集更多的信息，尽管这不是必须的。
  
--- 跟踪一个已经开始的进程
+```
+
+### 8.2 跟踪一个已经开始的进程
+
+```
 如果需要跟踪一个已经存在session，可以用 oradebug连接到session上，并发起10046 trace。
 首先，用某种方法找到需要被跟踪的session.
 例如，在SQL*Plus里，找出目标session的OS的进程ID(spid):
@@ -1175,7 +1200,11 @@ select 'ospid: ' || p.spid || ' # ''' ||s.sid||','||s.serial#||''' '||
 from v$session s , v$process p
 where p.addr = s.paddr
 and s.username <> ' ';
+```
 
+### 8.3 oradebug产生10046
+
+```plsql
 如果是使用了12c的multi thread下，那么需要使用v$process中新的列stid来找到对应的thread, 因为Oracle把多个processes放进了一个单独的 ospid 中。如果想找到特定的thread, 使用下面的语法:
 oradebug setospid <spid> <stid>
 一旦找到OS PID，就可以用以下命令初始化跟踪：
