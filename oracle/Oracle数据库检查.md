@@ -2037,6 +2037,9 @@ select scn,to_char(time_dp,'yyyy-mm-dd hh24:mi:ss')from sys.smon_scn_time;
 
 -- 查看闪回restore_point
 select scn, STORAGE_SIZE ,to_char(time,'yyyy-mm-dd hh24:mi:ss') time,NAME from v$restore_point;
+
+-- 查看闪回空间使用情况
+select * from V$RECOVERY_AREA_USAGE;
 ```
 
 ### 3.7.2 开启/关闭闪回
