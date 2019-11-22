@@ -1,10 +1,6 @@
-Oracle开发
+# 1. 用户与表空间
 
-# 一、SQL基础
-
-## 1. 用户与表空间
-
-### 1.1 用户
+## 1.1 用户
 
 ```plsql
 show user
@@ -17,7 +13,7 @@ alter user username  default temporary tablespace tablesapce_name;
 //删除user
 drop user ×× cascade
 ```
-### 1.2 表空间
+## 1.2 表空间
 
 ```plsql
 create tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
@@ -39,9 +35,9 @@ drop tablesapce tablesapce_name including contents;
 -- 如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
 drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;
 ```
-## 2. 表与约束
+# 2. 表与约束
 
-### 2.1 表
+## 2.1 表
 
 ```plsql
 alter table tablename add column_nmae datatype;
@@ -72,7 +68,7 @@ DELETE * FROM EMP5;
 ALTER TABLE <tablename> STORAGE (BUFFER POOL KEEP);
 ALTER INDEX <indexname> STORAGE (BUFFER_POOL KEEP);
 ```
-### 2.2 约束在表中的作用
+## 2.2 约束在表中的作用
 
 ```plsql
 create table tablename(
@@ -128,15 +124,25 @@ VALUES
 ORA-01402: view WITH CHECK OPTION where-clause violation
 ```
 
-## 3 查询
+# 3 单表查询
 
-
-
-
-
-### 3.1 简单查询
+## 3.1 简单查询
 
 ```plsql
+-- 查看表结构
+describe scott.emp;
+desc scott.emp;
+
+user_tab_cols用来获取对应用户表的列信息；
+user_col_comments用来获取对应用户表列的注释信息；
+user_constraints用来获取用户表的约束条件；
+user_cons_columns约束中用户可访问列。
+
+select * from dba_tab_cols where owner='SCOTT' and table_name='EMP';
+select * from dba_col_comments where owner='SCOTT' and table_name='EMP';
+select * from dba_constraints where owner='SCOTT' and table_name='EMP';
+select * from dba_cons_columns where owner='SCOTT' and table_name='EMP';
+
 select  distinct .. from tablename where ...;
 -- col username heading 用户名
 -- col value for 9999.99 
@@ -150,7 +156,7 @@ select sal,case when sal=800 then '=800'  when sal=1250 then '=1250'  else '不�
 
 select sal,decode(sal,800,'工资低',5000,'工资高','工资一般') from emp;
 
-//查询空值
+-- 查询空值
 SQL> select * from emp where comm is null;
 
      EMPNO ENAME      JOB              MGR HIREDATE         SAL       COMM     DEPTNO
@@ -206,14 +212,26 @@ STR
 ----
 bcde
 
-SQL> 
 SQL> select greatest(1,null) from dual;
 
 GREATEST(1,NULL)
 ----------------
+NULL
+
+SQL> select deptno,ename,comm,decode(comm,NULL,0) from scott.emp where deptno = 20;
+    DEPTNO ENAME            COMM DECODE(COMM,NULL,0)
+---------- ---------- ---------- -------------------
+        20 Galaxy              0                    
+        20 SMITH                                   0
+        20 JONES                                   0
+        20 SCOTT                                   0
+        20 ADAMS                                   0
+        20 FORD                                    0
+        20 Aubrey              0                    
+-- 不同的函数对NULL的支持不一样,使用NULL要先测试
 ````
 
-### 3.2 NULL转换为0
+## 3.2 NULL转换为0
 
 ```plsql
 SQL> select coalesce(comm,0) from emp;
@@ -258,6 +276,8 @@ SQL> select coalesce(c1,c2,c3,c4,c5,c6) as c from v1;
          1
          3
 
+-- 注: COALESCE(A,B,C,D)返回参数表中第一个不为空的值(从左开始) A B C D 可以是字段,也可以是其他函数的返回值或者表达式的结果值,如果所有的表达式都是空值,最终将返回一个空值.
+
 SQL> select nvl(nvl(nvl(nvl(nvl(c1,c2),c3),c4),c5),c6)from v1;
 
 NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
@@ -266,7 +286,7 @@ NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
 3
 ```
 
-### 3.3 过滤条件加括号,便于查看
+## 3.3 过滤条件加括号,便于查看
 
 ```plsql
 select *
@@ -276,115 +296,125 @@ select *
     or (DEPTNO = 20 and sal <= 2000));
 ```
 
-### 3.4 别名作为where条件
+## 3.4 别名作为where条件
 
 ```plsql
 select  * from (select ename as 姓名,sal as 薪水,comm as 提成 from emp) x 
 where 薪水 > 3000;
 ```
 
-### 3.5 拼接字符
+## 3.5 拼接字符
 
 ```plsql
 select 'truncate table '||owner||'.'||table_name||';' as 清空表 from all_tables where owner ='SCOTT';
 //单引号转义
 select 'select table_name from all_tables where owner =''SCOTT'';' from dual;
+select 'alter database datafile '''||file_name||''' offline drop;' from dba_data_files;
 1.首尾单引号为字符串识别标识,不做转译用
 2.首尾单引号里面如果出现的单引号，并且有多个,则相连两个单引号转译为一个字符串单引号
 3.单引号一定成对出现,否者这个字符串出错,因为字符串不知道哪个单引号负责结束
 ```
 
-### 3.6 select条件逻辑
+## 3.6 select条件逻辑
 
 ```plsql
-select ename as 姓名,
+select ename as 姓名,sal as 薪资,
        case  when sal <= 2000 then '薪资低'
        when  sal >= 5000 then '薪资高'
        else '薪资中等'  end as 薪资水平
   from emp
  where deptno = 10;
-姓名       薪资水平
----------- --------
-CLARK      薪资中等
-KING       薪资高
-MILLER     薪资低
 
-SQL>SELECT (CASE
-         WHEN SAL <= 1000 THEN
-          '0000-1000'
-         WHEN SAL <= 2000 THEN
-          '1000-2000'
-         WHEN SAL <= 3000 THEN
-          '2000-3000'
-         WHEN SAL <= 4000 THEN
-          '3000-4000'
-         WHEN SAL <= 5000 THEN
-          '4000-5000'
-         ELSE
-          'high salary'
-       END) AS 档次,
-       ENAME,
-       SAL
-  FROM EMP;
+姓名                 薪资 薪资水平
+---------- ---------- ----
+CLARK            2450 薪资中等
+KING             5000 薪资高
+MILLER           1300 薪资低
 
-档次        ENAME            SAL
------------ ---------- ---------
-0000-1000   SMITH         800.00
-1000-2000   ALLEN        1600.00
-1000-2000   WARD         1250.00
-2000-3000   JONES        2975.00
-1000-2000   MARTIN       1250.00
-2000-3000   BLAKE        2850.00
-2000-3000   CLARK        2450.00
-2000-3000   SCOTT        3000.00
-4000-5000   KING         5000.00
-1000-2000   TURNER       1500.00
-1000-2000   ADAMS        1100.00
-0000-1000   JAMES         950.00
-2000-3000   FORD         3000.00
-1000-2000   MILLER       1300.00
-
-14 rows selected
-
-SQL> SELECT 档次, COUNT(*) 
-  FROM (SELECT (CASE
-                 WHEN SAL <= 1000 THEN
-                  '0000-1000'
-                 WHEN SAL <= 2000 THEN
-                  '1000-2000'
-                 WHEN SAL <= 3000 THEN
-                  '2000-3000'
-                 WHEN SAL <= 4000 THEN
-                  '3000-4000'
-                 WHEN SAL <= 5000 THEN
-                  '4000-5000'
-                 ELSE
-                  'high salary'
-               END) AS 档次,
-               ENAME,
-               SAL
-          FROM EMP) X
- GROUP BY 档次
- ORDER BY 2 DESC;
- 
- 
-档次          COUNT(*)
------------ ----------
-1000-2000            6
-2000-3000            5
-0000-1000            2
-4000-5000            1
+SQL> SELECT
+    档次,
+    COUNT(*) AS 人数
+FROM
+    (
+        SELECT
+            (
+                CASE
+                    WHEN sal <= 1000 THEN
+                        '0000-1000'
+                    WHEN sal <= 2000 THEN
+                        '1000-2000'
+                    WHEN sal <= 3000 THEN
+                        '2000-3000'
+                    WHEN sal <= 4000 THEN
+                        '3000-4000'
+                    WHEN sal >= 5000 THEN
+                        '4000-5000'
+                    ELSE
+                        '好高'
+                END
+            ) AS 档次,
+            ename,
+            sal
+        FROM
+            scott.emp
+    )
+GROUP BY
+    档次
+ORDER BY
+    1;
+    
+档次                人数
+--------- ----------
+0000-1000          2
+1000-2000          6
+2000-3000          7
+4000-5000          1
 ```
 
-### 3.7 取第二行数据
+## 3.7 取第二行数据
 
 ```plsql
 SELECT * FROM (SELECT ROWNUM AS SN, EMP.* FROM EMP) WHERE SN = 2;
 ```
 
-### 3.8 随机读取数据
+# 4 排序
+
+## 4.1 基本排序
 
 ```plsql
+SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
+SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
+SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
+```
+## 4.2 多个字段排序
+
+```plsql
+select empno,deptno,sal,ename,job from scott.emp order by 2 asc,3 desc;
+```
+## 4.3 按子串排序
+
+```plsql
+SELECT LAST_NAME AS 名称,
+       PHONE_NUMBER AS 号码,
+       SALARY AS 工资,
+       SUBSTR(PHONE_NUMBER, -4) AS 尾号
+  FROM HR.EMPLOYEES
+ WHERE ROWNUM <= 5
+ ORDER BY 4;
+ 
+ 
+ SELECT LAST_NAME AS 名称,
+       PHONE_NUMBER AS 号码,
+       SALARY AS 工资     
+  FROM HR.EMPLOYEES t
+ WHERE ROWNUM <= 5
+ ORDER BY SUBSTR(t.PHONE_NUMBER, -4); 
+```
+
+## 4.4 随机读取数据
+
+```plsql
+-- 先随机排序,再取数据
 SQL> SELECT empno,ename FROM (SELECT empno,ename FROM emp ORDER BY dbms_random.value()) WHERE ROWNUM <= 3;
 
 EMPNO ENAME
@@ -393,7 +423,32 @@ EMPNO ENAME
  7934 MILLER
  7654 MARTIN
 ```
-### 3.9 转义字符
+## 4.5 TRANSLATE
+
+TRANSLATE(expr,from_string,to_string)
+
+```plsql
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
+
+NEW_STR
+---------------
+12 您好 2314567
+
+-- to_string为空,则返回空值
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+
+-- to_string对应的位置没有字符,则from_string中列出的字符将会消掉
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg','1') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+ 您好
+```
+
+##  4.6 转义字符
 
 ```plsql
 CREATE OR REPLACE VIEW v2 AS
@@ -412,48 +467,8 @@ SELECT * FROM v2 WHERE vname LIKE '_BCD%';
 SELECT * FROM v2 WHERE vname LIKE '\_BCD%' ESCAPE '\';
 SELECT * FROM v2 WHERE vname LIKE '_\\BCD%' ESCAPE '\';
 ```
-### 3.10 排序
 
-```plsql
-SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
-SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
-SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
-
-SELECT LAST_NAME AS 名称,
-       PHONE_NUMBER AS 号码,
-       SALARY AS 工资,
-       SUBSTR(PHONE_NUMBER, -4) AS 尾号
-  FROM HR.EMPLOYEES
- WHERE ROWNUM <= 5
- ORDER BY 4;
-```
-
-### 3.11 TRANSLATE
-
-```plsql
-SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
-
-NEW_STR
----------------
-12 您好 2314567
-
-SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','') AS NEW_STR  FROM dual;
-
-NEW_STR
--------
-
-SQL> SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg','1') AS NEW_STR  FROM dual;
-
-NEW_STR
--------
- 您好
-SQL>  SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg ','1') AS NEW_STR  FROM dual;
-
-NEW_STR
--------
-您好
-```
-### 3.12 部分字段排序
+## 4.7 部分字段排序
 
 ```plsql
 CREATE OR REPLACE VIEW V3 AS SELECT EMPNO || ' ' ||ename AS DATA FROM emp;
@@ -483,14 +498,20 @@ DATA                                                ENAME
 14 rows selected
 ```
 
-### 3.13 处理排序空值
+## 4.8  处理排序空值
+
+**Oracle默认升序空值在后,降序空值在前.**
 
 ```plsql
+-- NULL排在最前
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS FIRST;
+-- NULL排在最后
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS LAST;
 ```
 
-### 3.14 部分值排序
+## 4.9 根据条件取不同列中的值来排序
+
+要求工资在这个范围的员工排在前面,以便优先查看.
 
 ```plsql
 SELECT EMPNO AS 编码,
@@ -518,6 +539,8 @@ SELECT EMPNO AS 编码,
           2
        END,3;
 ```
+
+# 5 操作多个表
 
 ### 3.15 UNION ALL 和空值
 
@@ -1280,7 +1303,7 @@ SQL> SELECT COUNT(*)
          1
 ```
 
-## 4 插入、更新与删除
+# 6 插入、更新与删除
 
 ### 4.1 插入
 
