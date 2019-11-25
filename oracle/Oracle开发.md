@@ -1,10 +1,6 @@
-Oracle开发
+# 1. 用户与表空间
 
-# 一、SQL基础
-
-## 1.1 用户与表空间
-
-### 用户
+## 1.1 用户
 
 ```plsql
 show user
@@ -17,7 +13,7 @@ alter user username  default temporary tablespace tablesapce_name;
 //删除user
 drop user ×× cascade
 ```
-### 表空间
+## 1.2 表空间
 
 ```plsql
 create tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
@@ -29,22 +25,23 @@ select * from v$datafile;
 --修改表空间
 alter tablespace tablesapce_name off/online;
 alter tablespace tablesapce_name read only/read write;
---修改数据文件
+-- 修改数据文件
 alter tablespace tablesapce_name add datafile '+DATA' size 30g autoextend on;
+--删除数据文件
 alter tablespace tablesapce_name drop datafile '(数据文件名,可以不添加路径*/)';
 /*不能删除表空间第一个数据文件,若要删除必须删除表空间*/
 drop tablespace tablespace_name including contents and datafiles;
 drop tablesapce tablesapce_name including contents;
-//如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
+-- 如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
 drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;
 ```
-## 1.2 表与约束
+# 2. 表与约束
 
-#### 表
+## 2.1 表
 
 ```plsql
 alter table tablename add column_nmae datatype;
---修改数据类型
+-- 修改数据类型
 alter table tablename modify column_nmae datatype not null/null;
 
 alter table tablename drop column colume_name;
@@ -67,8 +64,11 @@ update table table_name set XX=XX where  ...
 //删除
 DELETE EMP4;
 DELETE * FROM EMP5;
+
+ALTER TABLE <tablename> STORAGE (BUFFER POOL KEEP);
+ALTER INDEX <indexname> STORAGE (BUFFER_POOL KEEP);
 ```
-#### 约束在表中的作用
+## 2.2 约束在表中的作用
 
 ```plsql
 create table tablename(
@@ -124,11 +124,25 @@ VALUES
 ORA-01402: view WITH CHECK OPTION where-clause violation
 ```
 
-## 1.3 查询语句
+# 3 单表查询
 
-查询的作用,强大的select
+## 3.1 简单查询
 
 ```plsql
+-- 查看表结构
+describe scott.emp;
+desc scott.emp;
+
+user_tab_cols用来获取对应用户表的列信息；
+user_col_comments用来获取对应用户表列的注释信息；
+user_constraints用来获取用户表的约束条件；
+user_cons_columns约束中用户可访问列。
+
+select * from dba_tab_cols where owner='SCOTT' and table_name='EMP';
+select * from dba_col_comments where owner='SCOTT' and table_name='EMP';
+select * from dba_constraints where owner='SCOTT' and table_name='EMP';
+select * from dba_cons_columns where owner='SCOTT' and table_name='EMP';
+
 select  distinct .. from tablename where ...;
 -- col username heading 用户名
 -- col value for 9999.99 
@@ -142,7 +156,7 @@ select sal,case when sal=800 then '=800'  when sal=1250 then '=1250'  else '不�
 
 select sal,decode(sal,800,'工资低',5000,'工资高','工资一般') from emp;
 
-//查询空值
+-- 查询空值
 SQL> select * from emp where comm is null;
 
      EMPNO ENAME      JOB              MGR HIREDATE         SAL       COMM     DEPTNO
@@ -198,14 +212,26 @@ STR
 ----
 bcde
 
-SQL> 
 SQL> select greatest(1,null) from dual;
 
 GREATEST(1,NULL)
 ----------------
+NULL
+
+SQL> select deptno,ename,comm,decode(comm,NULL,0) from scott.emp where deptno = 20;
+    DEPTNO ENAME            COMM DECODE(COMM,NULL,0)
+---------- ---------- ---------- -------------------
+        20 Galaxy              0                    
+        20 SMITH                                   0
+        20 JONES                                   0
+        20 SCOTT                                   0
+        20 ADAMS                                   0
+        20 FORD                                    0
+        20 Aubrey              0                    
+-- 不同的函数对NULL的支持不一样,使用NULL要先测试
 ````
 
-### **NULL转换为0**
+## 3.2 NULL转换为0
 
 ```plsql
 SQL> select coalesce(comm,0) from emp;
@@ -250,6 +276,8 @@ SQL> select coalesce(c1,c2,c3,c4,c5,c6) as c from v1;
          1
          3
 
+-- 注: COALESCE(A,B,C,D)返回参数表中第一个不为空的值(从左开始) A B C D 可以是字段,也可以是其他函数的返回值或者表达式的结果值,如果所有的表达式都是空值,最终将返回一个空值.
+
 SQL> select nvl(nvl(nvl(nvl(nvl(c1,c2),c3),c4),c5),c6)from v1;
 
 NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
@@ -258,7 +286,7 @@ NVL(NVL(NVL(NVL(NVL(C1,C2),C3),C4),C5),C
 3
 ```
 
-### **过滤条件加括号,便于查看**
+## 3.3 过滤条件加括号,便于查看
 
 ```plsql
 select *
@@ -268,115 +296,125 @@ select *
     or (DEPTNO = 20 and sal <= 2000));
 ```
 
-### **别名作为where条件**
+## 3.4 别名作为where条件
 
 ```plsql
 select  * from (select ename as 姓名,sal as 薪水,comm as 提成 from emp) x 
 where 薪水 > 3000;
 ```
 
-### **拼接字符**
+## 3.5 拼接字符
 
 ```plsql
 select 'truncate table '||owner||'.'||table_name||';' as 清空表 from all_tables where owner ='SCOTT';
 //单引号转义
 select 'select table_name from all_tables where owner =''SCOTT'';' from dual;
+select 'alter database datafile '''||file_name||''' offline drop;' from dba_data_files;
 1.首尾单引号为字符串识别标识,不做转译用
 2.首尾单引号里面如果出现的单引号，并且有多个,则相连两个单引号转译为一个字符串单引号
 3.单引号一定成对出现,否者这个字符串出错,因为字符串不知道哪个单引号负责结束
 ```
 
-### **select条件逻辑**
+## 3.6 select条件逻辑
 
 ```plsql
-select ename as 姓名,
+select ename as 姓名,sal as 薪资,
        case  when sal <= 2000 then '薪资低'
        when  sal >= 5000 then '薪资高'
        else '薪资中等'  end as 薪资水平
   from emp
  where deptno = 10;
-姓名       薪资水平
----------- --------
-CLARK      薪资中等
-KING       薪资高
-MILLER     薪资低
 
-SQL>SELECT (CASE
-         WHEN SAL <= 1000 THEN
-          '0000-1000'
-         WHEN SAL <= 2000 THEN
-          '1000-2000'
-         WHEN SAL <= 3000 THEN
-          '2000-3000'
-         WHEN SAL <= 4000 THEN
-          '3000-4000'
-         WHEN SAL <= 5000 THEN
-          '4000-5000'
-         ELSE
-          'high salary'
-       END) AS 档次,
-       ENAME,
-       SAL
-  FROM EMP;
+姓名                 薪资 薪资水平
+---------- ---------- ----
+CLARK            2450 薪资中等
+KING             5000 薪资高
+MILLER           1300 薪资低
 
-档次        ENAME            SAL
------------ ---------- ---------
-0000-1000   SMITH         800.00
-1000-2000   ALLEN        1600.00
-1000-2000   WARD         1250.00
-2000-3000   JONES        2975.00
-1000-2000   MARTIN       1250.00
-2000-3000   BLAKE        2850.00
-2000-3000   CLARK        2450.00
-2000-3000   SCOTT        3000.00
-4000-5000   KING         5000.00
-1000-2000   TURNER       1500.00
-1000-2000   ADAMS        1100.00
-0000-1000   JAMES         950.00
-2000-3000   FORD         3000.00
-1000-2000   MILLER       1300.00
-
-14 rows selected
-
-SQL> SELECT 档次, COUNT(*) 
-  FROM (SELECT (CASE
-                 WHEN SAL <= 1000 THEN
-                  '0000-1000'
-                 WHEN SAL <= 2000 THEN
-                  '1000-2000'
-                 WHEN SAL <= 3000 THEN
-                  '2000-3000'
-                 WHEN SAL <= 4000 THEN
-                  '3000-4000'
-                 WHEN SAL <= 5000 THEN
-                  '4000-5000'
-                 ELSE
-                  'high salary'
-               END) AS 档次,
-               ENAME,
-               SAL
-          FROM EMP) X
- GROUP BY 档次
- ORDER BY 2 DESC;
- 
- 
-档次          COUNT(*)
------------ ----------
-1000-2000            6
-2000-3000            5
-0000-1000            2
-4000-5000            1
+SQL> SELECT
+    档次,
+    COUNT(*) AS 人数
+FROM
+    (
+        SELECT
+            (
+                CASE
+                    WHEN sal <= 1000 THEN
+                        '0000-1000'
+                    WHEN sal <= 2000 THEN
+                        '1000-2000'
+                    WHEN sal <= 3000 THEN
+                        '2000-3000'
+                    WHEN sal <= 4000 THEN
+                        '3000-4000'
+                    WHEN sal >= 5000 THEN
+                        '4000-5000'
+                    ELSE
+                        '好高'
+                END
+            ) AS 档次,
+            ename,
+            sal
+        FROM
+            scott.emp
+    )
+GROUP BY
+    档次
+ORDER BY
+    1;
+    
+档次                人数
+--------- ----------
+0000-1000          2
+1000-2000          6
+2000-3000          7
+4000-5000          1
 ```
 
-### **取第二行数据**
+## 3.7 取第二行数据
 
 ```plsql
 SELECT * FROM (SELECT ROWNUM AS SN, EMP.* FROM EMP) WHERE SN = 2;
 ```
 
-### **随机读取数据**
+# 4 排序
+
+## 4.1 基本排序
 
 ```plsql
+SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
+SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
+SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
+```
+## 4.2 多个字段排序
+
+```plsql
+select empno,deptno,sal,ename,job from scott.emp order by 2 asc,3 desc;
+```
+## 4.3 按子串排序
+
+```plsql
+SELECT LAST_NAME AS 名称,
+       PHONE_NUMBER AS 号码,
+       SALARY AS 工资,
+       SUBSTR(PHONE_NUMBER, -4) AS 尾号
+  FROM HR.EMPLOYEES
+ WHERE ROWNUM <= 5
+ ORDER BY 4;
+ 
+ 
+ SELECT LAST_NAME AS 名称,
+       PHONE_NUMBER AS 号码,
+       SALARY AS 工资     
+  FROM HR.EMPLOYEES t
+ WHERE ROWNUM <= 5
+ ORDER BY SUBSTR(t.PHONE_NUMBER, -4); 
+```
+
+## 4.4 随机读取数据
+
+```plsql
+-- 先随机排序,再取数据
 SQL> SELECT empno,ename FROM (SELECT empno,ename FROM emp ORDER BY dbms_random.value()) WHERE ROWNUM <= 3;
 
 EMPNO ENAME
@@ -385,7 +423,32 @@ EMPNO ENAME
  7934 MILLER
  7654 MARTIN
 ```
-### **转义字符**
+## 4.5 TRANSLATE
+
+TRANSLATE(expr,from_string,to_string)
+
+```plsql
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
+
+NEW_STR
+---------------
+12 您好 2314567
+
+-- to_string为空,则返回空值
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+
+-- to_string对应的位置没有字符,则from_string中列出的字符将会消掉
+SQL> SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg','1') AS NEW_STR  FROM dual;
+
+NEW_STR
+-------
+ 您好
+```
+
+##  4.6 转义字符
 
 ```plsql
 CREATE OR REPLACE VIEW v2 AS
@@ -404,48 +467,8 @@ SELECT * FROM v2 WHERE vname LIKE '_BCD%';
 SELECT * FROM v2 WHERE vname LIKE '\_BCD%' ESCAPE '\';
 SELECT * FROM v2 WHERE vname LIKE '_\\BCD%' ESCAPE '\';
 ```
-### **排序**
 
-```plsql
-SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY hiredate ASC;
-SELECT empno,ename,hiredate FROM emp WHERE deptno=10 ORDER BY 3 ASC;
-SELECT empno,deptno,sal,ename,job FROM emp ORDER BY 2 ASC,3 DESC;
-
-SELECT LAST_NAME AS 名称,
-       PHONE_NUMBER AS 号码,
-       SALARY AS 工资,
-       SUBSTR(PHONE_NUMBER, -4) AS 尾号
-  FROM HR.EMPLOYEES
- WHERE ROWNUM <= 5
- ORDER BY 4;
-```
-
-### **TRANSLATE**
-
-```plsql
-SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','1234567') AS NEW_STR  FROM dual;
-
-NEW_STR
----------------
-12 您好 2314567
-
-SQL> SELECT  TRANSLATE('ab 您好 bcadefg','abcdefg','') AS NEW_STR  FROM dual;
-
-NEW_STR
--------
-
-SQL> SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg','1') AS NEW_STR  FROM dual;
-
-NEW_STR
--------
- 您好
-SQL>  SELECT  TRANSLATE('ab 您好 bcadefg','1abcdefg ','1') AS NEW_STR  FROM dual;
-
-NEW_STR
--------
-您好
-```
-### **部分字段排序**
+## 4.7 部分字段排序
 
 ```plsql
 CREATE OR REPLACE VIEW V3 AS SELECT EMPNO || ' ' ||ename AS DATA FROM emp;
@@ -475,14 +498,20 @@ DATA                                                ENAME
 14 rows selected
 ```
 
-### **处理排序空值**
+## 4.8  处理排序空值
+
+**Oracle默认升序空值在后,降序空值在前.**
 
 ```plsql
+-- NULL排在最前
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS FIRST;
+-- NULL排在最后
 SELECT ENAME, SAL, COMM ORDER_COL FROM EMP ORDER BY 3 NULLS LAST;
 ```
 
-### **部分值排序**
+## 4.9 根据条件取不同列中的值来排序
+
+要求工资在这个范围的员工排在前面,以便优先查看.
 
 ```plsql
 SELECT EMPNO AS 编码,
@@ -511,7 +540,9 @@ SELECT EMPNO AS 编码,
        END,3;
 ```
 
-### **UNION ALL 和空值**
+# 5 操作多个表
+
+## 5.1 UNION ALL 和空值
 
 ```plsql
 SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
@@ -526,14 +557,16 @@ SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
 ---------- -------------- ----------
       7788 SCOTT                7566
         10 ACCOUNTING     
-        
-SQL> SELECT '' AS c1 FROM dual;
 
-C1
---
+-- Oracle中常常把空字符串当作NULL处理
+SQL> select sysdate from dual where '' is null;
+SYSDATE   
+----------
+2019-11-25
+-- 空字符串本身是varchar2类型,NULL可以是任何类型,它们不等价.
 ```
 
-### **UNION 与 OR**
+## 5.2 UNION 与 OR
 
 ```plsql
 SQL> SELECT empno,ename FROM emp WHERE empno = 7788 OR ename = 'SCOTT';
@@ -543,12 +576,12 @@ EMPNO ENAME
  7788 SCOTT
 
 SQL> SELECT EMPNO, ENAME
-  2    FROM EMP
-  3   WHERE EMPNO = 7788
-  4  UNION ALL
-  5  SELECT EMPNO, ENAME
-  6    FROM EMP
-  7   WHERE ENAME = 'SCOTT';
+      FROM EMP
+     WHERE EMPNO = 7788
+    UNION ALL
+    SELECT EMPNO, ENAME
+      FROM EMP
+     WHERE ENAME = 'SCOTT';
 
 EMPNO ENAME
 ----- ----------
@@ -556,12 +589,12 @@ EMPNO ENAME
  7788 SCOTT
  
 SQL> SELECT EMPNO, ENAME
-  2    FROM EMP
-  3   WHERE EMPNO = 7788
-  4  UNION
-  5  SELECT EMPNO, ENAME
-  6    FROM EMP
-  7   WHERE ENAME = 'SCOTT';
+      FROM EMP
+     WHERE EMPNO = 7788
+    UNION
+    SELECT EMPNO, ENAME
+      FROM EMP
+     WHERE ENAME = 'SCOTT';
 
 EMPNO ENAME
 ----- ----------
@@ -602,7 +635,7 @@ Predicate Information (identified by operation id):
 
 20 rows selected.
 ```
-### **inner join**
+## 5.3  INNER JOIN
 
 ```plsql
 SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
@@ -616,199 +649,191 @@ SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
   WHERE E.DEPTNO = D.DEPTNO
     AND E.DEPTNO = 10;
     
-    
-    SQL> EXPLAIN PLAN FOR
-  2    SELECT A.EMPNO, A.ENAME, A.JOB, A.SAL, A.DEPTNO
-  3      FROM EMP A
-  4     INNER JOIN EMP3 B
-  5        ON (B.ENAME = A.ENAME AND B.JOB = A.JOB AND B.SAL = A.SAL);
+EXPLAIN PLAN FOR
+      SELECT a.EMPNO, a.ENAME, a.JOB, a.SAL, a.DEPTNO
+       FROM EMP a
+     inner join emp2 b on (b.ename=a.ename and b.job=a.job and b.sal=a.sal);
+      
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);      
 
-Explained
-
-
-SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
-
-PLAN_TABLE_OUTPUT
---------------------------------------------------------------------------------
-Plan hash value: 620718003
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 166525280
+ 
 ---------------------------------------------------------------------------
 | Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
 ---------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |      |     4 |   160 |     6   (0)| 00:00:01 |
-|*  1 |  HASH JOIN         |      |     4 |   160 |     6   (0)| 00:00:01 |
-|   2 |   TABLE ACCESS FULL| EMP3 |     4 |    60 |     3   (0)| 00:00:01 |
-|   3 |   TABLE ACCESS FULL| EMP  |    14 |   350 |     3   (0)| 00:00:01 |
+|   0 | SELECT STATEMENT   |      |     4 |   208 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN         |      |     4 |   208 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP2 |     4 |   104 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP  |    16 |   416 |     3   (0)| 00:00:01 |
 ---------------------------------------------------------------------------
+ 
+
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Predicate Information (identified by operation id):
 ---------------------------------------------------
-   1 - access("B"."ENAME"="A"."ENAME" AND "B"."JOB"="A"."JOB" AND
+ 
+   1 - access("B"."ENAME"="A"."ENAME" AND "B"."JOB"="A"."JOB" AND 
               "B"."SAL"="A"."SAL")
+ 
 Note
 -----
-   - this is an adaptive plan
+   - dynamic sampling used for this statement (level=2)
 
-20 rows selected
+已选择 20 行。
 ```
 
-###  **IN**
+##  5.4 IN
 
 ```plsql
 SQL> EXPLAIN PLAN FOR
-  2    SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
-  3      FROM EMP
-  4     WHERE (ENAME, JOB, SAL) IN (SELECT ENAME, JOB, SAL FROM EMP3);
+      SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
+       FROM EMP
+      WHERE (ENAME, JOB, SAL) IN (SELECT ENAME, JOB, SAL FROM EMP3);
 
 Explained
 
 
 SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
 
-PLAN_TABLE_OUTPUT
---------------------------------------------------------------------------------
-Plan hash value: 102031456
---------------------------------------------------------------------------------
-| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CP
---------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT             |               |     4 |   160 |     6  (1
-|   1 |  NESTED LOOPS                |               |     4 |   160 |     6  (1
-|   2 |   NESTED LOOPS               |               |     4 |   160 |     6  (1
-|   3 |    SORT UNIQUE               |               |     4 |    60 |     3   (
-|   4 |     TABLE ACCESS FULL        | EMP3          |     4 |    60 |     3   (
-|*  5 |    INDEX RANGE SCAN          | IDX_EMP_ENAME |     1 |       |     0   (
-|*  6 |   TABLE ACCESS BY INDEX ROWID| EMP           |     1 |    25 |     1   (
---------------------------------------------------------------------------------
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 4039873364
+ 
+---------------------------------------------------------------------------
+| Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |      |     4 |   208 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN SEMI    |      |     4 |   208 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP  |    16 |   416 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP2 |     4 |   104 |     3   (0)| 00:00:01 |
+---------------------------------------------------------------------------
+ 
+
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Predicate Information (identified by operation id):
 ---------------------------------------------------
-   5 - access("ENAME"="ENAME")
-   6 - filter("SAL"="SAL" AND "JOB"="JOB")
+ 
+   1 - access("ENAME"="ENAME" AND "JOB"="JOB" AND "SAL"="SAL")
+ 
+Note
+-----
+   - dynamic sampling used for this statement (level=2)
 
-19 rows selected
+已选择 19 行。
+
+
 ```
 
-### **exists**
+## 5.5 EXISTS
 
 ```plsql
-SQL> EXPLAIN PLAN FOR
-  2    SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
-  3      FROM EMP A
-  4     WHERE EXISTS (SELECT NULL
-  5              FROM EMP3 B
-  6             WHERE B.ENAME = A.ENAME
-  7               AND B.JOB = A.JOB
-  8               AND B.SAL = A.SAL);
+EXPLAIN PLAN FOR
+      SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
+       FROM EMP a
+      exists (select null from emp2 b where b.ename=a.ename and b.job=a.job and b.sal=a.sal);
+      
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);     
 
-Explained
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 4039873364
+ 
+---------------------------------------------------------------------------
+| Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |      |     4 |   208 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN SEMI    |      |     4 |   208 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP  |    16 |   416 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP2 |     4 |   104 |     3   (0)| 00:00:01 |
+---------------------------------------------------------------------------
+ 
 
-
-SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
-
-PLAN_TABLE_OUTPUT
---------------------------------------------------------------------------------
-Plan hash value: 102031456
---------------------------------------------------------------------------------
-| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CP
---------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT             |               |     4 |   160 |     6  (1
-|   1 |  NESTED LOOPS                |               |     4 |   160 |     6  (1
-|   2 |   NESTED LOOPS               |               |     4 |   160 |     6  (1
-|   3 |    SORT UNIQUE               |               |     4 |    60 |     3   (
-|   4 |     TABLE ACCESS FULL        | EMP3          |     4 |    60 |     3   (
-|*  5 |    INDEX RANGE SCAN          | IDX_EMP_ENAME |     1 |       |     0   (
-|*  6 |   TABLE ACCESS BY INDEX ROWID| EMP           |     1 |    25 |     1   (
---------------------------------------------------------------------------------
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Predicate Information (identified by operation id):
 ---------------------------------------------------
-   5 - access("B"."ENAME"="A"."ENAME")
-   6 - filter("B"."SAL"="A"."SAL" AND "B"."JOB"="A"."JOB")
+ 
+   1 - access("ENAME"="ENAME" AND "JOB"="JOB" AND "SAL"="SAL")
+ 
+Note
+-----
+   - dynamic sampling used for this statement (level=2)
 
-19 rows selected
+已选择 19 行。
 ```
 
-### **表连接**
+## 5.6 表连接
 
 ```plsql
 DROP TABLE L PURGE;
 DROP TABLE R PURGE;
-
 /*左表*/
-CREATE TABLE L AS
-  SELECT 'left_1' AS STR, '1' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'left_2' AS STR, '2' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'left_3' AS STR, '3' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'left_4' AS STR, '4' AS V
-    FROM DUAL;
-
+create table l as 
+select 'left_1' as str,'1' as val from dual union ALL
+select 'left_2','2' as val from dual union all
+select 'left_3','3' as val from dual union all
+select 'left_4','4' as val from dual;
+select * from l;
 /*右表*/
-CREATE TABLE R AS
-  SELECT 'right_3' AS STR, '3' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'right_4' AS STR, '4' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'right_5' AS STR, '5' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'right_6' AS STR, '6' AS V
-    FROM DUAL;
+create table r as 
+select  'right_3' as str,'3' as val,1 as status from dual union all
+select  'right_4' as str,'4' as val,0 as status from dual union all
+select  'right_5' as str,'5' as val,0 as status from dual union all
+select  'right_6' as str,'6' as val,0 as status from dual;
+select * from r;
 
 /*INNER JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
- INNER JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l inner join r on l.val=r.val order by 1,2;
 
-/*WHERE*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L, R
- WHERE L.V = R.V
- ORDER BY 1, 2;
+/*INNER JOIN WHERE*/
+select l.str as left_str,r.str as right_str from l,r where  l.val=r.val order by 1,2;
 
 /*LEFT JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
-  LEFT JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l left join r on l.val=r.val order by 1,2;
+select l.str as left_str,r.str as right_str,r.status  from l left join r on l.val=r.val where r.status=1 order by 1,2;
+select l.str as left_str,r.str as right_str,r.status  from l left join r on (l.val=r.val and r.status=1) order by 1,2;
 
-/*+*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L, R
- WHERE L.V = R.V(+)
- ORDER BY 1, 2;
+/*LEFT JOIN + */
+select l.str as left_str,r.str as right_str from l,r where  l.val=r.val(+) order by 1,2;
+select l.str as left_str,r.str as right_str,r.status from l,r where  l.val=r.val(+) and r.status=1 order by 1,2;
+select l.str as left_str,r.str as right_str,r.status from l,r where  l.val=r.val(+) and r.status(+)=1 order by 1,2;
+select l.str as left_str,r.str as right_str,r.status from l,(select * from r where r.status=1) r where l.val=r.val(+)  order by 1,2;
 
 /*RIGHT JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
- RIGHT JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l right join r on l.val=r.val order by 1,2;
  
-/*+*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L, R
- WHERE L.V(+) = R.V
- ORDER BY 1, 2;
- 
+/*RIGHT JOIN + */
+select l.str as left_str,r.str as right_str from l,r where  l.val(+)=r.val order by 1,2;
+
 /*FULL JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
- FULL JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l full join r on l.val=r.val order by 1,2;
  
- //natural join
-select index_name,column_name,index_type,uniqueness from user_indexes natural join user_ind_columns where table_name='CUSTOMERS';
+ -- natural join
+ -- 自然连接（NATURAL JOIN）是一种特殊的等值连接，将表中具有相同名称的列自动进行匹配。
+ -- 1.自然连接不必指定任何连接条件;
+ -- 2.如果两张表中有相同名字的列，但是数据类型不一致，如果能隐式转换，则能正常连接，但如果隐式转换不成功，则报错;
+ -- 3.使用自然连接时，不能使用表名或表的别名修饰列;
+ -- 4.自然连接会两张表中相同名称的所有列;
+ -- 5.自然连接也可以指定显示列。
+ -- 自然连接，自动匹配同名的列，虽然很方便，不用指定匹配的列。但也有缺点，虽然可以指定查询结果包括哪些列，但不能人为地指定哪些列被匹配,而内连接就可以自由指定。
+
+SELECT
+    index_name,
+    column_name,
+    index_type,
+    uniqueness
+FROM
+    dba_indexes
+    NATURAL JOIN dba_ind_columns
+WHERE
+    table_name = 'CUSTOMERS';
 ```
 
-### **自关联**
+## 5.7 自关联
 
 ```plsql
 /*自关联*/
@@ -835,17 +860,20 @@ SELECT 员工.EMPNO AS 职工编码,
   LEFT JOIN 主管
     ON (员工.MGR = 主管.EMPNO)
  ORDER BY 1;
+ 
+ /*自关联*/
+ select a.*,b.ename from  emp a left join  emp b  on a.MGR=b.empno order by 1;
 ```
 
-### **NOT IN,NOT EXISTS 和LEFT JOIN**
+## 5.8 NOT IN,NOT EXISTS ,LEFT JOIN
 
 ```PLSQL
 /*NOT IN*/
 SQL> EXPLAIN PLAN FOR
-  2    SELECT *
-  3      FROM DEPT
-  4     WHERE DEPTNO NOT IN
-  5           (SELECT EMP.DEPTNO FROM EMP WHERE EMP.DEPTNO IS NOT NULL);
+      SELECT *
+       FROM DEPT
+       WHERE DEPTNO NOT IN
+             (SELECT EMP.DEPTNO FROM EMP WHERE EMP.DEPTNO IS NOT NULL);
 
 Explained
 
@@ -937,7 +965,7 @@ Predicate Information (identified by operation id):
 20 rows selected
 ```
 
-### **GROUP BY不显示0行**
+## 5.9 GROUP BY不显示0行
 
 ```plsql
 SQL> SELECT COUNT(*) FROM EMP GROUP BY DEPTNO;
@@ -955,7 +983,7 @@ SQL> SELECT COUNT(*) FROM EMP WHERE DEPTNO = 40;
          0
 ```
 
-### **LEFT JOIN的条件**
+## 5.10  LEFT JOIN的条件
 
 ```plsql
 SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
@@ -1096,7 +1124,7 @@ Predicate Information (identified by operation id):
 * 4 - filter("R"."STATUS"(+)=1 AND "STATUS"(+)=1)
 ```
 
-### **比对表数据**
+## 5.11 比对两张表的数据
 
 ```plsql
 CREATE OR REPLACE VIEW V4 AS
@@ -1113,10 +1141,10 @@ SELECT * FROM V4 WHERE ENAME = 'SCOTT';
 SELECT ROWNUM, EMPNO, ENAME FROM EMP WHERE ENAME = 'SCOTT';
 
 SQL> SELECT V4.EMPNO, V4.ENAME, B.EMPNO, B.ENAME
-  2    FROM V4
-  3    FULL JOIN EMP B
-  4      ON (B.EMPNO = V4.EMPNO)
-  5   WHERE (V4.EMPNO IS NULL OR B.EMPNO IS NULL);
+      FROM V4
+      FULL JOIN EMP B
+        ON (B.EMPNO = V4.EMPNO)
+     WHERE (V4.EMPNO IS NULL OR B.EMPNO IS NULL);
 
 EMPNO ENAME      EMPNO ENAME
 ----- ---------- ----- ----------
@@ -1142,53 +1170,53 @@ EMPNO ENAME             CNT EMPNO ENAME             CNT
  7788 SCOTT               2                  
 ```
 
-### **聚集与内连接**
+## 5.12 聚集与内连接
 
 ```plsql
 SQL> SELECT E.DEPTNO,
-  2         SUM(E.SAL) AS TOTAL_SAL,
-  3         SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
-  4    FROM EMP E
-  5   INNER JOIN (SELECT EB.EMPNO,
-  6                      SUM(CASE
-  7                            WHEN EB.TYPE = 1 THEN
-  8                             0.1
-  9                            WHEN EB.TYPE = 2 THEN
- 10                             0.2
- 11                            WHEN EB.TYPE = 3 THEN
- 12                             0.3
- 13                          END) AS RATE
- 14                 FROM EMP_BONUS EB
- 15                GROUP BY EB.EMPNO) EB2
- 16      ON E.EMPNO = EB2.EMPNO
- 17   WHERE E.DEPTNO = 10
- 18   GROUP BY DEPTNO;
+          SUM(E.SAL) AS TOTAL_SAL,
+           SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+      FROM EMP E
+     INNER JOIN (SELECT EB.EMPNO,
+                        SUM(CASE
+                              WHEN EB.TYPE = 1 THEN
+                               0.1
+                              WHEN EB.TYPE = 2 THEN
+                              0.2
+                             WHEN EB.TYPE = 3 THEN
+                             0.3
+                           END) AS RATE
+                  FROM EMP_BONUS EB
+                 GROUP BY EB.EMPNO) EB2
+       ON E.EMPNO = EB2.EMPNO
+    WHERE E.DEPTNO = 10
+    GROUP BY DEPTNO;
 
 DEPTNO  TOTAL_SAL TOLTAL_BONUS
 ------ ---------- ------------
     10       6300         1890
 ```
 
-### **聚集与外连接**
+## 5.13 聚集与外连接
 
 ```plsql
 SQL> SELECT E.DEPTNO,
-  2         SUM(E.SAL) AS TOTAL_SAL,
-  3         SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
-  4    FROM EMP E
-  5    LEFT JOIN (SELECT EB.EMPNO,
-  6                      SUM(CASE
-  7                            WHEN EB.TYPE = 1 THEN
-  8                             0.1
-  9                            WHEN EB.TYPE = 2 THEN
- 10                             0.2
- 11                            WHEN EB.TYPE = 3 THEN
- 12                             0.3
- 13                          END) AS RATE
- 14                 FROM EMP_BONUS EB
- 15                GROUP BY EB.EMPNO) EB2
- 16      ON E.EMPNO = EB2.EMPNO
- 17   GROUP BY DEPTNO;
+           SUM(E.SAL) AS TOTAL_SAL,
+           SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+      FROM EMP E
+      LEFT JOIN (SELECT EB.EMPNO,
+                        SUM(CASE
+                              WHEN EB.TYPE = 1 THEN
+                              0.1
+                              WHEN EB.TYPE = 2 THEN
+                              0.2
+                             WHEN EB.TYPE = 3 THEN
+                              0.3
+                           END) AS RATE
+                  FROM EMP_BONUS EB
+                GROUP BY EB.EMPNO) EB2
+       ON E.EMPNO = EB2.EMPNO
+    GROUP BY DEPTNO;
 
 DEPTNO  TOTAL_SAL TOLTAL_BONUS
 ------ ---------- ------------
@@ -1197,7 +1225,7 @@ DEPTNO  TOTAL_SAL TOLTAL_BONUS
     10       8750         1890
 ```
 
-### **空值连接**
+## 5.14 空值连接
 
 ```plsql
 SQL> SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
@@ -1237,7 +1265,7 @@ SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
     ON DEPT.DEPTNO = EMP.DEPTNO;
 ```
 
-### **空值转换**
+## 5.15  空值转换
 
 ```plsql
 SQL> SELECT A.ENAME, A.COMM
@@ -1272,9 +1300,9 @@ SQL> SELECT COUNT(*)
          1
 ```
 
-## 1.4  插入、更新与删除
+# 6 插入、更新与删除
 
-### **插入**
+### 4.1 插入
 
 ```plsql
  CREATE TABLE test1 (
@@ -1305,7 +1333,7 @@ INSERT INTO v_test1(c1,c2,c3) VALUES(DEFAULT,NULL,'不能改c4')
 ORA-32575: Explicit column default is not supported for modifying views
 ```
 
-### **复制数据**
+### 4.2 复制数据
 
 ```plsql
 CREATE TABLE test2 AS SELECT * FROM test1;
@@ -1325,7 +1353,7 @@ INSERT INTO test2 SELECT * FROM test1;
 
 [^注]:复制的表不包含默认值等约束信息,使用这种方式复制表后,需重建默认值及索引和约束.
 
-### **无条件INSTER INTO**
+### 4.3 无条件INSTER INTO
 
 ```plsql
 CREATE TABLE EMP4 AS
@@ -1344,7 +1372,7 @@ VALUES
   SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP WHERE DEPTNO IN (10, 20);
 ```
 
-### **有条件INSTER INTO**
+### 4.4 有条件INSTER INTO
 
 ```plsql
 INSERT ALL WHEN JOB IN
@@ -1359,7 +1387,7 @@ VALUES
   SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP;
 ```
 
-### **INSTER FIRST**
+### 4.5 INSTER FIRST
 
 ```PLSQL
 /*INSERT FIRST*/
@@ -1377,7 +1405,7 @@ VALUES
   SELECT EMPNO, ENAME, JOB, DEPTNO FROM EMP;
 ```
 
-### **转置INSTER**
+### 4.6 转置INSTER
 
 ```plsql
 /*转置 INSERT*/
@@ -1431,7 +1459,7 @@ SELECT '周四',d4 FROM test3 UNION ALL
 SELECT '周五',d5 FROM test3;
 ```
 
-### 批量更新
+### 4.7 批量更新
 
 ```plsql
 ALTER TABLE EMP ADD DNAME VARCHAR2(50) DEFAULT 'noname';
@@ -1487,18 +1515,18 @@ SELECT EMPNO, ENAME, DEPTNO, DNAME FROM EMP;
 
 
 
-## 二、SQL函数
+# 二、函数
 
-### 2.1 函数的作用
+## 1. 函数的作用
 
 - 方便数据的统计 
 - 处理查询结果
 
-### 2.2 函数的分类
+## 2. 函数的分类
 
-- 数值函数
+### 2.1 数值函数
 
-### **四舍五入round(n[,m])**
+**四舍五入round(n[,m])**
 
 省略m:0;m>0:小数点后m位;m>0:小数点前m位
 
@@ -1510,7 +1538,7 @@ ROUND(23.4) ROUND(23.4,1) ROUND(23.4,-1)
          23          23.4             20
 ```
 
-### 	**取整函数**
+**取整函数**
 
 ceil(n),floor(n)
 
@@ -1522,7 +1550,7 @@ CEIL(23.45) FLOOR(23.45)
          24           23
 ```
 
-### 常用计算
+**常用计算**
 
 abs(n),mod(n,m),power(n,m),sqrt(16)
 
@@ -1551,27 +1579,27 @@ SQL> select sqrt(16) from dual;
          4
 ```
 
-### 三角函数
+**三角函数**
 
 sin(n)、asin(n)、cos(n)、acos(n)、tan(n)、atan(n)
 
-### 字符函数
+### 2.2 字符函数
 
-upper(char),lower(char), initcap(char)  ----首字母大写
+**upper(char),lower(char), initcap(char)  ----首字母大写**
 
-substr(char,n[m])
+**substr(char,n[m])**
 
-length(char)
+**length(char)**
 
-concat(char1,char2):与||操作符作用一样,字符串拼接
+**concat(char1,char2):与||操作符作用一样,字符串拼接**
 
-trim(c2 from c1)  去除字符两边的一个字符,trim(char) 去除字符两边的所有空格
+**trim(c2 from c1)  去除字符两边的一个字符,trim(char) 去除字符两边的所有空格**
 
-ltrim(c2 from c1)
+**ltrim(c2 from c1)**
 
-rtrim(c2 from c1)
+**rtrim(c2 from c1)**
 
-replace(char,s_string[,r_string])
+**replace(char,s_string[,r_string])**
 
 ```
 SQL> select substr('oracle',4),substr('oracle',0,4),substr('oracle',-5,4) from dual;
@@ -1611,26 +1639,26 @@ REPLACE('ORACLE','AC','R')
 orRle
 ```
 
-### 日期函数
+### 2.3 日期函数
 
-系统时间sysdate
+**系统时间sysdate**
 
 ```
 alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.ff';
 select sysdate from dual
 ```
 
-​	日期操作
+​	**日期操作**
 
-​	add_months(date,i)
+​	**add_months(date,i)**
 
-​	next_day(date,char)
+​	**next_day(date,char)**
 
-​	last_day(date) 返回该月的最后一天
+​	**last_day(date) 返回该月的最后一天**
 
-​	month_between(date1,date2)
+​	**month_between(date1,date2)**
 
-​	extract(date from datetime)
+​	**extract(date from datetime)**
 
 ```
 SQL> select add_months(sysdate,1),add_months(sysdate,-1) from dual;
@@ -1652,9 +1680,9 @@ EXTRACT(YEARFROMSYSDATE)
                     2019
 ```
 
-### 转换函数
+### 2.4 转换函数
 
-日期转字符to_char(date[,fmt[,params])
+**日期转字符to_char(date[,fmt[,params])**
 
 ```
 SQL> select to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') from dual;
@@ -1674,19 +1702,19 @@ TO_DATE('2019-09-10','YYYY-MM-DDHH24:MI:SS')
 2019/9/10
 ```
 
-数字转字符to_char(number,fmt[,params])
+**数字转字符to_char(number,fmt[,params])**
 
-​		9:显示数字并忽略前面的0
+​		**9:显示数字并忽略前面的0**
 
-​		0:显示数字,位数不足,用0补齐
+​		**0:显示数字,位数不足,用0补齐**
 
-​		.或D:显示小数点
+​		**.或D:显示小数点**
 
-​		,或G:显示千位符
+​		**,或G:显示千位符**
 
-​		$:美元符号
+​		**$:美元符号**
 
-​		S:加正负号(前后都可以)
+​		**S:加正负号(前后都可以)**
 
 ```
 SQL> select to_char(122232.324,'$99,999,999.99') from dual;
@@ -1703,7 +1731,7 @@ TO_CHAR(122232.324,'S99,999,999.99')
 
 ```
 
-字符转数字to_number(char[,fmt])
+**字符转数字to_number(char[,fmt])**
 
 ```
 SQL> select to_number('$122,322.233','$999,999.999') from dual;
@@ -1713,7 +1741,11 @@ TO_NUMBER('$122,322.233','$999,999.999')
                               122322.233
 ```
 
-## 三、Oracle触发器
+# 三、PL/SQL
+
+
+
+# 四、Oracle触发器
 
 ### 3.1 什么是触发器
 
@@ -1765,3 +1797,4 @@ PLSQL块
 
 ```
 
+# 

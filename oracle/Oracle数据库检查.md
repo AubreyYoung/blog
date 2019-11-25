@@ -266,6 +266,19 @@ srvctl config nodeapps -n jaxnh1 -a        #10g
 select inst_id, count(*) from gv$session where status='ACTIVE' group by inst_id;
 ```
 
+## 1.12 清空缓存
+
+```plsql
+----清空shared pool
+alter system flush shared_pool;
+
+----清空buffer cache
+alter system flush buffer_cache;
+
+----清空SGA连接池信息
+alter system flush global context
+```
+
 
 
 ## 2.1 数据库版本和补丁安装情况
@@ -334,7 +347,7 @@ alter database add supplemental log data;
 
 ## 2.3 数据库连接数
 
-```
+```plsql
 col name format a10
 col value format a10
 select inst_id, sessions_current,sessions_highwater,SESSIONS_MAX,SESSIONS_WARNING ,USERS_MAX from  gv$license;
@@ -342,9 +355,9 @@ select inst_id, sessions_current,sessions_highwater,SESSIONS_MAX,SESSIONS_WARNIN
 select name,value from v$parameter where name='processes';
 ```
 
-### 2.4 数据库时区
+## 2.4 数据库时区
 
-```
+```plsql
 -- 数据库时区
 select dbtimezone from dual ;  
 -- 看会话时区
@@ -479,6 +492,79 @@ HOST = 192.168.1.216 --此处使用数字形式的VIP，绝对禁止使用rac1-v
 HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-vip
 #更改控制文件记录保留时间
 alter system set control_file_record_keep_time =31;
+```
+
+### 2.5.5 Oracle 参数调优
+
+```plsql
+ALTER SYSTEM SET "_buffer_busy_wait_timeout"=2     SCOPE=SPFILE;
+ALTER SYSTEM SET "_kill_diagnostics_timeout"=140   SCOPE=SPFILE;
+ALTER SYSTEM SET "_lm_rcvr_hang_allow_time"=140    SCOPE=SPFILE;
+ALTER SYSTEM SET "_optim_peek_user_binds"=FALSE    SCOPE=SPFILE;
+ALTER SYSTEM SET "_use_adaptive_log_file_sync"=FALSE SCOPE=SPFILE;
+ALTER SYSTEM SET "_PX_use_large_pool"=TRUE SCOPE=SPFILE;
+ALTER SYSTEM SET "deferred_segment_creation"=FALSE SCOPE=SPFILE;
+ALTER SYSTEM SET log_buffer=512000000 SCOPE=SPFILE;
+ALTER SYSTEM SET parallel_force_local=false;
+ALTER SYSTEM SET parallel_max_servers=20;    默认480
+ALTER SYSTEM SET open_cursors=3000 SCOPE=SPFILE;             
+open_cursors设定每个session（会话）最多能同时打开多少个cursor（游标）。session_cached_cursor设定每个session（会话）最多可以缓存多少个关闭掉的cursor
+ALTER SYSTEM SET session_cached_cursors=3000 SCOPE=SPFILE;
+ALTER SYSTEM SET "_kgl_hot_object_copies"=2 SCOPE=SPFILE;
+ALTER SYSTEM SET audit_trail='none' SCOPE=SPFILE;
+ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
+ALTER SYSTEM SET db_cache_size=56g SCOPE=SPFILE;
+ALTER SYSTEM SET pga_aggregate_target=10g SCOPE=SPFILE;   
+ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
+ALTER SYSTEM SET "_enable_NUMA_support"=false;
+ALTER SYSTEM SET PLSQL_CODE_TYPE=NATIVE SCOPE=SPFILE;    ---把plsql存储过程编译成本地代码的过程，不会导致任何解释器开销
+ALTER SYSTEM SET PLSQL_OPTIMIZE_LEVEL=2 SCOPE=SPFILE;
+alter system set use_large_pages='ONLY' SCOPE=SPFILE;
+alter system set recyclebin='OFF' scope=spfile;
+//10g
+alter system set commit_write='immediate,nowait';    异步提交
+//11g
+alter system set commit_logging ='immediate';
+alter system set commit_wait ='nowait' ;
+alter system set db_file_multiblock_read_count = 128 ;
+alter system set java_jit_enabled=false scope=spfile;
+alter system set cursor_sharing=force scope=spfile;
+
+待定参数
+alter system set "_disk_sector_size_override" = true scope=spfile;
+alter system set "_ash_size" = 100M scope=spfile;
+alter system set "_gc_read_mostly_locking"=FALSE scope=spfile;
+alter system set "_gc_policy_time"=0 scope=spfile;
+```
+
+[^注]: 将可选的 vm.hugetlb_shm_group 参数设置为有权使用 HugePages 的操作系统组。默认情况下，此参数设置为 0，从而允许所有组使用 HugePages。可以将此参数设置为 Oracle
+
+```
+PARALLEL_MAX_SEVERS参数设置并行执行可用的最大进程数量，该参数的缺省值如下得出：
+1.当PGA_AGGREGATE_TARGET >0时
+	PARALLEL_MAX_SERVERS= (CPU_COUNT x PARALLEL_THREADS_PER_CPU x 10)
+2.当PARALLEL_MAX_SERVERS未设置
+	PARALLEL_MAX_SERVERS=(CPU_COUNT x PARALLEL_THREADS_PER_CPU x 5）
+3.缺省设置可能并不足够，通常我们根据最高的并行度（DOP）来设置PARALLEL_MAX_SERVERS参数
+```
+
+隐藏参数含义
+
+| NAME                        | VALUE | ISDEFAULT | DESCRIPTION                                             | ISMOD | ISADJ |
+| --------------------------- | ----- | --------- | ------------------------------------------------------- | ----- | ----- |
+| _PX_use_large_pool          | TRUE  | FALSE     | Use Large Pool as source of PX buffers                  | FALSE | FALSE |
+| _buffer_busy_wait_timeout   | 2     | FALSE     | buffer busy wait time in centiseconds                   | FALSE | FALSE |
+| _enable_NUMA_support        | FALSE | TRUE      | Enable NUMA support and optimizations                   | FALSE | FALSE |
+| _kgl_hot_object_copies      | 2     | FALSE     | Number of copies for the hot object                     | FALSE | FALSE |
+| _kill_diagnostics_timeout   | 140   | FALSE     | timeout delay in seconds before killing enqueue blocker | FALSE | FALSE |
+| _lm_rcvr_hang_allow_time    | 140   | FALSE     | receiver hang allow time in seconds                     | FALSE | FALSE |
+| _optim_peek_user_binds      | FALSE | FALSE     | enable peeking of user binds                            | FALSE | FALSE |
+| _use_adaptive_log_file_sync | FALSE | FALSE     | Adaptively switch between post/wait and polling         | FALSE | FALSE |
+
+### 2.5.6 ASM隐藏参数
+
+```plsql
+select ksppinm,ksppstvl,ksppdesc from x$ksppi x,x$ksppcv y where x.indx = y.indx and ksppinm='_asm_hbeatiowait';
 ```
 
 ## 2.6 数据库profile
@@ -654,7 +740,7 @@ ORA-00244: concurrent control file backup operation in progress
 
 ## 2.12 redo log文件
 
-## 2.12.1 查看redo
+### 2.12.1 查看redo
 
 ```plsql
 col status format a10;
@@ -676,6 +762,58 @@ select inst_id,thread#, GROUP#,SEQUENCE#,BYTES/1024/1024,STATUS,FIRST_TIME from 
 ```plsql
 --清空redo
 ALTER DATABASE CLEAR LOGFILE GROUP 1;
+--非归档清空redo
+ALTER DATABASE CLEAR UNARCHIVED LOGFILE GROUP 3;
+```
+
+### 2.12.3 查看REDO切换频率
+
+```plsql
+Select round(FIRST_TIME, 'DD'), THREAD#, Count(SEQUENCE#)
+From v$log_history
+Group By round(FIRST_TIME, 'DD'), THREAD#
+Order By 1, 2;
+```
+
+### 2.12.4 检查15天内归档的生成情况
+
+```plsql
+set numw 4
+set pagesize 500
+set line 500
+col Date for a20
+col Day for a20
+SELECT  trunc(first_time) "Date",
+to_char(first_time, 'Dy') "Day",
+count(1) "Total",
+SUM(decode(to_char(first_time, 'hh24'),'00',1,0)) "h0",
+SUM(decode(to_char(first_time, 'hh24'),'01',1,0)) "h1",
+SUM(decode(to_char(first_time, 'hh24'),'02',1,0)) "h2",
+SUM(decode(to_char(first_time, 'hh24'),'03',1,0)) "h3",
+SUM(decode(to_char(first_time, 'hh24'),'04',1,0)) "h4",
+SUM(decode(to_char(first_time, 'hh24'),'05',1,0)) "h5",
+SUM(decode(to_char(first_time, 'hh24'),'06',1,0)) "h6",
+SUM(decode(to_char(first_time, 'hh24'),'07',1,0)) "h7",
+SUM(decode(to_char(first_time, 'hh24'),'08',1,0)) "h8",
+SUM(decode(to_char(first_time, 'hh24'),'09',1,0)) "h9",
+SUM(decode(to_char(first_time, 'hh24'),'10',1,0)) "h10",
+SUM(decode(to_char(first_time, 'hh24'),'11',1,0)) "h11",
+SUM(decode(to_char(first_time, 'hh24'),'12',1,0)) "h12",
+SUM(decode(to_char(first_time, 'hh24'),'13',1,0)) "h13",
+SUM(decode(to_char(first_time, 'hh24'),'14',1,0)) "h14",
+SUM(decode(to_char(first_time, 'hh24'),'15',1,0)) "h15",
+SUM(decode(to_char(first_time, 'hh24'),'16',1,0)) "h16",
+SUM(decode(to_char(first_time, 'hh24'),'17',1,0)) "h17",
+SUM(decode(to_char(first_time, 'hh24'),'18',1,0)) "h18",
+SUM(decode(to_char(first_time, 'hh24'),'19',1,0)) "h19",
+SUM(decode(to_char(first_time, 'hh24'),'20',1,0)) "h20",
+SUM(decode(to_char(first_time, 'hh24'),'21',1,0)) "h21",
+SUM(decode(to_char(first_time, 'hh24'),'22',1,0)) "h22",
+SUM(decode(to_char(first_time, 'hh24'),'23',1,0)) "h23"
+FROM    V$log_history where to_date(first_time)>to_date(sysdate-15)
+group by trunc(first_time), to_char(first_time, 'Dy')
+Order by 1;
+set numw 10
 ```
 
 ## 2.13 归档情况 
@@ -976,12 +1114,12 @@ select username,account_status,default_tablespace,temporary_tablespace,CREATED f
 ### 2.15.2 临时表空间使用
 
 ```plsql
-col Name for a30
-col "Size (M)" for  a30
-col "HWM (M)" for a30
-col "HWM %" for a30
-col "Using (M)" for a30
-col "Using %" for a30
+col Name for a10
+col "Size (M)" for  a20
+col "HWM (M)" for a20
+col "HWM %" for a20
+col "Using (M)" for a20
+col "Using %" for a20
 SELECT d.tablespace_name "Name",
 TO_CHAR(NVL(a.bytes / 1024 / 1024, 0),'99,999,990.900') "Size (M)",
 TO_CHAR(NVL(t.hwm, 0)/1024/1024,'99999999.999')  "HWM (M)",
@@ -1011,8 +1149,8 @@ select tablespace_name,file_name,bytes/1024/1024,autoextensible,maxbytes/1024/10
 查看临时表空间对应的临时文件的使用情况
 
 ```plsql
-SELECT TABLESPACE_NAME         AS TABLESPACE_NAME    ,
-    BYTES_USED/1024/1024/1024    AS TABLESAPCE_USED  ,
+SELECT TABLESPACE_NAME         AS TABLESPACE_NAME,
+    BYTES_USED/1024/1024/1024    AS TABLESAPCE_USED,
     BYTES_FREE/1024/1024/1024  AS TABLESAPCE_FREE
 FROM V$TEMP_SPACE_HEADER
 ORDER BY 1 DESC;
@@ -1030,7 +1168,7 @@ SELECT   se.username,
          tablespace,
          segtype,
          sql_text
-FROM v$sort_usage su, v$parameter p, v$session se, v$sql s
+FROM gv$sort_usage su, gv$parameter p, gv$session se, gv$sql s
    WHERE p.name = 'db_block_size'
      AND su.session_addr = se.saddr
      AND s.hash_value = su.sqlhash
@@ -1279,60 +1417,102 @@ end;
 
 ## 2.20 数据库当前的等待事件
 
-```
+### 2.20.1 数据库等待事件
+
+```plsql
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
+
+
+-- "查询结果中，15分钟内“EVENT”列中不包含以下等待事件：
+ read by other session、buffer busy waits
+ control file parallel write
+ enqueue
+ latch free
+ log file sync
+ log file switch（checkpoint incomplete）
+ log file switch（archiving needed）
+ global cache busy、gc current block busy、gc cr block busy
+ log buffer space
+ log file parallel write
+ cursor: mutex S
+ cursor: mutex X
+ cursor: pin S
+ cursor: pin S wait on X
+ cursor: pin X
+ DFS lock handle
+ library cache lock
+ library cache pin
+ row cache lock
+如果15分钟内“EVENT”列包括以上等待事件，但等待次数小于或等于30次，则检查通过。例如，15分钟内“log file sync”总共等待16次。
+"
+
+select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
 
-## 5.17 客户端连接分布
+### 5.20.2 检查锁与library闩锁等待
 
-### 查询每个客户端连接每个实例的连接数
-
+```plsql
+1. 查询锁等待。
+   SQL> select 'session ' || c.locker || ' lock ' || c.locked ||
+    ', alter system kill session ' || '''' || c.locker || ',' ||
+    d.serial# || '''' || ', OS:kill -9 ' || e.spid as "result"
+    from (select a.sid locked, b.sid locker
+    from v$lock a, v$lock b
+    where a.request > 0
+    and a.id1 = b.id1
+    and a.id2 = b.ID2
+    and a.type = b.type
+    and a.addr <> b.addr) c,
+    v$session d,
+    v$process e
+   where c.locker = d.sid
+    and d.paddr = e.addr;
+   如果返回结果为空，则表示系统无锁等待事件。
+2. 查询library闩锁等待。
+   SQL> select 'session ' || d.locker || ' lock ' || d.locked ||
+    ', alter system kill session ' || '''' || d.locker || ',' ||
+    d.serial# || '''' || ', OS:kill -9 ' || d.os as "result"
+    from (select distinct s.sid locker, s.serial#, p.spid os, w.sid locked
+    from dba_kgllock k, v$session s, v$session_wait w, v$process p
+    where w.event like 'library cache%'
+    and k.kgllkhdl = w.p1raw
+    and k.kgllkuse = s.saddr
+    and s.sid <> w.sid
+    and s.paddr = p.addr) d
+   order by d.locker;
+   如果返回结果为空，则表示系统无library闩锁等待事件
 ```
+
+### 5.20.3 等待事件信息
+
+```plsql
+select * from v$event_name B where b.name ='latch: cache buffers chains';
+
+--引起等待事件的会话
+select user_id,sql_id,count(*) from  sys.wrh$_active_session_history a
+where sample_time > to_date('2019-10-29 08:00:00','yyyy-mm-dd hh24:mi:ss')
+and sample_time < to_date('2019-10-29 09:00:00','yyyy-mm-dd hh24:mi:ss')
+and a.instance_number =1 and a.event_id=2779959231
+group by user_id,sql_id
+order by 3;
+
+select sql_id,p1,count(*) from  sys.wrh$_active_session_history 
+where sample_time > to_date('2019-10-29 08:00:00','yyyy-mm-dd hh24:mi:ss')
+and sample_time < to_date('2019-10-29 09:00:00','yyyy-mm-dd hh24:mi:ss')
+and instance_number =1 and event_id=2779959231
+group by sql_id,p1
+order by 3 desc;
+```
+
+## 5.21 客户端连接分布
+
+查询每个客户端连接每个实例的连接数
+
+```plsql
 col MACHINE format a20
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
-```
-
-## 2.21  检查15天内归档的生成情况
-
-```plsql
-set numw 4
-set pagesize 500
-set line 500
-col Date for a20
-col Day for a20
-SELECT  trunc(first_time) "Date",
-to_char(first_time, 'Dy') "Day",
-count(1) "Total",
-SUM(decode(to_char(first_time, 'hh24'),'00',1,0)) "h0",
-SUM(decode(to_char(first_time, 'hh24'),'01',1,0)) "h1",
-SUM(decode(to_char(first_time, 'hh24'),'02',1,0)) "h2",
-SUM(decode(to_char(first_time, 'hh24'),'03',1,0)) "h3",
-SUM(decode(to_char(first_time, 'hh24'),'04',1,0)) "h4",
-SUM(decode(to_char(first_time, 'hh24'),'05',1,0)) "h5",
-SUM(decode(to_char(first_time, 'hh24'),'06',1,0)) "h6",
-SUM(decode(to_char(first_time, 'hh24'),'07',1,0)) "h7",
-SUM(decode(to_char(first_time, 'hh24'),'08',1,0)) "h8",
-SUM(decode(to_char(first_time, 'hh24'),'09',1,0)) "h9",
-SUM(decode(to_char(first_time, 'hh24'),'10',1,0)) "h10",
-SUM(decode(to_char(first_time, 'hh24'),'11',1,0)) "h11",
-SUM(decode(to_char(first_time, 'hh24'),'12',1,0)) "h12",
-SUM(decode(to_char(first_time, 'hh24'),'13',1,0)) "h13",
-SUM(decode(to_char(first_time, 'hh24'),'14',1,0)) "h14",
-SUM(decode(to_char(first_time, 'hh24'),'15',1,0)) "h15",
-SUM(decode(to_char(first_time, 'hh24'),'16',1,0)) "h16",
-SUM(decode(to_char(first_time, 'hh24'),'17',1,0)) "h17",
-SUM(decode(to_char(first_time, 'hh24'),'18',1,0)) "h18",
-SUM(decode(to_char(first_time, 'hh24'),'19',1,0)) "h19",
-SUM(decode(to_char(first_time, 'hh24'),'20',1,0)) "h20",
-SUM(decode(to_char(first_time, 'hh24'),'21',1,0)) "h21",
-SUM(decode(to_char(first_time, 'hh24'),'22',1,0)) "h22",
-SUM(decode(to_char(first_time, 'hh24'),'23',1,0)) "h23"
-FROM    V$log_history where to_date(first_time)>to_date(sysdate-15)
-group by trunc(first_time), to_char(first_time, 'Dy')
-Order by 1;
-set numw 10
 ```
 
 ## 2.22 未删除归档
@@ -1342,13 +1522,13 @@ set numw 10
 ```
 select  ((sum(blocks * block_size)) /1024 /1024) as "MB" from v$archived_log where  STANDBY_DEST  ='NO'  and deleted='NO';
 ```
-### 2.20.2 删除归档
+### 2.22.2 删除归档
 
 ```
 -- 删除3天前的归档日志，注意不要敲错日期，此删除操作是不可逆的。
 RMAN> delete force archivelog until time "sysdate-1";
 -- 删除3天前的归档日志
-delete  archivelog until time "sysdate";
+delete  archivelog until time "sysdate -3";
 ```
 
 ## 2.21 数据库所有实例每天生成的归档大小
@@ -1512,10 +1692,12 @@ select owner,table_name name,status,degree from dba_tables where degree>1;
 select owner,index_name name,status,degree from dba_indexes where degree>'1';
 ```
 
-## 2.32 Disabled Trigger(es)
+## 2.32 Trigger(es)
 
 ```plsql
-SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE status = 'DISABLED' and owner in (select username from dba_users where account_status='OPEN');
+col OWNER for a15
+col TRIGGER_NAME for a30
+col TABLE_NAME for a40SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
 ```
 
 ## 2.33 Disabled Constraint(s) 
@@ -1604,7 +1786,7 @@ SELECT PROCESS,STATUS,THREAD#,SEQUENCE#,BLOCK#,BLOCKS,DELAY_MINS FROM V$MANAGED_
 
 ### 2.36.1 切换归档日志
 
-```
+```plsql
 ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
 ALTER DATABASE OPEN READ ONLY;
 RECOVER MANAGED STANDBY DATABASE DISCONNECT USING CURRENT LOGFILE;
@@ -1612,6 +1794,9 @@ ALTER SYSTEM SWITCH LOGFILE;
 ALTER SYSTEM ARCHIVE LOG CURRENT;
 
 archive log all；
+
+---Flush any unsent redo from the primary database to the target standby database.
+SQL> ALTER SYSTEM FLUSH REDO TO target_db_name;
 ```
 ### 2.36.2 应用归档
 
@@ -1854,6 +2039,9 @@ select scn,to_char(time_dp,'yyyy-mm-dd hh24:mi:ss')from sys.smon_scn_time;
 
 -- 查看闪回restore_point
 select scn, STORAGE_SIZE ,to_char(time,'yyyy-mm-dd hh24:mi:ss') time,NAME from v$restore_point;
+
+-- 查看闪回空间使用情况
+select * from V$RECOVERY_AREA_USAGE;
 ```
 
 ### 3.7.2 开启/关闭闪回
@@ -2253,6 +2441,8 @@ where rownum < 11;
 
 ## 3.14 统计信息
 
+### 3.14.1 查看统计信息
+
 ```plsql
 -- 查看表统计信息
 select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
@@ -2280,7 +2470,108 @@ SELECT OWNER, TABLE_NAME, PARTITION_NAME,
    AND TABLE_NAME NOT LIKE 'BIN%'
    -- 回收站中的表不做统计
   order by 1,2;
+  
+-- 统计信息脚本
+select 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>''' ||owner||'''' || ', tabname=> ''' || table_name || ''''||',estimate_percent =>10' || ',method_opt=> ' ||'''FOR ALL COLUMNS SIZE AUTO'''||', degree => 2'|| ', cascade => TRUE ); '
+  from DBA_TAB_STATISTICS
+ where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
+and  (STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL) AND TABLE_NAME NOT LIKE 'BIN%';
 ```
+
+### 3.14.2 收集统计信息
+
+```plsql
+select distinct 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>''' ||owner||'''' || ', tabname=> ''' || table_name || ''''||',estimate_percent =>0.01' || ',method_opt=> ' ||'''FOR ALL COLUMNS SIZE AUTO'''||', degree => 2'|| ', cascade => TRUE ); '
+  from DBA_TAB_STATISTICS
+ where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS')
+and  ( LAST_ANALYZED IS NULL) AND TABLE_NAME NOT LIKE 'BIN%'
+and rownum <= 100;
+
+select DISTINCT 'exec dbms_stats' || '.' || 'gather_table_stats' || '(ownname=>''' ||owner||'''' || ', tabname=> ''' || table_name ||''''||',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE' || ',method_opt=> ' ||'''FOR ALL COLUMNS SIZE AUTO'''||', degree => 10'|| ', cascade => TRUE ); '
+  from DBA_TAB_STATISTICS
+ where owner ='PM4H_DB'
+and  ( STALE_STATS = 'YES' OR LAST_ANALYZED IS NULL ) AND TABLE_NAME NOT LIKE 'BIN%'
+and last_analyzed <=  TO_DATE('2019-09-26 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+and  last_analyzed >= TO_DATE('2019-09-21 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+
+-- 收集表统计信息
+exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZ,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 4, cascade => TRUE ); 
+
+-- 收集表分区统计信息
+exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',partname => 'P21989_2_20190926',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 10, cascade => TRUE ); 
+
+-- 只收集表的统计信息
+exec dbms_stats.gather_table_stats(ownname => 'PM4H_DB', tabname =>'IND_TOH_20688', estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE, method_opt => 'FOR TABLE',degree => 4);
+
+```
+
+### 3.14.3 统计信息管理
+
+```plsql
+--- 还原统计信息
+select TABLE_NAME, STATS_UPDATE_TIME from dba_tab_stats_history where table_name=upper('IND_ORG_20686');
+
+select TABLE_NAME, PARTITION_NAME,STATS_UPDATE_TIME from dba_tab_stats_history where table_name=upper('MO_MOENTITY');
+
+execute dbms_stats.restore_table_stats ('PM4H_AD','MO_MOENTITY','25-SEP-19 02.26.47.499595 PM +07:00');
+
+-- 删除列统计信息
+exec dbms_stats.gather_table_stats('PM4H_DB','IND_TOH_20688',method_opt=>'for columns owner size 1');
+
+exec dbms_stats.delete_column_stats(ownname=>'PM4H_DB',tabname=>'QTM_MODATA',colname=> NULL)
+
+-- 删除表的统计信息
+analyze table  table_name delete statistics;
+
+DBMS_STATS.DELETE_TABLE_STATS (
+   ownname          VARCHAR2, 
+   tabname          VARCHAR2, 
+   partname         VARCHAR2 DEFAULT NULL,
+   stattab          VARCHAR2 DEFAULT NULL, 
+   statid           VARCHAR2 DEFAULT NULL,
+   cascade_parts    BOOLEAN  DEFAULT TRUE, 
+   cascade_columns  BOOLEAN  DEFAULT TRUE,
+   cascade_indexes  BOOLEAN  DEFAULT TRUE,
+   statown          VARCHAR2 DEFAULT NULL,
+   no_invalidate    BOOLEAN  DEFAULT to_no_invalidate_type (
+                                     get_param('NO_INVALIDATE')),
+   force            BOOLEAN DEFAULT FALSE);
+   
+exec dbms_stats.delete_table_stats(ownname=>'PM4H_DB',tabname=>'IND_TOH_20688') 
+
+-- 删除索引统计信息
+DBMS_STATS.DELETE_INDEX_STATS (
+   ownname          VARCHAR2, 
+   indname          VARCHAR2,
+   partname         VARCHAR2 DEFAULT NULL,
+   stattab          VARCHAR2 DEFAULT NULL, 
+   statid           VARCHAR2 DEFAULT NULL,
+   cascade_parts    BOOLEAN  DEFAULT TRUE,
+   statown          VARCHAR2 DEFAULT NULL,
+   no_invalidate    BOOLEAN  DEFAULT to_no_invalidate_type (
+                                     get_param('NO_INVALIDATE')),
+   force            BOOLEAN DEFAULT FALSE);
+   
+exec DBMS_STATS.DELETE_INDEX_STATS(ownname=>'PM4H_AD', indname=>'MO_MOENTITY_IDX11')
+
+--11g统计信息收集新特性：扩展统计信息收集
+
+exec DBMS_STATS.GATHER_TABLE_STATS(ownname=>‘xxx',tabname=>‘DEALREC_ERR_201608',method_opt=>'for columns (substr(other_class, 1, 3)) size skewonly',estimate_percent=>10,no_invalidate=>false,cascade=>true,degree => 10);
+```
+
+
 
 ## 3.15 分区表信息
 
@@ -2486,6 +2777,12 @@ ORDER BY
 ;
 ```
 
+### 3.17.3 查看表的并行度
+
+```
+select owner,table_name,degree from dba_tables where table_name='EMP';
+```
+
 ## 3.18 查看UNDO表空间
 
 ### 3.18.1 查看UNDO表空间
@@ -2554,11 +2851,164 @@ create undo tablespace undotbs3 datafile '/data1/oradata/undotbs03_1.dbf' size 1
 上面命令中，指定UNDO表空间名称、对应数据文件、初始大小、自动扩展、每次扩展大小、最大扩展到多大
 
 -- 给UNDO表空间增加数据文件：
-ALTER TABLESPACE UNDOTBS3 ADD DATAFILE ''/data1/oradata/undotbs03_2.dbf' SIZE 1024M AUTOEXTEND ON NEXT 100M MAXSIZE 2048M;
+ALTER TABLESPACE UNDOTBS3 ADD DATAFILE '/data1/oradata/undotbs03_2.dbf' SIZE 1024M AUTOEXTEND ON NEXT 100M MAXSIZE 2048M;
 
 -- 切换默认UNDO表空间：
 alter system set undo_tablespace = UNDOTBS3;
 
+
+```
+
+### 3.18.4 UNDO参数
+
+```plsql
+show parameter undo
+
 -- 更改UNDO RETENTION
 alter system set UNDO_RETENTION = 1800;
+
+SELECT TO_CHAR(BEGIN_TIME, 'YYYY-MM-DD HH24:MI:SS') BEGIN_TIME,TUNED_UNDORETENTION FROM V$UNDOSTAT;
 ```
+
+### 3.18.5 UNDO参数建议
+
+```plsql
+set serveroutput on;
+DECLARE
+tablespacename        varchar2(30);
+tablespacesize        number;
+autoextend            boolean;
+autoextendtf          char(5);
+undoretention         number;
+retentionguarantee    boolean;
+retentionguaranteetf  char(5);
+autotuneenabled       boolean;
+autotuneenabledtf     char(5);
+longestquery          number;
+requiredretention     number;
+bestpossibleretention number;
+requireundosize       number;
+
+
+problem               varchar2(100);
+recommendation        varchar2(100);
+rationale             varchar2(100);
+retention             number;
+utbsize               number;
+nbr                   number;
+undoadvisor           varchar2(100);
+instancenumber        number;
+ret                   boolean;
+rettf                 char(5);
+BEGIN
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_info');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   ret := dbms_undo_adv.undo_info(tablespacename,
+tablespacesize,
+          autoextend, undoretention,
+retentionguarantee);
+   if ret then rettf := 'TRUE'; else rettf :=
+'FALSE'; end if;
+   if autoextend then autoextendtf := 'TRUE';
+      else autoextendtf := 'FALSE'; end if;
+   if retentionguarantee then retentionguaranteetf
+:= 'TRUE';
+      else retentionguaranteetf := 'FALSE'; end if;
+   dbms_output.put_line ('Information Valid    :
+'||rettf);
+   dbms_output.put_line ('Tablespace Name      :
+'||tablespacename);
+   dbms_output.put_line ('Tablespace Size      :
+'||tablespacesize);
+   dbms_output.put_line ('Extensiable          :
+'||autoextendtf);
+   dbms_output.put_line ('undo_retention       :
+'||undoretention);
+   dbms_output.put_line ('Guaranteed Retention :
+'||retentionguaranteetf);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_health');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   nbr := dbms_undo_adv.undo_health(problem,
+recommendation, rationale, retention, utbsize);
+   dbms_output.put_line ('Information Valid    :
+'||nbr);
+   dbms_output.put_line ('Problem              :
+'||problem);
+   dbms_output.put_line ('Recommendation       :
+'||recommendation);
+   dbms_output.put_line ('Rationale            :
+'||rationale);
+   dbms_output.put_line ('Retention            :
+'||retention);
+   dbms_output.put_line ('UTBSize              :
+'||utbsize);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_advisor');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   select instance_number into instancenumber from
+v$instance;
+   undoadvisor :=
+dbms_undo_adv.undo_advisor(instancenumber);
+   dbms_output.put_line ('Undo Advisor         :
+'||undoadvisor);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--undo_autotune');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   ret :=
+dbms_undo_adv.undo_autotune(autotuneenabled);
+   if autotuneenabled then autotuneenabledtf :=
+'TRUE';
+       else autotuneenabledtf := 'FALSE'; end if;
+   dbms_output.put_line ('Auto Tuning Enabled  :
+'||autotuneenabledtf);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--longest_query');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   longestquery :=
+dbms_undo_adv.longest_query(sysdate-1,sysdate);
+   dbms_output.put_line ('Longest Run Query    :
+'||longestquery);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--required_retention');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   requiredretention :=
+dbms_undo_adv.required_retention;
+   dbms_output.put_line ('Required Retention   :
+'||requiredretention);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+  
+dbms_output.put_line('--best_possible_retention');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   bestpossibleretention :=
+dbms_undo_adv.best_possible_retention;
+   dbms_output.put_line ('Best Retention       :
+'||bestpossibleretention);
+
+
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   dbms_output.put_line('--required_undo_size');
+   dbms_output.put_line('--x--x--x--x--x--x--x');
+   requireundosize := dbms_undo_adv.required_undo_size(444);
+   dbms_output.put_line ('Required Undo Size   :
+'||requireundosize);
+
+END;
+/
+```
+
+
+
