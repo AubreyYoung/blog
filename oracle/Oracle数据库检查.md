@@ -1692,10 +1692,12 @@ select owner,table_name name,status,degree from dba_tables where degree>1;
 select owner,index_name name,status,degree from dba_indexes where degree>'1';
 ```
 
-## 2.32 Disabled Trigger(es)
+## 2.32 Trigger(es)
 
 ```plsql
-SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
+col OWNER for a15
+col TRIGGER_NAME for a30
+col TABLE_NAME for a40SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
 ```
 
 ## 2.33 Disabled Constraint(s) 

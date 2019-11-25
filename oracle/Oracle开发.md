@@ -542,7 +542,7 @@ SELECT EMPNO AS 编码,
 
 # 5 操作多个表
 
-### 3.15 UNION ALL 和空值
+## 5.1 UNION ALL 和空值
 
 ```plsql
 SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
@@ -557,14 +557,16 @@ SQL> SELECT EMPNO AS 编码, ENAME AS 名称, NVL(MGR, DEPTNO) AS 上级编码
 ---------- -------------- ----------
       7788 SCOTT                7566
         10 ACCOUNTING     
-        
-SQL> SELECT '' AS c1 FROM dual;
 
-C1
---
+-- Oracle中常常把空字符串当作NULL处理
+SQL> select sysdate from dual where '' is null;
+SYSDATE   
+----------
+2019-11-25
+-- 空字符串本身是varchar2类型,NULL可以是任何类型,它们不等价.
 ```
 
-### 3.16 UNION 与 OR
+## 5.2 UNION 与 OR
 
 ```plsql
 SQL> SELECT empno,ename FROM emp WHERE empno = 7788 OR ename = 'SCOTT';
@@ -574,12 +576,12 @@ EMPNO ENAME
  7788 SCOTT
 
 SQL> SELECT EMPNO, ENAME
-  2    FROM EMP
-  3   WHERE EMPNO = 7788
-  4  UNION ALL
-  5  SELECT EMPNO, ENAME
-  6    FROM EMP
-  7   WHERE ENAME = 'SCOTT';
+      FROM EMP
+     WHERE EMPNO = 7788
+    UNION ALL
+    SELECT EMPNO, ENAME
+      FROM EMP
+     WHERE ENAME = 'SCOTT';
 
 EMPNO ENAME
 ----- ----------
@@ -587,12 +589,12 @@ EMPNO ENAME
  7788 SCOTT
  
 SQL> SELECT EMPNO, ENAME
-  2    FROM EMP
-  3   WHERE EMPNO = 7788
-  4  UNION
-  5  SELECT EMPNO, ENAME
-  6    FROM EMP
-  7   WHERE ENAME = 'SCOTT';
+      FROM EMP
+     WHERE EMPNO = 7788
+    UNION
+    SELECT EMPNO, ENAME
+      FROM EMP
+     WHERE ENAME = 'SCOTT';
 
 EMPNO ENAME
 ----- ----------
@@ -633,7 +635,7 @@ Predicate Information (identified by operation id):
 
 20 rows selected.
 ```
-### 3.17  INNER JOIN
+## 5.3  INNER JOIN
 
 ```plsql
 SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
@@ -647,199 +649,191 @@ SELECT E.EMPNO, E.ENAME, D.DNAME, D.LOC
   WHERE E.DEPTNO = D.DEPTNO
     AND E.DEPTNO = 10;
     
-    
-    SQL> EXPLAIN PLAN FOR
-  2    SELECT A.EMPNO, A.ENAME, A.JOB, A.SAL, A.DEPTNO
-  3      FROM EMP A
-  4     INNER JOIN EMP3 B
-  5        ON (B.ENAME = A.ENAME AND B.JOB = A.JOB AND B.SAL = A.SAL);
+EXPLAIN PLAN FOR
+      SELECT a.EMPNO, a.ENAME, a.JOB, a.SAL, a.DEPTNO
+       FROM EMP a
+     inner join emp2 b on (b.ename=a.ename and b.job=a.job and b.sal=a.sal);
+      
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);      
 
-Explained
-
-
-SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
-
-PLAN_TABLE_OUTPUT
---------------------------------------------------------------------------------
-Plan hash value: 620718003
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 166525280
+ 
 ---------------------------------------------------------------------------
 | Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
 ---------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |      |     4 |   160 |     6   (0)| 00:00:01 |
-|*  1 |  HASH JOIN         |      |     4 |   160 |     6   (0)| 00:00:01 |
-|   2 |   TABLE ACCESS FULL| EMP3 |     4 |    60 |     3   (0)| 00:00:01 |
-|   3 |   TABLE ACCESS FULL| EMP  |    14 |   350 |     3   (0)| 00:00:01 |
+|   0 | SELECT STATEMENT   |      |     4 |   208 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN         |      |     4 |   208 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP2 |     4 |   104 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP  |    16 |   416 |     3   (0)| 00:00:01 |
 ---------------------------------------------------------------------------
+ 
+
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Predicate Information (identified by operation id):
 ---------------------------------------------------
-   1 - access("B"."ENAME"="A"."ENAME" AND "B"."JOB"="A"."JOB" AND
+ 
+   1 - access("B"."ENAME"="A"."ENAME" AND "B"."JOB"="A"."JOB" AND 
               "B"."SAL"="A"."SAL")
+ 
 Note
 -----
-   - this is an adaptive plan
+   - dynamic sampling used for this statement (level=2)
 
-20 rows selected
+已选择 20 行。
 ```
 
-###  3.18 IN
+##  5.4 IN
 
 ```plsql
 SQL> EXPLAIN PLAN FOR
-  2    SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
-  3      FROM EMP
-  4     WHERE (ENAME, JOB, SAL) IN (SELECT ENAME, JOB, SAL FROM EMP3);
+      SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
+       FROM EMP
+      WHERE (ENAME, JOB, SAL) IN (SELECT ENAME, JOB, SAL FROM EMP3);
 
 Explained
 
 
 SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
 
-PLAN_TABLE_OUTPUT
---------------------------------------------------------------------------------
-Plan hash value: 102031456
---------------------------------------------------------------------------------
-| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CP
---------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT             |               |     4 |   160 |     6  (1
-|   1 |  NESTED LOOPS                |               |     4 |   160 |     6  (1
-|   2 |   NESTED LOOPS               |               |     4 |   160 |     6  (1
-|   3 |    SORT UNIQUE               |               |     4 |    60 |     3   (
-|   4 |     TABLE ACCESS FULL        | EMP3          |     4 |    60 |     3   (
-|*  5 |    INDEX RANGE SCAN          | IDX_EMP_ENAME |     1 |       |     0   (
-|*  6 |   TABLE ACCESS BY INDEX ROWID| EMP           |     1 |    25 |     1   (
---------------------------------------------------------------------------------
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 4039873364
+ 
+---------------------------------------------------------------------------
+| Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |      |     4 |   208 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN SEMI    |      |     4 |   208 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP  |    16 |   416 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP2 |     4 |   104 |     3   (0)| 00:00:01 |
+---------------------------------------------------------------------------
+ 
+
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Predicate Information (identified by operation id):
 ---------------------------------------------------
-   5 - access("ENAME"="ENAME")
-   6 - filter("SAL"="SAL" AND "JOB"="JOB")
+ 
+   1 - access("ENAME"="ENAME" AND "JOB"="JOB" AND "SAL"="SAL")
+ 
+Note
+-----
+   - dynamic sampling used for this statement (level=2)
 
-19 rows selected
+已选择 19 行。
+
+
 ```
 
-### 3.19 EXISTS
+## 5.5 EXISTS
 
 ```plsql
-SQL> EXPLAIN PLAN FOR
-  2    SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
-  3      FROM EMP A
-  4     WHERE EXISTS (SELECT NULL
-  5              FROM EMP3 B
-  6             WHERE B.ENAME = A.ENAME
-  7               AND B.JOB = A.JOB
-  8               AND B.SAL = A.SAL);
+EXPLAIN PLAN FOR
+      SELECT EMPNO, ENAME, JOB, SAL, DEPTNO
+       FROM EMP a
+      exists (select null from emp2 b where b.ename=a.ename and b.job=a.job and b.sal=a.sal);
+      
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);     
 
-Explained
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 4039873364
+ 
+---------------------------------------------------------------------------
+| Id  | Operation          | Name | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |      |     4 |   208 |     6   (0)| 00:00:01 |
+|*  1 |  HASH JOIN SEMI    |      |     4 |   208 |     6   (0)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL| EMP  |    16 |   416 |     3   (0)| 00:00:01 |
+|   3 |   TABLE ACCESS FULL| EMP2 |     4 |   104 |     3   (0)| 00:00:01 |
+---------------------------------------------------------------------------
+ 
 
-
-SQL> SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
-
-PLAN_TABLE_OUTPUT
---------------------------------------------------------------------------------
-Plan hash value: 102031456
---------------------------------------------------------------------------------
-| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CP
---------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT             |               |     4 |   160 |     6  (1
-|   1 |  NESTED LOOPS                |               |     4 |   160 |     6  (1
-|   2 |   NESTED LOOPS               |               |     4 |   160 |     6  (1
-|   3 |    SORT UNIQUE               |               |     4 |    60 |     3   (
-|   4 |     TABLE ACCESS FULL        | EMP3          |     4 |    60 |     3   (
-|*  5 |    INDEX RANGE SCAN          | IDX_EMP_ENAME |     1 |       |     0   (
-|*  6 |   TABLE ACCESS BY INDEX ROWID| EMP           |     1 |    25 |     1   (
---------------------------------------------------------------------------------
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Predicate Information (identified by operation id):
 ---------------------------------------------------
-   5 - access("B"."ENAME"="A"."ENAME")
-   6 - filter("B"."SAL"="A"."SAL" AND "B"."JOB"="A"."JOB")
+ 
+   1 - access("ENAME"="ENAME" AND "JOB"="JOB" AND "SAL"="SAL")
+ 
+Note
+-----
+   - dynamic sampling used for this statement (level=2)
 
-19 rows selected
+已选择 19 行。
 ```
 
-### 3.20 表连接
+## 5.6 表连接
 
 ```plsql
 DROP TABLE L PURGE;
 DROP TABLE R PURGE;
-
 /*左表*/
-CREATE TABLE L AS
-  SELECT 'left_1' AS STR, '1' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'left_2' AS STR, '2' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'left_3' AS STR, '3' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'left_4' AS STR, '4' AS V
-    FROM DUAL;
-
+create table l as 
+select 'left_1' as str,'1' as val from dual union ALL
+select 'left_2','2' as val from dual union all
+select 'left_3','3' as val from dual union all
+select 'left_4','4' as val from dual;
+select * from l;
 /*右表*/
-CREATE TABLE R AS
-  SELECT 'right_3' AS STR, '3' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'right_4' AS STR, '4' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'right_5' AS STR, '5' AS V
-    FROM DUAL
-  UNION ALL
-  SELECT 'right_6' AS STR, '6' AS V
-    FROM DUAL;
+create table r as 
+select  'right_3' as str,'3' as val,1 as status from dual union all
+select  'right_4' as str,'4' as val,0 as status from dual union all
+select  'right_5' as str,'5' as val,0 as status from dual union all
+select  'right_6' as str,'6' as val,0 as status from dual;
+select * from r;
 
 /*INNER JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
- INNER JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l inner join r on l.val=r.val order by 1,2;
 
-/*WHERE*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L, R
- WHERE L.V = R.V
- ORDER BY 1, 2;
+/*INNER JOIN WHERE*/
+select l.str as left_str,r.str as right_str from l,r where  l.val=r.val order by 1,2;
 
 /*LEFT JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
-  LEFT JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l left join r on l.val=r.val order by 1,2;
+select l.str as left_str,r.str as right_str,r.status  from l left join r on l.val=r.val where r.status=1 order by 1,2;
+select l.str as left_str,r.str as right_str,r.status  from l left join r on (l.val=r.val and r.status=1) order by 1,2;
 
-/*+*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L, R
- WHERE L.V = R.V(+)
- ORDER BY 1, 2;
+/*LEFT JOIN + */
+select l.str as left_str,r.str as right_str from l,r where  l.val=r.val(+) order by 1,2;
+select l.str as left_str,r.str as right_str,r.status from l,r where  l.val=r.val(+) and r.status=1 order by 1,2;
+select l.str as left_str,r.str as right_str,r.status from l,r where  l.val=r.val(+) and r.status(+)=1 order by 1,2;
+select l.str as left_str,r.str as right_str,r.status from l,(select * from r where r.status=1) r where l.val=r.val(+)  order by 1,2;
 
 /*RIGHT JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
- RIGHT JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l right join r on l.val=r.val order by 1,2;
  
-/*+*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L, R
- WHERE L.V(+) = R.V
- ORDER BY 1, 2;
- 
+/*RIGHT JOIN + */
+select l.str as left_str,r.str as right_str from l,r where  l.val(+)=r.val order by 1,2;
+
 /*FULL JOIN*/
-SELECT L.STR AS LIFT_STR, R.STR AS RIGHT_STR
-  FROM L
- FULL JOIN R
-    ON L.V = R.V
- ORDER BY 1, 2;
+select l.str as left_str,r.str as right_str from l full join r on l.val=r.val order by 1,2;
  
- //natural join
-select index_name,column_name,index_type,uniqueness from user_indexes natural join user_ind_columns where table_name='CUSTOMERS';
+ -- natural join
+ -- 自然连接（NATURAL JOIN）是一种特殊的等值连接，将表中具有相同名称的列自动进行匹配。
+ -- 1.自然连接不必指定任何连接条件;
+ -- 2.如果两张表中有相同名字的列，但是数据类型不一致，如果能隐式转换，则能正常连接，但如果隐式转换不成功，则报错;
+ -- 3.使用自然连接时，不能使用表名或表的别名修饰列;
+ -- 4.自然连接会两张表中相同名称的所有列;
+ -- 5.自然连接也可以指定显示列。
+ -- 自然连接，自动匹配同名的列，虽然很方便，不用指定匹配的列。但也有缺点，虽然可以指定查询结果包括哪些列，但不能人为地指定哪些列被匹配,而内连接就可以自由指定。
+
+SELECT
+    index_name,
+    column_name,
+    index_type,
+    uniqueness
+FROM
+    dba_indexes
+    NATURAL JOIN dba_ind_columns
+WHERE
+    table_name = 'CUSTOMERS';
 ```
 
-### 3.21 自关联
+## 5.7 自关联
 
 ```plsql
 /*自关联*/
@@ -866,17 +860,20 @@ SELECT 员工.EMPNO AS 职工编码,
   LEFT JOIN 主管
     ON (员工.MGR = 主管.EMPNO)
  ORDER BY 1;
+ 
+ /*自关联*/
+ select a.*,b.ename from  emp a left join  emp b  on a.MGR=b.empno order by 1;
 ```
 
-### 3.22 NOT IN,NOT EXISTS ,LEFT JOIN
+## 5.8 NOT IN,NOT EXISTS ,LEFT JOIN
 
 ```PLSQL
 /*NOT IN*/
 SQL> EXPLAIN PLAN FOR
-  2    SELECT *
-  3      FROM DEPT
-  4     WHERE DEPTNO NOT IN
-  5           (SELECT EMP.DEPTNO FROM EMP WHERE EMP.DEPTNO IS NOT NULL);
+      SELECT *
+       FROM DEPT
+       WHERE DEPTNO NOT IN
+             (SELECT EMP.DEPTNO FROM EMP WHERE EMP.DEPTNO IS NOT NULL);
 
 Explained
 
@@ -968,7 +965,7 @@ Predicate Information (identified by operation id):
 20 rows selected
 ```
 
-### 3.23 GROUP BY不显示0行
+## 5.9 GROUP BY不显示0行
 
 ```plsql
 SQL> SELECT COUNT(*) FROM EMP GROUP BY DEPTNO;
@@ -986,7 +983,7 @@ SQL> SELECT COUNT(*) FROM EMP WHERE DEPTNO = 40;
          0
 ```
 
-### 3.24 LEFT JOIN的条件
+## 5.10  LEFT JOIN的条件
 
 ```plsql
 SQL> SELECT L.STR AS LEFT_STR, R.STR AS RIGHT_STR, R.STATUS
@@ -1127,7 +1124,7 @@ Predicate Information (identified by operation id):
 * 4 - filter("R"."STATUS"(+)=1 AND "STATUS"(+)=1)
 ```
 
-### 3.25 比对表数据
+## 5.11 比对两张表的数据
 
 ```plsql
 CREATE OR REPLACE VIEW V4 AS
@@ -1144,10 +1141,10 @@ SELECT * FROM V4 WHERE ENAME = 'SCOTT';
 SELECT ROWNUM, EMPNO, ENAME FROM EMP WHERE ENAME = 'SCOTT';
 
 SQL> SELECT V4.EMPNO, V4.ENAME, B.EMPNO, B.ENAME
-  2    FROM V4
-  3    FULL JOIN EMP B
-  4      ON (B.EMPNO = V4.EMPNO)
-  5   WHERE (V4.EMPNO IS NULL OR B.EMPNO IS NULL);
+      FROM V4
+      FULL JOIN EMP B
+        ON (B.EMPNO = V4.EMPNO)
+     WHERE (V4.EMPNO IS NULL OR B.EMPNO IS NULL);
 
 EMPNO ENAME      EMPNO ENAME
 ----- ---------- ----- ----------
@@ -1173,53 +1170,53 @@ EMPNO ENAME             CNT EMPNO ENAME             CNT
  7788 SCOTT               2                  
 ```
 
-### 3.26 聚集与内连接
+## 5.12 聚集与内连接
 
 ```plsql
 SQL> SELECT E.DEPTNO,
-  2         SUM(E.SAL) AS TOTAL_SAL,
-  3         SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
-  4    FROM EMP E
-  5   INNER JOIN (SELECT EB.EMPNO,
-  6                      SUM(CASE
-  7                            WHEN EB.TYPE = 1 THEN
-  8                             0.1
-  9                            WHEN EB.TYPE = 2 THEN
- 10                             0.2
- 11                            WHEN EB.TYPE = 3 THEN
- 12                             0.3
- 13                          END) AS RATE
- 14                 FROM EMP_BONUS EB
- 15                GROUP BY EB.EMPNO) EB2
- 16      ON E.EMPNO = EB2.EMPNO
- 17   WHERE E.DEPTNO = 10
- 18   GROUP BY DEPTNO;
+          SUM(E.SAL) AS TOTAL_SAL,
+           SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+      FROM EMP E
+     INNER JOIN (SELECT EB.EMPNO,
+                        SUM(CASE
+                              WHEN EB.TYPE = 1 THEN
+                               0.1
+                              WHEN EB.TYPE = 2 THEN
+                              0.2
+                             WHEN EB.TYPE = 3 THEN
+                             0.3
+                           END) AS RATE
+                  FROM EMP_BONUS EB
+                 GROUP BY EB.EMPNO) EB2
+       ON E.EMPNO = EB2.EMPNO
+    WHERE E.DEPTNO = 10
+    GROUP BY DEPTNO;
 
 DEPTNO  TOTAL_SAL TOLTAL_BONUS
 ------ ---------- ------------
     10       6300         1890
 ```
 
-### 3.27 聚集与外连接
+## 5.13 聚集与外连接
 
 ```plsql
 SQL> SELECT E.DEPTNO,
-  2         SUM(E.SAL) AS TOTAL_SAL,
-  3         SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
-  4    FROM EMP E
-  5    LEFT JOIN (SELECT EB.EMPNO,
-  6                      SUM(CASE
-  7                            WHEN EB.TYPE = 1 THEN
-  8                             0.1
-  9                            WHEN EB.TYPE = 2 THEN
- 10                             0.2
- 11                            WHEN EB.TYPE = 3 THEN
- 12                             0.3
- 13                          END) AS RATE
- 14                 FROM EMP_BONUS EB
- 15                GROUP BY EB.EMPNO) EB2
- 16      ON E.EMPNO = EB2.EMPNO
- 17   GROUP BY DEPTNO;
+           SUM(E.SAL) AS TOTAL_SAL,
+           SUM(E.SAL * EB2.RATE) AS TOLTAL_BONUS
+      FROM EMP E
+      LEFT JOIN (SELECT EB.EMPNO,
+                        SUM(CASE
+                              WHEN EB.TYPE = 1 THEN
+                              0.1
+                              WHEN EB.TYPE = 2 THEN
+                              0.2
+                             WHEN EB.TYPE = 3 THEN
+                              0.3
+                           END) AS RATE
+                  FROM EMP_BONUS EB
+                GROUP BY EB.EMPNO) EB2
+       ON E.EMPNO = EB2.EMPNO
+    GROUP BY DEPTNO;
 
 DEPTNO  TOTAL_SAL TOLTAL_BONUS
 ------ ---------- ------------
@@ -1228,7 +1225,7 @@ DEPTNO  TOTAL_SAL TOLTAL_BONUS
     10       8750         1890
 ```
 
-### 3.28 空值连接
+## 5.14 空值连接
 
 ```plsql
 SQL> SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
@@ -1268,7 +1265,7 @@ SELECT EMP.EMPNO, EMP.ENAME, DEPT.DEPTNO, DEPT.DNAME
     ON DEPT.DEPTNO = EMP.DEPTNO;
 ```
 
-### 3.29 空值转换
+## 5.15  空值转换
 
 ```plsql
 SQL> SELECT A.ENAME, A.COMM
