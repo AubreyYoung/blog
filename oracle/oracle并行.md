@@ -18,6 +18,8 @@ select /* parallel_execution_demo_1 */count(*) from t1;
 
 select /* serial_execution_demo_1 */t1.owner,t1.object_name,t2.status from t1, t2 where t1.object_id=t2.object_id and t1.owner='SCOTT';
 select /* parallel_execution_demo_1 */t1.owner,t1.object_name,t2.status from t1, t2 where t1.object_id=t2.object_id and t1.owner='SCOTT';
+
+select /*+ parallel(4) */ from t1;
 ```
 
 2. 并行DML

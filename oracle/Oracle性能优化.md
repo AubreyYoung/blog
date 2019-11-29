@@ -1232,7 +1232,17 @@ tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 
 # 9. 10053Trace
 
+# 10. 数据字典
 
+```plsql
+-- 基表
+select * from v$fixed_table;
+-- 动态性能视图定义
+select * from v$fixed_view_definition;
+-- 数据字典
+select * from dba_views;
+select * from dict where table_name like 'DBA_HIST_%';
+```
 
 ## 9. 表nologging
 
