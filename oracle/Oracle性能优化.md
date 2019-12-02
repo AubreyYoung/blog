@@ -75,6 +75,8 @@ awrddrpt.sql
 用于比较两个指定的时间段之间数据库详细性能指标和配置情况。
 awrddrpi.sql 
 用于在特定的数据库和特定实例上，比较两个指定的时间段之间的数据库详细性能指标和配置情况。
+awrextr.sql/awrload.sql
+导出/导入AWR数据
 ```
 
 ## 1.4 AWR 相关的视图
@@ -95,6 +97,8 @@ DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
 DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
 ## 1.5 查看ASH信息
+
+![image-20191202111133104](Oracle性能优化.assets/image-20191202111133104.png)
 
 ```plsql
 select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
@@ -309,6 +313,8 @@ AND b1.object_id = c.object_id
 AND f.status = 'OPEN'
 AND f.database_status = 'ACTIVE'
 order by b.ctime;
+
+alter system kill session '1568,27761,@2' immediate; 
 ```
 
 ## 2.5 根据SID查询SQL
@@ -660,6 +666,8 @@ order by sql_id, snap_id;
 
 #  3.等待事件
 
+![image-20191202105710344](Oracle性能优化.assets/image-20191202105710344.png)
+
 ## 3.1  等待事件的历史会话信息
 
 ```plsql
@@ -894,6 +902,88 @@ DBA_HIST_ACTIVE_SESS_HISTORY视图是WRH#_ACTIVE_SESSION_HISTORY视图和其他�
 V$SYSTEM_EVENT 由于V$SESSION记录的是动态信息，和SESSION的生命周期相关，而并不记录历史信息，所以ORACLE提供视图V$SYSTEM_EVENT来记录数据库自启动以来所有等待事件的汇总信息。通过这个视图，用户可以迅速获得数据库运行的总体概况。
 
 V$SQLTEXT 当数据库出现瓶颈时，通常可以从V$SESSION_WAIT找到那些正在等待资源的SESSION，通过SESSION的SID，联合V$SESSION和V$SQLTEXT视图就可以捕获这些SESSION正在执行的SQL语句。
+
+-- 总体性视图
+--event :名称
+--total_waits:自从实例启动以来的等待次数
+--total_timeouts:事件被唤醒的总次数
+--time_waited:按照cs统计的总的等待时间
+--average_wait:平均每次等待的等待时间,单位为CS
+--sid:v$session_event, session id number
+select * from v$system_event;
+
+-- 按照session划分的总体性视图
+--sid:session id
+--seq#:等待次数统计
+--event:事件
+--p[1-3]:等待的详细参数 p1:文件号 p2:块号 p3:每次读的数量
+--p[1-3]让我:参数的raw模式
+--p[1-3]text:参数的名字
+select * from v$session_event;
+-- 明细信息,每三秒钟刷新一次等待时间
+select * from v$session_wait;
+
+select wait_class#,wait_class,sum(total_waits),sum(time_waited) from v$system_event  group by wait_class#,wait_class order by wait_class#;
+
+select event,p1,p2,p3 from v$session_wait where event like 'latch%';
+-- 等待直方图
+select * from v$event_histogram;
+v$file_histogram;
+v$temp_histogram;
+
+v$session_wait_class
+v$session_wait_history
+
+-- v$sys_time_model
+select * from v$sys_time_model;
+
+-- v$sess_time_model
+select * from v$sess_time_model;
+
+metric:系统自动统计的数据,大多数指标60秒钟采集一次,历史数据可以从*_histroy视图中获取
+v$sysmetric v$sysmetric_history
+v$sessmetric
+v$filemetric v$filemetric_history
+v$eventmetric
+v$waitclassmetric v$waitclassmetric_history
+v$metricname
+
+--osstat操作系统统计数据
+select * from v$osstat;
+
+--ASH:Active Session Histroy AWR的一部分
+--从v$session中每秒一次采样,除去IDEL是见,除去非ACTIVEdesession,除了存储在AWR中外,1/10的采样可以在视图中看到
+v$active_session_history
+dba_hist_active_sess_history
+
+--OWI诊断的方法
+从系统级开始
+    v$system_event
+    v$session_wait
+    statspack/AWR报告
+关注存在较大等待时间和次数的事件
+    注意过滤掉IDEL事件 IDLE事件一般存放在statspack报告的时间的尾部
+对关键事件进行细致跟踪
+    v$session_wait  statspack/AWR报告
+建立基线
+
+局部变慢或hang住的分析方法
+    查看alert log中是否有报错
+    查看相关会话信息
+    通过v$session_wait查看等待事件
+    ash报告
+    检查长时间执行的SQL
+    通过hanganalyze分析查看是否有hang住现象
+    检查OS资源
+    
+获取会话的信息
+    session基本信息
+    session统计信息
+    session Event信息
+    
+使用ADDM分析系统性能问题 --使用ADDM验证AWR分析结果;使用AWR分析细节;使用ADDM分析主要问题
+	优点:直接看到结论;不需要很专业的技术能力;适合解决主要问题
+	缺点:缺乏细节;分析的深度不够;对次要矛盾的把握能力较弱
 ```
 
 # 4. 追踪数据库修改
@@ -1242,6 +1332,84 @@ select * from v$fixed_view_definition;
 -- 数据字典
 select * from dba_views;
 select * from dict where table_name like 'DBA_HIST_%';
+```
+
+# 11.LATCH
+
+```PLSQL
+LATCH/LOCK分类
+	应用级锁(TM,TX)
+    	v$lock
+    	?/rdbms/admin/cablock.sql 
+    	使用dba_waiters,dba_blockers来查找阻塞
+        	select * from dba_waiters;
+        	select * from dba_blockers;
+	数据字典锁 v$lock
+	内存控制锁(LATCH,MUTEX) 
+    	保证核心内存访问的高效性和一致性
+    	一个LATCH可以保护多个内核内存区域,但是一个内核内存区域只有一个LATCH
+    	
+LATCH相关的时间开销
+    三个方面消耗的时间
+        获取LATCH的时间(SPIN:CPU时间,SLEEP等)
+        持有LATCH的时间(内核代码:CPU时间,OS调用,锁等待)
+        LATCH释放的时间(内核代码:CPU时间)
+    注意的要点
+        spin消耗CPU资源你,因此提高_spin_count会加大CPU开销
+        spin不产生等待事件
+        sleep不消耗cpu时间，会记录latch free等待
+        
+如何发现闩锁等待
+    v$session_wait,v$latch,v$latch_children等视图
+    Statspack报告/AWR报告：最好的工具
+    
+LATCH分析的主要思路
+    理解LATCH的基本原理和算法
+    发现LATCH FREE问题
+    找出存在严重冲突的LATCH
+    找出存在问题的LATCH相关的内核对象
+    分析为什么该闩锁请求那么高，为什么等待时间那么长
+    综合系统和应用情况提出优化建议
+    
+AWR报告是最好的LATCH问题分析工具
+    Latch Activity for DB
+    Latch Sleep breakdown for DB
+    Latch Miss Sources for DB
+    Child Latch Statistics DB
+    
+共享池相关的闩锁
+    shared pool
+    library cache
+    library cache pin
+    row cache objects
+    row cache enqueue latch
+    
+DB CACHE相关闩锁:和LRU CHAINS或者HASH CHAINS相关
+    cache buffer handles
+    cache buffers chains
+    cache buffers lru chain
+    multiblock read objects
+    
+REDO LOG相关闩锁
+    REDO LOG相关闩锁竞争一般由于以下原因：LOG BUFFER太小;过于频繁的COMMIT;REDO LOG的IO性能不佳;LOG SWITCH过于频繁;归档出现问题或者归档过慢
+    主要闩锁: Redo Copy;
+            Redo  allocation;
+                9.2:LOG_PARALLELISM
+                10G:_log_parallelism_max
+            Redo writing
+            redo on-disk SCN 
+            
+其他闩锁
+    archive control：和归档目录有关
+    process allocation：和进程状态修改有关，在短连接的系统中可能存在竞争
+    session allocation：和SESSION信息修改有关
+    sort extent pool：和硬盘排序有关
+    child cursor hash table：和SQL分析以及CURSOR VERSION有关
+    enqueue hash chains和锁的管理有关
+    modify parameters values：动态调整参数有关
+    parallel query alloc buffer,parallel query stats :和并行查询有关
+    GES*：和全局锁有关
+    GCS*：和全局CACHE有关
 ```
 
 ## 9. 表nologging
