@@ -1320,9 +1320,9 @@ oradebug setospid <spid> <stid>oradebug unlimit
 tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 ```
 
-# 9. 10053Trace
+# 9.  10053Trace
 
-# 10. 数据字典
+# 10.  数据字典
 
 ```plsql
 -- 基表
@@ -1334,7 +1334,7 @@ select * from dba_views;
 select * from dict where table_name like 'DBA_HIST_%';
 ```
 
-# 11.LATCH
+# 11. LATCH
 
 ```PLSQL
 LATCH/LOCK分类
@@ -1411,6 +1411,140 @@ REDO LOG相关闩锁
     GES*：和全局锁有关
     GCS*：和全局CACHE有关
 ```
+
+# 12. SHARED POOL共享池 
+
+```plsql
+-- 查看保留池
+select * from v$shared_pool_reserved;
+
+--  SHARED_POOL_RESERVED_SIZE 定义保留池的大小 缺省是SHARED_POOL_SIZE的5%
+--  _SHARED_POOL_RESERVED_PCT 缺省 5%
+-- _SHARED_POOL_RESERVED_MIN_ALLOC 缺省 4400 超过这个大小才被认为是大对象
+
+-- 查看SGA resize 共享池抖动
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+col component format a40 truncate;
+select component,oper_type, oper_mode, start_time, end_time, trunc(target_size/1024/1024) target 
+from v$sga_resize_ops;
+
+
+--查看共享池使用,多次执行形成图标
+col "avg size" format a30 truncate;
+col siz format 999999999999
+SELECT KSMCHCLS CLASS, COUNT(KSMCHCLS) NUM, SUM(KSMCHSIZ) SIZ,
+To_char( ((SUM(KSMCHSIZ)/COUNT(KSMCHCLS)/1024)),'999,999.00')||'k' "AVG SIZE"
+FROM X$KSMSP GROUP BY KSMCHCLS; 
+
+-- 查看共享池碎片化程度
+col sga_heap format a15
+col size format a10
+select KSMCHIDX "SubPool", 'sga heap('||KSMCHIDX||',0)'sga_heap,ksmchcom ChunkComment,
+decode(round(ksmchsiz/1000),0,'0-1K', 1,'1-2K', 2,'2-3K',3,'3-4K',
+4,'4-5K',5,'5-6k',6,'6-7k',7,'7-8k',8,
+'8-9k', 9,'9-10k','> 10K') "size",
+count(*),ksmchcls Status, sum(ksmchsiz) Bytes
+from x$ksmsp
+where KSMCHCOM = 'free memory'
+group by ksmchidx, ksmchcls,
+'sga heap('||KSMCHIDX||',0)',ksmchcom, ksmchcls,decode(round(ksmchsiz/1000),0,'0-1K',
+1,'1-2K', 2,'2-3K', 3,'3-4K',4,'4-5K',5,'5-6k',6,
+'6-7k',7,'7-8k',8,'8-9k', 9,'9-10k','> 10K');
+
+-- 每个共享池子池的ORA-04031报错次数
+select  indx,kghlurcr,kghlutrn,kghlufsh,kghluops,kghlunfu,kghlunfs from sys.x$kghlu where inst_id = userenv('Instance');
+
+--缓解共享池碎片问题
+配置合理的参数，尽可能少的动态扩展PERMENT的数组
+减少SUBPOOL的数量
+将常用大对象PIN到内存
+慎用CURSOR_SPACE_FOR_TIME
+尽可能使用绑定变量
+定期清理长期连接数据库的非用户会话
+定期重连数据库连接池
+定期刷新共享池
+定期重启实例
+
+--SUBPOOL和共享池碎片
+_kghdsidx_count参数可以手工配置SUBPOOL数量
+SUBPOOL和CPU_COUNT的关系
+每4个CPU一个
+最多7个
+SUBPOOL的最小大小
+9i：128M
+10g：256M
+11g：512M
+SUBPOOL的两面性
+提高并发访问性能
+增加碎片的机会
+```
+
+# 13. BUFFER CACHE
+
+```plsql
+-- 使用KEEP POOL
+KEEP POOL的主要作用是最大限度减少IO
+存放最常用的对象
+减少DEFAULT POOL对敏感数据的影响
+
+什么对象适合放入KEEP POOL
+常用的表和索引
+相对静态的数据
+
+如何启用KEEP POOL
+设置db_keep_cache_size
+alert table|index ... storage (buffer_pool keep);
+
+-- Buffer Cache建议值
+SELECT size_for_estimate, buffers_for_estimate, estd_physical_read_factor, estd_physical_reads
+   FROM V$DB_CACHE_ADVICE
+   WHERE name          = 'DEFAULT'
+     AND block_size    = (SELECT value FROM V$PARAMETER WHERE name = 'db_block_size')
+     AND advice_status = 'ON';
+     
+-- 分析x$bh的脚本
+Select 
+  decode(pd.bp_id,1,'KEEP',2,'RECYCLE',3,'DEFAULT',4,'2K SUBCACHE',5,'4K SUBCACHE',6,'8K SUBCACHE',7,'16K SUBCACHE',8,'32K SUBCACHE','UNKNOWN') subcache,bh.object_name object_name,bh.blocks,tch
+from x$kcbwds ds,x$kcbwbpd pd,
+ (select /*+ use_hash(x) */ set_ds,                                                               
+o.name object_name, count(*) BLOCKS,tch                                                                       
+from obj$ o, x$bh x where o.dataobj# = x.obj                                                            
+and x.state !=0 and o.owner# !=0                                                                          
+group by set_ds,o.name,tch) bh where ds.set_id >= pd.bp_lo_sid                                        
+and ds.set_id <= pd.bp_hi_sid and pd.bp_size != 0 and ds.addr=bh.set_ds
+order by subcache,object_name;
+
+-- 解决热块冲突的主要思路
+打散数据分布
+	使用较小的块大小
+	使用HASH簇表
+	使用HASH分区表
+	反转键索引
+	较大的SEQUENCE CACHE（RAC下）
+优化表存储参数
+	PCTFREE
+	INITRANS
+	FREELISTS/FREELIST GROUPS
+提高DB CACHE命中率
+优化IO
+使用物化视图
+KEEP热表
+优化应用
+
+-- 查找热块
+select event,p1,p2,p3 from v$session_wait where event like 'buffer busy wait%';
+select owner,segment_name from dba_extents where file_id=&p1 and block_id<=&p2 and (block_id+blocks)>=&p2;
+```
+
+# 14. REDO LOG
+
+```plsql
+-- redo log的块大小
+select max(lebsz) from x$kccle;
+
+```
+
+
 
 ## 9. 表nologging
 

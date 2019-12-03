@@ -433,8 +433,7 @@ order by
 translate(x.ksppinm, ' _', ' ');
 
 -- 关键字隐藏参数
-SELECT /* SHSNC */
- P.KSPPINM NAME, V.KSPPSTVL VALUE
+SELECT  P.KSPPINM NAME, V.KSPPSTVL VALUE
   FROM SYS.X$KSPPI P, SYS.X$KSPPSV V
  WHERE P.INDX = V.INDX
    AND V.INST_ID = USERENV('Instance')
