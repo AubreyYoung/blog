@@ -88,12 +88,25 @@ col path format a60;
 col group_name format a10
 col name format a20
 select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from v$asm_disk a,v$asm_diskgroup b where a.group_number=b.group_number;
+
+col name for a20
+col STATE for a10      
+col COMPATIBILITY for a20
+col DATABASE_COMPATIBILITY for a30
+select GROUP_NUMBER,name,STATE,TYPE,COMPATIBILITY,DATABASE_COMPATIBILITY from v$asm_diskgroup;
 ```
 
 ```plsql
+alter diskgroup data add disk '/dev/raw/raw41' name DATA_0001,'/dev/raw/raw42' name DATA_0002,'/dev/raw/raw43' name DATA_0003 drop disk DATA_0000,DATA_0004,DATA_0005 rebalance power 11;
+
 -- 挂在磁盘组
 alter diskgroup data mount;
 asmcmd> lsdg
+
+固态表X$KFGMG的REBALST_KFGMG字段会显示为2，代表正在compacting。
+select NUMBER_KFGMG, OP_KFGMG, ACTUAL_KFGMG, REBALST_KFGMG from X$KFGMG;
+
+select GROUP_NUMBER,OPERATION,POWER,EST_WORK,EST_RATE,EST_MINUTES from v$asm_operation;
 ```
 
 ## 1.5 日志大小
@@ -468,7 +481,7 @@ show parameter enable_ddl_logging
 ```
 ### 2.5.4 修改参数
 
-```
+```plsql
 alter system set deferred_segment_creation=FALSE;     
 alter system set audit_trail             =none           scope=spfile;  
 alter system set SGA_MAX_SIZE            =xxxxxM         scope=spfile; 
@@ -491,6 +504,10 @@ HOST = 192.168.1.216 --此处使用数字形式的VIP，绝对禁止使用rac1-v
 HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-vip
 #更改控制文件记录保留时间
 alter system set control_file_record_keep_time =31;
+
+-- asm parameter
+SQL> alter system set memory_max_target=4096m scope=spfile;
+SQL> alter system set memory_target=1536m scope=spfile;
 ```
 
 ### 2.5.5 Oracle 参数调优
@@ -1938,12 +1955,17 @@ create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solari
 
 ## 3.3 JOB状态查询
 
-```
+```plsql
 -- 主端查看当前DBMS_JOB 的状态
 SELECT * FROM DBA_JOBS_RUNNING;
 
 -- 主端查看当前DBMS_SCHEDULER的状态
 select owner,job_name,session_id,slave_process_id,running_instance from dba_scheduler_running_jobs;
+
+-- 查看数据泵Job
+ select job_name,state from dba_datapump_jobs;
+ 
+ select vs.sid, vp.program PROCESSNAME, vp.spid THREADID from   v$session vs,v$process p,dba_datapump_sessions dp where vp.addr = vs.paddr(+) and vs.saddr = dp.saddr; 
 ```
 
 ## 3.4 还原点设置

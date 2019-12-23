@@ -280,7 +280,11 @@ order by s.sid,s.serial#,s.username,s.status
 
 ```plsql
 --会话信息
-select machine , event ,SERIAL#, TERMINAL, PROGRAM, ACTION,TYPE, SQL_ID, LOGON_TIME
+ select sid,event,seconds_in_wait,status from v$session where program like '%DW%';
+ 
+ select sid,event,p1,p2,p3, seconds_in_wait from   v$session_wait where  sid=5929;
+ 
+select machine, event ,SERIAL#, TERMINAL, PROGRAM, ACTION,TYPE, SQL_ID, LOGON_TIME
 from gv$session where sid=1568 and INST_ID=2;
 
 --阻塞会话
