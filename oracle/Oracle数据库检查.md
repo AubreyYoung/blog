@@ -107,6 +107,11 @@ asmcmd> lsdg
 select NUMBER_KFGMG, OP_KFGMG, ACTUAL_KFGMG, REBALST_KFGMG from X$KFGMG;
 
 select GROUP_NUMBER,OPERATION,POWER,EST_WORK,EST_RATE,EST_MINUTES from v$asm_operation;
+
+-- ASM OCR 添加,删除
+Adding new storage disks and Dropping old storage disks from OCR ,Vote diskgroup (Doc ID 2073993.1) 
+alter diskgroup ocr add disk '/dev/raw/raw33';
+alter diskgroup ocr drop disk '/dev/raw/raw1';
 ```
 
 ## 1.5 日志大小
@@ -291,8 +296,6 @@ alter system flush buffer_cache;
 ----清空SGA连接池信息
 alter system flush global context
 ```
-
-
 
 ## 2.1 数据库版本和补丁安装情况
 
@@ -617,6 +620,7 @@ set linesize 150
 column parameter format a50
 column value format a20
 select *  from v$option where value='TRUE';
+
 col COMP_NAME format a35;
 select comp_id,comp_name, status, substr(version,1,10) as version  from dba_registry;
 ```
@@ -1713,7 +1717,8 @@ select owner,index_name name,status,degree from dba_indexes where degree>'1';
 ```plsql
 col OWNER for a15
 col TRIGGER_NAME for a30
-col TABLE_NAME for a40SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
+col TABLE_NAME for a40
+SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
 ```
 
 ## 2.33 Disabled Constraint(s) 
