@@ -1282,11 +1282,13 @@ select owner,object_type,count(*) from dba_objects where status='INVALID' group 
 ### 2.18.2 SYS用户无效对象
 
 ```plsql
-set linesize 200
+set linesize 400
 col owner format a15
 col object_name format a30
 col object_id format 99999999
 col object_type format a10
+col CREATED for a20
+col LAST_DDL_TIME for
 SELECT OWNER,OBJECT_NAME, OBJECT_ID, OBJECT_TYPE,to_char(CREATED,'yyyy-mm-dd,hh24:mi:ss') CREATED,
 to_char(LAST_DDL_TIME,'yyyy-mm-dd,hh24:mi:ss') LAST_DDL_TIME,STATUS
 FROM  dba_objects where status<>'VALID' and owner='SYS' order by last_ddl_time;
@@ -1681,7 +1683,7 @@ SELECT 'ALTER INDEX ' || IP.INDEX_OWNER || '.' || IP.INDEX_NAME ||
 
 ```plsql
 col INDEX_NAME for a30
-SELECT owner,index_name,blevel FROM dba_indexes WHERE blevel >= 3 ORDER BY blevel DESC;
+SELECT owner,index_name,INDEX_TYPE,TABLE_OWNER,TABLE_NAME,TABLE_TYPE,blevel,PARTITIONED FROM dba_indexes WHERE blevel >= 3 ORDER BY blevel DESC;
 ```
 
 ## 2.28 Other Index Type
@@ -2303,7 +2305,7 @@ END;
 ## 3.11 锁定对象处理(ORA-04021)
 
 ```plsql
-SELECT OBJECT_ID, SESSION_ID, inst_id FROM GV$LOCKED_OBJECT WHERE OBJECT_ID in (select object_id FROM dba_objects where object_name='IND_M5_42' AND OWNER='PM4H_DB');
+SELECT OBJECT_ID, SESSION_ID, inst_id FROM GV$LOCKED_OBJECT WHERE OBJECT_ID in (select object_id FROM dba_objects where object_name='OBJ_4525' AND OWNER='PM4H_MO');
 
 select SERIAL# from gv$session where sid=4276 and INST_ID=1;
 

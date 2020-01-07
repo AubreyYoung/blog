@@ -207,9 +207,9 @@ SELECT /* XJ LEADING(S) FIRST_ROWS */
 ```plsql
 --- 单实例
 select
-substr(s.username,1,18) username,
+substr(s.username,1,18) username,s.event,
 P.spid,
-s.sid,s.serial#,s.machine,y.sql_text,
+s.sid,s.serial#,s.machine,y.sql_id,s.inst_id,y.sql_text,
 'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''';' "kill Session "
 from gv$session s,
 v$process p,v$transaction t,v$rollstat r,v$rollname n,gv$sql y
@@ -220,7 +220,7 @@ and t.xidusn = r.usn (+)
 and r.usn = n.usn (+)
 and s.username is not null
 and s.sql_address=y.address
-and y.sql_text like '%IND_TOH_39251_1%'
+and y.sql_text like '%OBJ_VER_4525%';
 ```
 
 ##  2.3 查询SQL以及session
