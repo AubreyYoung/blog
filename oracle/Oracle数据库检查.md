@@ -496,7 +496,7 @@ alter system set enable_ddl_logging=true;
 #关闭11g密码延迟验证新特性
 ALTER SYSTEM SET EVENT = '28401 TRACE NAME CONTEXT FOREVER, LEVEL 1' SCOPE = SPFILE;
 #限制trace日志文件大最大25M
-alter system set max_dump_file_size ='25m' ;
+alter system set max_dump_file_size ='2G' ;
 #关闭密码大小写限制
 ALTER SYSTEM SET SEC_CASE_SENSITIVE_LOGON = FALSE;
 alter system set db_files=2000 scope=spfile;
@@ -526,9 +526,9 @@ ALTER SYSTEM SET "deferred_segment_creation"=FALSE SCOPE=SPFILE;
 ALTER SYSTEM SET log_buffer=512000000 SCOPE=SPFILE;
 ALTER SYSTEM SET parallel_force_local=false;
 ALTER SYSTEM SET parallel_max_servers=20;    默认480
-ALTER SYSTEM SET open_cursors=3000 SCOPE=SPFILE;             
+ALTER SYSTEM SET open_cursors=1000 SCOPE=SPFILE;             
 open_cursors设定每个session（会话）最多能同时打开多少个cursor（游标）。session_cached_cursor设定每个session（会话）最多可以缓存多少个关闭掉的cursor
-ALTER SYSTEM SET session_cached_cursors=3000 SCOPE=SPFILE;
+ALTER SYSTEM SET session_cached_cursors=1000 SCOPE=SPFILE;
 ALTER SYSTEM SET "_kgl_hot_object_copies"=2 SCOPE=SPFILE;
 ALTER SYSTEM SET audit_trail='none' SCOPE=SPFILE;
 ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
@@ -584,6 +584,17 @@ PARALLEL_MAX_SEVERS参数设置并行执行可用的最大进程数量，该参�
 
 ```plsql
 select ksppinm,ksppstvl,ksppdesc from x$ksppi x,x$ksppcv y where x.indx = y.indx and ksppinm='_asm_hbeatiowait';
+```
+
+### 2.5.7 Memory建议
+
+```plsql
+-- sga
+select sga_size,sga_size_factor,estd_db_time from v$sga_target_advice;
+-- pga
+select pga_target_for_estimate,pga_target_factor,estd_extra_bytes_rw from v$pga_target_advice;
+--memory 
+select memory_size,memory_size_factor,estd_db_time from v$memory_target_advice;
 ```
 
 ## 2.6 数据库profile
@@ -834,6 +845,25 @@ FROM    V$log_history where to_date(first_time)>to_date(sysdate-15)
 group by trunc(first_time), to_char(first_time, 'Dy')
 Order by 1;
 set numw 10
+```
+
+2.12.5 REDO管理
+
+```plsql
+-- add
+alter database add logfile group 4 '/usr/oracle/dbs/log4PROD.dbf' size 300M;
+alter database add logfile thread 1 group 5
+('/u04/oradata/redologs/redo05a.log','/u04/oradata/redologs/redo05b.log') size 300M;
+-- Add a redo log file group and specifying the group number
+ALTER DATABASE ADD LOGFILE GROUP 5 ('c:\temp\newlog1.log') SIZE 500M;
+-- switch
+alter system switch logfile;
+ALTER SYSTEM ARCHIVE LOG CURRENT;
+-- drop
+alter database drop logfile group 1;
+-- clear
+ ALTER DATABASE CLEAR LOGFILE GROUP 1;
+ ALTER DATABASE CLEAR UNARCHIVED LOGFILE GROUP 2;
 ```
 
 ## 2.13 归档情况 
