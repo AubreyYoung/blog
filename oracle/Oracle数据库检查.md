@@ -2570,9 +2570,10 @@ exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_
 -- 收集表分区统计信息
 exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',partname => 'P21989_2_20190926',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 10, cascade => TRUE ); 
 
+exec dbms_stats.gather_table_stats(ownname=>'PM4H_MO', tabname=> 'OBJ_VER_4525',partname => 'PW_OBJ_VER_4525_171120',granularity => 'PARTITION',estimate_percent =>0.01,method_opt=> 'for all indexed columns size 254', degree => 10, cascade => TRUE );
+
 -- 只收集表的统计信息
 exec dbms_stats.gather_table_stats(ownname => 'PM4H_DB', tabname =>'IND_TOH_20688', estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE, method_opt => 'FOR TABLE',degree => 4);
-
 ```
 
 ### 3.14.3 统计信息管理
