@@ -16,7 +16,7 @@ TRUNC(sysdate - startup_time))),
 MOD(TRUNC(86400 *
 ((SYSDATE - STARTUP_TIME) - TRUNC(SYSDATE - startup_time))),
 60) || 's' running
-from v$instance;
+from gv$instance;
 
 -- RAC
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
@@ -48,6 +48,80 @@ where n.name in ('opened cursors current')
 and s.statistic# = n.statistic#
 group by s.sid),
 (select value from v$parameter where name = 'open_cursors');
+
+-- RAC
+COL value FOR a15
+
+COL usage FOR a15
+
+SELECT
+    inst_id,
+    'session_cached_cursors'                                                        parameter,
+    lpad(
+        value, 5
+    )                                                                  value,
+    decode(
+        value, 0,
+        ' n/a',
+        to_char(
+            100 * used / value, '990'
+        )
+        || '%'
+    )             usage
+FROM
+    (
+        SELECT
+            MAX(s.value) used
+        FROM
+            gv$statname  n,
+            gv$sesstat   s
+        WHERE
+                n.name = 'session cursor cache count'
+            AND s.statistic# = n.statistic#
+    ),
+    (
+        SELECT
+            inst_id,value
+        FROM
+            gv$parameter
+        WHERE
+            name = 'session_cached_cursors'
+    )
+UNION ALL
+SELECT
+    inst_id,
+    'open_cursors',
+    lpad(
+        value, 5
+    ),
+    to_char(
+        100 * used / value, '990'
+    )
+    || '%'
+FROM
+    (
+        SELECT
+            MAX(SUM(s.value)) used
+        FROM
+            gv$statname  n,
+            gv$sesstat   s
+        WHERE
+            n.name IN (
+                'opened cursors current'
+            )
+            AND s.statistic# = n.statistic#
+        GROUP BY
+            s.sid
+    ),
+    (
+        SELECT
+            inst_id,value
+        FROM
+            gv$parameter
+        WHERE
+            name = 'open_cursors'
+    )
+ORDER BY inst_id,PARAMETER;
 ```
 
 ## 1.3 ASM rbal进程内存泄露检查
@@ -404,8 +478,8 @@ set linesize 120
 col NAME format a40
 COL VALUE FORMAT A40
 SELECT /* SHSNC */
- NAME, ISDEFAULT, ISSES_MODIFIABLE SESMOD, ISSYS_MODIFIABLE SYSMOD, VALUE
-  FROM V$PARAMETER
+ INST_ID,NAME, ISDEFAULT, ISSES_MODIFIABLE SESMOD, ISSYS_MODIFIABLE SYSMOD, VALUE
+  FROM GV$PARAMETER
  WHERE NAME LIKE '%' || LOWER('process') || '%'
    AND NAME <> 'control_files'
    AND NAME <> 'rollback_segments';
@@ -416,7 +490,7 @@ SELECT /* SHSNC */
 ```plsql
 Col name for a20
 Col value for a40
-select num,name,value FROM V$PARAMETER where isdefault='FALSE';
+select inst_id,num,name,value FROM GV$PARAMETER where isdefault='FALSE' order by inst_id,num;
 
 select inst_id,NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE' OR ismodified != 'FALSE' order by inst_id;
 ```
@@ -424,7 +498,7 @@ select inst_id,NUM,name,value from GV$SYSTEM_PARAMETER2 where isdefault = 'FALSE
 ### 2.5.2 查看已废弃参数
 
 ```plsql
-SELECT name from v$parameter WHERE isdeprecated = 'TRUE' ORDER BY name;
+SELECT inst_id,name from gv$parameter WHERE isdeprecated = 'TRUE' ORDER BY name;
 ```
 
 ### 2.5.3 隐藏参数
@@ -460,31 +534,32 @@ SELECT  P.KSPPINM NAME, V.KSPPSTVL VALUE
 ### 2.5.3 查看参数
 
 ```
-show parameter audit_trail
-show parameter max_dump_file_size
-show parameter processes
-show parameter sga_max_size
-show parameter sga_target
-show parameter spfile
-show parameter memory_target
-show parameter memory_max_target
-show parameter db_block_size
-show parameter db_files
-show parameter recyclebin
-show parameter O7_DICTIONARY_ACCESSIBILITY
-show parameter pga_aggregate_target
-show parameter listener
-show parameter local_listener
-show parameter remote_listener
-show parameter db_create_file_dest
-show parameter log_archive_dest_1
-show parameter log_archive_dest_2
-show parameter  control_file_record_keep_time
-show parameter enable_ddl_logging
+select inst_id,name,value from gv$parameter where name in('audit_trail',
+'max_dump_file_size',
+'processes',
+'sga_max_size',
+'sga_target',
+'spfile',
+'memory_target',
+'memory_max_target',
+'db_block_size',
+'db_files',
+'recyclebin',
+'O7_DICTIONARY_ACCESSIBILITY',
+'pga_aggregate_target',
+'listener',
+'local_listener',
+'remote_listener',
+'db_create_file_dest',
+'log_archive_dest_1',
+'log_archive_dest_2',
+'control_file_record_keep_time',
+'enable_ddl_logging','cursor_sharing','open_cursors','session_cached_cursors','sec_case_sensitive_logon','log_buffer','recyclebin');
 ```
 ### 2.5.4 修改参数
 
 ```plsql
+alter system set audit_sys_operations=false scope=spfile;
 alter system set deferred_segment_creation=FALSE;     
 alter system set audit_trail             =none           scope=spfile;  
 alter system set SGA_MAX_SIZE            =xxxxxM         scope=spfile; 
@@ -730,7 +805,7 @@ FROM DUAL;
 ### 2.10.4估算表大小(实际)
 
 ```plsql
-Select num_rows*avg_row_len/1024/1024 from dba_tables where table_name='<table_name>' ;
+select num_rows*avg_row_len/1024/1024 from sys.dba_tables where table_name=upper(:table_name) and owner=upper(:owner);
 ```
 
 ### 2.10.5 审计日志大小
@@ -1270,6 +1345,8 @@ TO_CHAR(START_TIME,'yyyy-mm-dd hh24:mi') start_time, OUTPUT_BYTES_DISPLAY out_si
 INPUT_BYTES_PER_SEC_DISPLAY
 from v$RMAN_BACKUP_JOB_DETAILS  where start_time >sysdate-30 order by start_time;
 ```
+
+
 ```plsql
 select * from (select RECID,start_time,HANDLE from v$backup_piece  order by start_time desc ) where rownum<30;
 ```
@@ -1993,10 +2070,10 @@ create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solari
 ## 3.3 JOB状态查询
 
 ```plsql
--- 主端查看当前DBMS_JOB 的状态
+-- 查看当前DBMS_JOB 的状态
 SELECT * FROM DBA_JOBS_RUNNING;
 
--- 主端查看当前DBMS_SCHEDULER的状态
+-- 查看当前DBMS_SCHEDULER的状态
 select owner,job_name,session_id,slave_process_id,running_instance from dba_scheduler_running_jobs;
 
 -- 查看数据泵Job
@@ -2836,11 +2913,6 @@ ORDER BY
 ;
 ```
 
-### 3.17.3 查看表的并行度
-
-```
-select owner,table_name,degree from dba_tables where table_name='EMP';
-```
 
 ## 3.18 查看UNDO表空间
 
@@ -2892,7 +2964,7 @@ SELECT A.SID, A.USERNAME, B.XIDUSN, B.USED_UREC, B.USED_UBLK FROM V$SESSION A, V
 
 SELECT XID AS "txn_id", XIDUSN AS "undo_seg", USED_UBLK "used_undo_blocks",XIDSLOT AS "slot", XIDSQN AS "seq", STATUS AS "txn_status" FROM V$TRANSACTION;
 
--- 查询事务使用的UNDO段及大小。
+-- 查询事务使用的UNDO段及大小
 select s.sid,s.serial#,s.sql_id,v.usn,segment_name,r.status, v.rssize/1024/1024 mb
 From dba_rollback_segs r, v$rollstat v,v$transaction t,v$session s
 Where r.segment_id = v.usn and v.usn=t.xidusn and t.addr=s.taddr
