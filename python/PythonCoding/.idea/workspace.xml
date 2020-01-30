@@ -2,6 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3e9b97b2-9b29-451b-ae01-a0efb4d919ef" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/out/production/JavaCoding/coding2020110/HelloWorld.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/out/production/JavaCoding/coding2020110/HelloWorld.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/src/coding2020110/HelloWorld.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/src/coding2020110/HelloWorld.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -293,6 +297,8 @@
       <workItem from="1575862182937" duration="716000" />
       <workItem from="1575863161407" duration="2004000" />
       <workItem from="1578683108181" duration="209000" />
+      <workItem from="1580395962345" duration="17000" />
+      <workItem from="1580396287325" duration="90000" />
     </task>
     <servers />
   </component>
@@ -313,10 +319,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="184" y="6" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1578683306932" />
-    <state x="363" y="188" key="com.intellij.ide.util.TipDialog" timestamp="1578683109572">
+    <state x="363" y="188" key="com.intellij.ide.util.TipDialog" timestamp="1580396287576">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="363" y="188" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1578683109572" />
+    <state x="363" y="188" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1580396287576" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
