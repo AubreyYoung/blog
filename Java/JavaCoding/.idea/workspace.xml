@@ -6,8 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="afc60311-8d4f-427a-aebe-e3cd0f4afbbc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/HelloWorld.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/HelloWorld.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/coding2020110/HelloWorld.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/coding2020110/HelloWorld.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/coding2020110/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/coding2020110/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../python/PythonCoding/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../python/PythonCoding/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +63,7 @@
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="MTConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -68,7 +71,7 @@
       <recent name="D:\Git\blog\Java\JavaCoding\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Main1">
+  <component name="RunManager" selected="Application.Main (1)">
     <configuration name="HelloWorld" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="coding2020110.HelloWorld" />
       <module name="JavaCoding" />
@@ -130,9 +133,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.Main (1)" />
         <item itemvalue="Application.Main1" />
         <item itemvalue="Application.HelloWorld" />
-        <item itemvalue="Application.Main (1)" />
         <item itemvalue="Application.Main" />
         <item itemvalue="Application.JdbcConnectOracle" />
       </list>
@@ -175,6 +178,15 @@
       <workItem from="1580183903282" duration="4898000" />
       <workItem from="1580262198668" duration="9000" />
       <workItem from="1580262390287" duration="1692000" />
+      <workItem from="1580562308217" duration="813000" />
+      <workItem from="1580695713266" duration="159000" />
+      <workItem from="1580856093233" duration="80000" />
+      <workItem from="1581623480200" duration="11000" />
+      <workItem from="1581623552850" duration="7000" />
+      <workItem from="1581623826094" duration="99000" />
+      <workItem from="1581623972920" duration="181000" />
+      <workItem from="1581624250906" duration="5000" />
+      <workItem from="1582671426142" duration="14000" />
     </task>
     <servers />
   </component>
@@ -206,26 +218,26 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="311" y="57" key="#com.intellij.ide.fileTemplates.ui.ConfigureTemplatesDialog/0.0.1366.728@0.0.1366.728" timestamp="1580163813602" />
-    <state x="463" y="96" key="FileChooserDialogImpl" timestamp="1580161533673">
+    <state x="463" y="96" key="FileChooserDialogImpl" timestamp="1580695727603">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="463" y="96" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1580161533673" />
-    <state width="1323" height="149" key="GridCell.Tab.0.bottom" timestamp="1580239891477">
+    <state x="463" y="96" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1580695727603" />
+    <state width="1323" height="149" key="GridCell.Tab.0.bottom" timestamp="1580563127862">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="149" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1580239891477" />
-    <state width="1323" height="149" key="GridCell.Tab.0.center" timestamp="1580239891477">
+    <state width="1323" height="149" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1580563127862" />
+    <state width="1323" height="149" key="GridCell.Tab.0.center" timestamp="1580563127862">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="149" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1580239891477" />
-    <state width="1323" height="149" key="GridCell.Tab.0.left" timestamp="1580239891477">
+    <state width="1323" height="149" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1580563127862" />
+    <state width="1323" height="149" key="GridCell.Tab.0.left" timestamp="1580563127862">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="149" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1580239891477" />
-    <state width="1323" height="149" key="GridCell.Tab.0.right" timestamp="1580239891477">
+    <state width="1323" height="149" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1580563127862" />
+    <state width="1323" height="149" key="GridCell.Tab.0.right" timestamp="1580563127862">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="149" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1580239891477" />
+    <state width="1323" height="149" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1580563127862" />
     <state width="1286" height="194" key="GridCell.Tab.1.bottom" timestamp="1578692085626">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
@@ -242,10 +254,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state width="1286" height="194" key="GridCell.Tab.1.right/0.0.1366.728@0.0.1366.728" timestamp="1578692085626" />
-    <state x="186" y="0" key="SettingsEditor" timestamp="1580235659184">
+    <state x="186" y="0" key="SettingsEditor" timestamp="1580695869475">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="186" y="0" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1580235659184" />
+    <state x="186" y="0" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1580695869475" />
     <state x="404" y="105" width="540" height="540" key="StructurePopup" timestamp="1580264008266">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
@@ -254,10 +266,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state width="498" height="446" key="SwitcherDM/0.0.1366.728@0.0.1366.728" timestamp="1580154032388" />
-    <state x="375" y="191" key="com.intellij.ide.util.TipDialog" timestamp="1580262391023">
+    <state x="375" y="191" key="com.intellij.ide.util.TipDialog" timestamp="1582671427073">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="375" y="191" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1580262391023" />
+    <state x="375" y="191" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582671427073" />
     <state x="475" y="56" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1580263941200">
       <screen x="0" y="0" width="1366" height="728" />
     </state>

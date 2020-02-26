@@ -49,7 +49,7 @@ and s.statistic# = n.statistic#
 group by s.sid),
 (select value from v$parameter where name = 'open_cursors');
 
--- RAC
+-- RAC (存在问题需要修复)
 COL value FOR a15
 
 COL usage FOR a15
@@ -554,7 +554,7 @@ select inst_id,name,value from gv$parameter where name in('audit_trail',
 'log_archive_dest_1',
 'log_archive_dest_2',
 'control_file_record_keep_time',
-'enable_ddl_logging','cursor_sharing','open_cursors','session_cached_cursors','sec_case_sensitive_logon','log_buffer','recyclebin');
+'enable_ddl_logging','cursor_sharing','open_cursors','session_cached_cursors','sec_case_sensitive_logon','log_buffer','recyclebin') order by inst_id;
 ```
 ### 2.5.4 修改参数
 
@@ -1564,8 +1564,8 @@ end;
 ### 2.20.1 数据库等待事件
 
 ```plsql
+set line 500
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
-
 
 -- "查询结果中，15分钟内“EVENT”列中不包含以下等待事件：
  read by other session、buffer busy waits
@@ -1588,7 +1588,6 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
  library cache pin
  row cache lock
 如果15分钟内“EVENT”列包括以上等待事件，但等待次数小于或等于30次，则检查通过。例如，15分钟内“log file sync”总共等待16次。
-"
 
 select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
