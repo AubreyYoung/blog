@@ -709,6 +709,10 @@ select *  from v$option where value='TRUE';
 
 col COMP_NAME format a35;
 select comp_id,comp_name, status, substr(version,1,10) as version  from dba_registry;
+
+select comp_name, version, status from dba_server_registry where comp_name like '%OLAP%';
+
+select name, detected_usages, currently_used from dba_feature_usage_statistics where name like 'OLAP%' order by name;
 ```
 
 ## 2.10 数据量大小

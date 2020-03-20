@@ -3,11 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="3e9b97b2-9b29-451b-ae01-a0efb4d919ef" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/out/production/JavaCoding/coding2020110/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/out/production/JavaCoding/coding2020110/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/out/production/JavaCoding/coding2020110/Main1.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/out/production/JavaCoding/coding2020110/Main1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/src/coding2020110/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/src/coding2020110/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +117,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="Oracle&#10;MySQL" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
     <property name="settings.editor.splitter.proportion" value="0.2585034" />
   </component>
   <component name="PyCoverageOptionsProvider">
@@ -306,6 +302,7 @@
       <workItem from="1581624703552" duration="273000" />
       <workItem from="1581625045776" duration="67000" />
       <workItem from="1582671401234" duration="17000" />
+      <workItem from="1582831134712" duration="354000" />
     </task>
     <servers />
   </component>
@@ -322,14 +319,14 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="184" y="6" key="SettingsEditor" timestamp="1581625099860">
+    <state x="184" y="6" key="SettingsEditor" timestamp="1582831487224">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="184" y="6" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1581625099860" />
-    <state x="363" y="188" key="com.intellij.ide.util.TipDialog" timestamp="1582671402682">
+    <state x="184" y="6" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1582831487224" />
+    <state x="363" y="188" key="com.intellij.ide.util.TipDialog" timestamp="1582831138020">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="363" y="188" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582671402682" />
+    <state x="363" y="188" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582831138020" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

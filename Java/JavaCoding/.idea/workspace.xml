@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="afc60311-8d4f-427a-aebe-e3cd0f4afbbc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/JavaCoding/coding2020110/Main1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/coding2020110/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/coding2020110/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../python/PythonCoding/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../python/PythonCoding/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -187,6 +184,9 @@
       <workItem from="1581623972920" duration="181000" />
       <workItem from="1581624250906" duration="5000" />
       <workItem from="1582671426142" duration="14000" />
+      <workItem from="1582817024982" duration="1351000" />
+      <workItem from="1582834136553" duration="731000" />
+      <workItem from="1584494318126" duration="6000" />
     </task>
     <servers />
   </component>
@@ -266,10 +266,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state width="498" height="446" key="SwitcherDM/0.0.1366.728@0.0.1366.728" timestamp="1580154032388" />
-    <state x="375" y="191" key="com.intellij.ide.util.TipDialog" timestamp="1582671427073">
+    <state x="375" y="191" key="com.intellij.ide.util.TipDialog" timestamp="1584494321682">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="375" y="191" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582671427073" />
+    <state x="375" y="191" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1584494321682" />
     <state x="475" y="56" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1580263941200">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
