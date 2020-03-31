@@ -3159,5 +3159,11 @@ END;
 /
 ```
 
+## 3.19 查看表修改记录
+
+```plsql
+select * from dba_tab_modifications;
+```
+
 
 
