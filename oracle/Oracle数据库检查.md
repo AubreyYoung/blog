@@ -1409,6 +1409,12 @@ SELECT COUNT(*) FROM obj$ WHERE status IN (4, 5, 6);
 
 -- 2. Query returning the number of objects compiled so far. This number should increase with time.
 SELECT COUNT(*) FROM UTL_RECOMP_COMPILED;
+
+-- 3. Query showing jobs created by UTL_RECOMP
+SELECT job_name FROM dba_scheduler_jobs WHERE job_name like 'UTL_RECOMP_SLAVE_%';
+
+-- 4. Query showing UTL_RECOMP jobs that are running
+SELECT job_name FROM dba_scheduler_running_jobs WHERE job_name like 'UTL_RECOMP_SLAVE_%';
 ```
 
 ### 2.18.2 SYS用户无效对象
@@ -3169,6 +3175,94 @@ END;
 
 ```plsql
 select * from dba_tab_modifications;
+```
+
+## 4.20 Oracle 12c/19c 参数优化
+
+```plsql
+-- 12c
+alter system set deferred_segment_creation=false;
+alter system set audit_trail =none scope=spfile;
+alter system set sga_max_size =xxxxxm scope=spfile;
+alter system set sga_target =xxxxxm scope=spfile;
+alter system set pga_aggregate_target =xxxxxm scope=spfile;
+alter profile default limit password_life_time unlimited;
+alter database add supplemental log data;
+alter system set enable_ddl_logging=true;
+-- 关闭密码延迟验证新特性
+alter system set event = '28401 trace name context forever, level 1' scope = spfile;
+-- 限制trace日志文件大最大25m
+alter system set max_dump_file_size ='25m';
+alter system set db_files=2000 scope=spfile;
+-- 如果修改了监听端口（默认1521）修改local_listener
+alter system set local_listener = '(address = (protocol = tcp)(host = 192.168.0.125)
+(port = 2016))' ;
+-- 更改控制文件记录保留时间
+alter system set control_file_record_keep_time =31;
+alter system set "_report_capture_cycle_time"=0;
+alter system set "_optimizer_ads_use_result_cache" = false;
+alter system set "_use_single_log_writer"=true sid='*' scope=spfile;
+alter system set "_optimizer_aggr_groupby_elim"=false scope=both;
+alter system set "_optimizer_reduce_groupby_key"=false scope=both;
+alter system set "_enable_pdb_close_abort"=true;
+alter system set "_enable_pdb_close_noarchivelog"=true;
+alter system set "_drop_stat_segment"=1;
+alter system set "_common_data_view_enabled"=false;
+alter system set "_optimizer_dsdir_usage_control"=0;
+alter system set "_optimizer_gather_feedback"=false;
+alter system set "_optimizer_enable_extended_stats"=false;
+alter system set "_datafile_write_errors_crash_instance"=false;
+alter system set awr_pdb_autoflush_enabled= true sid='*' scope=both;
+alter system set awr_snapshot_time_offset=1000000 sid='*' scope=both;
+
+--19c
+alter system set db_file_multiblock_read_count=32 scope=spfile sid='*';
+alter system set max_dump_file_size = '500M' scope=spfile sid='*';
+alter system set "_memory_imm_mode_without_autosga"=FALSE scope=spfile sid='*';
+alter system set job_queue_processes=100 scope=spfile sid='*';
+alter system set DB_FILES=4096 scope=spfile sid='*';
+alter system set nls_date_format='YYYY-MM-DD HH24:MI:SS' scope=spfile sid='*';
+alter system set open_cursors=3000 scope=spfile sid='*';
+alter system set open_links_per_instance=48 scope=spfile sid='*';
+alter system set open_links=100 scope=spfile sid='*';
+alter system set parallel_max_servers=20 scope=spfile sid='*';
+alter system set session_cached_cursors=200 scope=spfile sid='*';
+alter system set undo_retention=10800 scope=spfile sid='*';
+alter system set "_undo_autotune"=false scope=spfile sid='*';
+alter system set "_partition_large_extents"=false scope=spfile sid='*';
+alter system set "_use_adaptive_log_file_sync"=false scope=spfile sid='*';
+alter system set "_optimizer_use_feedback"=false scope=spfile sid='*';
+alter system set deferred_segment_creation=false scope=spfile sid='*';
+alter system set "_external_scn_logging_threshold_seconds"=600 scope=spfile sid='*';
+alter system set "_external_scn_rejection_threshold_hours"=24 scope=spfile sid='*';
+alter system set result_cache_max_size=0 scope=spfile sid='*';
+alter system set "_cleanup_rollback_entries"=2000 scope=spfile sid='*';
+alter system set parallel_force_local=true scope=spfile sid='*';   --rac
+alter system set "_gc_policy_time"=0 scope=spfile sid='*';
+alter system set "_clusterwide_global_transactions"=false scope=spfile sid='*'; 
+alter system set "_library_cache_advice"=false scope=both sid='*';
+alter system set db_cache_advice=off scope=both sid='*';
+alter system set filesystemio_options=setall scope=spfile sid='*';
+alter system set fast_start_mttr_target=300 scope=spfile sid='*';
+
+alter profile default limit PASSWORD_LIFE_TIME   UNLIMITED;
+alter profile  ORA_STIG_PROFILE limit  PASSWORD_LIFE_TIME   UNLIMITED;
+
+begin
+ DBMS_AUTO_TASK_ADMIN.DISABLE(
+ client_name => 'sql tuning advisor',
+ operation => NULL,
+ window_name => NULL);
+end;
+/
+
+begin
+ DBMS_AUTO_TASK_ADMIN.DISABLE(
+ client_name => 'auto space advisor',
+ operation => NULL,
+ window_name => NULL);
+end;
+/
 ```
 
 
