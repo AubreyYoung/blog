@@ -1403,6 +1403,12 @@ select substr(comp_name,1,40) comp_name, status, substr(version,1,10) version fr
 select substr(object_name,1,40) object_name,substr(owner,1,15) owner,object_type from dba_objects where status='INVALID' order by owner,object_type;
 
 select owner,object_type,count(*) from dba_objects where status='INVALID' group by owner,object_type order by owner,object_type ;
+
+-- 1. Query returning the number of invalid objects remaining. This number should decrease with time.
+SELECT COUNT(*) FROM obj$ WHERE status IN (4, 5, 6);
+
+-- 2. Query returning the number of objects compiled so far. This number should increase with time.
+SELECT COUNT(*) FROM UTL_RECOMP_COMPILED;
 ```
 
 ### 2.18.2 SYS用户无效对象

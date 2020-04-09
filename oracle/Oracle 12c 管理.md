@@ -16,3 +16,10 @@ create pluggable database HCM using '/u01/app/oracle/oradata/.../hcm.xml';
 PDB 共享UNDO,REDO以及控制文件和参数文件.
 
 CDB有SYSTEM,SYSAUX,UNDO,TEMP,REDO.
+
+## 3 升级
+
+```plsql
+mos  1572925.1  Oracle 19c GI升级
+```
+
