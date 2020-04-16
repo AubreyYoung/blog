@@ -3265,5 +3265,58 @@ end;
 /
 ```
 
+## 4.21 19c In-Memory
 
+```plsql
+-- 查看In-Memeory
+select * from  v$im_column_level;
+SELECT * FROM V$IM_SEGMENTS;
+
+-- 查看In-Memeory大小
+select pool,ALLOC_BYTES/1024/1024,USED_BYTES/1024/1024,POPULATE_STATUS,con_id 
+from V$INMEMORY_AREA;
+
+--查看In-Memeory级别
+select * from dba_tables；
+-- PRIORITY NONE	缺省级别；执行 SQL 引起对象扫描后，触发进入 IN-MEMORY
+-- PRIORITY CRITICAL	最高优先级；数据库启动后立即进入 IN-MEMORY
+-- PRIORITY HIGH	在具有 CRITICAL 优先级的对象之后进入 IN-MEMORY
+-- PRIORITY MEDIUM	在具有 CRITICAL、HIGH 优先级的对象之后进入 IN-MEMORY
+-- PRIORITY LOW	在具有 CRITICAL、HIGH、MEDIUM 优先级的对象之后进入 IN-MEMORY
+alter table test inmemory priority high;
+
+-- 开启In-Memeory
+create table test (id number) inmemory;
+alter table test inmemory;
+alter table imo_t1 inmemory (id) no inmemory (name,type); 
+
+-- 可以通过如下初始创建表空间或后续修改表空间 inmemory 属性的方式进行启用，在属性为 inmemory 的表空间中创建的对象自动加载 inmemory 属性，除非显示设置对象为 no inmemory：
+create tablespace imotest datafile '/oradata/orcl/imotest01.dbf' size 100M default inmemory;
+alter tablespace imotest default inmemory;
+
+--关闭inmemory
+alter table test no inmemory;
+
+--手工执行DBMS_INMEMORY.POPULATE procedure来加载TEST表到IM中
+EXEC DBMS_INMEMORY.POPULATE('CS','TEST');
+EXEC DBMS_INMEMORY.REPOPULATE('CS','TEST', FORCE=>TRUE);
+
+-- 通过全表扫描objects加载数据到IM
+SELECT /*+ FULL (s) */ COUNT(*) FROM test s;
+```
+
+
+
+## 4.22 查看EXPDP/IMPDP JOB
+
+```plsql
+set lines 150 pages 100 numwidth 7
+col program for a38
+col username for a10
+col spid for a7
+select s.program, s.sid,
+s.status, s.username, d.job_name, p.spid, s.serial#, p.pid
+from v$session s, v$process p, dba_datapump_sessions d
+where p.addr=s.paddr and s.saddr=d.saddr;
+```
 
