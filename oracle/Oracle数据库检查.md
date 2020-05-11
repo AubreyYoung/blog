@@ -3426,8 +3426,6 @@ EXEC DBMS_INMEMORY.REPOPULATE('CS','TEST', FORCE=>TRUE);
 SELECT /*+ FULL (s) */ COUNT(*) FROM test s;
 ```
 
-
-
 ## 4.22 查看EXPDP/IMPDP JOB
 
 ```plsql
@@ -3439,5 +3437,23 @@ select s.program, s.sid,
 s.status, s.username, d.job_name, p.spid, s.serial#, p.pid
 from v$session s, v$process p, dba_datapump_sessions d
 where p.addr=s.paddr and s.saddr=d.saddr;
+```
+
+## 5.静默安装
+
+```sh
+# RAC
+su oracle -c "$ORACLE_HOME/bin/dbca -silent -createDatabase -templateName
+General_Purpose.dbc -gdbName $DBNAME -sid $ORACLE_SID -sysPassword password
+-systemPassword password -sysmanPassword password -dbsnmpPassword password
+-emConfiguration LOCAL -storageType ASM -diskGroupName ASMgrp1
+-datafileJarLocation $ORACLE_HOME/assistants/dbca/templates -nodeinfo
+node1,node2 -characterset WE8ISO8859P1 -obfuscatedPasswords false -sampleSchema
+false -asmSysPassword password"
+
+# SingleInstance
+dbca -silent -createDatabase -templateName General_Purpose.dbc
+  -gdbname ora11g -sid ora11g -responseFile NO_VALUE -characterSet AL32UTF8
+  -memoryPercentage 30 -emConfiguration LOCAL
 ```
 
