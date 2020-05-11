@@ -168,6 +168,80 @@ col STATE for a10
 col COMPATIBILITY for a20
 col DATABASE_COMPATIBILITY for a30
 select GROUP_NUMBER,name,STATE,TYPE,COMPATIBILITY,DATABASE_COMPATIBILITY from v$asm_diskgroup;
+
+SELECT DG.NAME AS DISKGROUP, SUBSTR(C.INSTANCE_NAME,1,12) AS INSTANCE,
+SUBSTR(C.DB_NAME,1,12) AS DBNAME, SUBSTR(C.SOFTWARE_VERSION,1,12) AS SOFTWARE,
+SUBSTR(C.COMPATIBLE_VERSION,1,12) AS COMPATIBLE
+FROM V$ASM_DISKGROUP DG, V$ASM_CLIENT C
+WHERE DG.GROUP_NUMBER = C.GROUP_NUMBER;
+
+SELECT CONCAT('+'||GNAME, SYS_CONNECT_BY_PATH(ANAME, '/'))
+ FULL_PATH, SYSTEM_CREATED, ALIAS_DIRECTORY, FILE_TYPE
+ FROM ( SELECT B.NAME GNAME, A.PARENT_INDEX PINDEX,
+ A.NAME ANAME, A.REFERENCE_INDEX RINDEX,
+ A.SYSTEM_CREATED, A.ALIAS_DIRECTORY,
+ C.TYPE FILE_TYPE
+ FROM V$ASM_ALIAS A, V$ASM_DISKGROUP B, V$ASM_FILE C
+ WHERE A.GROUP_NUMBER = B.GROUP_NUMBER
+ AND A.GROUP_NUMBER = C.GROUP_NUMBER(+)
+ AND A.FILE_NUMBER = C.FILE_NUMBER(+)
+ AND A.FILE_INCARNATION = C.INCARNATION(+)
+ )
+ START WITH (MOD(PINDEX, POWER(2, 24))) = 0
+ CONNECT BY PRIOR RINDEX = PINDEX;
+
+SELECT GROUP_NUMBER, DISK_NUMBER, MOUNT_STATUS, HEADER_STATUS, MODE_STATUS, STATE, OS_MB, TOTAL_MB, FREE_MB, NAME, FAILGROUP, PATH
+FROM V$ASM_DISK ORDER BY GROUP_NUMBER, FAILGROUP, DISK_NUMBER;
+
+SELECT * FROM V$ASM_DISK ORDER BY GROUP_NUMBER,DISK_NUMBER;
+
+SELECT * FROM V$ASM_ATTRIBUTE;
+
+SELECT * FROM V$ASM_OPERATION;
+SELECT * FROM GV$ASM_OPERATION;
+
+SELECT * FROM V$VERSION;
+
+SELECT * FROM V$ASM_ACFSSNAPSHOTS;
+SELECT * FROM V$ASM_ACFSVOLUMES;
+SELECT * FROM V$ASM_FILESYSTEM;
+SELECT * FROM V$ASM_VOLUME;
+SELECT * FROM V$ASM_VOLUME_STAT;
+
+SELECT * FROM V$ASM_USER;
+SELECT * FROM V$ASM_USERGROUP;
+SELECT * FROM V$ASM_USERGROUP_MEMBER;
+
+SELECT * FROM V$ASM_DISK_IOSTAT;
+SELECT * FROM V$ASM_DISK_STAT;
+SELECT * FROM V$ASM_DISKGROUP_STAT;
+
+SELECT * FROM V$ASM_TEMPLATE;
+
+SELECT * FROM V$ASM_CLIENT;
+
+--DISPLAYS INFORMATION ABOUT THE CONTENTS OF THE SPFILE.
+SELECT * FROM V$SPPARAMETER ORDER BY 2;
+SELECT * FROM GV$SPPARAMETER ORDER BY 3;
+
+--DISPLAYS INFORMATION ABOUT THE INITIALIZATION PARAMETERS THAT ARE CURRENTLY IN EFFECT IN THE INSTANCE.
+SELECT * FROM V$SYSTEM_PARAMETER ORDER BY 2;
+SELECT * FROM GV$SYSTEM_PARAMETER ORDER BY 3;
+
+-- ASM alias
+select * from v$asm_file;
+select * from v$asm_alias;
+
+
+-- 12C ASM AUDIT VIEWS
+SELECT * FROM V$ASM_AUDIT_CLEAN_EVENTS;
+SELECT * FROM V$ASM_AUDIT_CLEANUP_JOBS;
+SELECT * FROM V$ASM_AUDIT_CONFIG_PARAMS;
+SELECT * FROM V$ASM_AUDIT_LAST_ARCH_TS;
+
+-- 12C ASM ESTIMATE VIEW
+SELECT * FROM V$ASM_ESTIMATE;
+SELECT * FROM GV$ASM_ESTIMATE;
 ```
 
 ```plsql
@@ -175,17 +249,53 @@ alter diskgroup data add disk '/dev/raw/raw41' name DATA_0001,'/dev/raw/raw42' n
 
 -- 挂在磁盘组
 alter diskgroup data mount;
-asmcmd> lsdg
 
 固态表X$KFGMG的REBALST_KFGMG字段会显示为2，代表正在compacting。
 select NUMBER_KFGMG, OP_KFGMG, ACTUAL_KFGMG, REBALST_KFGMG from X$KFGMG;
 
-select GROUP_NUMBER,OPERATION,POWER,EST_WORK,EST_RATE,EST_MINUTES from v$asm_operation;
+select GROUP_NUMBER,OPERATION,POWER,EST_WORK,EST_RATE,EST_MINUTES from gv$asm_operation;
 
 -- ASM OCR 添加,删除
 Adding new storage disks and Dropping old storage disks from OCR ,Vote diskgroup (Doc ID 2073993.1) 
 alter diskgroup ocr add disk '/dev/raw/raw33';
 alter diskgroup ocr drop disk '/dev/raw/raw1';
+```
+
+**ASMCMD**
+
+```plsql
+-- Lists the contents of an Oracle ASM directory, the attributes of the specified file, or the names and attributes of all disk groups.
+asmcmd -p ls
+-- Lists the attributes of a disk group.
+asmcmd -p lsattr
+-- Lists information about current Oracle ASM clients.
+asmcmd -p lsct
+-- Lists disk groups and their information.
+asmcmd -p lsdg
+-- Lists disks Oracle ASM disks.
+asmcmd -p lsdsk
+-- Lists the open files.
+asmcmd -p lsof
+-- Lists open devices.
+asmcmd -p lsod
+-- Displays I/O statistics for disks.
+asmcmd -p iostat
+-- Retrieves the discovery diskstring value that is used by the Oracle ASM instance and its clients.
+asmcmd -p dsget
+-- Lists the current operations on a disk group or Oracle ASM instance.
+asmcmd -p lsop
+-- Retrieves the location of the Oracle ASM SPFILE.
+asmcmd -p spget
+-- Lists disk group templates.
+asmcmd -p lstmpl
+-- Lists users in a disk group.
+asmcmd -p lsusr
+-- Lists user groups.
+asmcmd -p lsgrp
+-- Lists the users from an Oracle ASM password file.
+asmcmd -p lspwusr
+-- Displays information about Oracle ADVM volumes.
+asmcmd -p volinfo
 ```
 
 ## 1.5 日志大小
@@ -220,6 +330,15 @@ find / -name "alert*.log*" | xargs du -sk
 cd $ORACLE_BASE/admin/{SID}/adump
 -- 删除audit日志
 find /u01/app/oracle/admin/orcl/adump -name "*.aud" -print0 |xargs -0 rm -f
+```
+
+**ASM/RAC日志**
+
+```sh
+#ASM日志：
+cd $ORACLE_BASE/diag/asm/+ASMX/trace/alert_+ASMX.log
+#CRS日志：
+cd $ORACLE_HOME/log/主机名/alert主机名.log
 ```
 
 ## 1.6 查看集群运行状态
@@ -2611,6 +2730,8 @@ where rownum < 11;
 ```plsql
 -- 查看表统计信息
 select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
+
+select table_name,partition_name,subpartition_name,object_type, num_rows, global_stats,last_analyzed from user_tab_statistics;
 -- 查看列统计信息
 select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
 ;

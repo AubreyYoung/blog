@@ -395,5 +395,42 @@ wait        Block until one or more containers stop, then print their exit codes
 Run 'docker COMMAND --help' for more information on a command.
 ```
 
+### history
+
+```shell
+$ docker history c48059c55c17
+IMAGE               CREATED              CREATED BY                                      SIZE                COMMENT
+c48059c55c17        About a minute ago   /bin/sh -c #(nop)  CMD ["/hello"]               0B
+4b3ea33fcb22        About a minute ago   /bin/sh -c #(nop) ADD file:8838a0c049bbba3a0…   861kB
+```
+
+### ls
+
+```shell
+$ docker container ls -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                         PORTS               NAMES
+556e69a8ef49        aubrey/hello        "/hello"            31 minutes ago      Exited (13) 31 minutes ago                         optimistic_driscoll
+a4982dea46df        hello-world         "/hello"            About an hour ago   Exited (0) About an hour ago                       optimistic_heyrovsky
+
+$ docker container ls -aq
+556e69a8ef49
+a4982dea46df
+
+$ docker container ls -f "STATUS=exited"
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                         PORTS               NAMES
+556e69a8ef49        aubrey/hello        "/hello"            32 minutes ago      Exited (13) 32 minutes ago                         optimistic_driscoll
+a4982dea46df        hello-world         "/hello"            About an hour ago   Exited (0) About an hour ago                       optimistic_heyrovsky
+
+$ docker container ls -f "STATUS=exited" -aq
+556e69a8ef49
+a4982dea46df
+```
+
+commit
+
+```shell
+docker commit container images-
+```
+
 
 
