@@ -1540,15 +1540,84 @@ select event,p1,p2,p3 from v$session_wait where event like 'buffer busy wait%';
 select owner,segment_name from dba_extents where file_id=&p1 and block_id<=&p2 and (block_id+blocks)>=&p2;
 ```
 
-# 14. REDO LOG
+# 14. 查看最近7天DB Time
+
+确定数据业务负载状态
+
+```plsql
+WITH sysstat AS (
+    SELECT
+        sn.begin_interval_time    begin_interval_time,
+        sn.end_interval_time      end_interval_time,
+        ss.stat_name              stat_name,
+        ss.value                  e_value,
+        LAG(ss.value, 1) OVER(
+            ORDER BY
+                ss.snap_id
+        ) b_value
+    FROM
+        dba_hist_sysstat   ss,
+        dba_hist_snapshot  sn
+    WHERE
+            trunc(
+            sn.begin_interval_time
+        ) >= sysdate - 7
+        AND ss.snap_id = sn.snap_id
+        AND ss.dbid = sn.dbid
+        AND ss.instance_number = sn.instance_number
+        AND ss.dbid = (
+            SELECT
+                dbid
+            FROM
+                v$database
+        )
+        AND ss.instance_number = (
+            SELECT
+                instance_number
+            FROM
+                v$instance
+        )
+        AND ss.stat_name = 'DB time'
+)
+SELECT
+    to_char(
+        begin_interval_time, 'mm-dd hh24:mi'
+    )
+    || to_char(
+        end_interval_time, '  hh24:mi'
+    ) date_time,
+    stat_name,
+    round(
+        (e_value - nvl(
+            b_value, 0
+        )) /(EXTRACT(DAY FROM(end_interval_time - begin_interval_time)) * 24 * 60 * 60 + EXTRACT(HOUR FROM(end_interval_time - begin_interval_time)) *
+        60 * 60 + EXTRACT(MINUTE FROM(end_interval_time - begin_interval_time)) * 60 + EXTRACT(SECOND FROM(end_interval_time - begin_interval_time))),
+        0
+    ) per_sec
+FROM
+    sysstat
+WHERE
+        ( e_value - nvl(
+        b_value, 0
+    ) ) > 0
+    AND nvl(
+        b_value, 0
+    ) > 0
+/
+```
+
+# 15. REDO LOG
 
 ```plsql
 -- redo log的块大小
 select max(lebsz) from x$kccle;
-
 ```
 
+# 16.锁表
 
+```plsql
+select decode(request,0,'holder:','waiter:') holder,sid,id1,id2,lmode,request,type,ctime,block from v$lock where (id1,id2,type) in (select id1,id2,type from v$lock where request>0) order by id1,request;
+```
 
 ## 9. 表nologging
 

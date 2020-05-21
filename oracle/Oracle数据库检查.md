@@ -343,13 +343,19 @@ cd $ORACLE_HOME/log/主机名/alert主机名.log
 
 ## 1.6 查看集群运行状态
 
-```
+```plsql
 crs_stat -t -v											-- 10g
 crs_stat -t												-- 10g
 crsctl status res -t									 -- 11g
 crsctl status res -t -init
 crsctl check crs                                             -- 10g或11g
 crsctl check cluster  -all                                        -- 11g
+
+-- 查看集群组件状态
+crsctl check crs
+crsctl check cssd
+crsctl check crsd
+crsctl check evmd
 olsnodes -n
 或
 olsnodes -n -i -s -t 
@@ -358,6 +364,7 @@ srvctl status database -d sdbip
 srvctl status diskgroup -g DGDATA1
 gpnptool get
 cemutlo -n
+olsnodes -c
 srvctl status listener -l LISTENER
 srvctl status service -d spectra -v
 lsnrctl status listener_scan1
@@ -367,6 +374,59 @@ srvctl config listener -l LISTENER
 srvctl config listener -l LISTENER -a
 srvctl config scan
 crsctl stat res ora.LISTENER_SCAN1.lsnr -p
+
+-- 查看集群私网信息
+select NAME,IP_ADDRESS from gv$cluster_interconnects;
+
+-- 查看集群active version
+crsctl query crs activeversion
+
+-- 查看集群是否为standard或者flex ASM
+crsctl get cluster mode status
+
+crsctl status res <ora.racdb.db> -p （-p可以查看每个资源详细的属性）
+
+-- 关闭启动某个ora资源：（有的无法单独关闭，因为存在资源依赖关系）。
+crsctl start res ora.oc4j
+
+查询所有实例的状态
+srvctl status database -d racdb
+SQL> select * from v$active_instances;
+
+查询单节点实例的状态
+srvctl status instance -d racdb -i racdb1
+
+关闭所有节点的实例
+srvctl stop database -d racdb
+
+关闭单节点的实例
+srvctl stop instance -d racdb -i racdb2
+
+查看RAC数据库配置
+srvctl config database -d racdb
+
+使用srvctl资源控制命令：
+srvctl config network
+srvctl config vip -n node1
+srvctl status vip -n node1
+srvctl config scan
+srvctl status scan
+srvctl config listener
+srvctl status listener
+srvctl start/stop listener -n node1 停止监听资源
+srvctl config scan_listener
+srvctl status scan_listener
+srvctl config asm -a
+srvctl config asm -n node1 查看指定节点的ASM配置。
+srvctl status asm
+srvctl status diskgroup -g data1
+srvctl config database -d racdb 数据库配置
+srvctl config nodeapps -n node1 节点应用配置
+srvctl status nodeapps 节点应用状态
+srvctl stop nodeapps 停止某节点上的所有应用
+查看ASM实例状态:
+srvctl status asm
+srvctl status asm -a
 ```
 
 ## 1.7 RAC自启
@@ -384,6 +444,23 @@ crsctl stop cluster -all
 -- 10g RAC启动、关闭
 /etc/init.d/init.crs stop停止CRS主进程
 /etc/init.d/init.crs start启动CRS主进程
+
+-- 启停HAS
+crsctl stop has
+crsctl start has
+
+-- 查看crs配置
+crsctl config crs
+
+-- 单节点集群has命令
+crsctl check has
+crsctl config has
+crsctl disable has
+crsctl enable has
+crsctl query has releaseversion
+crsctl query has softwareversion
+crsctl start has
+crsctl stop has
 ```
 
 ## 1.8 RAC网络配置
@@ -416,12 +493,25 @@ $ oifcfg setif -global eth1/192.168.2.0:cluster_interconnectoracle网卡配置�
 [oracle@rac1 init.d]$ oifcfg getif					 -- 获取配置结果
 eth0 192.168.1.0 global public						-- eth0是全局公共网卡
 eth1 192.168.2.0 global cluster_interconnect		 -- eth1是全局私有网卡
+
+-- 查看私网延迟(Misscount)
+crsctl get css misscount
 ```
 
 ## 1.9 检查vote、ocr磁盘状态
 
-```
+```plsql
 crsctl query css votedisk
+
+-- 查看voting disk超时(disktimeout)
+crsctl get css disktimeout
+
+-- 移动voting disk到别的磁盘组
+crsctl replace votedisk +OCRVD
+-- 新增votedisk
+crsctl add css votedisk 
+-- 删除votedisk
+crsctl delete css votedisk 
 ```
 
 **OCR磁盘状态**
@@ -2068,6 +2158,7 @@ SELECT PROCESS,STATUS,THREAD#,SEQUENCE#,BLOCK#,BLOCKS,DELAY_MINS FROM V$MANAGED_
 ```plsql
 ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
 ALTER DATABASE OPEN READ ONLY;
+
 RECOVER MANAGED STANDBY DATABASE DISCONNECT USING CURRENT LOGFILE;
 ALTER SYSTEM SWITCH LOGFILE;
 ALTER SYSTEM ARCHIVE LOG CURRENT;
@@ -3457,7 +3548,7 @@ dbca -silent -createDatabase -templateName General_Purpose.dbc
   -memoryPercentage 30 -emConfiguration LOCAL
 ```
 
-## 5.2 SYS_CONTEXT
+## 5.2 SYS_CONTEXT函数
 
 ```plsql
 select
@@ -3492,3 +3583,102 @@ SYS_CONTEXT('USERENV','AUTHENTICATION_DATA') authentication_data
 FROM dual;
 ```
 
+## 5.3 查看业务用户
+
+```plsql
+select USER_NAME,CREATED from dba_users where DEFAULT_TABLESPACE not in('SYSTEM','SYSAUX') AND username not in('ANONYMOUS','APEX_030200', 'APEX_PUBLIC_USER', 'APPQOSSYS', 'CTXSYS', 'DIP', 'EXFSYS', 'FLOWS_FILES', 'MDDATA', 'OLAPSYS', 'ORACLE_OCM','ORDDATA', 'ORDPLUGINS', 'ORDSYS', 'OUTLN',
+'OWBSYS', 'OWBSYS_AUDIT', 'SI_INFORMTN_SCHEMA', 'SPATIAL_CSW_ADMIN_USR', 'SPATIAL_WFS_ADMIN_USR', 'SYS', 'SYSTEM', 'WMSYS','XDB','XS$NULL','SCOTT','DBSNMP','SYSMAN','MGMT_VIEW','MDSYS');
+```
+
+## 5.4 查看资源限制
+
+```plsql
+select resource_name,max_utilization,initial_allocation,limit_value from v$resource_limit;
+```
+
+## 5.5 动态性能视图
+
+```plsql
+-- 基表
+select * from v$fixed_table;
+-- 动态性能视图定义
+select * from v$fixed_view_definition;
+-- 数据字典
+select * from dba_views;
+select * from dict where table_name like 'DBA_HIST_%';
+```
+
+## 5.6 DataGuard管理
+
+**Start Standby Database**
+
+> startup nomount
+>
+> alter database mount standby database;
+>
+> alter database recover managed standby database disconnect;
+
+
+**Disable/Enable archive log destinations**
+
+> alter system set log_archive_dest_state_2 = 'defer';
+>
+> alter system set log_archive_dest_state_2 = 'enable';
+
+
+**To remove a delay from a standby**
+
+> alter database recover managed standby database cancel;
+>
+> alter database recover managed standby database nodelay disconnect;
+
+
+**Stop and Start of Logical standby apply**
+
+> alter database stop logical standby apply;
+> alter database start logical standby apply;
+
+
+**Physical Standby switchover:**
+In Primary Database：
+
+> ALTER DATABASE COMMIT TO SWITCHOVER TO PHYSICAL STANDBY;
+>
+> SHUTDOWN IMMEDIATE;
+>
+> STARTUP NOMOUNT;
+>
+> ALTER DATABASE MOUNT STANDBY DATABASE;
+
+
+In standby Database:
+
+> ALTER DATABASE COMMIT TO SWITCHOVER TO PRIMARY;
+>
+> SHUTDOWN IMMEDIATE;
+>
+> STARTUP;
+
+
+In Primary Database:
+
+> ALTER DATABASE RECOVER MANAGED STANDBY DATABASE DISCONNECT FROM SESSION;
+
+
+If the primary Database is down,we can use fllowing step to active standby database:
+
+> Alter DATABASE RECOVER MANAGED STANDBY DATABASE FINISH;
+> Alter DATABASE COMMIT TO SWITCHOVER TO PRIMARY;
+> SHUTDOWN IMMEDIATE;
+> STARTUP;
+
+
+**Register missing archive log file**
+Find archive log gap by query:
+
+> SELECT THREAD#, LOW_SEQUENCE#, HIGH_SEQUENCE# FROM V$ARCHIVE_GAP;
+
+
+register using:
+
+> ALTER DATABASE REGISTER PHYSICAL LOGFILE 'filespec1';

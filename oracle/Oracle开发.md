@@ -12,17 +12,36 @@ alter user username  default temporary tablespace tablesapce_name;
 
 //删除user
 drop user ×× cascade
+
+-- 创建用户
+create user yqm identified by ora1234 default tablespace users temporary tablespace temp;
+
+-- 修改密码
+alter user yqm identified by yqm1234;
+--授予用户 connect 的权限
+grant connect to yqm;
+-- 授予用户 DBA 的权限
+grant dba to yqm;
+-- 收回用户 DBA 的权限
+revoke dba from yqm;
+-- 授予用户 能查询 SCOTT 下的 EMP 表的权限
+grant select on scott.emp to kxht;
+-- 授予用户能查询所有表的权限
+grant select any table to solo;
+grant delete any table to solo;
+grant create any table to solo;
 ```
 ## 1.2 表空间
 
 ```plsql
 create tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
 create temporary tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
+create undo tablespace zzq_undo1 datafile '/oradata/zltest\zzq_undo2.dbf' size 20m autoextend on;
 select * from dba_data_files;
 select * from dba_temp_files;
 select * from v$filestat;
 select * from v$datafile;
---修改表空间
+-- 修改表空间
 alter tablespace tablesapce_name off/online;
 alter tablespace tablesapce_name read only/read write;
 -- 修改数据文件
@@ -34,6 +53,9 @@ drop tablespace tablespace_name including contents and datafiles;
 drop tablesapce tablesapce_name including contents;
 -- 如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
 drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;
+
+-- 移动数据库文件
+alter tablespace users rename datafile 'd:\oradata\ZLTEST\USERS01.DBF' to 'd:\oradata\aucdbf\USERS01.DBF';
 ```
 # 2. 表与约束
 
@@ -51,30 +73,32 @@ rename   tablename to new_tablename;
 truncate table  tablename;
 drop table tablename;
 
-//创建索引
-CREATE INDEX idx_emp_ename ON emp(ename);
+-- 创建索引
+CREATE INDEX idx_emp_ename ON emp(ename) tablespace users;
+CREATE bitmap INDEX idx_emp_ename ON emp(ename) tablespace users;
 
-#删除table
+-- 删除table
 drop table  bh cascade constraints purge;
 drop table emp2 purge;
 
 insert into table_name (....) values();
 update table table_name set XX=XX where  ...
 
-//删除
+-- 删除
 DELETE EMP4;
 DELETE * FROM EMP5;
 
+-- 加载到KEEP
 ALTER TABLE <tablename> STORAGE (BUFFER POOL KEEP);
 ALTER INDEX <indexname> STORAGE (BUFFER_POOL KEEP);
+
+-- 移动表到另一个表空间
+alter table zhang.zzq_1 move tablespace zhang_zzq;
 ```
 ## 2.2 约束在表中的作用
 
 ```plsql
-create table tablename(
-)
-constraint constraintname primary key();
-
+create table tablename constraint constraintname primary key();
 alter table tablename  add constraint constraintname primary key();
 alter table tablename  add constraint constraintname unique();
 alter table tablename  add constraint constraintname check();
@@ -1743,11 +1767,59 @@ TO_NUMBER('$122,322.233','$999,999.999')
 
 # 三、PL/SQL
 
+## 1 . 定时JOB 
+
+```plsql
+1．创建一张表，用户存放定时信息
+create table test_time (test date)
+2. 制定定时执行的存储过程
+create or replace procedure inserttest as begin insert into test_time values (sysdate);
+end;
+/
+3. 创建 JOB，即创建待执行的定时任务过程
+variable job1 number;
+begin
+dbms_job.submit(:job1,'inserttest;',sysdate,'sysdate+1/1440');
+end;
+4.启动 JOB 启动并运行定时任务的过程
+begin
+dbms_job.run(:job1);
+end;
+/
+5.查看 结果
+select to_char(test,'yyyy/mm/dd hh24:mi:ss') from test_time
+```
+
+定时JOB的参数说明  
+
+```plsql
+DBMS_JOB.SUBMIT(:jobno,//job 号
+'your_procedure;',//要执行的过程
+trunc(sysdate)+1/24,//下次执行时间
+'trunc(sysdate)+1/24+1'//每次间隔时间
+);
+删除 job:dbms_job.remove(jobno);
+修改要执行的操作:job:dbms_job.what(jobno,what);
+修改下次执行时间： dbms_job.next_date(job,next_date);
+修改间隔时间： dbms_job.interval(job,interval);
+停止 job:dbms.broken(job,broken,nextdate);
+启动 job:dbms_job.run(jobno);
+修改 job_queue_processes 的值：（保证其不为 0 否则 JOB 不自动运行)可通过 select * from v$parameter;查看其值；
+或者直接用 show parameter job_queue_processes;查看如下：
+NAME TYPE VALUE
+--------------- ----------- ------------
+job_queue_processes integer 10
+```
+
+
+
+###  
+
 
 
 # 四、Oracle触发器
 
-### 3.1 什么是触发器
+## 4.1 什么是触发器
 
 每当一个特定的数据操作语句(insert,update,delete)在指定的表上发出时,Oracle自动地执行触发器中定义的语句序列.
 
@@ -1761,14 +1833,14 @@ end;
 
 ```
 
-### 3.2  触发器的应用场景
+## 4.2  触发器的应用场景
 
 - 复杂的安全性检查
 - 数据的确认
 - 实现审计功能
 - 数据的备份与同步
 
-### 3.3 触发器的语法
+## 4.3 触发器的语法
 
 ```plsql
 create [or replace] trigger 触发器名
@@ -1779,7 +1851,7 @@ on 表名
 PLSQL块
 ```
 
-### 3.4 触发器的类型
+## 4.4 触发器的类型
 
 - 语句级触发器
 
@@ -1789,7 +1861,7 @@ PLSQL块
 
   触发语句作用的每一条记录都被出发.在行级触发器中使用:old和:new伪记录变量识别值的状态
 
-### 3.5 案例
+## 4.5 案例
 
 - 案例一: 复杂的安全性检查      禁止在非工作时间插入新员工
 
