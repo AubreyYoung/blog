@@ -1,12 +1,12 @@
-# Oracle故障处理指导
+# Oracle问题处理指导
 
-
-
-## 一、故障处理思想
+## 一、指导思想
 
 ### 1.1 搞明白问题
 
-会问问题、会反馈问题、有效沟通
+会问问题、会反馈问题、有效沟通 
+
+**切忌猜**
 
 ​		时空史论
 
@@ -14,15 +14,17 @@
 
 ### 1.2 信息收集
 
-常用指标、状态/配置查看、日志、监控工具/软件
+操作日志、常用指标、状态/配置查看、日志、监控工具/软件
 
-### 1.3 故障范围判定
+**故障范围判定**
 
 硬件/OS/软件/应用/架构
 
+故障类型分类：故障类，性能类，监控类
+
 CPU、内存、网络、IO、文件系统
 
-### 1.4 需求、目的
+### 1.3 需求、目的
 
 - 需求--模块/功能
 
@@ -32,7 +34,7 @@ CPU、内存、网络、IO、文件系统
 
   **分层**：应用层、服务层、数据层
 
-### 1.5 万物一理
+### 1.4 客观原则
 
 - 尊重客观事实
 
@@ -53,21 +55,13 @@ CPU、内存、网络、IO、文件系统
 
 ​	你碰到的问题别人肯定都碰到了;你想到了别人肯定也想到了.
 
+## 二、“三板斧”之Oracle报告
 
-
-**参考文档**：
-
-- 大型网站技术架构：核心原理与案例分析
-
-- 人月神话（40周年中文纪念版）
-
-  
-
-## 二、Oracle性能类故障处理
+“三板斧”之Oracle报告主要用于发现，诊断Oracle性能类问题;针对整体性能问题进行分析，诊断。
 
 ### 2.1 AWR、ASH、ADDM、AWRSQRPT
 
-## 1.  生成脚本
+#### 1.  生成脚本
 
 ```plsql
 脚本目录 $ORACLE_HOME/rdbms/admin
@@ -77,7 +71,7 @@ CPU、内存、网络、IO、文件系统
 @?/rdbms/admin/awrsqrpt.sql
 ```
 
-## 2.  快照、基线
+#### 2.  快照、基线
 
 ```plsql
 -- 查看快照保留期限，11g默认为8天
@@ -93,20 +87,72 @@ CPU、内存、网络、IO、文件系统
  /
 ```
 
-### 2.2 动态性能视图、等待事件
+#### 3. AWR查看
+
+![image-20200519144046470](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144046470.png)
+
+![image-20200519144253729](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144253729.png)
+
+![image-20200519144136864](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144136864.png)
+
+![image-20200519144331209](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144331209.png)
+
+### 2.2 MOS/Google
+
+​		搜索等待事件，关键字
+
+## 三、“三板斧”之日志
+
+“三板斧”之日志主要用于发现，诊断Oracle维护类问题
+
+### 3.1 数据库日志、OS日志
 
 ```plsql
-Oracle最重要的9个动态性能视图
-v$session v$session_wait
-v$process
-v$sql
-v$sqltext
-v$bh (更宁愿是x$bh)
-v$lock
-v$latch_children
-v$sysstat
-v$system_event
+-- Oracle日志
+select * from v$diag_info;
 
+-- OS日志收集(/var/log)
+sosreport
+supportconfig
+```
+**Oracle日志**
+
+```sh
+# ASM日志：
+ $ORACLE_BASE/diag/asm/+ASMX/trace/alert_+ASMX.log
+# CRS日志：
+ $ORACLE_HOME/log/主机名/alert主机名.logexit
+# Oracle日志
+ $ORACLE_BASE/diag/rdbms/数据库名/主机名/trace/alert_acrosspm1.log
+ 
+ # Find日志
+find / -name "*listener*.log*" | xargs du -m
+find / -name "alert*.log*" | xargs du -m
+```
+
+![image-20200518153733617](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200518153733617.png)
+
+### 3.2 nmon/osw
+
+### 3.3 资料搜索
+
+![1566530808942](Oracle故障处理指导.assets/1566530808942.png)
+
+### 
+
+## 四、 “三板斧”之SQLDeveoper
+
+### 2.1 SQL Developer
+
+![1566526765705](Oracle故障处理指导.assets/1566526765705.png)
+
+![1566526703935](Oracle故障处理指导.assets/1566526703935.png)
+
+![1566526586883](Oracle故障处理指导.assets/1566526586883.png)
+
+![1566526456578](Oracle故障处理指导.assets/1566526456578.png)
+
+```plsql
 --按组分的几组重要的性能视图
 1.System的overview
 v$sysstat,v$system_event,v$parameter
@@ -124,47 +170,6 @@ v$Librarycache,v$rowcache,x$ksmsp
 v$db_cache_advice,v$PGA_TARGET_ADVICE,v$SHARED_POOL_ADVICE
 ```
 
-
-
-### 2.3 SQL Developer
-
-![1566526765705](Oracle故障处理指导.assets/1566526765705.png)
-
-![1566526703935](Oracle故障处理指导.assets/1566526703935.png)
-
-![1566526586883](Oracle故障处理指导.assets/1566526586883.png)
-
-![1566526456578](Oracle故障处理指导.assets/1566526456578.png)
-
-### 2.4 MOS/Google
-
-
-
-## 三、Oracle维护类故障处理
-
-### 3.1 数据库日志、OS日志
-
-```plsql
---Oracle日志
-select * from v$diag_info;
-```
-
-### 3.2 资料搜索
-
-![1566530808942](Oracle故障处理指导.assets/1566530808942.png)
-
-### 3.3 网址链接
-
-|                                                              |                                                              |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [MOS 中文文档列表](https://support.oracle.com/epmos/faces/DocumentDisplay?_afrLoop=274652291319490&id=1533057.1&displayIndex=27&_afrWindowMode=0&_adf.ctrl-state=13mq0a0pi9_618#aref_section22) | [阿里云帮助与文档](https://help.aliyun.com/?spm=a2c4g.11186623.201511181.1.qM1Nlp) |
-| [My Oracle Support](https://support.oracle.com/epmos/faces/MosIndex.jspx?_afrLoop=185267211786600&_afrWindowMode=0&_adf.ctrl-state=1bnl89ywrk_4) | [AWS产品使用文档](https://aws.amazon.com/cn/documentation/?nc2=h_ql_d&awsm=ql-5) |
-| [Oracle Help Center](http://docs.oracle.com/en/)             | [数据库内核月报](http://mysql.taobao.org/monthly/)           |
-| [Redhat Documentation](https://access.redhat.com/documentation/en/) | [Brendan Gregg](http://www.brendangregg.com/)                |
-| [IBM developerWorks ](http://www.ibm.com/developerworks/cn/) | [惜分飞](http://www.xifenfei.com/)                           |
-| [Stack overflow](http://stackoverflow.com/)                  | [Oracle Life](http://www.eygle.com/)                         |
-| [极客时间](https://time.geekbang.org/?category=0&sort=2&order=desc) | [iMySQL](http://www.imysql.cn/)                              |
-
-## 四、问题处理总结
+## 五、问题处理总结
 
 ![1566868028969](Oracle故障处理指导.assets/1566868028969.png)

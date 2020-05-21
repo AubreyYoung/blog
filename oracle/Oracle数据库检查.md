@@ -329,7 +329,7 @@ find / -name "alert*.log*" | xargs du -sk
 -- audit目录
 cd $ORACLE_BASE/admin/{SID}/adump
 -- 删除audit日志
-find /u01/app/oracle/admin/orcl/adump -name "*.aud" -print0 |xargs -0 rm -f
+find /opt/oracle/app/oracle/admin/oss/adump -name "*.aud" -print0 |xargs -0 rm -f
 ```
 
 **ASM/RAC日志**
@@ -349,7 +349,7 @@ crs_stat -t												-- 10g
 crsctl status res -t									 -- 11g
 crsctl status res -t -init
 crsctl check crs                                             -- 10g或11g
-crsctl check cluster                                         -- 11g
+crsctl check cluster  -all                                        -- 11g
 olsnodes -n
 或
 olsnodes -n -i -s -t 
@@ -3439,7 +3439,7 @@ from v$session s, v$process p, dba_datapump_sessions d
 where p.addr=s.paddr and s.saddr=d.saddr;
 ```
 
-## 5.静默安装
+## 5.1 静默安装
 
 ```sh
 # RAC
@@ -3455,5 +3455,40 @@ false -asmSysPassword password"
 dbca -silent -createDatabase -templateName General_Purpose.dbc
   -gdbname ora11g -sid ora11g -responseFile NO_VALUE -characterSet AL32UTF8
   -memoryPercentage 30 -emConfiguration LOCAL
+```
+
+## 5.2 SYS_CONTEXT
+
+```plsql
+select
+SYS_CONTEXT('USERENV','TERMINAL') terminal,
+SYS_CONTEXT('USERENV','LANGUAGE') language,
+SYS_CONTEXT('USERENV','SESSIONID') sessionid,
+SYS_CONTEXT('USERENV','INSTANCE') instance,
+SYS_CONTEXT('USERENV','ENTRYID') entryid,
+SYS_CONTEXT('USERENV','ISDBA') isdba,
+SYS_CONTEXT('USERENV','NLS_TERRITORY') nls_territory,
+SYS_CONTEXT('USERENV','NLS_CURRENCY') nls_currency,
+SYS_CONTEXT('USERENV','NLS_CALENDAR') nls_calendar,
+SYS_CONTEXT('USERENV','NLS_DATE_formAT') nls_date_format,
+SYS_CONTEXT('USERENV','NLS_DATE_LANGUAGE') nls_date_language,
+SYS_CONTEXT('USERENV','NLS_SORT') nls_sort,
+SYS_CONTEXT('USERENV','CURRENT_USER') current_user,
+SYS_CONTEXT('USERENV','CURRENT_USERID') current_userid,
+SYS_CONTEXT('USERENV','SESSION_USER') session_user,
+SYS_CONTEXT('USERENV','SESSION_USERID') session_userid,
+SYS_CONTEXT('USERENV','PROXY_USER') proxy_user,
+SYS_CONTEXT('USERENV','PROXY_USERID') proxy_userid,
+SYS_CONTEXT('USERENV','DB_DOMAIN') db_domain,
+SYS_CONTEXT('USERENV','DB_NAME') db_name,
+SYS_CONTEXT('USERENV','HOST') host,
+SYS_CONTEXT('USERENV','OS_USER') os_user,
+SYS_CONTEXT('USERENV','EXTERNAL_NAME') external_name,
+SYS_CONTEXT('USERENV','IP_ADDRESS') ip_address,
+SYS_CONTEXT('USERENV','NETWORK_PROTOCOL') network_protocol,
+SYS_CONTEXT('USERENV','BG_JOB_ID') bg_job_id,
+SYS_CONTEXT('USERENV','FG_JOB_ID') fg_job_id,
+SYS_CONTEXT('USERENV','AUTHENTICATION_DATA') authentication_data
+FROM dual;
 ```
 
