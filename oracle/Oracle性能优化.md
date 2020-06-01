@@ -803,6 +803,16 @@ select s.sql_text,h.* from v$active_session_history h,v$sql s
 ## 3.5 等待时间统计
 
 ```plsql
+-- 查询指定对象的统计
+select * from v$segstat where ts# = 11
+and obj# = (select object_id from user_objects
+where object_name = 'TMPTABLE1' and owner = 'JSS')
+-- 查看系统的各项等待，按总耗时排序
+SELECT event,total_waits waits,total_timeouts timeouts,
+time_waited total_time,average_wait avg
+FROM V$SYSTEM_EVENT
+ORDER BY 4 DESC;
+
 -- 查询数据库等待时间和实际执行时间的相对百分比
 select *
 from v$sysmetric a
@@ -885,7 +895,18 @@ WHERE EVENT LIKE 'db file%read'
 　　and s.ROW_WAIT_OBJ# = d.object_id
 ```
 
+V$WAITSTAT 视图保持自实例启动所有的等待事件统计信息。
+
+常用于当你发现系统存在大量的"buffer busy waits"时据此做出适当调整。  
+
+```plsql
+SELECT * FROM  v$waitstat order by count desc;
+```
+
+
+
 ## 3.6 等待事件相关视图
+
 ```plsql
 几个视图的总结
 
@@ -1336,6 +1357,16 @@ select * from v$fixed_view_definition;
 -- 数据字典
 select * from dba_views;
 select * from dict where table_name like 'DBA_HIST_%';
+
+-- 分组统计数据字典统计项
+SELECT parameter,sum("COUNT"),sum(usage),sum(gets),sum(getmisses),
+sum(scans),sum(scanmisses),sum(modifications),
+sum(dlm_requests),sum(dlm_conflicts),sum(dlm_releases)
+FROM V$ROWCACHE
+GROUP BY parameter;
+-- 检查数据字典的命中率
+select 1 - sum(getmisses) / sum(gets) "data dictionary hitratio" from
+v$rowcache;
 ```
 
 # 11. LATCH

@@ -4,11 +4,11 @@
 
 ### 1.1 搞明白问题
 
-会问问题、会反馈问题、有效沟通 
+会问问题、会反馈问题、有效沟通
 
-**切忌猜**
+**忌猜**
 
-​		时空史论
+​		时（时间）空（地点 服务器）史（症状）论（问题）
 
 常用术语、指标
 
@@ -42,7 +42,7 @@ CPU、内存、网络、IO、文件系统
 
 - 处处皆缓存
 
-  - 硬件缓存**：CPU一级、二级缓存，内存、SWAP、硬盘缓存、存储缓存
+  - 硬件缓存：CPU一级、二级缓存，内存、SWAP、硬盘缓存、存储缓存
   
   - 软件缓存：MongoDB、Redis、Memcached
   - CDN加速
@@ -50,10 +50,6 @@ CPU、内存、网络、IO、文件系统
 - 一个事务所作的修改对其他事务是不可见的，好似是串行执行的；
 - 大型网站架构演化历程 https://www.hollischuang.com/archives/728
 - 对比/对照 
-
-常识:
-
-​	你碰到的问题别人肯定都碰到了;你想到了别人肯定也想到了.
 
 ## 二、“三板斧”之Oracle报告
 
@@ -89,17 +85,30 @@ CPU、内存、网络、IO、文件系统
 
 #### 3. AWR查看
 
-![image-20200519144046470](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144046470.png)
+![image-20200526142520695](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526142520695.png)
 
-![image-20200519144253729](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144253729.png)
+![image-20200526142815169](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526142815169.png)
 
-![image-20200519144136864](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144136864.png)
+![image-20200526142913624](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526142913624.png)
 
-![image-20200519144331209](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200519144331209.png)
+![image-20200522161456216](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200522161456216.png)
+
+![image-20200522161650278](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200522161650278.png)
+
+![image-20200522161720659](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200522161720659.png)
+
+![image-20200522161600842](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200522161600842.png)
+
+
+#### 4. ADDM/ASH
+
+![image-20200526142209989](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526142209989.png)
+
+![image-20200526142358210](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526142358210.png)
 
 ### 2.2 MOS/Google
 
-​		搜索等待事件，关键字
+​		搜索等待事件,关键字,错误代码
 
 ## 三、“三板斧”之日志
 
@@ -113,7 +122,21 @@ select * from v$diag_info;
 
 -- OS日志收集(/var/log)
 sosreport
-supportconfig
+sosreport -a --report
+
+supportconfig 
+//以最小选项搜集所需的信息
+# supportconfig -m
+//在输出中包含附加的联系人信息
+# supportconfig -E tux@example.org -N "Tux Penguin" -O "Penguin Inc." ...
+//要查看完整的功能列表
+# supportconfig -F
+//仅收集某个模块的用法，如LVM相的信息
+# supportconfig -i LVM
+//-x 的功能与-i刚好相反，是排除某个模块不收集
+# supportconfig -x LVM
+//使用-U url 可以将收集的结果上传到服务器上，直接的服务有ftp, scp, http, https,如：
+# supportconfig -A -U http://www.361way.com/files/
 ```
 **Oracle日志**
 
@@ -132,27 +155,67 @@ find / -name "alert*.log*" | xargs du -m
 
 ![image-20200518153733617](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200518153733617.png)
 
-### 3.2 nmon/osw
+### 3.2 nmon/osw/TFA
+
+![image-20200526095452831](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526095452831.png)
+
+![image-20200526153417651](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526153417651.png)
 
 ### 3.3 资料搜索
 
-![1566530808942](Oracle故障处理指导.assets/1566530808942.png)
+> 1. 官方文档/MOS
+>
+>    https://docs.oracle.com/en/
+>
+>    https://support.oracle.com/portal/
+>
+> 2. 指导手册
+>
+> 3. 谷歌百度
 
-### 
+<img src="Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526094101995.png" alt="image-20200526094101995" style="zoom:150%;" />
+
+![image-20200526094441399](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526094441399.png)
 
 ## 四、 “三板斧”之SQLDeveoper
 
-### 2.1 SQL Developer
+### 4.1 SQL Developer
 
-![1566526765705](Oracle故障处理指导.assets/1566526765705.png)
+**实时SQL监控**
 
-![1566526703935](Oracle故障处理指导.assets/1566526703935.png)
+![image-20200526141839370](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526141839370.png)
 
-![1566526586883](Oracle故障处理指导.assets/1566526586883.png)
+**监视回话**
 
-![1566526456578](Oracle故障处理指导.assets/1566526456578.png)
+![image-20200526142037236](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526142037236.png)
+
+![image-20200526143051663](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526143051663.png)
+
+**实例查看器**
+
+![image-20200526143201056](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526143201056.png)
+
+**SQL优化**
+
+![image-20200526143424237](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526143424237.png)
+
+![image-20200526143546531](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526143546531.png)
+
+![image-20200526143641311](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526143641311.png)
+
+![image-20200526143906951](Oracle%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E6%8C%87%E5%AF%BC.assets/image-20200526143906951.png)
+
+### 4.2 动态性能视图
 
 ```plsql
+-- 基表
+select * from v$fixed_table;
+-- 动态性能视图定义
+select * from v$fixed_view_definition;
+-- 数据字典
+select * from dba_views;
+select * from dict where table_name like 'DBA_HIST_%';
+
 --按组分的几组重要的性能视图
 1.System的overview
 v$sysstat,v$system_event,v$parameter

@@ -676,6 +676,8 @@ where c.type# = 231
 ## 2.5 数据库参数
 
 ```plsql
+-- V$PARAMETER 显示执行查询的 session的参数值。 V$SYSTEM_PARAMETER 视图则列出实例的参数值。
+
 Set pagesize 1000
 set linesize 100
 column name format a30
@@ -2201,11 +2203,14 @@ select * from v$archive_gap;
 
 脚本目录 $ORACLE_HOME/rdbms/admin
 
-```
+```plsql
 @?/rdbms/admin/addmrpt.sql
 @?/rdbms/admin/awrrpt.sql
 @?/rdbms/admin/ashrpt.sql
 @?/rdbms/admin/awrsqrpt.sql
+@?/rdbms/admin/awrrpti   -- RAC中选择实例号
+@?/rdbms/admin/awrgrpt   -- RAC全局AWR
+@?/rdbms/admin/awrddrpt  -- AWR比对报告
 ```
 ### 3.1.2 快照、基线
 
@@ -3456,7 +3461,6 @@ alter system set "_library_cache_advice"=false scope=both sid='*';
 alter system set db_cache_advice=off scope=both sid='*';
 alter system set filesystemio_options=setall scope=spfile sid='*';
 alter system set fast_start_mttr_target=300 scope=spfile sid='*';
-
 alter profile default limit PASSWORD_LIFE_TIME   UNLIMITED;
 alter profile  ORA_STIG_PROFILE limit  PASSWORD_LIFE_TIME   UNLIMITED;
 
@@ -3682,3 +3686,25 @@ Find archive log gap by query:
 register using:
 
 > ALTER DATABASE REGISTER PHYSICAL LOGFILE 'filespec1';
+
+## 5.7 回滚段使用
+
+查询回滚段的信息。所用数据字典： DBA_ROLLBACK_SEGS，可以查询的信息：回滚段的标识(SEGMENT_ID)、名称(SEGMENT_NAME)、所在表空间(TABLESPACE_NAME)、类型(OWNER)、状态(STATUS)。
+>select * from DBA_ROLLBACK_SEGS
+
+查看回滚段的统计信息
+```plsql
+SELECT n.name, s.extents, s.rssize, s.optsize, s.hwmsize, s.xacts,
+s.status
+FROM v$rollname n, v$rollstat s
+WHERE n.usn = s.usn;
+```
+查看回滚段的使用情况，哪个用户正在使用回滚段的资源:
+```plsql
+select s.username, u.name
+from v$transaction t, v$rollstat r, v$rollname u, v$session s
+where s.taddr = t.addr
+and t.xidusn = r.usn
+and r.usn = u.usn
+order by s.username; 
+```
