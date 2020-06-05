@@ -36,7 +36,7 @@ grant create any table to solo;
 ```plsql
 create tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
 create temporary tablespace tablesapce_name datafile '+DATA' size 30g autoextend on;
-create undo tablespace zzq_undo1 datafile '/oradata/zltest\zzq_undo2.dbf' size 20m autoextend on;
+create undo tablespace zzq_undo1 datafile '/oradata/zzq_undo2.dbf' size 20m autoextend on;
 select * from dba_data_files;
 select * from dba_temp_files;
 select * from v$filestat;

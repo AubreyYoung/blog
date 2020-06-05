@@ -1,344 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3e9b97b2-9b29-451b-ae01-a0efb4d919ef" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/src/coding2020110/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Java/JavaCoding/src/coding2020110/Main.java" afterDir="false" />
+    <list default="true" id="d856d6e7-5787-4483-bb22-0b6d6f57c045" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/libraries/ojdbc6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/sqldialects.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Java/JavaCoding/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle开发.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle开发.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/PythonCoding.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PythonCoding.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/galaxy.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/PythonCoding$time_module.coverage" NAME="time_module Coverage Results" MODIFIED="1546849388083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
-    <SUITE FILE_PATH="coverage/PythonCoding$sqlite3_module.coverage" NAME="sqlite3_module Coverage Results" MODIFIED="1547023990668" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Recursive.coverage" NAME="Recursive Coverage Results" MODIFIED="1545360351271" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Csv_module.coverage" NAME="Csv_module Coverage Results" MODIFIED="1546934723178" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$print.coverage" NAME="print Coverage Results" MODIFIED="1547385525515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190113" />
-    <SUITE FILE_PATH="coverage/PythonCoding$object.coverage" NAME="object Coverage Results" MODIFIED="1552216112135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190310" />
-    <SUITE FILE_PATH="coverage/PythonCoding$pickle_module.coverage" NAME="pickle_module Coverage Results" MODIFIED="1547100812206" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
-    <SUITE FILE_PATH="coverage/PythonCoding$logging_module.coverage" NAME="logging_module Coverage Results" MODIFIED="1547102679963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Urllib2_module.coverage" NAME="Urllib2_module Coverage Results" MODIFIED="1546937819700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$print__1_.coverage" NAME="print (1) Coverage Results" MODIFIED="1547446930626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190114" />
-    <SUITE FILE_PATH="coverage/PythonCoding$LineCache.coverage" NAME="LineCache Coverage Results" MODIFIED="1546836333806" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Reture.coverage" NAME="Reture Coverage Results" MODIFIED="1545122747956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
-    <SUITE FILE_PATH="coverage/PythonCoding$DictDelete.coverage" NAME="DictDelete Coverage Results" MODIFIED="1545361185281" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Except.coverage" NAME="Except Coverage Results" MODIFIED="1545119667394" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
-    <SUITE FILE_PATH="coverage/PythonCoding$datatime_module.coverage" NAME="datatime_module Coverage Results" MODIFIED="1547185429405" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190111" />
-    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day8_session.coverage" NAME="oldboy_python_day8_session Coverage Results" MODIFIED="1552216060717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190122" />
-    <SUITE FILE_PATH="coverage/PythonCoding$MySQLDelete.coverage" NAME="MySQLDelete Coverage Results" MODIFIED="1541662694402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$arrow_module.coverage" NAME="arrow_module Coverage Results" MODIFIED="1547021986558" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
-    <SUITE FILE_PATH="coverage/PythonCoding$ListInsert.coverage" NAME="ListInsert Coverage Results" MODIFIED="1545371716239" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
-    <SUITE FILE_PATH="coverage/PythonCoding$gzip_module.coverage" NAME="gzip_module Coverage Results" MODIFIED="1546938380986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Oldboy_Python_Day3_session.coverage" NAME="Oldboy_Python_Day3_session Coverage Results" MODIFIED="1548048913675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
-    <SUITE FILE_PATH="coverage/PythonCoding$MySQLInsert.coverage" NAME="MySQLInsert Coverage Results" MODIFIED="1541662685382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day11_session.coverage" NAME="oldboy_python_day11_session Coverage Results" MODIFIED="1552483016367" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190311" />
-    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day3_session.coverage" NAME="oldboy_python_day3_session Coverage Results" MODIFIED="1548048935600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190116" />
-    <SUITE FILE_PATH="coverage/PythonCoding$MySQLupdate.coverage" NAME="MySQLupdate Coverage Results" MODIFIED="1541662573843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Function.coverage" NAME="Function Coverage Results" MODIFIED="1545359060770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181221" />
-    <SUITE FILE_PATH="coverage/PythonCoding$MySQLSelect.coverage" NAME="MySQLSelect Coverage Results" MODIFIED="1542701147424" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$OS_module.coverage" NAME="OS_module Coverage Results" MODIFIED="1546840457450" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
-    <SUITE FILE_PATH="coverage/PythonCoding$MySQLCreateTable.coverage" NAME="MySQLCreateTable Coverage Results" MODIFIED="1541662027588" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Sys_module.coverage" NAME="Sys_module Coverage Results" MODIFIED="1546846591032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
-    <SUITE FILE_PATH="coverage/PythonCoding$base64_module.coverage" NAME="base64_module Coverage Results" MODIFIED="1547101653643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
-    <SUITE FILE_PATH="coverage/PythonCoding$smtp_module.coverage" NAME="smtp_module Coverage Results" MODIFIED="1547025694391" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
-    <SUITE FILE_PATH="coverage/PythonCoding$PythonConnectMySQL.coverage" NAME="PythonConnectMySQL Coverage Results" MODIFIED="1541661735857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$yunsuan.coverage" NAME="yunsuan Coverage Results" MODIFIED="1547630418426" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
-    <SUITE FILE_PATH="coverage/PythonCoding$PythonConnectMongodb.coverage" NAME="PythonConnectMongodb Coverage Results" MODIFIED="1542701183123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181120" />
-    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day5_session.coverage" NAME="oldboy_python_day5_session Coverage Results" MODIFIED="1548135668246" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190122" />
-    <SUITE FILE_PATH="coverage/PythonCoding$String_module.coverage" NAME="String_module Coverage Results" MODIFIED="1546843618058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
-    <SUITE FILE_PATH="coverage/PythonCoding$json_module.coverage" NAME="json_module Coverage Results" MODIFIED="1547021934989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190109" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Random_module.coverage" NAME="Random_module Coverage Results" MODIFIED="1546848716659" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190107" />
-    <SUITE FILE_PATH="coverage/PythonCoding$queue_module.coverage" NAME="queue_module Coverage Results" MODIFIED="1547102682762" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190110" />
-    <SUITE FILE_PATH="coverage/PythonCoding$open.coverage" NAME="open Coverage Results" MODIFIED="1547385359676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190111" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Math_module.coverage" NAME="Math_module Coverage Results" MODIFIED="1546932388190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Print.coverage" NAME="Print Coverage Results" MODIFIED="1545116267980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Oldboy_Python_Day02_homework.coverage" NAME="Oldboy_Python_Day02_homework Coverage Results" MODIFIED="1547685584735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190116" />
-    <SUITE FILE_PATH="coverage/PythonCoding$while.coverage" NAME="while Coverage Results" MODIFIED="1547446047202" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190114" />
-    <SUITE FILE_PATH="coverage/PythonCoding$MySQLInsert2.coverage" NAME="MySQLInsert2 Coverage Results" MODIFIED="1541662264611" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181108" />
-    <SUITE FILE_PATH="coverage/PythonCoding$break.coverage" NAME="break Coverage Results" MODIFIED="1547434030295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190114" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Count.coverage" NAME="Count Coverage Results" MODIFIED="1545272279096" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181220" />
-    <SUITE FILE_PATH="coverage/PythonCoding$format.coverage" NAME="format Coverage Results" MODIFIED="1547519120782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190114" />
-    <SUITE FILE_PATH="coverage/PythonCoding$Class.coverage" NAME="Class Coverage Results" MODIFIED="1545118038637" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181218" />
-    <SUITE FILE_PATH="coverage/PythonCoding$walk.coverage" NAME="walk Coverage Results" MODIFIED="1547188562704" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20190111" />
-    <SUITE FILE_PATH="coverage/PythonCoding$PythonType.coverage" NAME="PythonType Coverage Results" MODIFIED="1545115260092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Coding20181126" />
-  </component>
-  <component name="CoverageViewManager">
-    <option name="myElementSize" value="269" />
-  </component>
-  <component name="DatabaseView">
-    <option name="SHOW_INTERMEDIATE" value="true" />
-    <option name="GROUP_DATA_SOURCES" value="true" />
-    <option name="GROUP_SCHEMA" value="true" />
-    <option name="GROUP_CONTENTS" value="false" />
-    <option name="SORT_POSITIONED" value="false" />
-    <option name="SHOW_EMPTY_GROUPS" value="false" />
-    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
-    <option name="HIDDEN_KINDS">
-      <set />
-    </option>
-    <expand />
-    <select />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>\</find>
-      <find># #</find>
-      <find># print</find>
-      <find>dic1 \= \{\n    \'age\' \: 18\,\n    \'name\' \: \'Aubrey\'\,\n    \'sex\' \: \'male\'\n\}</find>
-    </findStrings>
-    <replaceStrings>
-      <replace>\\</replace>
-      <replace>#</replace>
-      <replace>print</replace>
-    </replaceStrings>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectId" id="1WDTKj4jDVb3tscO7TXRZHYf9Ew" />
+  <component name="ProjectId" id="1csryLgFx5J0xk6wmlZNTGAocjU" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/galaxy/.PyCharm2018.1/system/python_stubs/396143780/builtins.py" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="com.intellij.database.dataSource.DataSourceTemplate" value="Oracle&#10;MySQL" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
-    <property name="settings.editor.splitter.proportion" value="0.2585034" />
-  </component>
-  <component name="PyCoverageOptionsProvider">
-    <option name="myUseBundledCoveragePy" value="true" />
-  </component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Git\blog\python\PythonCoding\coding20190122" />
-      <recent name="D:\Git\blog\python\PythonCoding\coding20190116" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Git\blog\python\PythonCoding\coding20190311" />
-      <recent name="D:\Git\blog\python\PythonCoding" />
-    </key>
-  </component>
-  <component name="RunManager" selected="Python.oldboy_python_day12_session">
-    <configuration name="object" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/coding20190310" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coding20190310/object.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="oldboy_python_day11_session" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/coding20190311" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coding20190311/oldboy_python_day11_session.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="oldboy_python_day12_session" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/coding20190311" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coding20190311/oldboy_python_day12_session.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="oldboy_python_day5_session" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/coding20190122" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="D:\Git\blog\python\PythonCoding\coding20190122\oldboy_python_day6_session.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="oldboy_python_day8_session" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PythonCoding" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/coding20190122" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coding20190122/oldboy_python_day8_session.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <list>
-      <item itemvalue="Python.object" />
-      <item itemvalue="Python.oldboy_python_day11_session" />
-      <item itemvalue="Python.oldboy_python_day12_session" />
-      <item itemvalue="Python.oldboy_python_day5_session" />
-      <item itemvalue="Python.oldboy_python_day8_session" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.oldboy_python_day12_session" />
-        <item itemvalue="Python.oldboy_python_day11_session" />
-        <item itemvalue="Python.object" />
-        <item itemvalue="Python.oldboy_python_day8_session" />
-        <item itemvalue="Python.oldboy_python_day5_session" />
-      </list>
-    </recent_temporary>
-  </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView>
-          <treeState>
-            <expand />
-            <select />
-          </treeState>
-        </serviceView>
-      </list>
-    </option>
-  </component>
-  <component name="SshConsoleOptionsProvider">
-    <option name="myEncoding" value="UTF-8" />
-    <option name="myConnectionType" value="NONE" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="3e9b97b2-9b29-451b-ae01-a0efb4d919ef" name="Default" comment="" />
-      <created>1541657359418</created>
+      <changelist id="d856d6e7-5787-4483-bb22-0b6d6f57c045" name="Default Changelist" comment="" />
+      <created>1591328394416</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1541657359418</updated>
-      <workItem from="1554193168125" duration="61000" />
-      <workItem from="1557037931083" duration="29000" />
-      <workItem from="1557220188095" duration="1117000" />
-      <workItem from="1557381456520" duration="277000" />
-      <workItem from="1575862182937" duration="716000" />
-      <workItem from="1575863161407" duration="2004000" />
-      <workItem from="1578683108181" duration="209000" />
-      <workItem from="1580395962345" duration="17000" />
-      <workItem from="1580396287325" duration="90000" />
-      <workItem from="1580856080821" duration="13000" />
-      <workItem from="1581623505157" duration="8000" />
-      <workItem from="1581624475099" duration="201000" />
-      <workItem from="1581624703552" duration="273000" />
-      <workItem from="1581625045776" duration="67000" />
-      <workItem from="1582671401234" duration="17000" />
-      <workItem from="1582831134712" duration="354000" />
+      <updated>1591328394416</updated>
+      <workItem from="1591328397094" duration="29000" />
+      <workItem from="1591328873803" duration="1434000" />
+      <workItem from="1591330337466" duration="6000" />
     </task>
     <servers />
   </component>
-  <component name="TodoView">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
-  </component>
   <component name="WindowStateProjectService">
-    <state x="184" y="6" key="SettingsEditor" timestamp="1582831487224">
+    <state x="184" y="8" key="SettingsEditor" timestamp="1591330322353">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="184" y="6" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1582831487224" />
-    <state x="363" y="188" key="com.intellij.ide.util.TipDialog" timestamp="1582831138020">
-      <screen x="0" y="0" width="1366" height="728" />
-    </state>
-    <state x="363" y="188" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582831138020" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/coding20190107/string_module.py</url>
-          <line>14</line>
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/PythonCoding$oldboy_python_day12_session.coverage" NAME="oldboy_python_day12_session Coverage Results" MODIFIED="1557221187865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/coding20190311" />
+    <state x="184" y="8" key="SettingsEditor/0.0.1366.728/1366.0.1440.860@0.0.1366.728" timestamp="1591330322353" />
   </component>
 </project>

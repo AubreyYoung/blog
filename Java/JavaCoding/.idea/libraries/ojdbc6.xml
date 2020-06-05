@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="ojdbc6">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/src/coding2020110/ojdbc6.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
