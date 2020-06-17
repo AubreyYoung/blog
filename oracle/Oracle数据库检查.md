@@ -330,6 +330,8 @@ find / -name "alert*.log*" | xargs du -sk
 cd $ORACLE_BASE/admin/{SID}/adump
 -- 删除audit日志
 find /opt/oracle/app/oracle/admin/oss/adump -name "*.aud" -print0 |xargs -0 rm -f
+
+find /u01/app/oracle/admin/lydsj/cdump -name "*.trc" -ctime +30 -exec ls {} \;
 ```
 
 **ASM/RAC日志**
@@ -1241,8 +1243,7 @@ round((d.sumbytes-f.sumbytes)/1024/1024/1024,2) used_GB,
 round((d.sumbytes-f.sumbytes)*100/(d.sumbytes+d.extend_bytes),2) used_percent_with_extend
 from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by tablespace_name) f,
 (select tablespace_name,sum(aa.bytes) sumbytes,sum(aa.extend_bytes) extend_bytes from
-(select  nvl(case  when autoextensible ='YES' then (case when (maxbytes-bytes)>=0 then (maxbytes-bytes) end) end,0) Extend_bytes
-,tablespace_name,bytes  from dba_data_files) aa group by tablespace_name) d
+(select  nvl(case  when autoextensible ='YES' then (case when (maxbytes-bytes)>=0 then (maxbytes-bytes) end) end,0) Extend_bytes,tablespace_name,bytes  from dba_data_files) aa group by tablespace_name) d
 where f.tablespace_name= d.tablespace_name
 order by  used_percent_with_extend desc;
 
@@ -2943,8 +2944,7 @@ DBMS_STATS.DELETE_INDEX_STATS (
    statid           VARCHAR2 DEFAULT NULL,
    cascade_parts    BOOLEAN  DEFAULT TRUE,
    statown          VARCHAR2 DEFAULT NULL,
-   no_invalidate    BOOLEAN  DEFAULT to_no_invalidate_type (
-                                     get_param('NO_INVALIDATE')),
+   no_invalidate    BOOLEAN  DEFAULT to_no_invalidate_type (get_param('NO_INVALIDATE')),
    force            BOOLEAN DEFAULT FALSE);
    
 exec DBMS_STATS.DELETE_INDEX_STATS(ownname=>'PM4H_AD', indname=>'MO_MOENTITY_IDX11')
@@ -3233,8 +3233,6 @@ ALTER TABLESPACE UNDOTBS3 ADD DATAFILE '/data1/oradata/undotbs03_2.dbf' SIZE 102
 
 -- 切换默认UNDO表空间：
 alter system set undo_tablespace = UNDOTBS3;
-
-
 ```
 
 ### 3.18.4 UNDO参数
@@ -3708,3 +3706,33 @@ and t.xidusn = r.usn
 and r.usn = u.usn
 order by s.username; 
 ```
+
+## 5.8 查看表的索引
+
+```plsql
+SELECT
+    col.table_owner    "table_owner",
+    idx.table_name     "table_name",
+    col.index_owner    "index_owner",
+    idx.index_name     "index_name",
+    uniqueness         "uniqueness",
+    status,
+    column_name        "column_name",
+    column_position
+FROM
+    dba_ind_columns  col,
+    dba_indexes      idx
+WHERE
+        col.index_name = idx.index_name
+    AND col.table_name = idx.table_name
+    AND col.table_owner = idx.table_owner
+    AND col.table_owner = '&owner'
+    AND col.table_name = '&table_name'
+ORDER BY
+    idx.table_type,
+    idx.table_name,
+    idx.index_name,
+    col.table_owner,
+    column_position;
+```
+

@@ -337,6 +337,9 @@ select 'alter database datafile '''||file_name||''' offline drop;' from dba_data
 1.首尾单引号为字符串识别标识,不做转译用
 2.首尾单引号里面如果出现的单引号，并且有多个,则相连两个单引号转译为一个字符串单引号
 3.单引号一定成对出现,否者这个字符串出错,因为字符串不知道哪个单引号负责结束
+
+-- REGEXP_LIKE
+select * from dba_tables where  REGEXP_LIKE(TABLE_NAME, '(DBA|ALL|USER)');
 ```
 
 ## 3.6 select条件逻辑
