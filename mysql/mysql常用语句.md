@@ -1,7 +1,7 @@
-### MySQL常用语句
+# MySQL常用语句
 
 [TOC]
-## 1. 数据库操作
+# 1. 数据库操作
 ```mysql
 -- 如果【某数据库】存在就删除【某数据库】 
 DROP DATABASE IF EXISTS db;
@@ -20,9 +20,9 @@ alter database sampdb character set utf8 collate utf8_general_ci;
 -- 关闭mysql
 mysqladmin -uroot -p shutdown
 ```
-## 2. 表操作
+# 2. 表操作
 
-### 2.1 常用操作
+## 2.1 常用操作
 
 ```mysql
 ## 如果【某表】存在就删除【某表】
@@ -89,7 +89,7 @@ select * from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where Constraint_Schema='test_
 ## 查询当前数据库中所有表的约束（简单）
 select * from information_schema.Table_Constraints where Constraint_Schema='test_StringEntityTest';
 ```
-### 2.2 修改主键SQL
+## 2.2 修改主键SQL
 
 ```mysql
 declare @defname varchar(100)
@@ -115,7 +115,7 @@ else
 select @cmd='alter table '+ @tablename+ ' ADD constraint '+ @defname +' PRIMARY KEY CLUSTERED('+@keyname+')'
    exec (@cmd)
 ```
-### 2.3 主键字段名称及字段类型
+## 2.3 主键字段名称及字段类型
 ```mysql
 SELECT TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE TABLE_NAME<>'dtproperties'
@@ -134,7 +134,7 @@ order by o.name,k.colid
 
 -- 以上就是关于如何修改MySql数据表的字段类型，默认值和增加新的字段。
 ```
-### 2.4 dual表
+## 2.4 dual表
 ```mysql
 mysql> select 4*4 from dual;
 +-----+
@@ -169,7 +169,7 @@ sys@ORCL> select 4*4 from dual;
 16
 ```
 
-### 2.5 MySQL函数
+## 2.5 MySQL函数
 
 ```mysql
 mysql> select concat("oracle","mysql") from dual;
@@ -247,9 +247,9 @@ mysql> select date_add(now(),interval -7 day);
 CREATE TABLE t1 ( ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP );
 ```
 
-## 3. 用户管理
+# 3. 用户管理
 
-### 3.1创建/删除用户：
+## 3.1创建/删除用户
 
 ```mysql
 CREATE USER 'username'@'host' IDENTIFIED BY 'password';
@@ -261,7 +261,7 @@ create user 'root'@'%' identified by 'oracle';
 
 drop user 'root'@'192.168.45.52';
 ```
-### 3.2 授权
+## 3.2 授权
 ![](pictures\Image.png)
 ```mysql
 GRANT privileges ON databasename.tablename TO 'username'@'host';
@@ -283,7 +283,7 @@ show grants for current_user();
 ```mysql
 GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION;
 ```
-### 3.3 设置用户密码
+## 3.3 设置用户密码
 ```mysql
 SET PASSWORD FOR 'username'@'host'=PASSWORD('newpassword');
 
@@ -295,14 +295,14 @@ set password for 'sys'@'192.168.45.52' = password('oracle');
 set password = "oracle";       ###mysql5.7写法
 ```
 
-### 3.4设置root密码
+## 3.4设置root密码
 
 ```mysql
 > mysql -u root
 mysql> SET PASSWORD = PASSWORD('123456');
 ```
 
-### 3.5重设其它用户的密码
+## 3.5重设其它用户的密码
 
 ```mysql
 -- 方法一
@@ -320,13 +320,13 @@ mysql> exit
 mysqladmin -u root "old password" "new password"
 mysqladmin  -uroot -p password "oracle"
 ```
-### 3.6 免密码登录
+## 3.6 免密码登录
 
 ```mysql
 mysqld_safe  --skip-grant-tables --user=mysql &  
 ```
 
-### 3.7 mysql密码复杂设置
+## 3.7 mysql密码复杂设置
 ```mysql
 5.7 my.cnf文件中祛除validate-password = off
 
@@ -335,9 +335,9 @@ mysql> SET GLOBAL validate_password_policy = LOW;
 mysql> alter user user() identified by '12345678';
 ```
 
-## 4. 查看数据库状态\配置
+# 4. 查看数据库状态\配置
 
-### 4.1 参数
+## 4.1 参数
 
 ```mysql
 # mysqld --help --verbose|grep my.cnf
@@ -616,7 +616,7 @@ SQL> show global variables like 'max_connections';
 
 ![](MySQL常用语句.assets/Image [8].png)
 
-### 4.2 存储引擎:
+## 4.2 存储引擎:
 
 ```mysql
 mysql> show engines;
@@ -626,9 +626,9 @@ msyql>show engines
 -- 表用了什么引擎,在显示结果里参数engine后面的就表示该表当前用的存储引擎
 mysql> show create table 表名;
 ```
-## 5.MySQL日志
+# 5.MySQL日志
 
-###  binlog 日志
+##  5.1 binlog 日志
 
 ```mysql
 -- 基于时间查看 binlog 日志
@@ -648,9 +648,7 @@ mysqlbinlog --no-defaults --start-position=690271 mysql-bin.000214 |more
 mysqlbinlog -v -v --base64-output=DECODE-ROWS mysql-bin.000003
 ```
 
-
-
-### 慢SQL日志
+## 5.2 慢SQL日志
 
 ```mysql
 # mysqldumpslow /data/slow.log
@@ -667,7 +665,7 @@ alter table mysql.slow_log engine = myisam;
 set global slow_query_log=1;
 ```
 
-## 6. MySQL版本升级
+# 6. MySQL版本升级
 
 ```mysql
 -- 软连接重建
@@ -692,16 +690,26 @@ except for login file.
 [root@centos ~]# mysql --login-path=mysql5.7
 ```
 
-## 7. 常用系统表
+# 7. 常用系统表
 
 ```mysql
-select * from mysql.user limit 1\G
-select * from mysql.db limit 1\G
-select * from mysql.tables_priv limit 1\G
-select * from mysql.columns_priv limit 1\G
+-- 查看用户
+select * from mysql.user limit 1;
+-- 查看数据库
+select * from mysql.db limit 1;
+-- 查看表权限
+select * from mysql.tables_priv limit 1;
+-- 查看列权限
+select * from mysql.columns_priv limit 1;
+-- 查看线程
+select  * from INFORMATION_SCHEMA.PROCESSLIST;
+show processlist 
+show full processlist     -- 显示全部SQL
+mysqladmin  processlist
+select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
 ```
 
-## 8.表修复
+# 8.表修复
 
 ```mysql
 [root@centos sampdb]# mysqlfrm  --diagnostic   absence.frm
@@ -711,7 +719,7 @@ select * from mysql.columns_priv limit 1\G
 # The .frm file is a TABLE.
 ```
 
-## 9. MySQL解释计划
+# 9. MySQL解释计划
 
 ```mysql
 mysql> select @@gtid_mode;
@@ -725,8 +733,8 @@ mysql> select @@gtid_mode;
 select emp_no,first_name,last_name from employees where emp_no = any(select emp_no from dept_manager);
 select emp_no,first_name,last_name from employees where emp_no = all(select emp_no from dept_manager);
 select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);
-explain select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);\G
-explain extended select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager)\G
+explain select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);;
+explain extended select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);
 
 mysql> insert into a values (2);
 Query OK, 1 row affected (0.00 sec)
@@ -796,7 +804,7 @@ mysql> select (select count(1) from employees b where b.emp_no <= a.emp_no) as r
 5 rows in set (0.27 sec)
 mysql>
 ###EXPLAIN/DESC JSON
-mysql> desc FORMAT = JSON select * from employees where emp_no = 23344\G
+mysql> desc FORMAT = JSON select * from employees where emp_no = 23344;
 ********* 1. row *********
 EXPLAIN: {
   "query_block": {
@@ -887,14 +895,14 @@ mysql> explain FORMAT = JSON select * from employees where emp_no = 23344;
 1 row in set, 1 warning (0.00 sec)
 ```
 
-![](D:\Git\blog\mysql\pictures\Image [3].png)
+![](D:;ithub\blog\mysql\pictures\Image [3].png)
 
-## 10. 统计信息
+# 10. 统计信息
 
 ```
 use sys
 
-select * from  x$schema_index_statistics limit 1 \G
+select * from  x$schema_index_statistics limit 1 ;
 
 USE information_schema;
 
@@ -1050,7 +1058,7 @@ SQL> select 134217728/1024/1024;
 | to_date   | date    | NO   |     | NULL    |       |
 +-----------+---------+------+-----+---------+-------+
 4 rows in set (0.00 sec)
-(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000\G
+(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000;
 ********* 1. row *********
            id: 1
   select_type: SIMPLE
@@ -1078,7 +1086,7 @@ Records: 0  Duplicates: 0  Warnings: 0
 | to_date   | date    | NO   |     | NULL    |       |
 +-----------+---------+------+-----+---------+-------+
 4 rows in set (0.00 sec)
-(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000\G
+(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000;
 ********* 1. row *********
            id: 1
   select_type: SIMPLE
@@ -1097,7 +1105,7 @@ possible_keys: idx_salary
 
 ```
 
-## 11. sysbench
+# 11. sysbench
 
 [sysbench]: https://Git.com/akopytov/sysbench#linux	"sysbench github"
 
@@ -1138,7 +1146,7 @@ execution time (avg/stddev):   9.9934/0.00
 
 # sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 run
 ```
-## 12. mysqlslap
+12. mysqlslap
 
 ![](MySQL常用语句.assets/Image [11].png)
 
@@ -1168,7 +1176,7 @@ CREATE TABLE `t1` (id serial,intcol1 INT(32) ,intcol2 INT(32) ,intcol3 INT(32) ,
 INSERT INTO t1 VALUES (NULL,1804289383,846930886,1681692777,1714636915,1957747793,'vmC9127qJNm06sGB8R92q2j7vTiiITRDGXM9ZLzkdekbWtmXKwZ2qG1llkRw5m9DHOFilEREk3q7oce8O3BEJC0woJsm6uzFAEynLH2xCsw1KQ1lT4zg9rdxBLb97R','GHZ65mNzkSrYT3zWoSbg9cNePQr1bzSk81qDgE4Oanw3rnPfGsBHSbnu1evTdFDe83ro9w4jjteQg4yoo9xHck3WNqzs54W5zEm92ikdRF48B2oz3m8gMBAl11Wy50','w46i58Giekxik0cYzfA8BZBLADEg3JhzGfZDoqvQQk0Akcic7lcJInYSsf
 ```
 
-## 13. 性能优化
+# 13. 性能优化
 
 **什么影响了性能?**
 
@@ -1188,7 +1196,7 @@ INSERT INTO t1 VALUES (NULL,1804289383,846930886,1681692777,1714636915,195774779
   - 系统选择及优化
   - 硬件升级
 
-## 14. 事务
+# 14. 事务
 
 ```mysql
 (root@localhost) [employees]> show engine innodb mutex;
@@ -1318,7 +1326,7 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 | max_heap_table_size | 16777216 |
 +---------------------+----------+
 1 row in set (0.00 sec)
-(root@localhost) [information_schema]> show table status like 'TABLES%'\G
+(root@localhost) [information_schema]> show table status like 'TABLES%';
 ********* 1. row *********
            Name: TABLES
          Engine: MEMORY
@@ -2319,7 +2327,7 @@ mysql> show slave hosts;
 +-----------+------+------+-----------+--------------------------------------+
 1 row in set (0.00 sec)
 ```
-## mysqldump:mysql备份
+# 15. mysqldump
 ```mysql
  mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak$(date +%F%T).sql.gz
  mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak`date +%F%T`.sql.gz
@@ -2329,7 +2337,7 @@ mysql> show slave hosts;
 
 
 ```
-mysql> show engine innodb status\G
+mysql> show engine innodb status;
 ********* 1. row *********
   Type: InnoDB
   Name:
@@ -2538,7 +2546,7 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 mysql> stop slave sql_thread;  
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 ```
-## 针对某个DB复制
+# 16. 针对某个DB复制
 ```
 --replicate-do-db=db_name
 
@@ -2582,7 +2590,7 @@ Checking slave delay (seconds behind master)                         [pass]
 # ...done.
 ```
 
-## 需备份二进制日志
+# 17. 需备份二进制日志
 ```
 mysql> show master status;
 +------------------+----------+--------------+------------------+----------------------------------------------+
@@ -2611,7 +2619,7 @@ mysql> show master status;
 1 row in set (0.00 sec)
 start slave for channel ch1
 ```
-## 计算列
+# 18. 计算列
 ```
 root@mysql 16:31:  [mytest]> create table t4 (id int auto_increment not null,c1 int,c2 int,c3 int,primary key (id));
 Query OK, 0 rows affected (5.62 sec)
@@ -2871,7 +2879,7 @@ root@mysql 17:23:  [mytest]> show create table t8;
 +-------+----------------------------------------------------------------------------------------------------------------------------------------+
 1 row in set (0.00 sec)
 ```
-## 密码有效期
+# 19. 密码有效期
 ```
 root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
 +---------------------------+-------+
@@ -2881,7 +2889,7 @@ root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
 +---------------------------+-------+
 1 row in set (0.00 sec)
 ```
-## numa
+# 20. OS NUMA
 ```
 [root@centos ~]# numactl --hardware
 available: 1 nodes (0)
@@ -2892,7 +2900,7 @@ node distances:
 node   0
   0:  10
 ```
-## innodb buffer pool hit rate
+# 21. innodb buffer pool hit rate
 ```
 That's the Hit Rate since Uptime (Last MySQL Startup)
 There are two things you can do to get the Last 10 Minutes
@@ -2920,12 +2928,12 @@ FROM information_schema.GLOBAL_STATUS P1,
 information_schema.GLOBAL_STATUS P2
 WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
 ```
-## 验证唯一性
+# 22. 验证唯一性
 Oracle null可以多个
 mysql  null只能一个
-## mysql 5.7.22新特性
+# 23. 5.7.22新特性
 oracle mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-character-set=utf8  --single-transaction --master-data=2 备份，也是会发出FLUSH TABLES WITH READ LOCK 
-## 今日讨论，你都用了什么方法防止误删数据？
+# 24. 防止误删数据？
 ```
 根据白天大家的讨论，总结共有以下几个措施，供参考：
 1. 生产环境中，业务代码尽量不明文保存数据库连接账号密码信息；
@@ -2940,3 +2948,37 @@ oracle mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --de
 10. 降低数据库中普通账号的权限级别；
 11. 务必开启binlog。
 ```
+
+# 25. KILL会话
+
+```mysql
+-- 获取当前进程ID
+mysql>select CONNECTION_ID();
+
+mysql> kill XXXX;
+
+-- shell脚本
+#!/bin/bash
+mysql -u root -e "show processlist" | grep -i "Locked" >> locked_log.txt
+
+for line in `cat locked_log.txt | awk '{print $1}'`
+do 
+   echo "kill $line;" >> kill_thread_id.sql
+done
+现在kill_thread_id.sql的内容像这个样子
+
+kill 66402982;
+kill 66402983;
+kill 66402986;
+kill 66402991;
+
+--- shell for循环命令
+for id in `mysqladmin processlist | grep -i locked | awk '{print $1}'`
+do
+   mysqladmin kill ${id}
+done
+;
+```
+
+
+
