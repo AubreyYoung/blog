@@ -38,11 +38,11 @@ Hive是基于Hadoop之上的数据仓库.
 
   - 星型模型
 
-    ![星型模型](\Git\blog\nosql\pictures\数据仓库模型_星型模型.png)
+    ![星型模型](d:\Github\blog\nosql\pictures\数据仓库模型_星型模型.png)
 
   - 雪花模型
 
-    ![雪花模型](D:\Git\blog\nosql\pictures\数据仓库模型_雪花模型.png)
+    ![雪花模型](D:\Github\blog\nosql\pictures\数据仓库模型_雪花模型.png)
 
 ## 什么是Hive
 
@@ -62,13 +62,13 @@ Hive是基于Hadoop之上的数据仓库.
 - Hive将元数据存储在数据库中(metastore),支持mysql,derby,oracle等数据库
 - hive中的元数据包括表的名字,表的列和分区及其属性,表的属性(是否为外部表等),表的数据所在目录等
 
-![Hive的元数据](\Git\blog\nosql\pictures\Hived的元数据.png)
+![Hive的元数据](d:\Github\blog\nosql\pictures\Hived的元数据.png)
 
 ### HQL的执行过程
 
 解释器,编译器,优化器完成HQL查询语句从词法分析,语法分析,编译,优化以及查询计划的生成.生成的查询计划存储在HDFS中,并在随后由MapReduce调用执行
 
-![HQL执行过程](\Git\blog\nosql\pictures\HQL执行过程.png)
+![HQL执行过程](d:\Github\blog\nosql\pictures\HQL执行过程.png)
 
 ### Hive的体系结构
 
@@ -78,4 +78,4 @@ Hive是基于Hadoop之上的数据仓库.
 - 元数据存储(MetaStore)
   - 通常是存储在关系数据库如MySQL,derby中
 
-![Hive的体系结构](\Git\blog\nosql\pictures\Hive的体系结构.png)
+![Hive的体系结构](d:\Github\blog\nosql\pictures\Hive的体系结构.png)
