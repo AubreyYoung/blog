@@ -56,10 +56,10 @@ COL usage FOR a15
 
 SELECT
     inst_id,
-    'session_cached_cursors'                                                        parameter,
+    'session_cached_cursors' parameter,
     lpad(
         value, 5
-    )                                                                  value,
+    )   value,
     decode(
         value, 0,
         ' n/a',
@@ -348,10 +348,10 @@ cd $ORACLE_HOME/log/主机名/alert主机名.log
 ```plsql
 crs_stat -t -v											-- 10g
 crs_stat -t												-- 10g
-crsctl status res -t									 -- 11g
+crsctl status res -t									-- 11g
 crsctl status res -t -init
-crsctl check crs                                             -- 10g或11g
-crsctl check cluster  -all                                        -- 11g
+crsctl check crs                                        -- 10g或11g
+crsctl check cluster  -all                              -- 11g
 
 -- 查看集群组件状态
 crsctl check crs
@@ -361,7 +361,7 @@ crsctl check evmd
 olsnodes -n
 或
 olsnodes -n -i -s -t 
-srvctl status asm -a                                         -- 11g
+srvctl status asm -a                                      -- 11g
 srvctl status database -d sdbip
 srvctl status diskgroup -g DGDATA1
 gpnptool get
@@ -679,7 +679,6 @@ where c.type# = 231
 
 ```plsql
 -- V$PARAMETER 显示执行查询的 session的参数值。 V$SYSTEM_PARAMETER 视图则列出实例的参数值。
-
 Set pagesize 1000
 set linesize 100
 column name format a30
@@ -892,7 +891,7 @@ set pagesize 200
 col PROFILE format a20
 col RESOURCE_NAME format a25
 col LIMIT format a15
-select * from dba_profiles;
+select * from dba_profiles where profile='PM4H';
 ```
 
 ## 2.7 数据库字符集
