@@ -1,332 +1,81 @@
-# MySQL常用语句
-
 [TOC]
-# 1. 数据库操作
+# 一、MySQL数据库巡检
+
+## 1. 查看数据库当前的进程
+
+```dart
+mysql> show  processlist;
+```
+
+## 2. 查看当前的事务
+
+```bash
+#当前运行的所有事务
+mysql> SELECT * FROM information_schema.INNODB_TRX;
+#当前出现的锁
+mysql> SELECT * FROM information_schema.INNODB_LOCKs;
+#锁等待的对应关系
+mysql> SELECT * FROM information_schema.INNODB_LOCK_waits;
+```
+
+## 5. 引擎检查
+
+```bash
+show ENGINES； #检查命令
+#查看表使用的存储引擎
+show table status from db_name where name='table_name';
+#修改表的存储引擎
+alter table table_name engine=innodb;
+```
+
+## 6. 查看会话ID
+
+```
+mysql>  select connection_id();
+
+mysql> SELECT a.trx_state, 
+          b.event_name, 
+          a.trx_started, 
+          b.timer_wait / 1000000000000 timer_wait, 
+          a.trx_mysql_thread_id        blocking_trx_id, 
+          b.sql_text 
+   FROM   information_schema.innodb_trx a, 
+          performance_schema.events_statements_current b, 
+          performance_schema.threads c 
+   WHERE  a.trx_mysql_thread_id = c.processlist_id 
+          AND b.thread_id = c.thread_id; 
+```
+
+## 7. 常用系统表
+
 ```mysql
--- 如果【某数据库】存在就删除【某数据库】 
-DROP DATABASE IF EXISTS db;
--- 如果【某数据库】不存在就创建【某数据库】
-CREATE DATABASE IF NOT EXISTS db;
-CREATE DATABASE IF NOT EXISTS yourdbname DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
-create database yourdb DEFAULT CHARACTER SET gbk COLLATE gbk_chinese_ci;
--- 使用【某数据库】
-USE db;
+-- 查看用户
+select * from mysql.user limit 1;
 -- 查看数据库
-show databases;
--- 查看创建语句
-show create database mytest;
--- 修改字符集
-alter database sampdb character set utf8 collate utf8_general_ci;
--- 关闭mysql
-mysqladmin -uroot -p shutdown
-```
-# 2. 表操作
-
-## 2.1 常用操作
-
-```mysql
-## 如果【某表】存在就删除【某表】
-DROP TABLE IF EXISTS tb;
-## 如果【某表】不存在就创建【某表】
-CREATE TABLE IF NOT EXISTS tb
-## 添加表字段
-alter table` 表名称` add transactor varchar(10) not Null;
-alter table  `表名称` add id int unsigned not Null auto_increment primary key
-## 修改某个表的字段类型及指定为空或非空
-alter table `表名称` change 字段名称 字段名称 字段类型 [是否允许非空];
-alter table `表名称` modify 字段名称 字段类型 [是否允许非空];
-## 修改某个表的字段名称及指定为空或非空 
-alter table `表名称` change 字段原名称 字段新名称 字段类型 [是否允许非空
-## 删除某一字段
-ALTER TABLE `表名称` DROP 字段名;
-## 添加唯一键
-ALTER TABLE `表名称` ADD UNIQUE ( `userid`)
-## 修改主键
-ALTER TABLE `表名称` DROP PRIMARY KEY ,ADD PRIMARY KEY ( `id` )
-## 增加索引
-ALTER TABLE `表名称` ADD INDEX ( `id` )
-ALTER TABLE `表名称` MODIFY COLUMN `id`  int(11) NOT NULL AUTO_INCREMENT FIRST ,ADD PRIMARY KEY (`id`);
-## 查看表的字段信息
-desc 表名
-describe mysql.user;
-desc mysql.user;
-show columns from `表名`；
-
-## 查看表的所有信息
-show create table `表名`;
-## 添加主键约束
-alter table `表名` add constraint 主键名称（形如：PK_表名） primary key 表名(主键字段);
-alter table  `表名` add 列名 列类型 unsigned 是否为空 auto_increment primary key；
-## 添加外键约束
-alter table `从表` add constraint 外键（形如：FK_从表_主表） foreign key 从表(外键字段) references 主表(主键字段);
-(alter table `主表名` add foreign key (字段 ) references 从表名(字段) on delete cascade)
-## 添加唯一约束 
-ALTER table `表名` add unique key 约束名 (字段);
-## 删除主键约束
-alter table `表名` drop primary key;
-## 删除外键约束
-alter table `表名` drop foreign key 外键（区分大小写）;
-## 修改表名
-alter table `表名称` rename to bbb;
-## 修改表的注释 
-ALTER TABLE `表名称` COMMENT '学生表2.0';
-## 查看数据库表
-show tables from sampdb;
-show tables in employees;
-
-## 查看表的详细信息
-SHOW CREATE TABLE `表名称`
-## 修改字段的注释信息 
-ALTER TABLE `表名` MODIFY COLUMN `列名` `数据类型` COMMENT '备注信息';
-## 查看字段的详细信息 
-SHOW FULL COLUMNS  FROM `表名称`;
-## 查看字段的简要信息
-SHOW COLUMNS FROM `表名称`;
-## 查询当前数据库中所有表
-select table_name from information_schema.tables where table_schema='当前数据库';
-## 查询当前数据库中所有表的约束（详情）
-select * from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where Constraint_Schema='test_StringEntityTest';
-## 查询当前数据库中所有表的约束（简单）
-select * from information_schema.Table_Constraints where Constraint_Schema='test_StringEntityTest';
-```
-## 2.2 修改主键SQL
-
-```mysql
-declare @defname varchar(100)
-declare @cmd varchar(500)
-declare @tablename varchar(100)
-declare @keyname varchar(100)
-Set @tablename='Temp1'
-Set @keyname='id' --需要設置的key,分隔
-select @defname= name
-   FROM sysobjects so 
-   JOIN sysconstraints sc
-   ON so.id = sc.constid
-   WHERE object_name(so.parent_obj) = @tablename
-   and xtype='PK'
-if @defname is not null
-begin
-select @cmd='alter table '+ @tablename+ ' drop constraint '+ @defname
---print @cmd
-   exec (@cmd)
- end
-else
- set @defname='PK_'+@keyname
-select @cmd='alter table '+ @tablename+ ' ADD constraint '+ @defname +' PRIMARY KEY CLUSTERED('+@keyname+')'
-   exec (@cmd)
-```
-## 2.3 主键字段名称及字段类型
-```mysql
-SELECT TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-WHERE TABLE_NAME<>'dtproperties'
-
-EXEC sp_pkeys @table_name='表名'
-
-select o.name as 表名,c.name as 字段名,k.colid as 字段序号,k.keyno as 索引顺序,t.name as 类型
-from sysindexes i
-join sysindexkeys k on i.id = k.id and i.indid = k.indid
-join sysobjects o on i.id = o.id
-join syscolumns c on i.id=c.id and k.colid = c.colid
-join systypes t on c.xusertype=t.xusertype
-where o.xtype = 'U' and o.name='要查询的表名'
-and exists(select 1 from sysobjects where xtype = 'PK' and parent_obj=i.id and name = i.name)
-order by o.name,k.colid
-
--- 以上就是关于如何修改MySql数据表的字段类型，默认值和增加新的字段。
-```
-## 2.4 dual表
-```mysql
-mysql> select 4*4 from dual;
-+-----+
-| 4*4 |
-+-----+
-|  16 |
-+-----+
-1 row in set (0.07 sec)
-mysql> select 4*4;
-+-----+
-| 4*4 |
-+-----+
-|  16 |
-+-----+
-1 row in set (0.00 sec)
-mysql> select * from dual;
-ERROR 1096 (HY000): No tables used
--- Oracle用法
-sys@ORCL> select * from dual;
-D
--
-X
-sys@ORCL> select 4*4;
-select 4*4
-*
-ERROR at line 1:
-ORA-00923: FROM keyword not found where expected
-sys@ORCL> select 4*4 from dual;
-
-4*4
---
-16
+select * from mysql.db limit 1;
+-- 查看表权限
+select * from mysql.tables_priv limit 1;
+-- 查看列权限
+select * from mysql.columns_priv limit 1;
+-- 查看线程
+select  * from INFORMATION_SCHEMA.PROCESSLIST;
+show processlist 
+show full processlist     -- 显示全部SQL
+mysqladmin  processlist
+select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
 ```
 
-## 2.5 MySQL函数
 
-```mysql
-mysql> select concat("oracle","mysql") from dual;
-+--------------------------+
-| concat("oracle","mysql") |
-+--------------------------+
-| oraclemysql              |
-+--------------------------+
-1 row in set (0.00 sec) 
-mysql> select cast(232432432 as  char) from dual;
-+--------------------------+
-| cast(232432432 as  char) |
-+--------------------------+
-| 232432432                |
-+--------------------------+
-1 row in set (0.00 sec)
-mysql>
-mysql> select now(6);     
-+----------------------------+
-| now(6)                     |
-+----------------------------+
-| 2018-03-11 17:10:53.982080 |
-+----------------------------+
-1 row in set (0.00 sec)
-mysql> select now();
-+---------------------+
-| now()               |
-+---------------------+
-| 2018-03-11 17:11:45 |
-+---------------------+
-1 row in set (0.00 sec)
-mysql>  select now(6);
-+----------------------------+
-| now(6)                     |
-+----------------------------+
-| 2018-03-11 17:15:00.301739 |
-+----------------------------+
-1 row in set (0.00 sec)
-mysql>  select current_timestamp(6);
-+----------------------------+
-| current_timestamp(6)       |
-+----------------------------+
-| 2018-03-11 17:15:12.392042 |
-+----------------------------+
-1 row in set (0.00 sec)
-mysql> select now(),sysdate(),sleep(2),sysdate() from dual;
-+---------------------+---------------------+----------+---------------------+
-| now()               | sysdate()           | sleep(2) | sysdate()           |
-+---------------------+---------------------+----------+---------------------+
-| 2018-03-11 17:16:12 | 2018-03-11 17:16:12 |        0 | 2018-03-11 17:16:14 |
-+---------------------+---------------------+----------+---------------------+
-1 row in set (2.00 sec)
-mysql> select sysdate(6) from dual;
-+----------------------------+
-| sysdate(6)                 |
-+----------------------------+
-| 2018-03-11 17:17:04.553088 |
-+----------------------------+
-1 row in set (0.00 sec)
-mysql> select now(6),sysdate(6) from dual;
-+----------------------------+----------------------------+
-| now(6)                     | sysdate(6)                 |
-+----------------------------+----------------------------+
-| 2018-03-11 17:18:08.181805 | 2018-03-11 17:18:08.181906 |
-+----------------------------+----------------------------+
-1 row in set (0.00 sec)
-mysql> select date_add(now(),interval -7 day);
-+---------------------------------+
-| date_add(now(),interval -7 day) |
-+---------------------------------+
-| 2018-03-04 17:18:58             |
-+---------------------------------+
-1 row in set (0.00 sec)
 
-CREATE TABLE t1 ( ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP );
-```
+# 二、MySQL数据库管理
 
-# 3. 用户管理
-
-## 3.1创建/删除用户
-
-```mysql
-CREATE USER 'username'@'host' IDENTIFIED BY 'password';
-CREATE USER 'username'@'192.168.5.9' IDENTIFIED BY 'password';
-CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
-CREATE USER 'username'@'%' IDENTIFIED BY '';
-CREATE USER 'username'@'%';
-create user 'root'@'%' identified by 'oracle';
-
-drop user 'root'@'192.168.45.52';
-```
-## 3.2 授权
-![](pictures\Image.png)
-```mysql
-GRANT privileges ON databasename.tablename TO 'username'@'host';
-GRANT SELECT,INSERT ON DBname.tablename TO 'username'@'%';
-GRANT ALL ON DBname.tablename TO 'username'@'%';
-GRANT ALL ON DBname.* TO 'username'@'%';
-GRANT ALL ON *.* TO 'username'@'%';
-GRANT ALL PRIVILEGES ON . TO 'root'@'%'  WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON . TO 'root'@'*.mysql.com'  WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON . TO 'root'@'192.168.45.0/255.255.255.0'  WITH GRANT OPTION;
-
-show privileges
-show grants for current_user;
-show grants for current_user();
-```
-注意：使用以上命令授权的用户不能用来再给其他用户授权
-如果想让该用户可以为其他用户授权，可以使用如下命令：
-
-```mysql
-GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION;
-```
-## 3.3 设置用户密码
-```mysql
-SET PASSWORD FOR 'username'@'host'=PASSWORD('newpassword');
-
--- 如果是修改当前登录的用户的密码，使用如下命令：
-SET PASSWDORD=PASSWORD('newpassword')
-
-rename user  'system'@'192.168.45.52' to 'test'@'192.168.45.52';
-set password for 'sys'@'192.168.45.52' = password('oracle');
-set password = "oracle";       ###mysql5.7写法
-```
-
-## 3.4设置root密码
-
-```mysql
-> mysql -u root
-mysql> SET PASSWORD = PASSWORD('123456');
-```
-
-## 3.5重设其它用户的密码
-
-```mysql
--- 方法一
-> mysql -u root -p
-mysql> use mysql;
-mysql> UPDATE user SET password=PASSWORD("new password") WHERE user='username';
-mysql> FLUSH PRIVILEGES;
-mysql> exit
--- 方法二
-> mysql -u root -p
-mysql> use mysql; 
-mysql> SET PASSWORD FOR username=PASSWORD('new password');
-mysql> exit
--- 方法三
-mysqladmin -u root "old password" "new password"
-mysqladmin  -uroot -p password "oracle"
-```
-## 3.6 免密码登录
+## 1.  免密码登录
 
 ```mysql
 mysqld_safe  --skip-grant-tables --user=mysql &  
 ```
 
-## 3.7 mysql密码复杂设置
+## 2. mysql密码复杂设置
 ```mysql
 5.7 my.cnf文件中祛除validate-password = off
 
@@ -335,300 +84,7 @@ mysql> SET GLOBAL validate_password_policy = LOW;
 mysql> alter user user() identified by '12345678';
 ```
 
-# 4. 查看数据库状态\配置
-
-## 4.1 参数
-
-```mysql
-# mysqld --help --verbose|grep my.cnf
-/etc/my.cnf /etc/mysql/my.cnf /usr/local/mysql/etc/my.cnf ~/.my.cnf
-                      my.cnf, $MYSQL_TCP_PORT, /etc/services, built-in default
-```
-
-![](pictures/Image%20%5B2%5D.png)
-
-```mysql
-## MySQL最大可用连接数
-show variables like '%max_connections%';
-## 查看MySQL连接超时
-mysql> SHOW GLOBAL VARIABLES LIKE '%TIMEOUT';
-### 查看MySQL运行多长时间
-mysql> show global status like 'UPTIME';
-## 查看mysql请求链接进程被主动杀死
-mysql> SHOW GLOBAL STATUS LIKE 'COM_KILL';
-## 查看MySQL通信信息包最大值
-mysql> SHOW GLOBAL VARIABLES LIKE 'MAX_ALLOWED_PACKET';
-## 字符集
-show variables like 'character_set%';
-show variables like 'collation%';
-## 告警
-show warnings;
-
-//自动提交
-mysql> select @@session.autocommit;
-+----------------------+
-| @@session.autocommit |
-+----------------------+
-|                    0 |
-+----------------------+
-1 row in set (0.00 sec)
-mysql> select @@global.autocommit;
-+---------------------+
-| @@global.autocommit |
-+---------------------+
-|                   0 |
-+---------------------+
-1 row in set (0.00 sec)
-mysql> set global autocommit = 1;
-Query OK, 0 rows affected (0.00 sec)
-mysql> select @@global.autocommit;
-+---------------------+
-| @@global.autocommit |
-+---------------------+
-|                   1 |
-+---------------------+
-1 row in set (0.00 sec)
-mysql> select @@session.autocommit;
-+----------------------+
-| @@session.autocommit |
-+----------------------+
-|                    0 |
-+----------------------+
-1 row in set (0.00 sec)
-mysq>set session autocommit = 1;
-```
-![](MySQL常用语句.assets/Image [4].png)
-
-```mysql
-SQL> show variables where variable_name='wait_timeout' or variable_name='interactive_timeout';
-+---------------------+-------+
-| Variable_name       | Value |
-+---------------------+-------+
-| interactive_timeout | 1800  |
-| wait_timeout        | 1800  |
-+---------------------+-------+
-2 rows in set (0.00 sec)
-
-SQL> set global wait_timeout=3600;set global interactive_timeout=3600;
-Query OK, 0 rows affected (0.00 sec)
-Query OK, 0 rows affected (0.00 sec)
-
-
-SQL> show variables where variable_name='wait_timeout' or variable_name='interactive_timeout';  ###这两个参数需同时修改，否则mysql选择其中大的参数，这两个参数只对新建链接有效
-+---------------------+-------+
-| Variable_name       | Value |
-+---------------------+-------+
-| interactive_timeout | 1800  |
-| wait_timeout        | 1800  |
-+---------------------+-------+
-2 rows in set (0.00 sec)
-
-(root@localhost) [(none)]> show variables where variable_name='wait_timeout' or variable_name='interactive_timeout';
-+---------------------+-------+
-| Variable_name       | Value |
-+---------------------+-------+
-| interactive_timeout | 3600  |
-| wait_timeout        | 3600  |
-+---------------------+-------+
-2 rows in set (0.00 sec)
-
-SQL> show variables like 'sort_buffer_size';
-ERROR 2006 (HY000): MySQL server has gone away
-No connection. Trying to reconnect...
-Connection id:    4
-Current database: mytest
-+------------------+----------+
-| Variable_name    | Value    |
-+------------------+----------+
-| sort_buffer_size | 33554432 |
-+------------------+----------+
-1 row in set (0.01 sec)
-
-SQL> show variables like 'join_buffer_size';    
-+------------------+-----------+
-| Variable_name    | Value     |
-+------------------+-----------+
-| join_buffer_size | 134217728 |
-+------------------+-----------+
-1 row in set (0.00 sec)
-
-SQL> show variables like 'read_buffer_size';    
-+------------------+----------+
-| Variable_name    | Value    |
-+------------------+----------+
-| read_buffer_size | 16777216 |
-+------------------+----------+
-1 row in set (0.00 sec)
-
-SQL> show variables like 'read_rnd_buffer_size';
-+----------------------+----------+
-| Variable_name        | Value    |
-+----------------------+----------+
-| read_rnd_buffer_size | 33554432 |
-+----------------------+----------+
-1 row in set (0.00 sec)
-```
-
-
-
-![](MySQL常用语句.assets/Image [5].png)
-
-```mysql
-SQL> show variables like 'innodb_buffer_pool_size';          
-+-------------------------+------------+
-| Variable_name           | Value      |
-+-------------------------+------------+
-| innodb_buffer_pool_size | 6442450944 |
-+-------------------------+------------+
-1 row in set (0.00 sec)
-SQL> select sum(index_length) from information_schema.tables where engine='myisam';
-+-------------------+
-| sum(index_length) |
-+-------------------+
-|             44032 |
-+-------------------+
-1 row in set (0.73 sec)
-SQL> show variables like 'key_buffer_size';
-+-----------------+---------+
-| Variable_name   | Value   |
-+-----------------+---------+
-| key_buffer_size | 8388608 |
-+-----------------+---------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_log_file_size';
-+----------------------+------------+
-| Variable_name        | Value      |
-+----------------------+------------+
-| innodb_log_file_size | 8589934592 |
-+----------------------+------------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_log_files_in_group';
-+---------------------------+-------+
-| Variable_name             | Value |
-+---------------------------+-------+
-| innodb_log_files_in_group | 2     |
-+---------------------------+-------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_log_buffer_size';
-+------------------------+----------+
-| Variable_name          | Value    |
-+------------------------+----------+
-| innodb_log_buffer_size | 33554432 |
-+------------------------+----------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_flush_log_at_trx_commit';
-+--------------------------------+-------+
-| Variable_name                  | Value |
-+--------------------------------+-------+
-| innodb_flush_log_at_trx_commit | 1     |
-+--------------------------------+-------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_flush_method';
-+---------------------+----------+
-| Variable_name       | Value    |
-+---------------------+----------+
-| innodb_flush_method | O_DIRECT |
-+---------------------+----------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_file_per_table';
-+-----------------------+-------+
-| Variable_name         | Value |
-+-----------------------+-------+
-| innodb_file_per_table | ON    |
-+-----------------------+-------+
-1 row in set (0.00 sec)
-SQL> show variables like 'innodb_doublewrite';
-+--------------------+-------+
-| Variable_name      | Value |
-+--------------------+-------+
-| innodb_doublewrite | ON    |
-+--------------------+-------+
-1 row in set (0.00 sec)
-\###myisam
-SQL> show variables like 'delay_key_write';   ###OFF ON ALL
-+-----------------+-------+
-| Variable_name   | Value |
-+-----------------+-------+
-| delay_key_write | ON    |
-+-----------------+-------+
-1 row in set (0.00 sec)
-SQL> show variables like 'expire_logs_days';
-+------------------+-------+
-| Variable_name    | Value |
-+------------------+-------+
-| expire_logs_days | 90    |
-+------------------+-------+
-1 row in set (0.00 sec)
-SQL> show variables like 'max_allowed_packet';    ###需主从一致
-+--------------------+----------+
-| Variable_name      | Value    |
-+--------------------+----------+
-| max_allowed_packet | 16777216 |
-+--------------------+----------+
-1 row in set (0.00 sec)
-SQL> show variables like 'skip_name_resolve';
-+-------------------+-------+
-| Variable_name     | Value |
-+-------------------+-------+
-| skip_name_resolve | ON    |
-+-------------------+-------+
-1 row in set (0.00 sec)
-
-SQL> show global variables like 'read_only';   ###从库启用
-+---------------+-------+
-| Variable_name | Value |
-+---------------+-------+
-| read_only     | OFF   |
-+---------------+-------+
-1 row in set (0.00 sec)
-
-SQL> show global variables like 'sync_binlog';
-+---------------+-------+
-| Variable_name | Value |
-+---------------+-------+
-| sync_binlog   | 1     |
-+---------------+-------+
-1 row in set (0.00 sec)
-
-SQL> show global variables like '%_table_size';
-+---------------------+----------+
-| Variable_name       | Value    |
-+---------------------+----------+
-| max_heap_table_size | 16777216 |
-| tmp_table_size      | 67108864 |
-+---------------------+----------+
-2 rows in set (0.00 sec)
-
-SQL> show global variables like 'max_connections';
-+-----------------+-------+
-| Variable_name   | Value |
-+-----------------+-------+
-| max_connections | 800   |
-+-----------------+-------+
-1 row in set (0.00 sec)
-```
-
-![](MySQL常用语句.assets/Image [6].png)
-
-
-
-![](MySQL常用语句.assets/Image [7].png)
-
-![](MySQL常用语句.assets/Image [8].png)
-
-## 4.2 存储引擎:
-
-```mysql
-mysql> show engines;
--- mysql当前默认的存储引擎:
-mysql>show variables like '%storage_engine%';
-msyql>show engines
--- 表用了什么引擎,在显示结果里参数engine后面的就表示该表当前用的存储引擎
-mysql> show create table 表名;
-```
-# 5.MySQL日志
-
-##  5.1 binlog 日志
+##  3. binlog 日志
 
 ```mysql
 -- 基于时间查看 binlog 日志
@@ -648,24 +104,7 @@ mysqlbinlog --no-defaults --start-position=690271 mysql-bin.000214 |more
 mysqlbinlog -v -v --base64-output=DECODE-ROWS mysql-bin.000003
 ```
 
-## 5.2 慢SQL日志
-
-```mysql
-# mysqldumpslow /data/slow.log
-
-Reading mysql slow query log from /data/slow.log
-Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=17.0 (17), root[root]@[192.168.45.1]
-  SELECT STATE AS Status, ROUND(SUM(DURATION),N) AS Duration, CONCAT(ROUND(SUM(DURATION)/N.N*N,N), 'S') AS Percentage FROM INFORMATION_SCHEMA.PROFILING WHERE QUERY_ID=N GROUP BY SEQ, STATE ORDER BY SEQ
-Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
-  bin/mysqld, Version: N.N.N-log (MySQL Community Server (GPL)). started with:
-  
--- 修改slow_log表存储引擎 
-set global slow_query_log=0;
-alter table mysql.slow_log engine = myisam;
-set global slow_query_log=1;
-```
-
-# 6. MySQL版本升级
+## 4. MySQL版本升级
 
 ```mysql
 -- 软连接重建
@@ -690,26 +129,7 @@ except for login file.
 [root@centos ~]# mysql --login-path=mysql5.7
 ```
 
-# 7. 常用系统表
-
-```mysql
--- 查看用户
-select * from mysql.user limit 1;
--- 查看数据库
-select * from mysql.db limit 1;
--- 查看表权限
-select * from mysql.tables_priv limit 1;
--- 查看列权限
-select * from mysql.columns_priv limit 1;
--- 查看线程
-select  * from INFORMATION_SCHEMA.PROCESSLIST;
-show processlist 
-show full processlist     -- 显示全部SQL
-mysqladmin  processlist
-select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
-```
-
-# 8.表修复
+## 5. 表修复
 
 ```mysql
 [root@centos sampdb]# mysqlfrm  --diagnostic   absence.frm
@@ -719,484 +139,76 @@ select * from performance_schema.threads;  -- 不影响性能，可以查看后�
 # The .frm file is a TABLE.
 ```
 
-# 9. MySQL解释计划
+## 6.  密码有效期
+```
+root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
++---------------------------+-------+
+| Variable_name             | Value |
++---------------------------+-------+
+| default_password_lifetime | 0     |
++---------------------------+-------+
+1 row in set (0.00 sec)
+```
+
+## 7. KILL会话
 
 ```mysql
-mysql> select @@gtid_mode;
-+-------------+
-| @@gtid_mode |
-+-------------+
-| ON          |
-+-------------+
-1 row in set (0.00 sec)
+-- 获取当前进程ID
+mysql>select CONNECTION_ID();
 
-select emp_no,first_name,last_name from employees where emp_no = any(select emp_no from dept_manager);
-select emp_no,first_name,last_name from employees where emp_no = all(select emp_no from dept_manager);
-select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);
-explain select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);;
-explain extended select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);
+mysql> kill XXXX;
 
-mysql> insert into a values (2);
-Query OK, 1 row affected (0.00 sec)
-mysql> select * from a;
-+------+
-| a    |
-+------+
-|    1 |
-|    2 |
-+------+
-2 rows in set (0.00 sec)
-mysql> insert into a values (3);
-Query OK, 1 row affected (0.10 sec)
-mysql> insert into a values (3),(4),(5);
-Query OK, 3 rows affected (0.01 sec)
-Records: 3  Duplicates: 0  Warnings: 0
-mysql> insert into a select 8;
-Query OK, 1 row affected (0.00 sec)
-Records: 1  Duplicates: 0  Warnings: 0
+-- shell脚本
+#!/bin/bash
+mysql -u root -e "show processlist" | grep -i "Locked" >> locked_log.txt
 
-mysql> set @rn:=0;
-Query OK, 0 rows affected (0.00 sec)
-mysql> select @rn;
-+------+
-| @rn  |
-+------+
-|    0 |
-+------+
-1 row in set (0.00 sec)
-mysql> select @rn:=@rn+1,e.* from employees e limit 10;
-+------------+--------+------------+------------+-----------+--------+------------+
-| @rn:=@rn+1 | emp_no | birth_date | first_name | last_name | gender | hire_date  |
-+------------+--------+------------+------------+-----------+--------+------------+
-|          1 |  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |
-|          2 |  10002 | 1964-06-02 | Bezalel    | Simmel    | F      | 1985-11-21 |
-|          3 |  10003 | 1959-12-03 | Parto      | Bamford   | M      | 1986-08-28 |
-|          4 |  10004 | 1954-05-01 | Chirstian  | Koblick   | M      | 1986-12-01 |
-|          5 |  10005 | 1955-01-21 | Kyoichi    | Maliniak  | M      | 1989-09-12 |
-|          6 |  10006 | 1953-04-20 | Anneke     | Preusig   | F      | 1989-06-02 |
-|          7 |  10007 | 1957-05-23 | Tzvetan    | Zielinski | F      | 1989-02-10 |
-|          8 |  10008 | 1958-02-19 | Saniya     | Kalloufi  | M      | 1994-09-15 |
-|          9 |  10009 | 1952-04-19 | Sumant     | Peac      | F      | 1985-02-18 |
-|         10 |  10010 | 1963-06-01 | Duangkaew  | Piveteau  | F      | 1989-08-24 |
-+------------+--------+------------+------------+-----------+--------+------------+
-10 rows in set (0.00 sec)
-mysql> select @rn:=@rn+1,e.* from employees e,(select @rn:=0) t limit 10,5;
-+------------+--------+------------+------------+-----------+--------+------------+
-| @rn:=@rn+1 | emp_no | birth_date | first_name | last_name | gender | hire_date  |
-+------------+--------+------------+------------+-----------+--------+------------+
-|          1 |  10011 | 1953-11-07 | Mary       | Sluis     | F      | 1990-01-22 |
-|          2 |  10012 | 1960-10-04 | Patricio   | Bridgland | M      | 1992-12-18 |
-|          3 |  10013 | 1963-06-07 | Eberhardt  | Terkki    | M      | 1985-10-20 |
-|          4 |  10014 | 1956-02-12 | Berni      | Genin     | M      | 1987-03-11 |
-|          5 |  10015 | 1959-08-19 | Guoxiang   | Nooteboom | M      | 1987-07-02 |
-+------------+--------+------------+------------+-----------+--------+------------+
-5 rows in set (0.00 sec)
-mysql> select (select count(1) from employees b where b.emp_no <= a.emp_no) as rn,  emp_no,CONCAT(last_name," ",first_name) name,gender,hire_date from employees a limit 10,5;
-+------+--------+--------------------+--------+------------+
-| rn   | emp_no | name               | gender | hire_date  |
-+------+--------+--------------------+--------+------------+
-|   11 |  10011 | Sluis Mary         | F      | 1990-01-22 |
-|   12 |  10012 | Bridgland Patricio | M      | 1992-12-18 |
-|   13 |  10013 | Terkki Eberhardt   | M      | 1985-10-20 |
-|   14 |  10014 | Genin Berni        | M      | 1987-03-11 |
-|   15 |  10015 | Nooteboom Guoxiang | M      | 1987-07-02 |
-+------+--------+--------------------+--------+------------+
-5 rows in set (0.27 sec)
-mysql>
-###EXPLAIN/DESC JSON
-mysql> desc FORMAT = JSON select * from employees where emp_no = 23344;
-********* 1. row *********
-EXPLAIN: {
-  "query_block": {
-    "select_id": 1,
-    "cost_info": {
-      "query_cost": "1.00"
-    },
-    "table": {
-      "table_name": "employees",
-      "access_type": "const",
-      "possible_keys": [
-        "PRIMARY"
-      ],
-      "key": "PRIMARY",
-      "used_key_parts": [
-        "emp_no"
-      ],
-      "key_length": "4",
-      "ref": [
-        "const"
-      ],
-      "rows_examined_per_scan": 1,
-      "rows_produced_per_join": 1,
-      "filtered": "100.00",
-      "cost_info": {
-        "read_cost": "0.00",
-        "eval_cost": "0.20",
-        "prefix_cost": "0.00",
-        "data_read_per_join": "136"
-      },
-      "used_columns": [
-        "emp_no",
-        "birth_date",
-        "first_name",
-        "last_name",
-        "gender",
-        "hire_date"
-      ]
-    }
-  }
-}
-1 row in set, 1 warning (0.00 sec)
-mysql> explain FORMAT = JSON select * from employees where emp_no = 23344;
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| EXPLAIN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| {
-  "query_block": {
-    "select_id": 1,
-    "cost_info": {
-      "query_cost": "1.00"
-    },
-    "table": {
-      "table_name": "employees",
-      "access_type": "const",
-      "possible_keys": [
-        "PRIMARY"
-      ],
-      "key": "PRIMARY",
-      "used_key_parts": [
-        "emp_no"
-      ],
-      "key_length": "4",
-      "ref": [
-        "const"
-      ],
-      "rows_examined_per_scan": 1,
-      "rows_produced_per_join": 1,
-      "filtered": "100.00",
-      "cost_info": {
-        "read_cost": "0.00",
-        "eval_cost": "0.20",
-        "prefix_cost": "0.00",
-        "data_read_per_join": "136"
-      },
-      "used_columns": [
-        "emp_no",
-        "birth_date",
-        "first_name",
-        "last_name",
-        "gender",
-        "hire_date"
-      ]
-    }
-  }
-} |
-+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-1 row in set, 1 warning (0.00 sec)
+for line in `cat locked_log.txt | awk '{print $1}'`
+do 
+   echo "kill $line;" >> kill_thread_id.sql
+done
+现在kill_thread_id.sql的内容像这个样子
+
+kill 66402982;
+kill 66402983;
+kill 66402986;
+kill 66402991;
+
+--- shell for循环命令
+for id in `mysqladmin processlist | grep -i locked | awk '{print $1}'`
+do
+   mysqladmin kill ${id}
+done
+;
+
+方法二
+# 批量删除事务表中的事务
+mysql>  select concat('KILL ',id,';') from information_schema.processlist where user='cms_bokong';
 ```
 
-![](D:;ithub\blog\mysql\pictures\Image [3].png)
+## 8. autocommit配置
 
-# 10. 统计信息
-
-```
-use sys
-
-select * from  x$schema_index_statistics limit 1 ;
-
-USE information_schema;
-
-SELECT
-     t.TABLE_SCHEMA,t.TABLE_NAME,INDEX_NAME, CARDINALITY, TABLE_ROWS,
-     CARDINALITY/TABLE_ROWS AS SELETIVITY
-FROM
-    TABLES t,
-    STATISTICS s
-WHERE
-    t.table_schema = s.table_schema
-        AND t.table_name = s.table_name
-        AND t.table_schema = 'dbt3';
-SELECT
-     t.TABLE_SCHEMA,t.TABLE_NAME,INDEX_NAME, CARDINALITY, TABLE_ROWS, CARDINALITY/TABLE_ROWS AS SELETIVITY
-FROM
-    TABLES t,
-    (SELECT table_schema,table_name,index_name,CARDINALITY,MAX(seq_in_index) FROM STATISTICS GROUP BY table_schema,table_name,index_name) s
-WHERE
-    t.table_schema = s.table_schema
-        AND t.table_name = s.table_name
-        AND t.table_schema = 'dbt3'
-ORDER BY SELETIVITY;
-SELECT
-     t.TABLE_SCHEMA,t.TABLE_NAME,INDEX_NAME, CARDINALITY, TABLE_ROWS, CARDINALITY/TABLE_ROWS AS SELETIVITY
-FROM
-    TABLES t,
-    (
-        SELECT     
-            table_schema,
-            table_name,
-            index_name,
-            cardinality
-        FROM STATISTICS
-        WHERE (table_schema,table_name,index_name,seq_in_index) IN (
-        SELECT
-            table_schema,
-            table_name,
-            index_name,
-            MAX(seq_in_index)
-        FROM
-            STATISTICS
-        GROUP BY table_schema , table_name , index_name )
-    ) s
-WHERE
-    t.table_schema = s.table_schema
-        AND t.table_name = s.table_name
-        AND t.table_schema = 'employees'
-ORDER BY SELETIVITY;
-
-ANALYZE TABLE employees;
-
-mysql> select * from employees force index(idx_birth_date) where emp_no=10002;
-+--------+------------+------------+-----------+--------+------------+
-| emp_no | birth_date | first_name | last_name | gender | hire_date  |
-+--------+------------+------------+-----------+--------+------------+
-|  10002 | 1964-06-02 | Bezalel    | Simmel    | F      | 1985-11-21 |
-+--------+------------+------------+-----------+--------+------------+
-1 row in set (0.11 sec)
-mysql> desc format=json select * from employees force index(idx_birth_date) where emp_no=10002;
-+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| EXPLAIN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| {
-  "query_block": {
-    "select_id": 1,
-    "cost_info": {
-      "query_cost": "358394.20"
-    },
-    "table": {
-      "table_name": "employees",
-      "access_type": "ALL",
-      "rows_examined_per_scan": 298661,
-      "rows_produced_per_join": 0,
-      "filtered": "0.00",
-      "cost_info": {
-        "read_cost": "358394.00",
-        "eval_cost": "0.20",
-        "prefix_cost": "358394.20",
-        "data_read_per_join": "135"
-      },
-      "used_columns": [
-        "emp_no",
-        "birth_date",
-        "first_name",
-        "last_name",
-        "gender",
-        "hire_date"
-      ],
-      "attached_condition": "(`employees`.`employees`.`emp_no` = 10002)"
-    }
-  }
-} |
-+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-1 row in set, 1 warning (0.00 sec)
-creata table a(1 int) data directory='/test';
-drop table sbtest6,sbtest7,sbtest8,sbtest9,sbtest10;
-###soft link
-###general tablespace
-create tablespace ts1 add datafile '/test/test01.ibd' file block size=8192;
-creata table a(1 int) tablespace=ts1;
-###只创建表结构
-create table test like employees;
-mysql> select database();
-+------------+
-| database() |
-+------------+
-| sampdb     |
-+------------+
-1 row in set (0.00 sec)
-mysql> set global innodb_cmp_per_index_enabled = 1;
-Query OK, 0 rows affected (0.00 sec)
-mysql> show variables like 'innodb_%index%';
-+----------------------------------+-------+
-| Variable_name                    | Value |
-+----------------------------------+-------+
-| innodb_adaptive_hash_index       | ON    |
-| innodb_adaptive_hash_index_parts | 8     |
-| innodb_cmp_per_index_enabled     | ON    |
-+----------------------------------+-------+
-3 rows in set (0.00 sec)
-mysql> create table t3 (a int) compression="zlib";
-Query OK, 0 rows affected (5.48 sec)
-SQL> show variables like '%join%buffer%';
-+------------------+-----------+
-| Variable_name    | Value     |
-+------------------+-----------+
-| join_buffer_size | 134217728 |
-+------------------+-----------+
-1 row in set (0.00 sec)
-SQL> select 134217728/1024/1024;
-+---------------------+
-| 134217728/1024/1024 |
-+---------------------+
-|        128.00000000 |
-+---------------------+
-1 row in set (0.00 sec)
-(root@localhost) [employees]> set global optimizer_switch='mrr_cost_based=off';
-(root@localhost) [employees]> show variables like 'optimizer_switch';
-+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Variable_name    | Value                                                                                                                                                                                                                                                                                                                                                                                                            |
-+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| optimizer_switch | index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on |
-+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-1 row in set (0.00 sec)
-(root@localhost) [employees]> desc salaries;
-+-----------+---------+------+-----+---------+-------+
-| Field     | Type    | Null | Key | Default | Extra |
-+-----------+---------+------+-----+---------+-------+
-| emp_no    | int(11) | NO   | PRI | NULL    |       |
-| salary    | int(11) | NO   |     | NULL    |       |
-| from_date | date    | NO   | PRI | NULL    |       |
-| to_date   | date    | NO   |     | NULL    |       |
-+-----------+---------+------+-----+---------+-------+
-4 rows in set (0.00 sec)
-(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000;
-********* 1. row *********
-           id: 1
-  select_type: SIMPLE
-        table: salaries
-   partitions: NULL
-         type: ALL
-possible_keys: NULL
-          key: NULL
-      key_len: NULL
-          ref: NULL
-         rows: 2648578
-     filtered: 11.11
-        Extra: Using where
-1 row in set, 1 warning (0.00 sec)
-(root@localhost) [employees]> alter table salaries add index idx_salary(salary);
-Query OK, 0 rows affected (11.08 sec)
-Records: 0  Duplicates: 0  Warnings: 0
-(root@localhost) [employees]> desc salaries;                    
-+-----------+---------+------+-----+---------+-------+
-| Field     | Type    | Null | Key | Default | Extra |
-+-----------+---------+------+-----+---------+-------+
-| emp_no    | int(11) | NO   | PRI | NULL    |       |
-| salary    | int(11) | NO   | MUL | NULL    |       |
-| from_date | date    | NO   | PRI | NULL    |       |
-| to_date   | date    | NO   |     | NULL    |       |
-+-----------+---------+------+-----+---------+-------+
-4 rows in set (0.00 sec)
-(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000;
-********* 1. row *********
-           id: 1
-  select_type: SIMPLE
-        table: salaries
-   partitions: NULL
-         type: range
-possible_keys: idx_salary
-          key: idx_salary
-      key_len: 4
-          ref: NULL
-         rows: 23606
-     filtered: 100.00
-        Extra: Using index condition; Using MRR
-1 row in set, 1 warning (0.00 sec)
-(root@localhost) [employees]>
-
+```dart
+mysql> select @@autocommit;
+mysql> set global autocommit=1;
 ```
 
-# 11. sysbench
-
-[sysbench]: https://Git.com/akopytov/sysbench#linux	"sysbench github"
-
-```shell
-# sysbench --test=cpu --cpu-max-prime=10000 run
-
-WARNING: the --test option is deprecated. You can pass a script name or path on the command line without any options.
-sysbench 1.0.13 (using bundled LuaJIT 2.1.0-beta2)
-Running the test with following options:
-Number of threads: 1
-
-Initializing random number generator from current time
-Prime numbers limit: 10000
-Initializing worker threads...
-Threads started!
-
-CPU speed:
-events per second:   914.21
-
-General statistics:
-total time:                          10.0004s
-total number of events:              9144
-
-Latency (ms):
-     min:                                    1.04
-     avg:                                    1.09
-     max:                                    2.30
-     95th percentile:                        1.16
-     sum:                                 9993.36
-
-Threads fairness:
-events (avg/stddev):           9144.0000/0.00
-execution time (avg/stddev):   9.9934/0.00
 
 
+# 三、MySQL优化
 
-# sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 prepare
-
-# sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 run
+## 1. OS NUMA
 ```
-12. mysqlslap
-
-![](MySQL常用语句.assets/Image [11].png)
-
-![](MySQL常用语句.assets/Image [12].png)
-
-![](MySQL常用语句.assets/Image [13].png)
-
-```mysql
-# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest;
-
-
-
-# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest --only-print|more
-
-DROP SCHEMA IF EXISTS `sbtest`;
-
-CREATE SCHEMA `sbtest`;
-
-use sbtest;
-
-set default_storage_engine=`myisam`;
-
-CREATE TABLE `t1` (id serial,intcol1 INT(32) ,intcol2 INT(32) ,intcol3 INT(32) ,intcol4 INT(32) ,intcol5 INT(32) ,charcol1 VARCHAR(128),charcol2 VARCHAR(128
-
-),charcol3 VARCHAR(128),charcol4 VARCHAR(128),charcol5 VARCHAR(128));
-
-INSERT INTO t1 VALUES (NULL,1804289383,846930886,1681692777,1714636915,1957747793,'vmC9127qJNm06sGB8R92q2j7vTiiITRDGXM9ZLzkdekbWtmXKwZ2qG1llkRw5m9DHOFilEREk3q7oce8O3BEJC0woJsm6uzFAEynLH2xCsw1KQ1lT4zg9rdxBLb97R','GHZ65mNzkSrYT3zWoSbg9cNePQr1bzSk81qDgE4Oanw3rnPfGsBHSbnu1evTdFDe83ro9w4jjteQg4yoo9xHck3WNqzs54W5zEm92ikdRF48B2oz3m8gMBAl11Wy50','w46i58Giekxik0cYzfA8BZBLADEg3JhzGfZDoqvQQk0Akcic7lcJInYSsf
+[root@centos ~]# numactl --hardware
+available: 1 nodes (0)
+node 0 cpus: 0 1
+node 0 size: 4095 MB
+node 0 free: 2645 MB
+node distances:
+node   0
+  0:  10
 ```
 
-# 13. 性能优化
-
-**什么影响了性能?**
-
-- 数据库设计对性能的影响
-
-  - 过分的反范式化为表建立太多的列
-
-  - 过分的范式化造成太多的表关联
-
-  - 在OLTP环境中使用不切当的分区表
-
-  - 使用外键保证数据的完整性
-
-- 性能优化顺序
-  - 数据库结构设计和SQL语句
-  - 数据库存储引擎的选择和参数配置
-  - 系统选择及优化
-  - 硬件升级
-
-# 14. 事务
+## 2. 事务
 
 ```mysql
 (root@localhost) [employees]> show engine innodb mutex;
@@ -1432,18 +444,18 @@ SQL> show variables like '%iso%';
 2 rows in set (0.00 sec)
 ```
 
-![](pictures/Image [14].png)
-![](pictures/Image [15].png)
-![](pictures/Image [16].png)
-![](pictures/Image [17].png)
-![](pictures/Image [18].png)
-![](pictures/Image [19].png)
-![](pictures/Image [20].png)
-![](pictures/Image [21].png)
-![](pictures/Image [22].png)
-![](pictures/Image [23].png)
-![](pictures/Image [24].png)
-![](pictures/Image [25].png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B14%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B15%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B16%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B17%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B18%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B19%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B20%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B21%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B22%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B23%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B24%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B25%5D.png)
 
 ```mysql
 (root@localhost) [(none)]> show variables like 'binlog_format';
@@ -1857,32 +869,32 @@ or
 echo 5 >/proc/sys/vm/swappiness
 ```
 
-![](pictures/Image [26].png)
-![](pictures/Image [27].png)
-![](pictures/Image [28].png)
-![](pictures/Image [29].png)
-![](pictures/Image [30].png)
-![](pictures/Image [31].png)
-![](pictures/Image [32].png)
-![](pictures/Image [33].png)
-![](pictures/Image [34].png)
-![](pictures/Image [35].png)
-![](pictures/Image [36].png)
-![](pictures/Image [37].png)
-![](pictures/Image [38].png)
-![](pictures/Image [39].png)
-![](pictures/Image [40].png)
-![](pictures/Image [41].png)
-![](pictures/Image [42].png)
-![](pictures/Image [43].png)
-![](pictures/Image [44].png)
-![](pictures/Image [45].png)
-![](pictures/Image [46].png)
-![](pictures/Image [47].png)
-![](pictures/Image [48].png)
-![](pictures/Image [49].png)
-![](pictures/Image [50].png)
-![](pictures/Image [51].png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B26%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B27%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B28%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B29%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B30%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B31%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B32%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B33%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B34%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B35%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B36%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B37%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B38%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B39%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B40%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B41%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B42%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B43%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B44%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B45%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B46%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B47%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B48%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B49%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B50%5D.png)
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B51%5D.png)
 
 ```
 [root@centos tpcc-mysql]# mysql tpcc1000 -e "show tables";
@@ -2327,226 +1339,569 @@ mysql> show slave hosts;
 +-----------+------+------+-----------+--------------------------------------+
 1 row in set (0.00 sec)
 ```
-# 15. mysqldump
+
+## 3. MySQL解释计划
+
 ```mysql
- mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak$(date +%F%T).sql.gz
- mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak`date +%F%T`.sql.gz
- mysqldump -uroot -poracle -B  --events -x  wordpress|gzip>/app/mysqlbak`date +%F%T`.sql.gz
-```
+mysql> select @@gtid_mode;
++-------------+
+| @@gtid_mode |
++-------------+
+| ON          |
++-------------+
+1 row in set (0.00 sec)
 
+select emp_no,first_name,last_name from employees where emp_no = any(select emp_no from dept_manager);
+select emp_no,first_name,last_name from employees where emp_no = all(select emp_no from dept_manager);
+select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);
+explain select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);;
+explain extended select emp_no,first_name,last_name from employees where emp_no in (select emp_no from dept_manager);
 
+mysql> insert into a values (2);
+Query OK, 1 row affected (0.00 sec)
+mysql> select * from a;
++------+
+| a    |
++------+
+|    1 |
+|    2 |
++------+
+2 rows in set (0.00 sec)
+mysql> insert into a values (3);
+Query OK, 1 row affected (0.10 sec)
+mysql> insert into a values (3),(4),(5);
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+mysql> insert into a select 8;
+Query OK, 1 row affected (0.00 sec)
+Records: 1  Duplicates: 0  Warnings: 0
 
-```
-mysql> show engine innodb status;
+mysql> set @rn:=0;
+Query OK, 0 rows affected (0.00 sec)
+mysql> select @rn;
++------+
+| @rn  |
++------+
+|    0 |
++------+
+1 row in set (0.00 sec)
+mysql> select @rn:=@rn+1,e.* from employees e limit 10;
++------------+--------+------------+------------+-----------+--------+------------+
+| @rn:=@rn+1 | emp_no | birth_date | first_name | last_name | gender | hire_date  |
++------------+--------+------------+------------+-----------+--------+------------+
+|          1 |  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |
+|          2 |  10002 | 1964-06-02 | Bezalel    | Simmel    | F      | 1985-11-21 |
+|          3 |  10003 | 1959-12-03 | Parto      | Bamford   | M      | 1986-08-28 |
+|          4 |  10004 | 1954-05-01 | Chirstian  | Koblick   | M      | 1986-12-01 |
+|          5 |  10005 | 1955-01-21 | Kyoichi    | Maliniak  | M      | 1989-09-12 |
+|          6 |  10006 | 1953-04-20 | Anneke     | Preusig   | F      | 1989-06-02 |
+|          7 |  10007 | 1957-05-23 | Tzvetan    | Zielinski | F      | 1989-02-10 |
+|          8 |  10008 | 1958-02-19 | Saniya     | Kalloufi  | M      | 1994-09-15 |
+|          9 |  10009 | 1952-04-19 | Sumant     | Peac      | F      | 1985-02-18 |
+|         10 |  10010 | 1963-06-01 | Duangkaew  | Piveteau  | F      | 1989-08-24 |
++------------+--------+------------+------------+-----------+--------+------------+
+10 rows in set (0.00 sec)
+mysql> select @rn:=@rn+1,e.* from employees e,(select @rn:=0) t limit 10,5;
++------------+--------+------------+------------+-----------+--------+------------+
+| @rn:=@rn+1 | emp_no | birth_date | first_name | last_name | gender | hire_date  |
++------------+--------+------------+------------+-----------+--------+------------+
+|          1 |  10011 | 1953-11-07 | Mary       | Sluis     | F      | 1990-01-22 |
+|          2 |  10012 | 1960-10-04 | Patricio   | Bridgland | M      | 1992-12-18 |
+|          3 |  10013 | 1963-06-07 | Eberhardt  | Terkki    | M      | 1985-10-20 |
+|          4 |  10014 | 1956-02-12 | Berni      | Genin     | M      | 1987-03-11 |
+|          5 |  10015 | 1959-08-19 | Guoxiang   | Nooteboom | M      | 1987-07-02 |
++------------+--------+------------+------------+-----------+--------+------------+
+5 rows in set (0.00 sec)
+mysql> select (select count(1) from employees b where b.emp_no <= a.emp_no) as rn,  emp_no,CONCAT(last_name," ",first_name) name,gender,hire_date from employees a limit 10,5;
++------+--------+--------------------+--------+------------+
+| rn   | emp_no | name               | gender | hire_date  |
++------+--------+--------------------+--------+------------+
+|   11 |  10011 | Sluis Mary         | F      | 1990-01-22 |
+|   12 |  10012 | Bridgland Patricio | M      | 1992-12-18 |
+|   13 |  10013 | Terkki Eberhardt   | M      | 1985-10-20 |
+|   14 |  10014 | Genin Berni        | M      | 1987-03-11 |
+|   15 |  10015 | Nooteboom Guoxiang | M      | 1987-07-02 |
++------+--------+--------------------+--------+------------+
+5 rows in set (0.27 sec)
+mysql>
+###EXPLAIN/DESC JSON
+mysql> desc FORMAT = JSON select * from employees where emp_no = 23344;
 ********* 1. row *********
-  Type: InnoDB
-  Name:
-
-# Status:
-
-# 2018-04-13 08:32:48 0x7fdfde5fa700 INNODB MONITOR OUTPUT
-
-## Per second averages calculated from the last 4 seconds
-
-## BACKGROUND THREAD
-
-srv_master_thread loops: 5 srv_active, 0 srv_shutdown, 486 srv_idle
-
-## srv_master_thread log flush and writes: 491
-
-## SEMAPHORES
-
-OS WAIT ARRAY INFO: reservation count 135
-OS WAIT ARRAY INFO: signal count 133
-RW-shared spins 0, rounds 12, OS waits 6
-RW-excl spins 0, rounds 60, OS waits 2
-RW-sx spins 0, rounds 0, OS waits 0
-
-## Spin rounds per wait: 12.00 RW-shared, 60.00 RW-excl, 0.00 RW-sx
-
-## TRANSACTIONS
-
-Trx id counter 15238
-Purge done for trx's n:o < 15237 undo n:o < 0 state: running but idle
-History list length 18
-LIST OF TRANSACTIONS FOR EACH SESSION:
----TRANSACTION 422074637217392, not started
-0 lock struct(s), heap size 1136, 0 row lock(s)
----TRANSACTION 422074637216480, not started
-0 lock struct(s), heap size 1136, 0 row lock(s)
----TRANSACTION 422074637215568, not started
-
-## 0 lock struct(s), heap size 1136, 0 row lock(s)
-
-## FILE I/O
-
-I/O thread 0 state: waiting for completed aio requests (insert buffer thread)
-I/O thread 1 state: waiting for completed aio requests (log thread)
-I/O thread 2 state: waiting for completed aio requests (read thread)
-I/O thread 3 state: waiting for completed aio requests (read thread)
-I/O thread 4 state: waiting for completed aio requests (read thread)
-I/O thread 5 state: waiting for completed aio requests (read thread)
-I/O thread 6 state: waiting for completed aio requests (write thread)
-I/O thread 7 state: waiting for completed aio requests (write thread)
-I/O thread 8 state: waiting for completed aio requests (write thread)
-I/O thread 9 state: waiting for completed aio requests (write thread)
-Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
-ibuf aio reads:, log i/o's:, sync i/o's:
-Pending flushes (fsync) log: 0; buffer pool: 0
-459 OS file reads, 219 OS file writes, 86 OS fsyncs
-
-## 0.00 reads/s, 0 avg bytes/read, 0.00 writes/s, 0.00 fsyncs/s
-
-## INSERT BUFFER AND ADAPTIVE HASH INDEX
-
-Ibuf: size 1, free list len 0, seg size 2, 0 merges
-merged operations:
-insert 0, delete mark 0, delete 0
-discarded operations:
-insert 0, delete mark 0, delete 0
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-Hash table size 34673, node heap has 0 buffer(s)
-
-## 0.00 hash searches/s, 0.00 non-hash searches/s
-
-## LOG
-
-Log sequence number 5543009
-Log flushed up to   5543009
-Pages flushed up to 5543009
-Last checkpoint at  5543000
-0 pending log flushes, 0 pending chkp writes
-
-## 80 log i/o's done, 0.00 log i/o's/second
-
-## BUFFER POOL AND MEMORY
-
-Total large memory allocated 137428992
-Dictionary memory allocated 145206
-Buffer pool size   8191
-Free buffers       7733
-Database pages     458
-Old database pages 0
-Modified db pages  0
-Pending reads      0
-Pending writes: LRU 0, flush list 0, single page 0
-Pages made young 0, not young 0
-0.00 youngs/s, 0.00 non-youngs/s
-Pages read 420, created 38, written 129
-0.00 reads/s, 0.00 creates/s, 0.00 writes/s
-No buffer pool page gets since the last printout
-Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
-LRU len: 458, unzip_LRU len: 0
-
-## I/O sum[0]:cur[0], unzip sum[0]:cur[0]
-
-## ROW OPERATIONS
-
-0 queries inside InnoDB, 0 queries in queue
-0 read views open inside InnoDB
-Process ID=1591, Main thread ID=140599331071744, state: sleeping
-Number of rows inserted 45, updated 112, deleted 0, read 186
-
-## 0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.00 reads/s
-
-# END OF INNODB MONITOR OUTPUT
-
-1 row in set (0.00 sec)
-mysql> INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';
-Query OK, 0 rows affected (0.41 sec)
-mysql> INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';
-mysql> show plugins;
-+----------------------------+----------+--------------------+----------------------+---------+
-| Name                       | Status   | Type               | Library              | License |
-+----------------------------+----------+--------------------+----------------------+---------+
-| binlog                     | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| mysql_native_password      | ACTIVE   | AUTHENTICATION     | NULL                 | GPL     |
-| sha256_password            | ACTIVE   | AUTHENTICATION     | NULL                 | GPL     |
-| CSV                        | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| MyISAM                     | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| MRG_MYISAM                 | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| PERFORMANCE_SCHEMA         | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| MEMORY                     | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| InnoDB                     | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| INNODB_TRX                 | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_LOCKS               | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_LOCK_WAITS          | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_CMP                 | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_CMP_RESET           | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_CMPMEM              | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_CMPMEM_RESET        | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_CMP_PER_INDEX       | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_CMP_PER_INDEX_RESET | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_BUFFER_PAGE         | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_BUFFER_PAGE_LRU     | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_BUFFER_POOL_STATS   | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_TEMP_TABLE_INFO     | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_METRICS             | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_FT_DEFAULT_STOPWORD | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_FT_DELETED          | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_FT_BEING_DELETED    | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_FT_CONFIG           | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_FT_INDEX_CACHE      | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_FT_INDEX_TABLE      | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_TABLES          | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_TABLESTATS      | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_INDEXES         | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_COLUMNS         | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_FIELDS          | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_FOREIGN         | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_FOREIGN_COLS    | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_TABLESPACES     | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_DATAFILES       | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| INNODB_SYS_VIRTUAL         | ACTIVE   | INFORMATION SCHEMA | NULL                 | GPL     |
-| partition                  | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| ARCHIVE                    | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| FEDERATED                  | DISABLED | STORAGE ENGINE     | NULL                 | GPL     |
-| BLACKHOLE                  | ACTIVE   | STORAGE ENGINE     | NULL                 | GPL     |
-| ngram                      | ACTIVE   | FTPARSER           | NULL                 | GPL     |
-| validate_password          | DISABLED | VALIDATE PASSWORD  | validate_password.so | GPL     |
-| rpl_semi_sync_master       | ACTIVE   | REPLICATION        | semisync_master.so   | GPL     |
-+----------------------------+----------+--------------------+----------------------+---------+
-46 rows in set (0.00 sec)
-root@mysql 13:46:  [(none)]> show variables like 'slave_rows_search_algorithms';
-+------------------------------+-----------------------+
-| Variable_name                | Value                 |
-+------------------------------+-----------------------+
-| slave_rows_search_algorithms | TABLE_SCAN,INDEX_SCAN |
-+------------------------------+-----------------------+
-1 row in set (0.00 sec)
-root@mysql 13:50:  [(none)]> show global status like '%rpl%';
-+--------------------------------------------+-------+
-| Variable_name                              | Value |
-+--------------------------------------------+-------+
-| Rpl_semi_sync_master_clients               | 0     |
-| Rpl_semi_sync_master_net_avg_wait_time     | 0     |
-| Rpl_semi_sync_master_net_wait_time         | 0     |
-| Rpl_semi_sync_master_net_waits             | 0     |
-| Rpl_semi_sync_master_no_times              | 0     |
-| Rpl_semi_sync_master_no_tx                 | 0     |
-| Rpl_semi_sync_master_status                | ON    |
-| Rpl_semi_sync_master_timefunc_failures     | 0     |
-| Rpl_semi_sync_master_tx_avg_wait_time      | 0     |
-| Rpl_semi_sync_master_tx_wait_time          | 0     |
-| Rpl_semi_sync_master_tx_waits              | 0     |
-| Rpl_semi_sync_master_wait_pos_backtraverse | 0     |
-| Rpl_semi_sync_master_wait_sessions         | 0     |
-| Rpl_semi_sync_master_yes_tx                | 0     |
-| Rpl_semi_sync_slave_status                 | OFF   |
-+--------------------------------------------+-------+
-15 rows in set (0.00 sec)
-mysql> stop slave io_thread;
-Query OK, 0 rows affected, 1 warning (0.00 sec)
-mysql> stop slave sql_thread;  
-Query OK, 0 rows affected, 1 warning (0.00 sec)
+EXPLAIN: {
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1.00"
+    },
+    "table": {
+      "table_name": "employees",
+      "access_type": "const",
+      "possible_keys": [
+        "PRIMARY"
+      ],
+      "key": "PRIMARY",
+      "used_key_parts": [
+        "emp_no"
+      ],
+      "key_length": "4",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 1,
+      "rows_produced_per_join": 1,
+      "filtered": "100.00",
+      "cost_info": {
+        "read_cost": "0.00",
+        "eval_cost": "0.20",
+        "prefix_cost": "0.00",
+        "data_read_per_join": "136"
+      },
+      "used_columns": [
+        "emp_no",
+        "birth_date",
+        "first_name",
+        "last_name",
+        "gender",
+        "hire_date"
+      ]
+    }
+  }
+}
+1 row in set, 1 warning (0.00 sec)
+mysql> explain FORMAT = JSON select * from employees where emp_no = 23344;
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| EXPLAIN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| {
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1.00"
+    },
+    "table": {
+      "table_name": "employees",
+      "access_type": "const",
+      "possible_keys": [
+        "PRIMARY"
+      ],
+      "key": "PRIMARY",
+      "used_key_parts": [
+        "emp_no"
+      ],
+      "key_length": "4",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 1,
+      "rows_produced_per_join": 1,
+      "filtered": "100.00",
+      "cost_info": {
+        "read_cost": "0.00",
+        "eval_cost": "0.20",
+        "prefix_cost": "0.00",
+        "data_read_per_join": "136"
+      },
+      "used_columns": [
+        "emp_no",
+        "birth_date",
+        "first_name",
+        "last_name",
+        "gender",
+        "hire_date"
+      ]
+    }
+  }
+} |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
 ```
-# 16. 针对某个DB复制
+
+![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B3%5D.png)
+
+
+12. mysqlslap
+
+![](MySQL常用语句.assets/Image [11].png)
+
+![](MySQL常用语句.assets/Image [12].png)
+
+![](MySQL常用语句.assets/Image [13].png)
+
+```mysql
+# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest;
+
+
+
+# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest --only-print|more
+
+DROP SCHEMA IF EXISTS `sbtest`;
+
+CREATE SCHEMA `sbtest`;
+
+use sbtest;
+
+set default_storage_engine=`myisam`;
+
+CREATE TABLE `t1` (id serial,intcol1 INT(32) ,intcol2 INT(32) ,intcol3 INT(32) ,intcol4 INT(32) ,intcol5 INT(32) ,charcol1 VARCHAR(128),charcol2 VARCHAR(128
+
+),charcol3 VARCHAR(128),charcol4 VARCHAR(128),charcol5 VARCHAR(128));
+
+INSERT INTO t1 VALUES (NULL,1804289383,846930886,1681692777,1714636915,1957747793,'vmC9127qJNm06sGB8R92q2j7vTiiITRDGXM9ZLzkdekbWtmXKwZ2qG1llkRw5m9DHOFilEREk3q7oce8O3BEJC0woJsm6uzFAEynLH2xCsw1KQ1lT4zg9rdxBLb97R','GHZ65mNzkSrYT3zWoSbg9cNePQr1bzSk81qDgE4Oanw3rnPfGsBHSbnu1evTdFDe83ro9w4jjteQg4yoo9xHck3WNqzs54W5zEm92ikdRF48B2oz3m8gMBAl11Wy50','w46i58Giekxik0cYzfA8BZBLADEg3JhzGfZDoqvQQk0Akcic7lcJInYSsf
+```
+
+## 4.  性能优化
+
+**什么影响了性能?**
+
+- 数据库设计对性能的影响
+
+  - 过分的反范式化为表建立太多的列
+
+  - 过分的范式化造成太多的表关联
+
+  - 在OLTP环境中使用不切当的分区表
+
+  - 使用外键保证数据的完整性
+
+- 性能优化顺序
+  - 数据库结构设计和SQL语句
+  - 数据库存储引擎的选择和参数配置
+  - 系统选择及优化
+  - 硬件升级
+
+## 5. innodb buffer pool hit rate
+```
+That's the Hit Rate since Uptime (Last MySQL Startup)
+There are two things you can do to get the Last 10 Minutes
+
+//METHOD #1
+Flush all Status Values, Sleep 10 min, Run Query
+FLUSH STATUS;SELECT SLEEP(600) INTO @x;SELECT round ((P2.variable_value / P1.variable_value),4),
+P2.variable_value, P1.variable_value
+FROM information_schema.GLOBAL_STATUS P1,
+information_schema.GLOBAL_STATUS P2
+WHERE P1. variable_name = 'innodb_buffer_pool_read_requests'AND P2. variable_name = 'innodb_buffer_pool_reads';
+
+//METHOD #2
+Capture innodb_buffer_pool_read_requests, innodb_buffer_pool_reads, Sleep 10 minutes, Run Query with Differences in innodb_buffer_pool_read_requests and innodb_buffer_pool_reads
+SELECT
+P1.variable_value,P2.variable_value
+INTO
+@rqs,@rds
+FROM information_schema.GLOBAL_STATUS P1,
+information_schema.GLOBAL_STATUS P2
+WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
+SELECT SLEEP(600) INTO @x;SELECT round (((P2.variable_value - @rds) / (P1.variable_value - @rqs)),4),
+P2.variable_value, P1.variable_value
+FROM information_schema.GLOBAL_STATUS P1,
+information_schema.GLOBAL_STATUS P2
+WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
+```
+
+## 6.  慢SQL日志
+
+```mysql
+# mysqldumpslow /data/slow.log
+
+Reading mysql slow query log from /data/slow.log
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=17.0 (17), root[root]@[192.168.45.1]
+  SELECT STATE AS Status, ROUND(SUM(DURATION),N) AS Duration, CONCAT(ROUND(SUM(DURATION)/N.N*N,N), 'S') AS Percentage FROM INFORMATION_SCHEMA.PROFILING WHERE QUERY_ID=N GROUP BY SEQ, STATE ORDER BY SEQ
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  bin/mysqld, Version: N.N.N-log (MySQL Community Server (GPL)). started with:
+  
+-- 修改slow_log表存储引擎 
+set global slow_query_log=0;
+alter table mysql.slow_log engine = myisam;
+set global slow_query_log=1;
+```
+
+##  7. 统计信息
+
+```
+use sys
+
+select * from  x$schema_index_statistics limit 1 ;
+
+USE information_schema;
+
+SELECT
+     t.TABLE_SCHEMA,t.TABLE_NAME,INDEX_NAME, CARDINALITY, TABLE_ROWS,
+     CARDINALITY/TABLE_ROWS AS SELETIVITY
+FROM
+    TABLES t,
+    STATISTICS s
+WHERE
+    t.table_schema = s.table_schema
+        AND t.table_name = s.table_name
+        AND t.table_schema = 'dbt3';
+SELECT
+     t.TABLE_SCHEMA,t.TABLE_NAME,INDEX_NAME, CARDINALITY, TABLE_ROWS, CARDINALITY/TABLE_ROWS AS SELETIVITY
+FROM
+    TABLES t,
+    (SELECT table_schema,table_name,index_name,CARDINALITY,MAX(seq_in_index) FROM STATISTICS GROUP BY table_schema,table_name,index_name) s
+WHERE
+    t.table_schema = s.table_schema
+        AND t.table_name = s.table_name
+        AND t.table_schema = 'dbt3'
+ORDER BY SELETIVITY;
+SELECT
+     t.TABLE_SCHEMA,t.TABLE_NAME,INDEX_NAME, CARDINALITY, TABLE_ROWS, CARDINALITY/TABLE_ROWS AS SELETIVITY
+FROM
+    TABLES t,
+    (
+        SELECT     
+            table_schema,
+            table_name,
+            index_name,
+            cardinality
+        FROM STATISTICS
+        WHERE (table_schema,table_name,index_name,seq_in_index) IN (
+        SELECT
+            table_schema,
+            table_name,
+            index_name,
+            MAX(seq_in_index)
+        FROM
+            STATISTICS
+        GROUP BY table_schema , table_name , index_name )
+    ) s
+WHERE
+    t.table_schema = s.table_schema
+        AND t.table_name = s.table_name
+        AND t.table_schema = 'employees'
+ORDER BY SELETIVITY;
+
+ANALYZE TABLE employees;
+
+mysql> select * from employees force index(idx_birth_date) where emp_no=10002;
++--------+------------+------------+-----------+--------+------------+
+| emp_no | birth_date | first_name | last_name | gender | hire_date  |
++--------+------------+------------+-----------+--------+------------+
+|  10002 | 1964-06-02 | Bezalel    | Simmel    | F      | 1985-11-21 |
++--------+------------+------------+-----------+--------+------------+
+1 row in set (0.11 sec)
+mysql> desc format=json select * from employees force index(idx_birth_date) where emp_no=10002;
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| EXPLAIN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| {
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "358394.20"
+    },
+    "table": {
+      "table_name": "employees",
+      "access_type": "ALL",
+      "rows_examined_per_scan": 298661,
+      "rows_produced_per_join": 0,
+      "filtered": "0.00",
+      "cost_info": {
+        "read_cost": "358394.00",
+        "eval_cost": "0.20",
+        "prefix_cost": "358394.20",
+        "data_read_per_join": "135"
+      },
+      "used_columns": [
+        "emp_no",
+        "birth_date",
+        "first_name",
+        "last_name",
+        "gender",
+        "hire_date"
+      ],
+      "attached_condition": "(`employees`.`employees`.`emp_no` = 10002)"
+    }
+  }
+} |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+creata table a(1 int) data directory='/test';
+drop table sbtest6,sbtest7,sbtest8,sbtest9,sbtest10;
+###soft link
+###general tablespace
+create tablespace ts1 add datafile '/test/test01.ibd' file block size=8192;
+creata table a(1 int) tablespace=ts1;
+###只创建表结构
+create table test like employees;
+mysql> select database();
++------------+
+| database() |
++------------+
+| sampdb     |
++------------+
+1 row in set (0.00 sec)
+mysql> set global innodb_cmp_per_index_enabled = 1;
+Query OK, 0 rows affected (0.00 sec)
+mysql> show variables like 'innodb_%index%';
++----------------------------------+-------+
+| Variable_name                    | Value |
++----------------------------------+-------+
+| innodb_adaptive_hash_index       | ON    |
+| innodb_adaptive_hash_index_parts | 8     |
+| innodb_cmp_per_index_enabled     | ON    |
++----------------------------------+-------+
+3 rows in set (0.00 sec)
+mysql> create table t3 (a int) compression="zlib";
+Query OK, 0 rows affected (5.48 sec)
+SQL> show variables like '%join%buffer%';
++------------------+-----------+
+| Variable_name    | Value     |
++------------------+-----------+
+| join_buffer_size | 134217728 |
++------------------+-----------+
+1 row in set (0.00 sec)
+SQL> select 134217728/1024/1024;
++---------------------+
+| 134217728/1024/1024 |
++---------------------+
+|        128.00000000 |
++---------------------+
+1 row in set (0.00 sec)
+(root@localhost) [employees]> set global optimizer_switch='mrr_cost_based=off';
+(root@localhost) [employees]> show variables like 'optimizer_switch';
++------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Variable_name    | Value                                                                                                                                                                                                                                                                                                                                                                                                            |
++------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| optimizer_switch | index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on |
++------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+(root@localhost) [employees]> desc salaries;
++-----------+---------+------+-----+---------+-------+
+| Field     | Type    | Null | Key | Default | Extra |
++-----------+---------+------+-----+---------+-------+
+| emp_no    | int(11) | NO   | PRI | NULL    |       |
+| salary    | int(11) | NO   |     | NULL    |       |
+| from_date | date    | NO   | PRI | NULL    |       |
+| to_date   | date    | NO   |     | NULL    |       |
++-----------+---------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000;
+********* 1. row *********
+           id: 1
+  select_type: SIMPLE
+        table: salaries
+   partitions: NULL
+         type: ALL
+possible_keys: NULL
+          key: NULL
+      key_len: NULL
+          ref: NULL
+         rows: 2648578
+     filtered: 11.11
+        Extra: Using where
+1 row in set, 1 warning (0.00 sec)
+(root@localhost) [employees]> alter table salaries add index idx_salary(salary);
+Query OK, 0 rows affected (11.08 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+(root@localhost) [employees]> desc salaries;                    
++-----------+---------+------+-----+---------+-------+
+| Field     | Type    | Null | Key | Default | Extra |
++-----------+---------+------+-----+---------+-------+
+| emp_no    | int(11) | NO   | PRI | NULL    |       |
+| salary    | int(11) | NO   | MUL | NULL    |       |
+| from_date | date    | NO   | PRI | NULL    |       |
+| to_date   | date    | NO   |     | NULL    |       |
++-----------+---------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+(root@localhost) [employees]> explain select /*+ MRR(salaries) */ * from salaries where salary>1000 and salary <40000;
+********* 1. row *********
+           id: 1
+  select_type: SIMPLE
+        table: salaries
+   partitions: NULL
+         type: range
+possible_keys: idx_salary
+          key: idx_salary
+      key_len: 4
+          ref: NULL
+         rows: 23606
+     filtered: 100.00
+        Extra: Using index condition; Using MRR
+1 row in set, 1 warning (0.00 sec)
+(root@localhost) [employees]>
+
+```
+
+## 8. sysbench
+
+[sysbench]: https://Git.com/akopytov/sysbench#linux	"sysbench github"
+
+```shell
+# sysbench --test=cpu --cpu-max-prime=10000 run
+
+WARNING: the --test option is deprecated. You can pass a script name or path on the command line without any options.
+sysbench 1.0.13 (using bundled LuaJIT 2.1.0-beta2)
+Running the test with following options:
+Number of threads: 1
+
+Initializing random number generator from current time
+Prime numbers limit: 10000
+Initializing worker threads...
+Threads started!
+
+CPU speed:
+events per second:   914.21
+
+General statistics:
+total time:                          10.0004s
+total number of events:              9144
+
+Latency (ms):
+     min:                                    1.04
+     avg:                                    1.09
+     max:                                    2.30
+     95th percentile:                        1.16
+     sum:                                 9993.36
+
+Threads fairness:
+events (avg/stddev):           9144.0000/0.00
+execution time (avg/stddev):   9.9934/0.00
+
+
+
+# sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 prepare
+
+# sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 run
+```
+
+
+
+# 四、MySQL备份容灾
+
+## 1. 需备份二进制日志
+
+```
+mysql> show master status;
++------------------+----------+--------------+------------------+----------------------------------------------+
+
+| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
+| ---- | -------- | ------------ | ---------------- | ----------------- |
+|      |          |              |                  |                   |
++------------------+----------+--------------+------------------+----------------------------------------------+
+| mysql-bin.000020 | 8533959 |      |      | 7d0e42b6-0c89-11e8-90d8-000c292c7e58:1-23949 |
+| ---------------- | ------- | ---- | ---- | -------------------------------------------- |
+|                  |         |      |      |                                              |
++------------------+----------+--------------+------------------+----------------------------------------------+
+1 row in set (0.00 sec)
+mysql> reset master;
+Query OK, 0 rows affected (0.03 sec)
+mysql> show master status;
++------------------+----------+--------------+------------------+------------------------------------------+
+| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
+| ---- | -------- | ------------ | ---------------- | ----------------- |
+|      |          |              |                  |                   |
++------------------+----------+--------------+------------------+------------------------------------------+
+| mysql-bin.000001 | 1694 |      |      | 7d0e42b6-0c89-11e8-90d8-000c292c7e58:1-4 |
+| ---------------- | ---- | ---- | ---- | ---------------------------------------- |
+|                  |      |      |      |                                          |
++------------------+----------+--------------+------------------+------------------------------------------+
+1 row in set (0.00 sec)
+start slave for channel ch1
+```
+
+## 2. 针对某个DB复制
+
 ```
 --replicate-do-db=db_name
 
@@ -2590,36 +1945,361 @@ Checking slave delay (seconds behind master)                         [pass]
 # ...done.
 ```
 
-# 17. 需备份二进制日志
-```
-mysql> show master status;
-+------------------+----------+--------------+------------------+----------------------------------------------+
+## 3. mysqldump
 
-| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
-| ---- | -------- | ------------ | ---------------- | ----------------- |
-|      |          |              |                  |                   |
-+------------------+----------+--------------+------------------+----------------------------------------------+
-| mysql-bin.000020 | 8533959 |      |      | 7d0e42b6-0c89-11e8-90d8-000c292c7e58:1-23949 |
-| ---------------- | ------- | ---- | ---- | -------------------------------------------- |
-|                  |         |      |      |                                              |
-+------------------+----------+--------------+------------------+----------------------------------------------+
-1 row in set (0.00 sec)
-mysql> reset master;
-Query OK, 0 rows affected (0.03 sec)
-mysql> show master status;
-+------------------+----------+--------------+------------------+------------------------------------------+
-| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
-| ---- | -------- | ------------ | ---------------- | ----------------- |
-|      |          |              |                  |                   |
-+------------------+----------+--------------+------------------+------------------------------------------+
-| mysql-bin.000001 | 1694 |      |      | 7d0e42b6-0c89-11e8-90d8-000c292c7e58:1-4 |
-| ---------------- | ---- | ---- | ---- | ---------------------------------------- |
-|                  |      |      |      |                                          |
-+------------------+----------+--------------+------------------+------------------------------------------+
-1 row in set (0.00 sec)
-start slave for channel ch1
+```mysql
+ mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak$(date +%F%T).sql.gz
+ mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak`date +%F%T`.sql.gz
+ mysqldump -uroot -poracle -B  --events -x  wordpress|gzip>/app/mysqlbak`date +%F%T`.sql.gz
 ```
-# 18. 计算列
+
+
+
+## 4. 5.7.22新特性
+
+oracle mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-character-set=utf8  --single-transaction --master-data=2 备份，也是会发出FLUSH TABLES WITH READ LOCK 
+## 5. 防止误删数据？
+```
+根据白天大家的讨论，总结共有以下几个措施，供参考：
+1. 生产环境中，业务代码尽量不明文保存数据库连接账号密码信息；
+2. 重要的DML、DDL通过平台型工具自动实施，减少人工操作；
+3. 部署延迟复制从库，万一误删除时用于数据回档。且从库设置为read-only；
+4. 确认备份制度及时有效；
+5. 启用SQL审计功能，养成良好SQL习惯；
+6. 启用 sql_safe_updates 选项，不允许没 WHERE 条件的更新/删除；
+7. 将系统层的 rm 改为 mv；
+8. 线上不进行物理删除，改为逻辑删除（将row data标记为不可用）；
+9. 启用堡垒机，屏蔽高危SQL；
+10. 降低数据库中普通账号的权限级别；
+11. 务必开启binlog。
+```
+
+
+
+# 五、MySQL数据库开发
+
+## 1. 数据库操作
+
+```mysql
+-- 如果【某数据库】存在就删除【某数据库】 
+DROP DATABASE IF EXISTS db;
+-- 如果【某数据库】不存在就创建【某数据库】
+CREATE DATABASE IF NOT EXISTS db;
+CREATE DATABASE IF NOT EXISTS yourdbname DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+create database yourdb DEFAULT CHARACTER SET gbk COLLATE gbk_chinese_ci;
+-- 使用【某数据库】
+USE db;
+-- 查看数据库
+show databases;
+-- 查看创建语句
+show create database mytest;
+-- 修改字符集
+alter database sampdb character set utf8 collate utf8_general_ci;
+-- 关闭mysql
+mysqladmin -uroot -p shutdown
+```
+## 2. 表操作
+
+### 2.1 常用操作
+
+```mysql
+## 如果【某表】存在就删除【某表】
+DROP TABLE IF EXISTS tb;
+## 如果【某表】不存在就创建【某表】
+CREATE TABLE IF NOT EXISTS tb
+## 添加表字段
+alter table` 表名称` add transactor varchar(10) not Null;
+alter table  `表名称` add id int unsigned not Null auto_increment primary key
+## 修改某个表的字段类型及指定为空或非空
+alter table `表名称` change 字段名称 字段名称 字段类型 [是否允许非空];
+alter table `表名称` modify 字段名称 字段类型 [是否允许非空];
+## 修改某个表的字段名称及指定为空或非空 
+alter table `表名称` change 字段原名称 字段新名称 字段类型 [是否允许非空
+## 删除某一字段
+ALTER TABLE `表名称` DROP 字段名;
+## 添加唯一键
+ALTER TABLE `表名称` ADD UNIQUE ( `userid`)
+## 修改主键
+ALTER TABLE `表名称` DROP PRIMARY KEY ,ADD PRIMARY KEY ( `id` )
+## 增加索引
+ALTER TABLE `表名称` ADD INDEX ( `id` )
+ALTER TABLE `表名称` MODIFY COLUMN `id`  int(11) NOT NULL AUTO_INCREMENT FIRST ,ADD PRIMARY KEY (`id`);
+## 查看表的字段信息
+desc 表名
+describe mysql.user;
+desc mysql.user;
+show columns from `表名`；
+
+## 查看表的所有信息
+show create table `表名`;
+## 添加主键约束
+alter table `表名` add constraint 主键名称（形如：PK_表名） primary key 表名(主键字段);
+alter table  `表名` add 列名 列类型 unsigned 是否为空 auto_increment primary key；
+## 添加外键约束
+alter table `从表` add constraint 外键（形如：FK_从表_主表） foreign key 从表(外键字段) references 主表(主键字段);
+(alter table `主表名` add foreign key (字段 ) references 从表名(字段) on delete cascade)
+## 添加唯一约束 
+ALTER table `表名` add unique key 约束名 (字段);
+## 删除主键约束
+alter table `表名` drop primary key;
+## 删除外键约束
+alter table `表名` drop foreign key 外键（区分大小写）;
+## 修改表名
+alter table `表名称` rename to bbb;
+## 修改表的注释 
+ALTER TABLE `表名称` COMMENT '学生表2.0';
+## 查看数据库表
+show tables from sampdb;
+show tables in employees;
+
+## 查看表的详细信息
+SHOW CREATE TABLE `表名称`
+## 修改字段的注释信息 
+ALTER TABLE `表名` MODIFY COLUMN `列名` `数据类型` COMMENT '备注信息';
+## 查看字段的详细信息 
+SHOW FULL COLUMNS  FROM `表名称`;
+## 查看字段的简要信息
+SHOW COLUMNS FROM `表名称`;
+## 查询当前数据库中所有表
+select table_name from information_schema.tables where table_schema='当前数据库';
+## 查询当前数据库中所有表的约束（详情）
+select * from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where Constraint_Schema='test_StringEntityTest';
+## 查询当前数据库中所有表的约束（简单）
+select * from information_schema.Table_Constraints where Constraint_Schema='test_StringEntityTest';
+```
+### 2.2 修改主键SQL
+
+```mysql
+declare @defname varchar(100)
+declare @cmd varchar(500)
+declare @tablename varchar(100)
+declare @keyname varchar(100)
+Set @tablename='Temp1'
+Set @keyname='id' --需要設置的key,分隔
+select @defname= name
+   FROM sysobjects so 
+   JOIN sysconstraints sc
+   ON so.id = sc.constid
+   WHERE object_name(so.parent_obj) = @tablename
+   and xtype='PK'
+if @defname is not null
+begin
+select @cmd='alter table '+ @tablename+ ' drop constraint '+ @defname
+--print @cmd
+   exec (@cmd)
+ end
+else
+ set @defname='PK_'+@keyname
+select @cmd='alter table '+ @tablename+ ' ADD constraint '+ @defname +' PRIMARY KEY CLUSTERED('+@keyname+')'
+   exec (@cmd)
+```
+### 2.3 主键字段名称及字段类型
+```mysql
+SELECT TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE TABLE_NAME<>'dtproperties'
+
+EXEC sp_pkeys @table_name='表名'
+
+select o.name as 表名,c.name as 字段名,k.colid as 字段序号,k.keyno as 索引顺序,t.name as 类型
+from sysindexes i
+join sysindexkeys k on i.id = k.id and i.indid = k.indid
+join sysobjects o on i.id = o.id
+join syscolumns c on i.id=c.id and k.colid = c.colid
+join systypes t on c.xusertype=t.xusertype
+where o.xtype = 'U' and o.name='要查询的表名'
+and exists(select 1 from sysobjects where xtype = 'PK' and parent_obj=i.id and name = i.name)
+order by o.name,k.colid
+
+-- 以上就是关于如何修改MySql数据表的字段类型，默认值和增加新的字段。
+```
+### 2.4 dual表
+```mysql
+mysql> select 4*4 from dual;
++-----+
+| 4*4 |
++-----+
+|  16 |
++-----+
+1 row in set (0.07 sec)
+mysql> select 4*4;
++-----+
+| 4*4 |
++-----+
+|  16 |
++-----+
+1 row in set (0.00 sec)
+mysql> select * from dual;
+ERROR 1096 (HY000): No tables used
+-- Oracle用法
+sys@ORCL> select * from dual;
+D
+-
+X
+sys@ORCL> select 4*4;
+select 4*4
+*
+ERROR at line 1:
+ORA-00923: FROM keyword not found where expected
+sys@ORCL> select 4*4 from dual;
+
+4*4
+--
+16
+```
+
+### 2.5 MySQL函数
+
+```mysql
+mysql> select concat("oracle","mysql") from dual;
++--------------------------+
+| concat("oracle","mysql") |
++--------------------------+
+| oraclemysql              |
++--------------------------+
+1 row in set (0.00 sec) 
+mysql> select cast(232432432 as  char) from dual;
++--------------------------+
+| cast(232432432 as  char) |
++--------------------------+
+| 232432432                |
++--------------------------+
+1 row in set (0.00 sec)
+mysql>
+mysql> select now(6);     
++----------------------------+
+| now(6)                     |
++----------------------------+
+| 2018-03-11 17:10:53.982080 |
++----------------------------+
+1 row in set (0.00 sec)
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-03-11 17:11:45 |
++---------------------+
+1 row in set (0.00 sec)
+mysql>  select now(6);
++----------------------------+
+| now(6)                     |
++----------------------------+
+| 2018-03-11 17:15:00.301739 |
++----------------------------+
+1 row in set (0.00 sec)
+mysql>  select current_timestamp(6);
++----------------------------+
+| current_timestamp(6)       |
++----------------------------+
+| 2018-03-11 17:15:12.392042 |
++----------------------------+
+1 row in set (0.00 sec)
+mysql> select now(),sysdate(),sleep(2),sysdate() from dual;
++---------------------+---------------------+----------+---------------------+
+| now()               | sysdate()           | sleep(2) | sysdate()           |
++---------------------+---------------------+----------+---------------------+
+| 2018-03-11 17:16:12 | 2018-03-11 17:16:12 |        0 | 2018-03-11 17:16:14 |
++---------------------+---------------------+----------+---------------------+
+1 row in set (2.00 sec)
+mysql> select sysdate(6) from dual;
++----------------------------+
+| sysdate(6)                 |
++----------------------------+
+| 2018-03-11 17:17:04.553088 |
++----------------------------+
+1 row in set (0.00 sec)
+mysql> select now(6),sysdate(6) from dual;
++----------------------------+----------------------------+
+| now(6)                     | sysdate(6)                 |
++----------------------------+----------------------------+
+| 2018-03-11 17:18:08.181805 | 2018-03-11 17:18:08.181906 |
++----------------------------+----------------------------+
+1 row in set (0.00 sec)
+mysql> select date_add(now(),interval -7 day);
++---------------------------------+
+| date_add(now(),interval -7 day) |
++---------------------------------+
+| 2018-03-04 17:18:58             |
++---------------------------------+
+1 row in set (0.00 sec)
+
+CREATE TABLE t1 ( ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP );
+```
+
+## 3. 用户管理
+
+### 3.1创建/删除用户
+
+```mysql
+CREATE USER 'username'@'host' IDENTIFIED BY 'password';
+CREATE USER 'username'@'192.168.5.9' IDENTIFIED BY 'password';
+CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
+CREATE USER 'username'@'%' IDENTIFIED BY '';
+CREATE USER 'username'@'%';
+create user 'root'@'%' identified by 'oracle';
+
+drop user 'root'@'192.168.45.52';
+```
+### 3.2 授权
+![](pictures\Image.png)
+```mysql
+GRANT privileges ON databasename.tablename TO 'username'@'host';
+GRANT SELECT,INSERT ON DBname.tablename TO 'username'@'%';
+GRANT ALL ON DBname.tablename TO 'username'@'%';
+GRANT ALL ON DBname.* TO 'username'@'%';
+GRANT ALL ON *.* TO 'username'@'%';
+GRANT ALL PRIVILEGES ON . TO 'root'@'%'  WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON . TO 'root'@'*.mysql.com'  WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON . TO 'root'@'192.168.45.0/255.255.255.0'  WITH GRANT OPTION;
+
+show privileges
+show grants for current_user;
+show grants for current_user();
+```
+注意：使用以上命令授权的用户不能用来再给其他用户授权
+如果想让该用户可以为其他用户授权，可以使用如下命令：
+
+```mysql
+GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION;
+```
+### 3.3 设置用户密码
+```mysql
+SET PASSWORD FOR 'username'@'host'=PASSWORD('newpassword');
+
+-- 如果是修改当前登录的用户的密码，使用如下命令：
+SET PASSWDORD=PASSWORD('newpassword')
+
+rename user  'system'@'192.168.45.52' to 'test'@'192.168.45.52';
+set password for 'sys'@'192.168.45.52' = password('oracle');
+set password = "oracle";       ###mysql5.7写法
+```
+
+### 3.4设置root密码
+
+```mysql
+> mysql -u root
+mysql> SET PASSWORD = PASSWORD('123456');
+```
+
+### 3.5重设其它用户的密码
+
+```mysql
+-- 方法一
+> mysql -u root -p
+mysql> use mysql;
+mysql> UPDATE user SET password=PASSWORD("new password") WHERE user='username';
+mysql> FLUSH PRIVILEGES;
+mysql> exit
+-- 方法二
+> mysql -u root -p
+mysql> use mysql; 
+mysql> SET PASSWORD FOR username=PASSWORD('new password');
+mysql> exit
+-- 方法三
+mysqladmin -u root "old password" "new password"
+mysqladmin  -uroot -p password "oracle"
+```
+## 4. 计算列
+
 ```
 root@mysql 16:31:  [mytest]> create table t4 (id int auto_increment not null,c1 int,c2 int,c3 int,primary key (id));
 Query OK, 0 rows affected (5.62 sec)
@@ -2879,106 +2559,9 @@ root@mysql 17:23:  [mytest]> show create table t8;
 +-------+----------------------------------------------------------------------------------------------------------------------------------------+
 1 row in set (0.00 sec)
 ```
-# 19. 密码有效期
-```
-root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
-+---------------------------+-------+
-| Variable_name             | Value |
-+---------------------------+-------+
-| default_password_lifetime | 0     |
-+---------------------------+-------+
-1 row in set (0.00 sec)
-```
-# 20. OS NUMA
-```
-[root@centos ~]# numactl --hardware
-available: 1 nodes (0)
-node 0 cpus: 0 1
-node 0 size: 4095 MB
-node 0 free: 2645 MB
-node distances:
-node   0
-  0:  10
-```
-# 21. innodb buffer pool hit rate
-```
-That's the Hit Rate since Uptime (Last MySQL Startup)
-There are two things you can do to get the Last 10 Minutes
-
-//METHOD #1
-Flush all Status Values, Sleep 10 min, Run Query
-FLUSH STATUS;SELECT SLEEP(600) INTO @x;SELECT round ((P2.variable_value / P1.variable_value),4),
-P2.variable_value, P1.variable_value
-FROM information_schema.GLOBAL_STATUS P1,
-information_schema.GLOBAL_STATUS P2
-WHERE P1. variable_name = 'innodb_buffer_pool_read_requests'AND P2. variable_name = 'innodb_buffer_pool_reads';
-
-//METHOD #2
-Capture innodb_buffer_pool_read_requests, innodb_buffer_pool_reads, Sleep 10 minutes, Run Query with Differences in innodb_buffer_pool_read_requests and innodb_buffer_pool_reads
-SELECT
-P1.variable_value,P2.variable_value
-INTO
-@rqs,@rds
-FROM information_schema.GLOBAL_STATUS P1,
-information_schema.GLOBAL_STATUS P2
-WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
-SELECT SLEEP(600) INTO @x;SELECT round (((P2.variable_value - @rds) / (P1.variable_value - @rqs)),4),
-P2.variable_value, P1.variable_value
-FROM information_schema.GLOBAL_STATUS P1,
-information_schema.GLOBAL_STATUS P2
-WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
-```
-# 22. 验证唯一性
+## 5. 验证唯一性
 Oracle null可以多个
 mysql  null只能一个
-# 23. 5.7.22新特性
-oracle mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-character-set=utf8  --single-transaction --master-data=2 备份，也是会发出FLUSH TABLES WITH READ LOCK 
-# 24. 防止误删数据？
-```
-根据白天大家的讨论，总结共有以下几个措施，供参考：
-1. 生产环境中，业务代码尽量不明文保存数据库连接账号密码信息；
-2. 重要的DML、DDL通过平台型工具自动实施，减少人工操作；
-3. 部署延迟复制从库，万一误删除时用于数据回档。且从库设置为read-only；
-4. 确认备份制度及时有效；
-5. 启用SQL审计功能，养成良好SQL习惯；
-6. 启用 sql_safe_updates 选项，不允许没 WHERE 条件的更新/删除；
-7. 将系统层的 rm 改为 mv；
-8. 线上不进行物理删除，改为逻辑删除（将row data标记为不可用）；
-9. 启用堡垒机，屏蔽高危SQL；
-10. 降低数据库中普通账号的权限级别；
-11. 务必开启binlog。
-```
-
-# 25. KILL会话
-
-```mysql
--- 获取当前进程ID
-mysql>select CONNECTION_ID();
-
-mysql> kill XXXX;
-
--- shell脚本
-#!/bin/bash
-mysql -u root -e "show processlist" | grep -i "Locked" >> locked_log.txt
-
-for line in `cat locked_log.txt | awk '{print $1}'`
-do 
-   echo "kill $line;" >> kill_thread_id.sql
-done
-现在kill_thread_id.sql的内容像这个样子
-
-kill 66402982;
-kill 66402983;
-kill 66402986;
-kill 66402991;
-
---- shell for循环命令
-for id in `mysqladmin processlist | grep -i locked | awk '{print $1}'`
-do
-   mysqladmin kill ${id}
-done
-;
-```
 
 
 

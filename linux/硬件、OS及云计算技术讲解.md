@@ -82,7 +82,7 @@
   - Linux--Windows
 
 ==**SharedNoting Or SharedEverything**==
-​  ![SharedNoting Or SharedEverything](D:\Git\blog\linux\pictures\SharedNothingOrSharedEverything.png)
+​  ![SharedNoting Or SharedEverything](D:\Github\blog\linux\pictures\SharedNothingOrSharedEverything.png)
 
 > oracle RAC 物理 逻辑集群
 >
