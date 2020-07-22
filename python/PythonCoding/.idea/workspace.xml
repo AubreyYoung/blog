@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d856d6e7-5787-4483-bb22-0b6d6f57c045" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../mysql/MySQL数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../mysql/MySQL数据库检查.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/IMPDP_EXPDP样例.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/IMPDP_EXPDP样例.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle Goldengate数据库复制与容灾实施.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle Goldengate数据库复制与容灾实施.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,6 +44,8 @@
       <workItem from="1594169895066" duration="232000" />
       <workItem from="1594173925196" duration="1080000" />
       <workItem from="1594175020773" duration="595000" />
+      <workItem from="1595320170063" duration="523000" />
+      <workItem from="1595320706991" duration="1050000" />
     </task>
     <servers />
   </component>
@@ -48,9 +53,9 @@
     <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="184" y="8" key="SettingsEditor" timestamp="1594175614211">
+    <state x="184" y="8" key="SettingsEditor" timestamp="1595320739281">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="184" y="8" key="SettingsEditor/0.0.1366.728/1366.0.1440.860@0.0.1366.728" timestamp="1594175614211" />
+    <state x="184" y="8" key="SettingsEditor/0.0.1366.728/1366.0.1440.860@0.0.1366.728" timestamp="1595320739281" />
   </component>
 </project>

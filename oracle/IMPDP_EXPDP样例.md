@@ -1,6 +1,6 @@
 # IMPDP/EXPDP样例
 
-## 1. 导出导入dblink
+# 1. 导出导入dblink
 
 ```sh
 # 只导出导入dblink
@@ -14,7 +14,7 @@ expdp dumpfile=dblink.dmp directory=test schemas=user1,... include=db_link useri
 expdp dumpfile=dblink.dmp directory=test full=y include=db_link:"IN (select db_link from dba_db_links where owner='PUBLIC')" userid=\"/ as sysdba\"
 ```
 
-## 2. 数据泵处理大量分区
+# 2. 数据泵处理大量分区
 
 数据泵在处理大量分区时确实存在很多问题，特别是11204以下的版本存在一些BUG。
 可以做如下尝试：
@@ -24,7 +24,7 @@ expdp dumpfile=dblink.dmp directory=test full=y include=db_link:"IN (select db_l
 - 尝试exp/imp
 - 将metadata和dataonly分开
 
-## 3. EXPDP命令示例
+# 3. EXPDP命令示例
 ```plsql
 -- 导出一张表，例：
 expdp system/oracle directory=my_dir dumpfile=expdp.dmp   logfile=expdp.log tables=scott.emp
@@ -57,7 +57,7 @@ expdp system/oracle directory=my_dir dumpfile=expdp.dmp   logfile=expdp.log sche
 expdp system/oracle directory=my_dir dumpfile=expdp.dmp   logfile=expdp.log schemas=scott exclude=index
 ```
 
-## 4. EXPDP常用参数
+# 4. EXPDP常用参数
 
 ```sh
 attach=[schema_name.]job_name
@@ -129,7 +129,7 @@ cluster=[yes|no]
 说明：default:yes。Utilize cluster resources and distribute workers across the Oracle RAC。需要特别注意的是，当处于多节点环境下时，若导出目录不在共享存储上，不添加cluster=no参数将会报ORA-31693等错误，原因是其他节点对导出目录无权限。
 ```
 
-## 5. IMPDP导入注意事项
+# 5. IMPDP导入注意事项
 
 **注意事项：**
 
@@ -138,7 +138,7 @@ cluster=[yes|no]
 3. 导入时应确认dmp文件和目标数据库的tablespace、schema是否对应
 4. 导入dmp文件时，应确定dmp文件导出时的命令，以便顺利导入数据
 
-## 6. 确认DMP导出命令
+# 6. 确认DMP导出命令
 
 拿到一个dmp文件，如果忘记了导出命令，可以通过以下方法确认(非官方，生产数据勿使用)：
 
@@ -174,7 +174,7 @@ RTABLES  -----对象
 strings test.dmp | grep CLIENT_COMMAND
 ```
 
-## 7.  IMPDP命令示例
+# 7.  IMPDP命令示例
 
 ```plsql
 -- 导入dmp文件中的所有数据，例：
@@ -224,7 +224,7 @@ impdp system/oracle directory=my_dir dumpfile=expdp.dmp   logfile=impdp.log tran
 impdp system/oracle directory=my_dir dumpfile=expdp.dmp   logfile=impdp.log sqlfile=import.sql
 ```
 
-## 8. IMPDP参数说明
+# 8. IMPDP参数说明
 
 ```sh
 attach=[schema_name.]job_name
@@ -306,7 +306,7 @@ TABLE_EXISTS_ACTION=[SKIP | APPEND | TRUNCATE | REPLACE]
 说明：default:skip(if content=data_only is specified,then the default is append)
 ```
 
-## 9. 交互模式
+# 9. 交互模式
 
 进入交互可以操作导入导出作业。
 
@@ -317,9 +317,9 @@ expdp attach=jobname或impdp attach=jobname
 查看导入导出日志可以看到jobname，也可以通过查询dba_datapump_jobs找到jobname。
 ```
 
-## 10. 报错总结
+# 10. 报错总结
 
-### 10.1 系统目录未建立报错：
+## 10.1 目录未建立
 
 ```
 ORA-39002: invalid operation
@@ -329,14 +329,14 @@ ORA-06512: at "SYS.UTL_FILE", line 536
 ORA-29283: invalid file operation
 ```
 
-### 10.2 impdp导入exp导出的dmp文件报错：
+## 10.2 dmp文件报错
 
 ```
 ORA-39000: bad dump file specification
 ORA-39143: dump file "/u01/20161031/bjh02.dmp" may be an original export dump file
 ```
 
-### 10.3 版本不一致
+## 10.3 版本不一致
 
 如果导出的数据库版本比导入的数据版本高，需要在导出时加上参数version=要导入的数据库版本。否则报错：
 
@@ -347,7 +347,7 @@ ORA-31640: unable to open dump file "/home/oracle/EXPDP20161024_1.DMP" for read
 ORA-27037: unable to obtain file status
 ```
 
-### 10.4 导出用户元数据的sqlfile命令
+## 10.4 导出用户元数据
 
 文末再附加一条导出用户元数据的sqlfile命令，这个是之前一个朋友问我的，因为之前做的db2的工作，最近才开始和oracle打交道，数据泵了解的很少，所以被问到这块的时候犹豫了片刻，第一个想到的自然是使用oracle自带的数据泵工具expdp：
 
@@ -371,5 +371,6 @@ Write all the SQL DDL to a specified file.
 
 将所有的 SQL DDL 写入指定的文件。
 
+# 11.南非迁移问题总结
 
-
+ 

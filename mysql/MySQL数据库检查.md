@@ -69,9 +69,10 @@ select * from performance_schema.threads;  -- 不影响性能，可以查看后�
 
 # 二、MySQL数据库管理
 
-## 1.  免密码登录
+## 1.  忘记密码修改
 
 ```mysql
+# 免密码登录
 mysqld_safe  --skip-grant-tables --user=mysql &  
 ```
 
@@ -104,7 +105,7 @@ mysqlbinlog --no-defaults --start-position=690271 mysql-bin.000214 |more
 mysqlbinlog -v -v --base64-output=DECODE-ROWS mysql-bin.000003
 ```
 
-## 4. MySQL版本升级
+## 4.  5.7版本升级
 
 ```mysql
 -- 软连接重建
@@ -2559,7 +2560,7 @@ root@mysql 17:23:  [mytest]> show create table t8;
 +-------+----------------------------------------------------------------------------------------------------------------------------------------+
 1 row in set (0.00 sec)
 ```
-## 5. 验证唯一性
+## 5. NULL唯一性
 Oracle null可以多个
 mysql  null只能一个
 
