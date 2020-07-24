@@ -28,26 +28,15 @@ except for login file.
 --login-path=#          Read this path from the login file.
 [root@centos ~]# mysql --login-path=mysql5.7
 ```
-
-### 1.2 关闭mysq
-
-```
-mysqladmin -uroot -p shutdown
-```
-
-## 4. 表修复
+### 1.2 myisam修复
 
 ```mysql
-[root@centos sampdb]# mysqlfrm  --diagnostic   absence.frm
-# WARNING: Cannot generate character set or collation names without the --server option.
-# CAUTION: The diagnostic mode is a best-effort parse of the .frm file. As such, it may not identify all of the components of the table correctly. This is especially true for damaged files. It will also not read the default values for the columns and the resulting statement may not be syntactically correct.
-# Reading .frm file for absence.frm:
-# The .frm file is a TABLE.
+# myisamchk 
 ```
 
-## 5. KILL会话、进程管理
+## 2. KILL会话、进程管理
 
-### 5.1 查看进程
+### 2.1 查看进程
 
 ```mysql
 mysql> show  processlist;
@@ -68,7 +57,7 @@ mysql> SELECT a.trx_state,
 -- 获取当前会话进程ID
 mysql>select CONNECTION_ID();
 ```
-### 5.2 KILL会话
+### 2.2 KILL会话
 
 ```mysql
 mysql> kill XXXX;
@@ -100,9 +89,9 @@ done
 mysql>  select concat('KILL ',id,';') from information_schema.processlist where user='cms_bokong';
 ```
 
-## 6. 参数修改
+## 3. 参数修改
 
-###  6.1 密码有效期
+###  3.1 密码有效期
 ```
 root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
 +---------------------------+-------+
@@ -113,13 +102,13 @@ root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
 1 row in set (0.00 sec)
 ```
 
-### 6.2 autocommit配置
+### 3.2 autocommit配置
 
 ```dart
 mysql> select @@autocommit;
 mysql> set global autocommit=1;
 ```
-### 6.3 密码复杂设置
+### 3.3 密码复杂设置
 ```mysql
 5.7 my.cnf文件中祛除validate-password = off
 
@@ -128,13 +117,11 @@ mysql> SET GLOBAL validate_password_policy = LOW;
 mysql> alter user user() identified by '12345678';
 ```
 
-## 7. percona toolkit
+## 4. percona toolkit
 
+## 5. 用户权限管理
 
-
-## 8. 用户权限管理
-
-### 8.1 创建/删除用户
+### 5.1 创建/删除用户
 
 ```mysql
 CREATE USER 'username'@'host' IDENTIFIED BY 'password';
@@ -146,7 +133,7 @@ create user 'root'@'%' identified by 'oracle';
 
 drop user 'root'@'192.168.45.52';
 ```
-### 8.2 授权、角色
+### 5.2 授权、角色
 ![](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/Image.png)
 ```mysql
 GRANT privileges ON databasename.tablename TO 'username'@'host';
@@ -168,7 +155,7 @@ show grants for current_user();
 ```mysql
 GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION;
 ```
-### 8.3 设置用户密码
+### 5.3 设置用户密码
 ```mysql
 SET PASSWORD FOR 'username'@'host'=PASSWORD('newpassword');
 
@@ -198,10 +185,56 @@ mysql> exit
 -- 方法三
 mysqladmin -u root "old password" "new password"
 mysqladmin  -uroot -p password "oracle"
-
--- 免密码登录，忘记密码
-mysqld_safe  --skip-grant-tables --user=mysql &  
 ```
+
+## 6.mysqladmin
+
+```mysql
+mysqladmin create sampdb
+mysqladmin drop database
+mysqladmin extended-status
+mysqladmin flush-hosts
+mysqladmin flush-logs 
+mysqladmin flush-logs binary,engine,error,general,relay,slow
+mysqladmin flush-privileges
+mysqladmin flush-status
+mysqladmin flush-tables
+mysqladmin flush-threads
+mysqladmin kill id,id,.
+mysqladmin password new_password
+mysqladmin ping
+mysqladmin processlist
+mysqladmin reload 
+mysqladmin refresh    
+mysqladmin shutdown   
+mysqladmin status     
+mysqladmin start-slave
+mysqladmin stop-slave 
+mysqladmin variables  
+mysqladmin version
+
+-- 多个命令
+mysqladmin processlist status
+
+mysqladmin -uroot -pPassword@123 extended-status -r -i 1 -c 3|grep -iE 'connected|running|bytes_rece|bytes_sent'
+
+mysqladmin -uroot -pPassword@123 variables |grep -iE 'connect|log'
+-- 免密码登录，忘记密码
+mysqldadmin  --skip-grant-tables --user=mysql &  
+-- 查看mysqld进程号
+pgrep   mysqld
+```
+
+## 7. innotop
+
+```mysql
+innotop  --version
+
+```
+
+
+
+
 
 # 二、MySQL优化
 
