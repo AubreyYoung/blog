@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d856d6e7-5787-4483-bb22-0b6d6f57c045" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../mysql/MySQL.xmind" beforeDir="false" afterPath="$PROJECT_DIR$/../../mysql/MySQL.xmind" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mysql/MySQL实施工艺文档/CentOS7.X操作系统安装指导书V1.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../../mysql/MySQL实施工艺文档/CentOS7.X操作系统安装指导书V1.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mysql/MySQL实施工艺文档/Percona-Toolkit使用手册V1.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../../mysql/MySQL实施工艺文档/Percona-Toolkit使用手册V1.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mysql/MySQL实施工艺文档/新建... Microsoft Word 文档.docx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../mysql/MySQL数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../mysql/MySQL数据库检查.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../oracle/IMPDP_EXPDP样例.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/IMPDP_EXPDP样例.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle Goldengate数据库复制与容灾实施.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle Goldengate数据库复制与容灾实施.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mysql/README.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +48,7 @@
       <workItem from="1594175020773" duration="595000" />
       <workItem from="1595320170063" duration="523000" />
       <workItem from="1595320706991" duration="1050000" />
+      <workItem from="1595484659204" duration="322000" />
     </task>
     <servers />
   </component>

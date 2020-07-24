@@ -1,113 +1,12 @@
-[TOC]
-# 一、MySQL数据库巡检
 
-## 1. 查看数据库当前的进程
+# 一、MySQL数据库管理
 
-```dart
-mysql> show  processlist;
-```
+## 1.部署
 
-## 2. 查看当前的事务
-
-```bash
-#当前运行的所有事务
-mysql> SELECT * FROM information_schema.INNODB_TRX;
-#当前出现的锁
-mysql> SELECT * FROM information_schema.INNODB_LOCKs;
-#锁等待的对应关系
-mysql> SELECT * FROM information_schema.INNODB_LOCK_waits;
-```
-
-## 5. 引擎检查
-
-```bash
-show ENGINES； #检查命令
-#查看表使用的存储引擎
-show table status from db_name where name='table_name';
-#修改表的存储引擎
-alter table table_name engine=innodb;
-```
-
-## 6. 查看会话ID
-
-```
-mysql>  select connection_id();
-
-mysql> SELECT a.trx_state, 
-          b.event_name, 
-          a.trx_started, 
-          b.timer_wait / 1000000000000 timer_wait, 
-          a.trx_mysql_thread_id        blocking_trx_id, 
-          b.sql_text 
-   FROM   information_schema.innodb_trx a, 
-          performance_schema.events_statements_current b, 
-          performance_schema.threads c 
-   WHERE  a.trx_mysql_thread_id = c.processlist_id 
-          AND b.thread_id = c.thread_id; 
-```
-
-## 7. 常用系统表
+### 1.1 版本升级
 
 ```mysql
--- 查看用户
-select * from mysql.user limit 1;
--- 查看数据库
-select * from mysql.db limit 1;
--- 查看表权限
-select * from mysql.tables_priv limit 1;
--- 查看列权限
-select * from mysql.columns_priv limit 1;
--- 查看线程
-select  * from INFORMATION_SCHEMA.PROCESSLIST;
-show processlist 
-show full processlist     -- 显示全部SQL
-mysqladmin  processlist
-select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
-```
-
-
-
-# 二、MySQL数据库管理
-
-## 1.  忘记密码修改
-
-```mysql
-# 免密码登录
-mysqld_safe  --skip-grant-tables --user=mysql &  
-```
-
-## 2. mysql密码复杂设置
-```mysql
-5.7 my.cnf文件中祛除validate-password = off
-
--- 修改MySQL密码检查策略
-mysql> SET GLOBAL validate_password_policy = LOW;
-mysql> alter user user() identified by '12345678';
-```
-
-##  3. binlog 日志
-
-```mysql
--- 基于时间查看 binlog 日志
-mysqlbinlog  --no-defaults --start-datetime="2016-10-31 23:08:03" mysql-bin.000214 |more
--- 基于位置查看 binlog 日志
-mysqlbinlog --no-defaults --start-position=690271 mysql-bin.000214 |more
-```
-
-**mysqlbinlog命令查看binglog_format=row的日志**
-
-在配置文件中配置有`binglog_format=row`的数据库产生的 binglog 日志是不能以正常的`mysqlbinlog logfile`的方式打开的, 默认情况下只能看到一些经过base-64编码的信息
-
-- 从MySQL 5.1.28开始，mysqlbinlog多了个参数–verbose(或-v)，将改动生成带注释的语句，如果使用两次这个参数(如-v -v)，会生成字段的类型、长度、是否为null等属性信息
-- 加–base64-output=DECODE-ROWS参数还可以去掉BINLOG开头的信息
-
-```
-mysqlbinlog -v -v --base64-output=DECODE-ROWS mysql-bin.000003
-```
-
-## 4.  5.7版本升级
-
-```mysql
+-- 5.7版本升级
 -- 软连接重建
 mysql_upgrade -s     ## 只升级系统表
 [root@centos ~]# mysql_config_editor remove -G mysql5.7
@@ -130,7 +29,13 @@ except for login file.
 [root@centos ~]# mysql --login-path=mysql5.7
 ```
 
-## 5. 表修复
+### 1.2 关闭mysq
+
+```
+mysqladmin -uroot -p shutdown
+```
+
+## 4. 表修复
 
 ```mysql
 [root@centos sampdb]# mysqlfrm  --diagnostic   absence.frm
@@ -140,23 +45,32 @@ except for login file.
 # The .frm file is a TABLE.
 ```
 
-## 6.  密码有效期
-```
-root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
-+---------------------------+-------+
-| Variable_name             | Value |
-+---------------------------+-------+
-| default_password_lifetime | 0     |
-+---------------------------+-------+
-1 row in set (0.00 sec)
-```
+## 5. KILL会话、进程管理
 
-## 7. KILL会话
+### 5.1 查看进程
 
 ```mysql
--- 获取当前进程ID
-mysql>select CONNECTION_ID();
+mysql> show  processlist;
 
+-- 查询会话
+mysql> SELECT a.trx_state, 
+          b.event_name, 
+          a.trx_started, 
+          b.timer_wait / 1000000000000 timer_wait, 
+          a.trx_mysql_thread_id        blocking_trx_id, 
+          b.sql_text 
+   FROM   information_schema.innodb_trx a, 
+          performance_schema.events_statements_current b, 
+          performance_schema.threads c 
+   WHERE  a.trx_mysql_thread_id = c.processlist_id 
+          AND b.thread_id = c.thread_id; 
+
+-- 获取当前会话进程ID
+mysql>select CONNECTION_ID();
+```
+### 5.2 KILL会话
+
+```mysql
 mysql> kill XXXX;
 
 -- shell脚本
@@ -186,18 +100,133 @@ done
 mysql>  select concat('KILL ',id,';') from information_schema.processlist where user='cms_bokong';
 ```
 
-## 8. autocommit配置
+## 6. 参数修改
+
+###  6.1 密码有效期
+```
+root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
++---------------------------+-------+
+| Variable_name             | Value |
++---------------------------+-------+
+| default_password_lifetime | 0     |
++---------------------------+-------+
+1 row in set (0.00 sec)
+```
+
+### 6.2 autocommit配置
 
 ```dart
 mysql> select @@autocommit;
 mysql> set global autocommit=1;
 ```
+### 6.3 密码复杂设置
+```mysql
+5.7 my.cnf文件中祛除validate-password = off
+
+-- 修改MySQL密码检查策略
+mysql> SET GLOBAL validate_password_policy = LOW;
+mysql> alter user user() identified by '12345678';
+```
+
+## 7. percona toolkit
 
 
 
-# 三、MySQL优化
+## 8. 用户权限管理
 
-## 1. OS NUMA
+### 8.1 创建/删除用户
+
+```mysql
+CREATE USER 'username'@'host' IDENTIFIED BY 'password';
+CREATE USER 'username'@'192.168.5.9' IDENTIFIED BY 'password';
+CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
+CREATE USER 'username'@'%' IDENTIFIED BY '';
+CREATE USER 'username'@'%';
+create user 'root'@'%' identified by 'oracle';
+
+drop user 'root'@'192.168.45.52';
+```
+### 8.2 授权、角色
+![](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/Image.png)
+```mysql
+GRANT privileges ON databasename.tablename TO 'username'@'host';
+GRANT SELECT,INSERT ON DBname.tablename TO 'username'@'%';
+GRANT ALL ON DBname.tablename TO 'username'@'%';
+GRANT ALL ON DBname.* TO 'username'@'%';
+GRANT ALL ON *.* TO 'username'@'%';
+GRANT ALL PRIVILEGES ON . TO 'root'@'%'  WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON . TO 'root'@'*.mysql.com'  WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON . TO 'root'@'192.168.45.0/255.255.255.0'  WITH GRANT OPTION;
+
+show privileges
+show grants for current_user;
+show grants for current_user();
+```
+注意：使用以上命令授权的用户不能用来再给其他用户授权
+如果想让该用户可以为其他用户授权，可以使用如下命令：
+
+```mysql
+GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION;
+```
+### 8.3 设置用户密码
+```mysql
+SET PASSWORD FOR 'username'@'host'=PASSWORD('newpassword');
+
+-- 如果是修改当前登录的用户的密码，使用如下命令：
+SET PASSWDORD=PASSWORD('newpassword')
+
+rename user  'system'@'192.168.45.52' to 'test'@'192.168.45.52';
+set password for 'sys'@'192.168.45.52' = password('oracle');
+set password = "oracle";       ###mysql5.7写法
+
+-- 设置root密码
+mysql> mysql -u root
+mysql> SET PASSWORD = PASSWORD('123456');
+
+-- 重设其它用户的密码
+-- 方法一
+> mysql -u root -p
+mysql> use mysql;
+mysql> UPDATE user SET password=PASSWORD("new password") WHERE user='username';
+mysql> FLUSH PRIVILEGES;
+mysql> exit
+-- 方法二
+> mysql -u root -p
+mysql> use mysql; 
+mysql> SET PASSWORD FOR username=PASSWORD('new password');
+mysql> exit
+-- 方法三
+mysqladmin -u root "old password" "new password"
+mysqladmin  -uroot -p password "oracle"
+
+-- 免密码登录，忘记密码
+mysqld_safe  --skip-grant-tables --user=mysql &  
+```
+
+# 二、MySQL优化
+
+## 1.  性能优化原理
+
+**什么影响了性能?**
+
+- 数据库设计对性能的影响
+
+  - 过分的反范式化为表建立太多的列
+
+  - 过分的范式化造成太多的表关联
+
+  - 在OLTP环境中使用不切当的分区表
+
+  - 使用外键保证数据的完整性
+
+- 性能优化顺序
+  - 数据库结构设计和SQL语句
+  - 数据库存储引擎的选择和参数配置
+  - 系统选择及优化
+  - 硬件升级
+
+### 1.1 OS NUMA
+
 ```
 [root@centos ~]# numactl --hardware
 available: 1 nodes (0)
@@ -208,8 +237,88 @@ node distances:
 node   0
   0:  10
 ```
+## 2. 数据字典
 
-## 2. 事务
+### 2.1 mysql
+
+```mysql
+-- 查看用户
+select * from mysql.user limit 1;
+-- 查看数据库
+select * from mysql.db limit 1;
+-- 查看表权限
+select * from mysql.tables_priv limit 1;
+-- 查看列权限
+select * from mysql.columns_priv limit 1;
+-- master信息
+mysql.slave_master_info
+-- replay相关信息
+mysql.slave_relay_log_info
+
+
+-- 查看线程
+select  * from INFORMATION_SCHEMA.PROCESSLIST;
+
+
+show processlist 
+show full processlist     -- 显示全部SQL
+mysqladmin  processlist
+select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
+```
+
+## 3. 存储引擎
+
+```bash
+show ENGINES； #检查命令
+#查看表使用的存储引擎
+show table status from db_name where name='table_name';
+#修改表的存储引擎
+alter table table_name engine=innodb;
+```
+
+### 3.1. innodb buffer pool hit rate
+```
+That's the Hit Rate since Uptime (Last MySQL Startup)
+There are two things you can do to get the Last 10 Minutes
+
+//METHOD #1
+Flush all Status Values, Sleep 10 min, Run Query
+FLUSH STATUS;SELECT SLEEP(600) INTO @x;SELECT round ((P2.variable_value / P1.variable_value),4),
+P2.variable_value, P1.variable_value
+FROM information_schema.GLOBAL_STATUS P1,
+information_schema.GLOBAL_STATUS P2
+WHERE P1. variable_name = 'innodb_buffer_pool_read_requests'AND P2. variable_name = 'innodb_buffer_pool_reads';
+
+//METHOD #2
+Capture innodb_buffer_pool_read_requests, innodb_buffer_pool_reads, Sleep 10 minutes, Run Query with Differences in innodb_buffer_pool_read_requests and innodb_buffer_pool_reads
+SELECT
+P1.variable_value,P2.variable_value
+INTO
+@rqs,@rds
+FROM information_schema.GLOBAL_STATUS P1,
+information_schema.GLOBAL_STATUS P2
+WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
+SELECT SLEEP(600) INTO @x;SELECT round (((P2.variable_value - @rds) / (P1.variable_value - @rqs)),4),
+P2.variable_value, P1.variable_value
+FROM information_schema.GLOBAL_STATUS P1,
+information_schema.GLOBAL_STATUS P2
+WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
+```
+
+## 4. 事务
+
+### 4.1 查看当前的事务
+
+```bash
+#当前运行的所有事务
+mysql> SELECT * FROM information_schema.INNODB_TRX;
+#当前出现的锁
+mysql> SELECT * FROM information_schema.INNODB_LOCKs;
+#锁等待的对应关系
+mysql> SELECT * FROM information_schema.INNODB_LOCK_waits;
+```
+
+### 4.2 锁
 
 ```mysql
 (root@localhost) [employees]> show engine innodb mutex;
@@ -330,6 +439,7 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 | Binlog_stmt_cache_use      | 0     |
 +----------------------------+-------+
 4 rows in set (0.00 sec)
+```
 
 
 (root@localhost) [information_schema]> show variables like 'max_heap%';
@@ -458,7 +568,7 @@ SQL> show variables like '%iso%';
 ![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B24%5D.png)
 ![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B25%5D.png)
 
-```mysql
+​```mysql
 (root@localhost) [(none)]> show variables like 'binlog_format';
 +---------------+-------+
 | Variable_name | Value |
@@ -1341,7 +1451,9 @@ mysql> show slave hosts;
 1 row in set (0.00 sec)
 ```
 
-## 3. MySQL解释计划
+## 5. 优化器
+
+### 5.1 解释计划
 
 ```mysql
 mysql> select @@gtid_mode;
@@ -1519,104 +1631,7 @@ mysql> explain FORMAT = JSON select * from employees where emp_no = 23344;
 
 ![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B3%5D.png)
 
-
-12. mysqlslap
-
-![](MySQL常用语句.assets/Image [11].png)
-
-![](MySQL常用语句.assets/Image [12].png)
-
-![](MySQL常用语句.assets/Image [13].png)
-
-```mysql
-# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest;
-
-
-
-# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest --only-print|more
-
-DROP SCHEMA IF EXISTS `sbtest`;
-
-CREATE SCHEMA `sbtest`;
-
-use sbtest;
-
-set default_storage_engine=`myisam`;
-
-CREATE TABLE `t1` (id serial,intcol1 INT(32) ,intcol2 INT(32) ,intcol3 INT(32) ,intcol4 INT(32) ,intcol5 INT(32) ,charcol1 VARCHAR(128),charcol2 VARCHAR(128
-
-),charcol3 VARCHAR(128),charcol4 VARCHAR(128),charcol5 VARCHAR(128));
-
-INSERT INTO t1 VALUES (NULL,1804289383,846930886,1681692777,1714636915,1957747793,'vmC9127qJNm06sGB8R92q2j7vTiiITRDGXM9ZLzkdekbWtmXKwZ2qG1llkRw5m9DHOFilEREk3q7oce8O3BEJC0woJsm6uzFAEynLH2xCsw1KQ1lT4zg9rdxBLb97R','GHZ65mNzkSrYT3zWoSbg9cNePQr1bzSk81qDgE4Oanw3rnPfGsBHSbnu1evTdFDe83ro9w4jjteQg4yoo9xHck3WNqzs54W5zEm92ikdRF48B2oz3m8gMBAl11Wy50','w46i58Giekxik0cYzfA8BZBLADEg3JhzGfZDoqvQQk0Akcic7lcJInYSsf
-```
-
-## 4.  性能优化
-
-**什么影响了性能?**
-
-- 数据库设计对性能的影响
-
-  - 过分的反范式化为表建立太多的列
-
-  - 过分的范式化造成太多的表关联
-
-  - 在OLTP环境中使用不切当的分区表
-
-  - 使用外键保证数据的完整性
-
-- 性能优化顺序
-  - 数据库结构设计和SQL语句
-  - 数据库存储引擎的选择和参数配置
-  - 系统选择及优化
-  - 硬件升级
-
-## 5. innodb buffer pool hit rate
-```
-That's the Hit Rate since Uptime (Last MySQL Startup)
-There are two things you can do to get the Last 10 Minutes
-
-//METHOD #1
-Flush all Status Values, Sleep 10 min, Run Query
-FLUSH STATUS;SELECT SLEEP(600) INTO @x;SELECT round ((P2.variable_value / P1.variable_value),4),
-P2.variable_value, P1.variable_value
-FROM information_schema.GLOBAL_STATUS P1,
-information_schema.GLOBAL_STATUS P2
-WHERE P1. variable_name = 'innodb_buffer_pool_read_requests'AND P2. variable_name = 'innodb_buffer_pool_reads';
-
-//METHOD #2
-Capture innodb_buffer_pool_read_requests, innodb_buffer_pool_reads, Sleep 10 minutes, Run Query with Differences in innodb_buffer_pool_read_requests and innodb_buffer_pool_reads
-SELECT
-P1.variable_value,P2.variable_value
-INTO
-@rqs,@rds
-FROM information_schema.GLOBAL_STATUS P1,
-information_schema.GLOBAL_STATUS P2
-WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
-SELECT SLEEP(600) INTO @x;SELECT round (((P2.variable_value - @rds) / (P1.variable_value - @rqs)),4),
-P2.variable_value, P1.variable_value
-FROM information_schema.GLOBAL_STATUS P1,
-information_schema.GLOBAL_STATUS P2
-WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
-```
-
-## 6.  慢SQL日志
-
-```mysql
-# mysqldumpslow /data/slow.log
-
-Reading mysql slow query log from /data/slow.log
-Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=17.0 (17), root[root]@[192.168.45.1]
-  SELECT STATE AS Status, ROUND(SUM(DURATION),N) AS Duration, CONCAT(ROUND(SUM(DURATION)/N.N*N,N), 'S') AS Percentage FROM INFORMATION_SCHEMA.PROFILING WHERE QUERY_ID=N GROUP BY SEQ, STATE ORDER BY SEQ
-Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
-  bin/mysqld, Version: N.N.N-log (MySQL Community Server (GPL)). started with:
-  
--- 修改slow_log表存储引擎 
-set global slow_query_log=0;
-alter table mysql.slow_log engine = myisam;
-set global slow_query_log=1;
-```
-
-##  7. 统计信息
+###  5.2 统计信息
 
 ```
 use sys
@@ -1824,7 +1839,30 @@ possible_keys: idx_salary
 
 ```
 
-## 8. sysbench
+### 5.3 hint
+
+### 5.4 并行
+
+## 6.  慢SQL日志
+
+```mysql
+# mysqldumpslow /data/slow.log
+
+Reading mysql slow query log from /data/slow.log
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=17.0 (17), root[root]@[192.168.45.1]
+  SELECT STATE AS Status, ROUND(SUM(DURATION),N) AS Duration, CONCAT(ROUND(SUM(DURATION)/N.N*N,N), 'S') AS Percentage FROM INFORMATION_SCHEMA.PROFILING WHERE QUERY_ID=N GROUP BY SEQ, STATE ORDER BY SEQ
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  bin/mysqld, Version: N.N.N-log (MySQL Community Server (GPL)). started with:
+  
+-- 修改slow_log表存储引擎 
+set global slow_query_log=0;
+alter table mysql.slow_log engine = myisam;
+set global slow_query_log=1;
+```
+
+## 7. 基准测试
+
+### 7.1 sysbench
 
 [sysbench]: https://Git.com/akopytov/sysbench#linux	"sysbench github"
 
@@ -1866,11 +1904,64 @@ execution time (avg/stddev):   9.9934/0.00
 # sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 run
 ```
 
+### 7.2 mysqlslap
+
+![](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/Image%20%5B11%5D.png)
+
+![](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/Image%20%5B12%5D.png)
+
+![](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/Image%20%5B13%5D.png)
+
+```mysql
+# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest;
 
 
-# 四、MySQL备份容灾
 
-## 1. 需备份二进制日志
+# mysqlslap --concurrency=1,50,100,200 --iterations=3 --number-int-cols=5 --number-char-cols=5 --auto-generate-sql --auto-generate-sql-add-autoincrement --engine=myisam,innodb --number-of-queries=10 --create-schema=sbtest --only-print|more
+
+DROP SCHEMA IF EXISTS `sbtest`;
+
+CREATE SCHEMA `sbtest`;
+
+use sbtest;
+
+set default_storage_engine=`myisam`;
+
+CREATE TABLE `t1` (id serial,intcol1 INT(32) ,intcol2 INT(32) ,intcol3 INT(32) ,intcol4 INT(32) ,intcol5 INT(32) ,charcol1 VARCHAR(128),charcol2 VARCHAR(128
+
+),charcol3 VARCHAR(128),charcol4 VARCHAR(128),charcol5 VARCHAR(128));
+
+INSERT INTO t1 VALUES (NULL,1804289383,846930886,1681692777,1714636915,1957747793,'vmC9127qJNm06sGB8R92q2j7vTiiITRDGXM9ZLzkdekbWtmXKwZ2qG1llkRw5m9DHOFilEREk3q7oce8O3BEJC0woJsm6uzFAEynLH2xCsw1KQ1lT4zg9rdxBLb97R','GHZ65mNzkSrYT3zWoSbg9cNePQr1bzSk81qDgE4Oanw3rnPfGsBHSbnu1evTdFDe83ro9w4jjteQg4yoo9xHck3WNqzs54W5zEm92ikdRF48B2oz3m8gMBAl11Wy50','w46i58Giekxik0cYzfA8BZBLADEg3JhzGfZDoqvQQk0Akcic7lcJInYSsf
+```
+
+
+
+# 三、MySQL备份容灾
+
+##  1. binlog 日志
+
+```mysql
+-- 基于时间查看 binlog 日志
+mysqlbinlog  --no-defaults --start-datetime="2016-10-31 23:08:03" mysql-bin.000214 |more
+-- 基于位置查看 binlog 日志
+mysqlbinlog --no-defaults --start-position=690271 mysql-bin.000214 |more
+```
+
+**mysqlbinlog命令查看binglog_format=row的日志**
+
+在配置文件中配置有`binglog_format=row`的数据库产生的 binglog 日志是不能以正常的`mysqlbinlog logfile`的方式打开的, 默认情况下只能看到一些经过base-64编码的信息
+
+- 从MySQL 5.1.28开始，mysqlbinlog多了个参数–verbose(或-v)，将改动生成带注释的语句，如果使用两次这个参数(如-v -v)，会生成字段的类型、长度、是否为null等属性信息
+- 加–base64-output=DECODE-ROWS参数还可以去掉BINLOG开头的信息
+
+```
+mysqlbinlog -v -v --base64-output=DECODE-ROWS mysql-bin.000003
+```
+
+
+
+## 2. 复制
+###  2.1 复制需备份二进制日志
 
 ```
 mysql> show master status;
@@ -1900,8 +1991,7 @@ mysql> show master status;
 1 row in set (0.00 sec)
 start slave for channel ch1
 ```
-
-## 2. 针对某个DB复制
+### 2.2 针对某个DB复制
 
 ```
 --replicate-do-db=db_name
@@ -1952,14 +2042,11 @@ Checking slave delay (seconds behind master)                         [pass]
  mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak$(date +%F%T).sql.gz
  mysqldump -uroot -poracle -B -A --events -x |gzip>/app/mysqlbak`date +%F%T`.sql.gz
  mysqldump -uroot -poracle -B  --events -x  wordpress|gzip>/app/mysqlbak`date +%F%T`.sql.gz
+ 
+-- 5.7.22新特性
+mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-character-set=utf8  --single-transaction --master-data=2 备份，也是会发出FLUSH TABLES WITH READ LOCK 
 ```
-
-
-
-## 4. 5.7.22新特性
-
-oracle mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-character-set=utf8  --single-transaction --master-data=2 备份，也是会发出FLUSH TABLES WITH READ LOCK 
-## 5. 防止误删数据？
+## 4. 防止误删数据？
 ```
 根据白天大家的讨论，总结共有以下几个措施，供参考：
 1. 生产环境中，业务代码尽量不明文保存数据库连接账号密码信息；
@@ -1975,9 +2062,11 @@ oracle mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --de
 11. 务必开启binlog。
 ```
 
+## 5. XtraBackup
 
 
-# 五、MySQL数据库开发
+
+# 四、MySQL数据库开发
 
 ## 1. 数据库操作
 
@@ -1996,12 +2085,12 @@ show databases;
 show create database mytest;
 -- 修改字符集
 alter database sampdb character set utf8 collate utf8_general_ci;
--- 关闭mysql
-mysqladmin -uroot -p shutdown
 ```
-## 2. 表操作
+## 2. 分区表
 
-### 2.1 常用操作
+## 3. 表操作
+
+### 3.1 常用操作
 
 ```mysql
 ## 如果【某表】存在就删除【某表】
@@ -2068,7 +2157,7 @@ select * from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where Constraint_Schema='test_
 ## 查询当前数据库中所有表的约束（简单）
 select * from information_schema.Table_Constraints where Constraint_Schema='test_StringEntityTest';
 ```
-### 2.2 修改主键SQL
+### 3.2 修改主键SQL
 
 ```mysql
 declare @defname varchar(100)
@@ -2094,7 +2183,7 @@ else
 select @cmd='alter table '+ @tablename+ ' ADD constraint '+ @defname +' PRIMARY KEY CLUSTERED('+@keyname+')'
    exec (@cmd)
 ```
-### 2.3 主键字段名称及字段类型
+### 3.3 字段
 ```mysql
 SELECT TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE TABLE_NAME<>'dtproperties'
@@ -2113,7 +2202,7 @@ order by o.name,k.colid
 
 -- 以上就是关于如何修改MySql数据表的字段类型，默认值和增加新的字段。
 ```
-### 2.4 dual表
+## 4. dual表
 ```mysql
 mysql> select 4*4 from dual;
 +-----+
@@ -2148,7 +2237,7 @@ sys@ORCL> select 4*4 from dual;
 16
 ```
 
-### 2.5 MySQL函数
+## 5 MySQL函数
 
 ```mysql
 mysql> select concat("oracle","mysql") from dual;
@@ -2226,80 +2315,8 @@ mysql> select date_add(now(),interval -7 day);
 CREATE TABLE t1 ( ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP );
 ```
 
-## 3. 用户管理
 
-### 3.1创建/删除用户
-
-```mysql
-CREATE USER 'username'@'host' IDENTIFIED BY 'password';
-CREATE USER 'username'@'192.168.5.9' IDENTIFIED BY 'password';
-CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
-CREATE USER 'username'@'%' IDENTIFIED BY '';
-CREATE USER 'username'@'%';
-create user 'root'@'%' identified by 'oracle';
-
-drop user 'root'@'192.168.45.52';
-```
-### 3.2 授权
-![](pictures\Image.png)
-```mysql
-GRANT privileges ON databasename.tablename TO 'username'@'host';
-GRANT SELECT,INSERT ON DBname.tablename TO 'username'@'%';
-GRANT ALL ON DBname.tablename TO 'username'@'%';
-GRANT ALL ON DBname.* TO 'username'@'%';
-GRANT ALL ON *.* TO 'username'@'%';
-GRANT ALL PRIVILEGES ON . TO 'root'@'%'  WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON . TO 'root'@'*.mysql.com'  WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON . TO 'root'@'192.168.45.0/255.255.255.0'  WITH GRANT OPTION;
-
-show privileges
-show grants for current_user;
-show grants for current_user();
-```
-注意：使用以上命令授权的用户不能用来再给其他用户授权
-如果想让该用户可以为其他用户授权，可以使用如下命令：
-
-```mysql
-GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION;
-```
-### 3.3 设置用户密码
-```mysql
-SET PASSWORD FOR 'username'@'host'=PASSWORD('newpassword');
-
--- 如果是修改当前登录的用户的密码，使用如下命令：
-SET PASSWDORD=PASSWORD('newpassword')
-
-rename user  'system'@'192.168.45.52' to 'test'@'192.168.45.52';
-set password for 'sys'@'192.168.45.52' = password('oracle');
-set password = "oracle";       ###mysql5.7写法
-```
-
-### 3.4设置root密码
-
-```mysql
-> mysql -u root
-mysql> SET PASSWORD = PASSWORD('123456');
-```
-
-### 3.5重设其它用户的密码
-
-```mysql
--- 方法一
-> mysql -u root -p
-mysql> use mysql;
-mysql> UPDATE user SET password=PASSWORD("new password") WHERE user='username';
-mysql> FLUSH PRIVILEGES;
-mysql> exit
--- 方法二
-> mysql -u root -p
-mysql> use mysql; 
-mysql> SET PASSWORD FOR username=PASSWORD('new password');
-mysql> exit
--- 方法三
-mysqladmin -u root "old password" "new password"
-mysqladmin  -uroot -p password "oracle"
-```
-## 4. 计算列
+## 6. 计算列
 
 ```
 root@mysql 16:31:  [mytest]> create table t4 (id int auto_increment not null,c1 int,c2 int,c3 int,primary key (id));
@@ -2560,7 +2577,7 @@ root@mysql 17:23:  [mytest]> show create table t8;
 +-------+----------------------------------------------------------------------------------------------------------------------------------------+
 1 row in set (0.00 sec)
 ```
-## 5. NULL唯一性
+## 7. NULL唯一性
 Oracle null可以多个
 mysql  null只能一个
 
