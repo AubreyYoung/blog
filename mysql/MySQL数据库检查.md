@@ -3,7 +3,7 @@
 
 ## 1.部署
 
-### 1.1 版本升级
+### 1.1 升级
 
 ```mysql
 -- 5.7版本升级
@@ -28,13 +28,17 @@ except for login file.
 --login-path=#          Read this path from the login file.
 [root@centos ~]# mysql --login-path=mysql5.7
 ```
-### 1.2 myisam修复
+### 1.2 降级
+
+### 1.3 安装
+
+### 1.4 myisam表修复
 
 ```mysql
 # myisamchk 
 ```
 
-## 2. KILL会话、进程管理
+## 2. 会话管理
 
 ### 2.1 查看进程
 
@@ -77,7 +81,7 @@ kill 66402983;
 kill 66402986;
 kill 66402991;
 
---- shell for循环命令
+-- shell for循环命令脚本
 for id in `mysqladmin processlist | grep -i locked | awk '{print $1}'`
 do
    mysqladmin kill ${id}
@@ -85,21 +89,19 @@ done
 ;
 
 方法二
-# 批量删除事务表中的事务
+-- 批量删除事务表中的事务脚本
 mysql>  select concat('KILL ',id,';') from information_schema.processlist where user='cms_bokong';
 ```
 
-## 3. 参数修改
+## 3. 参数修改、优化
 
-###  3.1 密码有效期
-```
-root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
-+---------------------------+-------+
-| Variable_name             | Value |
-+---------------------------+-------+
-| default_password_lifetime | 0     |
-+---------------------------+-------+
-1 row in set (0.00 sec)
+###  3.1 密码相关
+```mysql
+-- 密码有效期
+mysql >  show variables like 'default_password_lifetime';
+-- 修改MySQL密码检查策略，5.7 my.cnf文件中祛除validate-password = off
+mysql> SET GLOBAL validate_password_policy = LOW;
+mysql> alter user user() identified by '12345678';
 ```
 
 ### 3.2 autocommit配置
@@ -107,14 +109,19 @@ root@mysql 15:17:  [mytest]>  show variables like 'default_password_lifetime';
 ```dart
 mysql> select @@autocommit;
 mysql> set global autocommit=1;
+mysql> set global autocommit=0;
 ```
-### 3.3 密码复杂设置
+### 3.3 事务隔离级别
 ```mysql
-5.7 my.cnf文件中祛除validate-password = off
+mysql > select @@transaction_isolation;
++-------------------------+
+| @@transaction_isolation |
++-------------------------+
+| REPEATABLE-READ         |
++-------------------------+
 
--- 修改MySQL密码检查策略
-mysql> SET GLOBAL validate_password_policy = LOW;
-mysql> alter user user() identified by '12345678';
+-- REPEATABLE READ   READ COMMITTED   READ UNCOMMITTED   SERIALIZABLE
+mysql> set global transaction_isolation='READ COMMITTED';
 ```
 
 ## 4. percona toolkit
@@ -187,7 +194,7 @@ mysqladmin -u root "old password" "new password"
 mysqladmin  -uroot -p password "oracle"
 ```
 
-## 6.mysqladmin
+## 6. mysqladmin
 
 ```mysql
 mysqladmin create sampdb
@@ -228,19 +235,78 @@ pgrep   mysqld
 ## 7. innotop
 
 ```mysql
-innotop  --version
+innotop 
+  --askpass          Prompt for a password when connecting to MySQL
+  --[no]color   -C   Use terminal coloring (default)
+  --config      -c   Config file to read
+  --count            Number of updates before exiting
+  --delay       -d   Delay between updates in seconds
+  --help             Show this help message
+  --host        -h   Connect to host
+  --[no]inc     -i   Measure incremental differences
+  --mode        -m   Operating mode to start in
+  --nonint      -n   Non-interactive, output tab-separated fields
+  --password    -p   Password to use for connection
+  --port        -P   Port number to use for connection
+  --skipcentral -s   Skip reading the central configuration file
+  --socket      -S   MySQL socket to use for connection
+  --spark            Length of status sparkline (default 10)
+  --timestamp   -t   Print timestamp in -n mode (1: per iter; 2: per line)
+  --user        -u   User for login if not current user
+  --version          Output version information and exit
+  --write       -w   Write running configuration into home directory if no config files were loaded
+  
+[RO] Dashboard (? for help)                                                                                      localhost, 9d, 101.73 QPS, 30/2/434 con/run/cac thds, 8.0.20
 
+Switch to a different mode:
+   A  Dashboard         I  InnoDB I/O Info     Q  Query List
+   B  InnoDB Buffers    K  InnoDB Lock Waits   R  InnoDB Row Ops
+   C  Command Summary   L  Locks               S  Variables & Status
+   D  InnoDB Deadlocks  M  Replication Status  T  InnoDB Txns
+   F  InnoDB FK Err     O  Open Tables         U  User Statistics
+
+Actions:
+   d  Change refresh interval        q  Quit innotop
+   k  Kill a query's connection      r  Reverse sort order
+   n  Switch to the next connection  s  Choose sort column
+   p  Pause innotop                  x  Kill a query
+
+Other:
+ TAB  Switch to the next server group   /  Quickly filter what you see
+   !  Show license and warranty         =  Toggle aggregation
+   #  Select/create server groups       @  Select/create server connections
+   $  Edit configuration settings       \  Clear quick-filters
+Press any key to continue
 ```
-
-
-
-
 
 # 二、MySQL优化
 
 ## 1.  性能优化原理
 
-**什么影响了性能?**
+### 1.1 体系架构
+
+#### 1.1.1 MySQL体系结构
+
+![MySQL体系结构](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/mysql-architecture.png)
+
+#### 1.1.2 InnoDB体系结构
+
+![InnoDB存储引擎1](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/innodb-architecture1.png)
+![InnoDB存储引擎2](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/innodb-architecture2.png)
+
+- 后台线程
+
+  ```mysql
+  select * from performance_schema.threads where type='BACKGROUND';
+  ```
+
+- 前台线程
+
+  ```mysql
+  select * from performance_schema.threads where type='FOREGROUND';
+  ```
+
+### 1.2 什么影响了性能?
 
 - 数据库设计对性能的影响
 
@@ -258,7 +324,7 @@ innotop  --version
   - 系统选择及优化
   - 硬件升级
 
-### 1.1 OS NUMA
+### 1.3 OS NUMA
 
 ```
 [root@centos ~]# numactl --hardware
@@ -288,10 +354,8 @@ mysql.slave_master_info
 -- replay相关信息
 mysql.slave_relay_log_info
 
-
 -- 查看线程
 select  * from INFORMATION_SCHEMA.PROCESSLIST;
-
 
 show processlist 
 show full processlist     -- 显示全部SQL
@@ -299,7 +363,330 @@ mysqladmin  processlist
 select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
 ```
 
-## 3. 存储引擎
+### 2.2 information_schema
+
+```mysql
+-- information_schema.ENGINES 存储引擎信息
+mysql>select * from information_schema.ENGINES;
++--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+| ENGINE             | SUPPORT | COMMENT                                                        | TRANSACTIONS | XA   | SAVEPOINTS |
++--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+| FEDERATED          | NO      | Federated MySQL storage engine                                 | NULL         | NULL | NULL       |
+| MEMORY             | YES     | Hash based, stored in memory, useful for temporary tables      | NO           | NO   | NO         |
+| InnoDB             | DEFAULT | Supports transactions, row-level locking, and foreign keys     | YES          | YES  | YES        |
+| PERFORMANCE_SCHEMA | YES     | Performance Schema                                             | NO           | NO   | NO         |
+| MyISAM             | YES     | MyISAM storage engine                                          | NO           | NO   | NO         |
+| MRG_MYISAM         | YES     | Collection of identical MyISAM tables                          | NO           | NO   | NO         |
+| BLACKHOLE          | YES     | /dev/null storage engine (anything you write to it disappears) | NO           | NO   | NO         |
+| CSV                | YES     | CSV storage engine                                             | NO           | NO   | NO         |
+| ARCHIVE            | YES     | Archive storage engine                                         | NO           | NO   | NO         |
++--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+```
+
+### 2.3 performance_schema
+
+- Setup Tables
+
+  ```mysql
+  mysql> show tables like '%setup_%';
+  +-----------------------------------------+
+  | Tables_in_performance_schema (%setup_%) |
+  +-----------------------------------------+
+  | setup_actors                            |
+  | setup_consumers                         |
+  | setup_instruments                       |
+  | setup_objects                           |
+  | setup_threads                           |
+  +-----------------------------------------+
+  5 rows in set (0.00 sec)
+  ```
+
+- Instance Tables
+
+  ```mysql
+  mysql> show tables like '%_instances%';
+  +---------------------------------------------+
+  | Tables_in_performance_schema (%_instances%) |
+  +---------------------------------------------+
+  | cond_instances                              |
+  | file_instances                              |
+  | mutex_instances                             |
+  | prepared_statements_instances               |
+  | rwlock_instances                            |
+  | socket_instances                            |
+  +---------------------------------------------+
+  6 rows in set (0.01 sec)
+  ```
+
+- Wait Event Tables
+
+  ```mysql
+  mysql>  show tables LIKE 'events_waits%';
+  +-----------------------------------------------+
+  | Tables_in_performance_schema (events_waits%)  |
+  +-----------------------------------------------+
+  | events_waits_current                          |
+  | events_waits_history                          |
+  | events_waits_history_long                     |
+  | events_waits_summary_by_account_by_event_name |
+  | events_waits_summary_by_host_by_event_name    |
+  | events_waits_summary_by_instance              |
+  | events_waits_summary_by_thread_by_event_name  |
+  | events_waits_summary_by_user_by_event_name    |
+  | events_waits_summary_global_by_event_name     |
+  +-----------------------------------------------+
+  9 rows in set (0.00 sec)
+  ```
+
+- Stage Event Tables
+
+  ```mysql
+  mysql> show tables LIKE 'events_stages%';
+  +------------------------------------------------+
+  | Tables_in_performance_schema (events_stages%)  |
+  +------------------------------------------------+
+  | events_stages_current                          |
+  | events_stages_history                          |
+  | events_stages_history_long                     |
+  | events_stages_summary_by_account_by_event_name |
+  | events_stages_summary_by_host_by_event_name    |
+  | events_stages_summary_by_thread_by_event_name  |
+  | events_stages_summary_by_user_by_event_name    |
+  | events_stages_summary_global_by_event_name     |
+  +------------------------------------------------+
+  8 rows in set (0.00 sec)
+  ```
+
+- Statement Event Tables
+
+  ```mysql
+  mysql> show tables LIKE '%statements%';
+  +----------------------------------------------------+
+  | Tables_in_performance_schema (%statements%)        |
+  +----------------------------------------------------+
+  | events_statements_current                          |
+  | events_statements_histogram_by_digest              |
+  | events_statements_histogram_global                 |
+  | events_statements_history                          |
+  | events_statements_history_long                     |
+  | events_statements_summary_by_account_by_event_name |
+  | events_statements_summary_by_digest                |
+  | events_statements_summary_by_host_by_event_name    |
+  | events_statements_summary_by_program               |
+  | events_statements_summary_by_thread_by_event_name  |
+  | events_statements_summary_by_user_by_event_name    |
+  | events_statements_summary_global_by_event_name     |
+  | prepared_statements_instances                      |
+  +----------------------------------------------------+
+  13 rows in set (0.01 sec)
+  ```
+
+- Transaction Tables
+
+  ```mysql
+  mysql> show tables LIKE 'events_transactions%';
+  +------------------------------------------------------+
+  | Tables_in_performance_schema (events_transactions%)  |
+  +------------------------------------------------------+
+  | events_transactions_current                          |
+  | events_transactions_history                          |
+  | events_transactions_history_long                     |
+  | events_transactions_summary_by_account_by_event_name |
+  | events_transactions_summary_by_host_by_event_name    |
+  | events_transactions_summary_by_thread_by_event_name  |
+  | events_transactions_summary_by_user_by_event_name    |
+  | events_transactions_summary_global_by_event_name     |
+  +------------------------------------------------------+
+  8 rows in set (0.00 sec)
+  ```
+
+- Connection Tables
+
+  ```mysql
+  mysql> SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+         WHERE TABLE_SCHEMA = 'performance_schema'
+         AND TABLE_NAME REGEXP '_summary_by_(account|host|user)'
+         ORDER BY TABLE_NAME;
+  +------------------------------------------------------+
+  | TABLE_NAME                                           |
+  +------------------------------------------------------+
+  | events_errors_summary_by_account_by_error            |
+  | events_errors_summary_by_host_by_error               |
+  | events_errors_summary_by_user_by_error               |
+  | events_stages_summary_by_account_by_event_name       |
+  | events_stages_summary_by_host_by_event_name          |
+  | events_stages_summary_by_user_by_event_name          |
+  | events_statements_summary_by_account_by_event_name   |
+  | events_statements_summary_by_host_by_event_name      |
+  | events_statements_summary_by_user_by_event_name      |
+  | events_transactions_summary_by_account_by_event_name |
+  | events_transactions_summary_by_host_by_event_name    |
+  | events_transactions_summary_by_user_by_event_name    |
+  | events_waits_summary_by_account_by_event_name        |
+  | events_waits_summary_by_host_by_event_name           |
+  | events_waits_summary_by_user_by_event_name           |
+  | memory_summary_by_account_by_event_name              |
+  | memory_summary_by_host_by_event_name                 |
+  | memory_summary_by_user_by_event_name                 |
+  +------------------------------------------------------+
+  18 rows in set (0.12 sec)
+  ```
+
+- Connection Attribute Tables
+
+  ```mysql
+  mysql > show tables LIKE '%_connect_attrs%';
+  +-------------------------------------------------+
+  | Tables_in_performance_schema (%_connect_attrs%) |
+  +-------------------------------------------------+
+  | session_account_connect_attrs                   |
+  | session_connect_attrs                           |
+  +-------------------------------------------------+
+  2 rows in set (0.00 sec)
+  ```
+
+- User-Defined Variable Tables
+
+  ```mysql
+  mysql > show tables LIKE 'user_variables_by_thread';
+  +---------------------------------------------------------+
+  | Tables_in_performance_schema (user_variables_by_thread) |
+  +---------------------------------------------------------+
+  | user_variables_by_thread                                |
+  +---------------------------------------------------------+
+  1 row in set (0.00 sec)
+  ```
+
+- Replication Tables
+
+  ```mysql
+  mysql > show tables LIKE 'replication_%';
+  +----------------------------------------------+
+  | Tables_in_performance_schema (replication_%) |
+  +----------------------------------------------+
+  | replication_applier_configuration            |
+  | replication_applier_filters                  |
+  | replication_applier_global_filters           |
+  | replication_applier_status                   |
+  | replication_applier_status_by_coordinator    |
+  | replication_applier_status_by_worker         |
+  | replication_connection_configuration         |
+  | replication_connection_status                |
+  | replication_group_member_stats               |
+  | replication_group_members                    |
+  +----------------------------------------------+
+  10 rows in set (0.00 sec)
+  ```
+
+- NDB Cluster Tables
+
+  ```mysql
+  mysql > show tables LIKE 'ndb_%';
+  ndb_sync_pending_objects
+  ndb_sync_excluded_objects
+  ```
+
+- Lock Tables
+
+  ```mysql
+  mysql > show tables LIKE '%lock%';
+  +---------------------------------------+
+  | Tables_in_performance_schema (%lock%) |
+  +---------------------------------------+
+  | data_lock_waits                       |
+  | data_locks                            |
+  | metadata_locks                        |
+  | rwlock_instances                      |
+  | table_lock_waits_summary_by_table     |
+  +---------------------------------------+
+  5 rows in set (0.00 sec)
+  ```
+
+  **The table_handles Table**
+
+- System Variable Tables、Status Variable Tables
+
+  ```mysql
+  mysql > show tables LIKE '%variables%';
+  +--------------------------------------------+
+  | Tables_in_performance_schema (%variables%) |
+  +--------------------------------------------+
+  | global_variables                           |
+  | persisted_variables                        |
+  | session_variables                          |
+  | user_variables_by_thread                   |
+  | variables_by_thread                        |
+  | variables_info                             |
+  +--------------------------------------------+
+  6 rows in set (0.00 sec)
+  ```
+
+- Thread Pool Tables
+
+  ```mysql
+  tp_thread_group_state 
+  tp_thread_group_stats 
+  tp_thread_state 
+  ```
+
+- Clone Tables
+
+  ```mysql
+  clone_status 
+  clone_progress 
+  ```
+
+- Summary Tables
+
+- Miscellaneous Tables
+
+  ```mysql
+  host_cache 
+  keyring_keys 
+  log_status 
+  performance_timers 
+  processlist 
+  threads 
+  tls_channel_status 
+  user_defined_functions 
+  ```
+
+**示例**
+
+```mysql
+-- 哪类的SQL执行最多？
+SELECT DIGEST_TEXT,COUNT_STAR,FIRST_SEEN,LAST_SEEN FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
+-- 哪类SQL的平均响应时间最多？
+SELECT DIGEST_TEXT,AVG_TIMER_WAIT FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
+-- 哪类SQL排序记录数最多？
+SELECT DIGEST_TEXT,SUM_SORT_ROWS FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
+-- 哪类SQL扫描记录数最多？
+SELECT DIGEST_TEXT,SUM_ROWS_EXAMINED FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
+-- 哪类SQL使用临时表最多？
+SELECT DIGEST_TEXT,SUM_CREATED_TMP_TABLES,SUM_CREATED_TMP_DISK_TABLES FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
+-- 哪类SQL返回结果集最多？
+SELECT DIGEST_TEXT,SUM_ROWS_SENT FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
+-- 哪个表物理IO最多？
+SELECT file_name,event_name,SUM_NUMBER_OF_BYTES_READ,SUM_NUMBER_OF_BYTES_WRITE FROM file_summary_by_instance ORDER BY SUM_NUMBER_OF_BYTES_READ + SUM_NUMBER_OF_BYTES_WRITE DESC
+-- 哪个表逻辑IO最多？
+SELECT object_name,COUNT_READ,COUNT_WRITE,COUNT_FETCH,SUM_TIMER_WAIT FROM table_io_waits_summary_by_table ORDER BY sum_timer_wait DESC
+-- 哪个索引访问最多？
+SELECT OBJECT_NAME,INDEX_NAME,COUNT_FETCH,COUNT_INSERT,COUNT_UPDATE,COUNT_DELETE FROM table_io_waits_summary_by_index_usage ORDER BY SUM_TIMER_WAIT DESC
+-- 哪个索引从来没有用过？
+SELECT OBJECT_SCHEMA,OBJECT_NAME,INDEX_NAME FROM table_io_waits_summary_by_index_usage WHERE INDEX_NAME IS NOT NULL AND COUNT_STAR = 0 AND OBJECT_SCHEMA <> 'mysql' ORDER BY OBJECT_SCHEMA,OBJECT_NAME;
+-- 哪个等待事件消耗时间最多？
+SELECT EVENT_NAME,COUNT_STAR,SUM_TIMER_WAIT,AVG_TIMER_WAIT FROM events_waits_summary_global_by_event_name WHERE event_name != 'idle' ORDER BY SUM_TIMER_WAIT DESC
+-- 剖析某条SQL的执行情况，包括statement信息，stege信息，wait信息
+SELECT EVENT_ID,sql_text FROM events_statements_history WHERE sql_text LIKE '%count(*)%';
+-- 查看每个阶段的时间消耗
+SELECT event_id,EVENT_NAME,SOURCE,TIMER_END - TIMER_START FROM events_stages_history_long WHERE NESTING_EVENT_ID = 1553;
+-- 查看每个阶段的锁等待情况
+SELECT event_id,event_name,source,timer_wait,object_name,index_name,operation,nesting_event_id FROM events_waits_history_longWHERE nesting_event_id = 1553;
+```
+
+
+
+## 3. InnoDB
 
 ```bash
 show ENGINES； #检查命令
@@ -309,7 +696,7 @@ show table status from db_name where name='table_name';
 alter table table_name engine=innodb;
 ```
 
-### 3.1. innodb buffer pool hit rate
+### 3.1 innodb buffer pool hit rate
 ```
 That's the Hit Rate since Uptime (Last MySQL Startup)
 There are two things you can do to get the Last 10 Minutes
@@ -338,9 +725,9 @@ information_schema.GLOBAL_STATUS P2
 WHERE P1.variable_name = 'innodb_buffer_pool_read_requests'AND P2.variable_name = 'innodb_buffer_pool_reads';
 ```
 
-## 4. 事务
+### 3.2 事务
 
-### 4.1 查看当前的事务
+####  3.2.1 查看事务
 
 ```bash
 #当前运行的所有事务
@@ -351,7 +738,7 @@ mysql> SELECT * FROM information_schema.INNODB_LOCKs;
 mysql> SELECT * FROM information_schema.INNODB_LOCK_waits;
 ```
 
-### 4.2 锁
+#### 3.2.2 锁
 
 ```mysql
 (root@localhost) [employees]> show engine innodb mutex;
@@ -374,7 +761,7 @@ show processlist;
 | READ-COMMITTED |
 +----------------+
 1 row in set, 1 warning (0.00 sec)
-一个事务所作的修改对其他事务是不可见的，好似是串行执行的
+-- 一个事务所作的修改对其他事务是不可见的，好似是串行执行的
 SQL> show variables like '%autoinc%';
 +--------------------------+-------+
 | Variable_name            | Value |
@@ -1484,9 +1871,11 @@ mysql> show slave hosts;
 1 row in set (0.00 sec)
 ```
 
-## 5. 优化器
+## 4. 优化器
 
-### 5.1 解释计划
+### 4.1 索引
+
+### 4.2 解释计划
 
 ```mysql
 mysql> select @@gtid_mode;
@@ -1664,7 +2053,7 @@ mysql> explain FORMAT = JSON select * from employees where emp_no = 23344;
 
 ![](MySQL%E5%B8%B8%E7%94%A8%E8%AF%AD%E5%8F%A5.assets/Image%20%5B3%5D.png)
 
-###  5.2 统计信息
+###  4.3 统计信息
 
 ```
 use sys
@@ -1872,11 +2261,11 @@ possible_keys: idx_salary
 
 ```
 
-### 5.3 hint
+### 4.4 hint
 
-### 5.4 并行
+### 4.5 并行
 
-## 6.  慢SQL日志
+## 5.  慢SQL日志
 
 ```mysql
 # mysqldumpslow /data/slow.log
@@ -1893,9 +2282,9 @@ alter table mysql.slow_log engine = myisam;
 set global slow_query_log=1;
 ```
 
-## 7. 基准测试
+## 6. 基准测试
 
-### 7.1 sysbench
+### 6.1 sysbench
 
 [sysbench]: https://Git.com/akopytov/sysbench#linux	"sysbench github"
 
@@ -1937,7 +2326,7 @@ execution time (avg/stddev):   9.9934/0.00
 # sysbench /usr/share/sysbench/oltp_read_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password='oracle' --mysql-db=mytest --db-driver=mysql --tables=10 --table-size=1000000 --report-interval=10 --threads=128 --time=120 run
 ```
 
-### 7.2 mysqlslap
+### 6.2 mysqlslap
 
 ![](MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E6%9F%A5.assets/Image%20%5B11%5D.png)
 
@@ -1991,38 +2380,13 @@ mysqlbinlog --no-defaults --start-position=690271 mysql-bin.000214 |more
 mysqlbinlog -v -v --base64-output=DECODE-ROWS mysql-bin.000003
 ```
 
-
-
 ## 2. 复制
 ###  2.1 复制需备份二进制日志
 
 ```
-mysql> show master status;
-+------------------+----------+--------------+------------------+----------------------------------------------+
-
-| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
-| ---- | -------- | ------------ | ---------------- | ----------------- |
-|      |          |              |                  |                   |
-+------------------+----------+--------------+------------------+----------------------------------------------+
-| mysql-bin.000020 | 8533959 |      |      | 7d0e42b6-0c89-11e8-90d8-000c292c7e58:1-23949 |
-| ---------------- | ------- | ---- | ---- | -------------------------------------------- |
-|                  |         |      |      |                                              |
-+------------------+----------+--------------+------------------+----------------------------------------------+
-1 row in set (0.00 sec)
 mysql> reset master;
-Query OK, 0 rows affected (0.03 sec)
 mysql> show master status;
-+------------------+----------+--------------+------------------+------------------------------------------+
-| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
-| ---- | -------- | ------------ | ---------------- | ----------------- |
-|      |          |              |                  |                   |
-+------------------+----------+--------------+------------------+------------------------------------------+
-| mysql-bin.000001 | 1694 |      |      | 7d0e42b6-0c89-11e8-90d8-000c292c7e58:1-4 |
-| ---------------- | ---- | ---- | ---- | ---------------------------------------- |
-|                  |      |      |      |                                          |
-+------------------+----------+--------------+------------------+------------------------------------------+
-1 row in set (0.00 sec)
-start slave for channel ch1
+mysql> start slave for channel ch1
 ```
 ### 2.2 针对某个DB复制
 
@@ -2079,7 +2443,9 @@ Checking slave delay (seconds behind master)                         [pass]
 -- 5.7.22新特性
 mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-character-set=utf8  --single-transaction --master-data=2 备份，也是会发出FLUSH TABLES WITH READ LOCK 
 ```
-## 4. 防止误删数据？
+## 4. XtraBackup
+
+## 5. 防止误删数据？
 ```
 根据白天大家的讨论，总结共有以下几个措施，供参考：
 1. 生产环境中，业务代码尽量不明文保存数据库连接账号密码信息；
@@ -2094,10 +2460,6 @@ mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-c
 10. 降低数据库中普通账号的权限级别；
 11. 务必开启binlog。
 ```
-
-## 5. XtraBackup
-
-
 
 # 四、MySQL数据库开发
 
@@ -2116,12 +2478,18 @@ USE db;
 show databases;
 -- 查看创建语句
 show create database mytest;
--- 修改字符集
+-- 修改数据库字符集
 alter database sampdb character set utf8 collate utf8_general_ci;
 ```
 ## 2. 分区表
 
-## 3. 表操作
+### 2.1 分区类型
+
+### 2.2 分区管理
+
+### 2.3 分区查询
+
+## 3. 表
 
 ### 3.1 常用操作
 
@@ -2235,7 +2603,7 @@ order by o.name,k.colid
 
 -- 以上就是关于如何修改MySql数据表的字段类型，默认值和增加新的字段。
 ```
-## 4. dual表
+### 3.4 dual表
 ```mysql
 mysql> select 4*4 from dual;
 +-----+
@@ -2270,7 +2638,11 @@ sys@ORCL> select 4*4 from dual;
 16
 ```
 
-## 5 MySQL函数
+### 3.5 NULL唯一性
+
+Oracle NULL可以多个	MySQL NULL只能一个
+
+## 4. 函数
 
 ```mysql
 mysql> select concat("oracle","mysql") from dual;
@@ -2348,8 +2720,9 @@ mysql> select date_add(now(),interval -7 day);
 CREATE TABLE t1 ( ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP );
 ```
 
+## 5.  其他特性
 
-## 6. 计算列
+### 5.1 计算列
 
 ```
 root@mysql 16:31:  [mytest]> create table t4 (id int auto_increment not null,c1 int,c2 int,c3 int,primary key (id));
@@ -2610,9 +2983,5 @@ root@mysql 17:23:  [mytest]> show create table t8;
 +-------+----------------------------------------------------------------------------------------------------------------------------------------+
 1 row in set (0.00 sec)
 ```
-## 7. NULL唯一性
-Oracle null可以多个
-mysql  null只能一个
-
 
 
