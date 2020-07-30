@@ -431,6 +431,8 @@ srvctl stop nodeapps 停止某节点上的所有应用
 查看ASM实例状态:
 srvctl status asm
 srvctl status asm -a
+
+ crsctl  stat res ora.acrosspm.db -t
 ```
 
 ## 1.7 RAC自启
@@ -2438,13 +2440,14 @@ alter system set db_recovery_file_dest_size=80g scope=spfile;
 alter system set db_recovery_file_dest='/workdb/account_flashback_area' scope=spfile;
 设置闪回目标为5天，以分钟为单位，每天为1440分钟：
 alter system set db_flashback_retention_target=7200 scope=spfile;
-
+-- RAC 
+alter system set cluster_database=false scope=spfile sid='am2';
 -- 打开闪回功能
 shutdown immediate;
 startup mount;
 alter database flashback on;
 alter database open;
-
+alter system set cluster_database=true scope=spfile sid='am2';
 -- 关闭闪回功能
 shutdown immediate;
 startup mount;
