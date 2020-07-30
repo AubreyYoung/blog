@@ -338,32 +338,405 @@ node   0
 ```
 ## 2. 数据字典
 
-### 2.1 mysql
+### 2.1 sys
 
-```mysql
--- 查看用户
-select * from mysql.user limit 1;
--- 查看数据库
-select * from mysql.db limit 1;
--- 查看表权限
-select * from mysql.tables_priv limit 1;
--- 查看列权限
-select * from mysql.columns_priv limit 1;
--- master信息
-mysql.slave_master_info
--- replay相关信息
-mysql.slave_relay_log_info
+**1. Server层统计信息字典表**
+COLUMNS：
 
--- 查看线程
-select  * from INFORMATION_SCHEMA.PROCESSLIST;
+提供查询表中的列(字段)信息
 
-show processlist 
-show full processlist     -- 显示全部SQL
-mysqladmin  processlist
-select * from performance_schema.threads;  -- 不影响性能，可以查看后台线程
-```
+该表为InnoDB 存储引擎的临时表
 
-### 2.2 information_schema
+KEY_COLUMN_USAGE：
+
+提供查询哪些索引列存在约束条件
+
+该表中的信息包含主键、唯一索引、外键等约束的信息，例如：所在库表列名，引用的库表列名等。表中的信息与TABLE_CONSTRAINTS表中记录的信息有些类似，但TABLE_CONSTRAINTS表中没有记录约束引用的库表列信息。但是却记录了TABLE_CONSTRAINTS表中所没有的约束类型信息
+
+该表为Memory引擎临时表
+
+REFERENTIAL_CONSTRAINTS：
+
+提供查询关于外键约束的一些信息
+
+该表为Memory引擎临时表
+
+STATISTICS：
+
+提供查询关于索引的一些统计信息，一个索引对应一行记录
+
+该表为Memory引擎临时表
+
+TABLE_CONSTRAINTS：
+
+提供查询表相关的约束信息
+
+该表为Memory引擎临时表
+
+FILES：
+
+提供查询MySQL的数据表空间文件相关的信息，包含InnoDB存储引擎和NDB存储引擎相关的数据文件信息，由于NDB存储引擎在国内较少使用，我们大多数场景(95%以上场景InnoDB存储引擎都满可以使用)都是使用InnoDB存储引擎
+
+该表为Memory存储引擎表
+
+ENGINES：
+
+提供查询MySQL Server支持的引擎相关的信息
+
+该表为Memory引擎临时表
+
+TABLESPACES：
+
+提供查询关于活跃表空间的相关信息（主要记录的是NDB存储引擎表空间信息）
+
+注意：该表不提供有关InnoDB存储引擎的表空间的信息。 对于InnoDB表空间元数据信息，请查询INNODB_SYS_TABLESPACES和INNODB_SYS_DATAFILES表。另外，从MySQL 5.7.8开始，INFORMATION_SCHEMA.FILES表也提供查询InnoDB表空间的元数据信息
+
+该表为Memory引擎临时表。
+
+SCHEMATA：
+
+提供查询MySQL Server中的数据库列表信息，一个schema就代表一个database
+
+该表为Memory引擎临时表
+
+**2. Server层表级别对象字典表**
+VIEWS：
+
+提供查询数据库中的视图相关的信息，查询该表的帐号需要拥有show view权限
+
+该表为InnoDB引擎临时表
+
+TRIGGERS：
+
+提供查询关于某个数据库下的触发器相关的信息，要查询某个表的触发器，查询的账户必须要有trigger权限
+
+该表为InnoDB引擎临时表
+
+TABLES：
+
+提供查询数据库内的表相关的基本信息
+
+该表为Memory引擎临时表
+
+ROUTINES：
+
+提供查询关于存储过程和存储函数的信息（不包括用户自定义函数UDF），该表中的信息与“mysql.proc”中记录的信息相对应（如果该表中有值的话）
+
+该表为InnoDB引擎临时表
+
+PARTITIONS：
+
+提供查询关于分区表的信息
+
+该表为InnoDB引擎临时表
+
+EVENTS：
+
+提供查询计划任务事件相关的信息
+
+该表是InnoDB引擎临时表
+
+PARAMETERS：
+
+提供有关存储过程和函数的参数信息，以及有关存储函数的返回值的信息。 这些参数信息与mysql.proc表中的param_list列记录的内容类似
+
+该表为InnoDB引擎临时表
+
+**3. Server 层混杂信息字典表**
+GLOBAL_STATUS、GLOBAL_VARIABLES、SESSION_STATUS、SESSION_VARIABLES：
+
+提供查询全局、会话级别的的状态变量与系统变量信息，这些表为Memory引擎临时表
+
+OPTIMIZER_TRACE：
+
+提供优化程序跟踪功能产生的信息。
+
+跟踪功能默认关闭，使用optimizer_trace系统变量启用跟踪功能。如果开启该功能，则每个会话只能跟踪他自己执行的语句，不能看到其他会话执行的语句，且每个会话只能记录最后一个跟踪的SQL语句
+
+该表为InnoDB引擎临时表
+
+PLUGINS：
+
+提供查询关于MySQL Server中支持哪些插件的信息
+
+该表为InnoDB引擎临时表
+
+PROCESSLIST：
+
+提供查询一些关于线程运行过程中的状态信息
+
+该表为InnoDB引擎临时表
+
+PROFILING：
+
+提供查询关于语句性能分析的信息。其记录内容对应于SHOW PROFILES和SHOW PROFILE语句产生的信息。该表需要在会话变量 profiling=1时才会记录语句性能分析信息，否则该表不记录。
+
+注意：从MySQL 5.7.2开始，此表不再推荐使用，在未来的MySQL版本中删除。改用Performance Schema;代替
+
+该表为Memory引擎临时表
+
+CHARACTER_SETS：
+
+提供查询MySQL Server支持的可用字符集有哪些
+
+该表为Memory引擎临时表
+
+COLLATIONS：
+
+提供查询MySQL Server支持的可用校对规则有哪些
+
+该表为Memory引擎临时表
+
+COLLATION_CHARACTER_SET_APPLICABILITY：
+
+提供查询MySQL Server中哪种字符集适用于什么校对规则。查询结果集相当于从SHOW COLLATION获得的结果集中的前两个字段值。该表目前并没有发现有太大作用，为Memory引擎临时表
+
+COLUMN_PRIVILEGES：
+
+提供查询关于列(字段)的权限信息，表中的内容来自mysql.column_priv列权限表（需要针对一个表的列单独授权之后才会有内容）
+
+该表为Memory引擎临时表
+
+SCHEMA_PRIVILEGES：
+
+提供查询关于库级别的权限信息，每种类型的库级别权限记录一行信息，该表中的信息来自mysql.db表
+
+该表为Memory引擎临时表
+
+TABLE_PRIVILEGES：
+
+提供查询关于表级别权限信息，该表中的内容来自mysql.tables_priv
+
+该表为Memory引擎临时表
+
+USER_PRIVILEGES：
+
+提供查询全局权限的信息，该表中的信息来自mysql.user表
+
+该表为Memory引擎临时表
+
+**4. InnoDB 层系统字典表**
+INNODB_SYS_DATAFILES：
+
+提供查询InnoDB file-per-table和常规表空间数据文件的路径信息，等同于InnoDB数据字典中SYS_DATAFILES表中的信息
+
+该表中的信息包含InnoDB所有表空间类型的元数据，包括独立表空间、常规表空间、系统表空间、临时表空间和undo表空间（如果开启了独立表空间的话）
+
+该表为memory引擎临时表，查询该表的用户需要有process权限。
+
+INNODB_SYS_VIRTUAL：
+
+提供查询有关InnoDB虚拟生成列和与之关联的列的元数据信息，等同于InnoDB数据字典内部SYS_VIRTUAL表中的信息。INNODB_SYS_VIRTUAL表中展示的行信息是虚拟生成列相关联列的每个列的信息。
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_SYS_INDEXES：
+
+提供查询有关InnoDB索引的元数据信息，等同于InnoDB数据字典内部SYS_INDEXES表中的信息
+
+该表为memory引擎临时表，查询该表的用户需要具有process权限
+
+INNODB_SYS_TABLES：
+
+提供查询有关InnoDB表的元数据，等同于InnoDB数据字典内部SYS_TABLES表的信息。
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_SYS_FIELDS：
+
+提供查询有关InnoDB索引键列（字段）的元数据信息，等同于InnoDB数据字典内部SYS_FIELDS表的信息
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_SYS_TABLESPACES：
+
+提供查询有关InnoDB独立表空间和普通表空间的元数据信息（也包含了全文索引表空间），等同于InnoDB数据字典内部SYS_TABLESPACES表中的信息
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_SYS_FOREIGN_COLS：
+
+提供查询有关InnoDB外键列的状态信息，等同于InnoDB数据字典内部SYS_FOREIGN_COLS表的信息
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_SYS_COLUMNS：
+
+提供查询有关InnoDB表列的元数据信息，等同于InnoDB数据字典内部SYS_COLUMNS表的信息
+
+该表为memory引擎临时表，查询该表的用户需要具有process权限
+
+INNODB_SYS_FOREIGN：
+
+提供查询有关InnoDB外键的元数据信息，等同于InnoDB数据字典内部SYS_FOREIGN表的信息
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_SYS_TABLESTATS：
+
+提供查询有关InnoDB表的较低级别的状态信息视图。 MySQL优化器会使用这些统计信息数据来计算并确定在查询InnoDB表时要使用哪个索引。这些信息保存在内存中的数据结构中，与存储在磁盘上的数据无对应关系。InnoDB内部也无对应的系统表。
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+**5. InnoDB 层锁、事务、统计信息字典表**
+INNODB_LOCKS：
+
+提供查询innodb引擎事务中正在请求的且并未获得的且同时阻塞了其他事务的锁信息(即没有发生不同事务之间的锁等待的锁信息，在这里是查看不到的，例如，只有一个事务时，该事务所加的锁信息无法查看到)。该表中的内容可以用于诊断高并发下的锁争用信息。
+
+该表为memory引擎临时表，访问该表需要拥有具有process权限
+
+INNODB_TRX：
+
+提供查询当前在InnoDB引擎中执行的每个事务（不包括只读事务）的信息，包括事务是否正在等待锁、事务什么时间点开始、以及事务正在执行的SQL语句文本信息等（如果有SQL的话）。
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_BUFFER_PAGE_LRU：
+
+提供查询缓冲池中的页面信息，与INNODB_BUFFER_PAGE表不同，INNODB_BUFFER_PAGE_LRU表保存有关innodb buffer pool中的页如何进入LRU链表以及在buffer pool不够用时确定需要从缓冲池中逐出哪些页
+
+该表为Memory引擎临时表
+
+INNODB_LOCK_WAITS：
+
+提供查询关于每个被阻塞的InnoDB事务的锁等待记录，包括发生锁等带事务所请求的锁和阻止该锁请求被授予的锁
+
+该表为memory引擎表，访问该表用户需要有process权限
+
+INNODB_TEMP_TABLE_INFO：
+
+提供查询有关在InnoDB实例中当前处于活动状态的用户(已建立连接的用户，断开的用户连接对应的临时表会被自动删除)创建的InnoDB临时表的信息。 它不提供查询优化器使用的内部InnoDB临时表的信息查询。INNODB_TEMP_TABLE_INFO表在首次查询时创建。
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_BUFFER_PAGE：
+
+提供查询关于buffer pool中的页相关的信息
+
+查询该表需要用户具有PROCESS权限，该表为Memory引擎临时表
+
+INNODB_METRICS：
+
+提供查询InnoDB更为详细细致的性能信息，是对InnoDB的PERFORMANCE_SCHEMA的补充。通过对该表的查询，可用于检查innodb的整体健康状况。也可用于诊断性能瓶颈、资源短缺和应用程序的问题等。
+
+该表为memory引擎临时表，查询该表的用户需要有process权限
+
+INNODB_BUFFER_POOL_STATS：
+
+提供查询一些Innodb buffer pool中的状态信息，该表中记录的信息与SHOW ENGINE INNODB STATUS输出的信息类似相同，另外，innodb buffer pool的一些状态变量也提供了部分相同的值
+
+查看该表需要有process权限，该表为Memory引擎临时表
+
+**6. InnoDB 层全文索引字典表**
+INNODB_FT_CONFIG：
+
+提供查询有关InnoDB表的FULLTEXT索引和关联的元数据信息。查询此表之前，需要先设置innodb_ft_aux_table="db_name/tb_name"，db_name/tb_name为包含全文索引的表名和库名。
+
+查询该表的账户需要有PROCESS权限，该表为Memory引擎临时表
+
+INNODB_FT_BEING_DELETED：
+
+该表仅在OPTIMIZE TABLE语句执行维护操作期间作为INNODB_FT_DELETED表的快照数据存放使用。运行OPTIMIZE TABLE语句时，会先清空INNODB_FT_BEING_DELETED表中的数据，保存INNODB_FT_DELETED表中的快照数据到INNODB_FT_BEING_DELETED表，并从INNODB_FT_DELETED表中删除DOC_ID。由于INNODB_FT_BEING_DELETED表中的内容通常生命周期较短，因此该表中的数据对于监控或者调试来说用处并不大。
+
+表中默认不记录数据，需要设置系统配置参数innodb_ft_aux_table=string（string表示db_name.tb_name字符串），并创建好全文索引，设置好停用词等。
+
+查询该表的账户需要有PROCESS权限，该表为Memory引擎临时表
+
+INNODB_FT_DELETED：
+
+提供查询从InnoDB表的FULLTEXT索引中删除的行信息。它的存在是为了避免在InnoDB FULLTEXT索引的DML操作期间进行昂贵的索引重组操作，新删除的全文索引中单词的信息将单独存储在该表中，在执行文本搜索时从中过滤出搜索结果，该表中的信息仅在执行OPTIMIZE TABLE语句时清空。
+
+该表中的信息默认不记录，需要使用innodb_ft_aux_table选项(该选项默认值为空串)指定需要记录哪个innodb引擎表的信息，例如：test/test。
+
+查询该表的账户需要有PROCESS权限，该表为Memory引擎临时表
+
+INNODB_FT_DEFAULT_STOPWORD：
+
+该表为默认的全文索引停用词表，提供查询停用词列表值。启用停用词表需要开启参数innodb_ft_enable_stopword=ON，该参数默认为ON，启用停用词功能之后，如果innodb_ft_user_stopword_table选项（针对指定的innodb引擎表中的全文索引生效）自定义了停用词库表名称值，则停用词功能使用innodb_ft_user_stopword_table选项指定的停用词表，如果innodb_ft_user_stopword_table选项未指定，而innodb_ft_server_stopword_table选项（针对所有的innodb引擎表中的全文索引生效）自定义了停用词库表名称值，则同停用词功能使用innodb_ft_server_stopword_table选项指定的停用词表，如果innodb_ft_server_stopword_table选项也未指定，则使用默认的停用词表，即INNODB_FT_DEFAULT_STOPWORD表。
+
+查询该表需要账户有PROCESS权限，该表为Memory引擎临时表
+
+INNODB_FT_INDEX_TABLE：
+
+提供查询关于innodb表全文索引中用于反向文本查找的倒排索引的分词信息。
+
+查询该表的账户需要有PROCESS权限，该表为Memory引擎临时表
+
+INNODB_FT_INDEX_CACHE：
+
+提供查询包含FULLTEXT索引的innodb存储引擎表中新插入行的全文索引标记信息。它存在的目的是为了避免在DML操作期间进行昂贵的索引重组，新插入的全文索引的单词的信息被单独存储在该表中，直到对表执行OPTIMIZE TABLE语句时、或者关闭服务器时、或者当高速缓存中存放的信息大小超过了innodb_ft_cache_size或innodb_ft_total_cache_size系统配置参数指定的大小才会执行清理。默认不记录数据，需要使用innodb_ft_aux_table系统配置参数指定需要记录哪个表中的新插入行的全文索引数据。
+
+查询该表的账户需要有PROCESS权限，该表为Memory引擎临时表
+
+**7. InnoDB 层压缩相关字典表**
+INNODB_CMP和INNODB_CMP_RESET：
+
+这两个表中的数据包含了与压缩的InnoDB表页有关的操作的状态信息。表中记录的数据为测量数据库中的InnoDb表压缩的有效性提供参考。
+
+### 2.2 mysql
+
+- 访问权限系统表
+
+  | 表名      | 含义 |
+  | ------------ | ------------------------------------------------------------ |
+  | db           | 数据库级别的权限表                                           |
+  | tables_priv  | 表级别的权限表                                               |
+  | columns_priv | 列级权限表                                                   |
+  | procs_priv   | 存储过程和函数权限表                                         |
+  | proxies_priv | 代理用户权限表                                               |
+  | user | 包含用户帐户和全局权限和其他非权限列表(安全配置选项和资源控制选项列) |
+
+- 数据库对象信息记录表
+
+  | 表名   | 含义                                                         |
+  | ------ | ------------------------------------------------------------ |
+  | plugin | 该表提供查询自定义安装的插件信息（非系统默认启用的插件），该表的功能已经被information_schema.plugins表取代 |
+  | proc   | 该表提供查询与information_schema.routines表类似的内容（早期版本主要用户记录存储过程），但information_schema.routines表记录的更加详细 |
+  | event  | 该表提供查询计划任务相关的事件信息，该表中的信息与information_schema.events相同，且information_schema.events中记录的信息更加详细 |
+  | func   | 该表提供查询与information_schema.routines表类似的内容（早期版本主要用于记录用户自定义函数），但information_schema.routines表记录的更加详细 |
+
+- 统计信息记录表
+
+  | 表名               | 含义                             |
+  | ------------------ | -------------------------------- |
+  | innodb_table_stats | 该表提供查询表数据相关的统计信息 |
+  | innodb_index_stats | 该表提供查询索引相关的统计信息   |
+
+- 优化器成本记录表
+
+  | 表名        | 含义                                                         |
+  | ----------- | ------------------------------------------------------------ |
+  | engine_cost | 该表提供查询针对特定存储引擎的操作需要使用到的的优化器成本估算常量值 |
+  | server_cost | 该表提供查询server常规操作需要使用到的优化器成本估算常量值   |
+
+- 时区信息记录表
+
+  | 表名                      | 含义                                                         |
+  | ------------------------- | ------------------------------------------------------------ |
+  | time_zone                 | 该表提供查询时区ID和跳秒之间的映射关系数据                   |
+  | time_zone_leap_second     | 该表提供查询跳秒机器修正值信息，该表中的信息与time_zone_transition表中的类似，但time_zone_transition表中还记录了时区ID等信息 |
+  | time_zone_name            | 该表提供查询时区的名称列表和时区ID的映射关系                 |
+  | time_zone_transition      | 该表提供查询时区的跳秒数据                                   |
+  | time_zone_transition_type | 该表提供查询具体的跳秒信息以及与时区的对应数据               |
+
+- 复制信息记录表
+
+  | 表名                 | 含义                                                         |
+  | -------------------- | ------------------------------------------------------------ |
+  | slave_master_info    | 该表提供查询IO线程读取主库的位置信息，以及从库连接主库的IP、账号、端口、密码等信息 |
+  | slave_relay_log_info | 该表提供查询SQL线程重放的二进制文件对应的主库位置和relay log当前最新的位置 |
+  | slave_worker_info    | 该表提供查询多线程复制时的worker线程状态信息，与performance_schema.replication_applier_status_by_worker表的区别是：slave_worker_info表记录worker线程重放的relay log和主库binlog位置信息，而performance_schema.replication_applier_status_by_worker表记录的是worker线程重放的GTID位置信息 |
+  | ndb_binlog_index     | 该表提供查询ndb集群引擎相关的统计信息                        |
+
+- 日志信息记录表
+
+  | 表名        | 含义                                                         |
+  | ----------- | ------------------------------------------------------------ |
+  | general_log | 该表提供查询普通SQL语句的执行记录信息，用于查找客户端到底在服务端上执行了什么SQL（ |
+  | slow_log    | 该表提供查询执行时间超过long_query_time设置值的SQL，或者未使用索引的（需要开启参数log_queries_not_using_indexes=ON）或者管理语句（需要开启参数log_slow_admin_statements=ON） |
+  | servers     | 该表提供查询连接组合信息(远程实例的IP、端口、帐号、密码、数据库名称等信息，详见后续示例)，这些连接组合信息通常用于federated引擎（当然也可以作为在数据库中保存连接组合的一种方式，维护也较为方便），该表中的信息需要使用create server方式创建 |
+
+### 2.3 information_schema
 
 ```mysql
 -- information_schema.ENGINES 存储引擎信息
@@ -381,9 +754,16 @@ mysql>select * from information_schema.ENGINES;
 | CSV                | YES     | CSV storage engine                                             | NO           | NO   | NO         |
 | ARCHIVE            | YES     | Archive storage engine                                         | NO           | NO   | NO         |
 +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+
+-- 查看会话
+select  * from INFORMATION_SCHEMA.PROCESSLIST;
+--查看进程
+show processlist 
+show full processlist     -- 显示全部进程
+mysqladmin  processlist
 ```
 
-### 2.3 performance_schema
+### 2.4 performance_schema
 
 - Setup Tables
 
@@ -654,6 +1034,9 @@ mysql>select * from information_schema.ENGINES;
 **示例**
 
 ```mysql
+-- 不影响性能查看线程
+select * from performance_schema.threads;  
+
 -- 哪类的SQL执行最多？
 SELECT DIGEST_TEXT,COUNT_STAR,FIRST_SEEN,LAST_SEEN FROM events_statements_summary_by_digest ORDER BY COUNT_STAR DESC
 -- 哪类SQL的平均响应时间最多？
