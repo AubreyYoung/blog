@@ -206,7 +206,17 @@ SELECT /* XJ LEADING(S) FIRST_ROWS */
 
 ```plsql
 --- 单实例
-no	
+select
+substr(s.username,1,18) username,s.event,s.blocking_session,P.spid,
+s.sid,s.serial#,s.machine,y.sql_id,s.inst_id,y.sql_text,
+'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''';' "kill Session "
+from gv$session s,gv$process p,gv$sql y
+where 
+s.paddr = p.addr
+and s.username is not null
+and s.sql_address=y.address
+and y.sql_text like '%scott%';
+
 ```
 
 ##  2.3 查询SQL以及session
