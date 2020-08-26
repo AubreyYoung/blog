@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d856d6e7-5787-4483-bb22-0b6d6f57c045" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coding20200812/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle性能优化.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle性能优化.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../oracle/Oracle数据库检查.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/PythonCoding.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PythonCoding.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -96,6 +97,7 @@
       <workItem from="1597221691189" duration="1505000" />
       <workItem from="1597284760112" duration="963000" />
       <workItem from="1597285747210" duration="1247000" />
+      <workItem from="1598425595748" duration="217000" />
     </task>
     <servers />
   </component>
