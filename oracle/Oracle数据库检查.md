@@ -583,7 +583,7 @@ select * from v$version;
 select dbid from v$database;
 ```
 
-### 2.2.2 补丁安装情况1
+### 2.2.2 补丁安装情况1d
 
 ```
 su - oracle/su - grid
@@ -788,8 +788,8 @@ HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-v
 alter system set control_file_record_keep_time =31;
 
 -- asm parameter
-SQL> alter system set memory_max_target=4096m scope=spfile;
-SQL> alter system set memory_target=1536m scope=spfile;
+alter system set memory_max_target=4096m scope=spfile;
+alter system set memory_target=1536m scope=spfile;
 ```
 
 ### 2.5.5 Oracle 参数调优
@@ -1217,7 +1217,7 @@ select *
 where space_usage_percent > 80
 and (instr(t.TABLESPACE_NAME,'_DAT_')<= 0 and  instr(t.TABLESPACE_NAME,'_IDX_')<=0);
 
-select tablespace_name,logging,status from dba_tablespaces;
+select tablespace_name,logging,status,SEGMENT_SPACE_MANAGEMENT from dba_tablespaces;
 ```
 
 ### 2.14.3 查看表空间使用信息2
@@ -1933,6 +1933,20 @@ select max(object_id) from dba_objects;
 
 如果查询出信息输出则表示已经被恶意程序植入了比特币勒索触发器，需要尽快处理。该问题主要是通过使用互联网上非正规渠道获得的plsqldevloper工具连接数据库时传播感染。
 
+数据库中存在被加密的存储过程，名字如下：
+"DBMS_SUPPORT_INTERNAL "
+"DBMS_ SYSTEM_INTERNAL "
+"DBMS_ CORE_INTERNAL "
+“DBMS_STANDARD_FUN9”
+三个触发器名字如下：
+"DBMS_SUPPORT_INTERNAL "
+"DBMS_ SYSTEM_INTERNAL "
+"DBMS_ CORE_INTERNAL "
+
+一旦重启数据库，代码会判断数据库创建时间大于1200天，然后开始truncate某些表以及tab$被删除，恢复起来比较复杂。
+
+检查是否使用盗版工具，Login.sql、AfterConnect.sql、toad.ini是否被注入。检查数据库中是否存在以上对象：
+
 ```plsql
 select 'DROP TRIGGER '||owner||'."'||TRIGGER_NAME||'";' from dba_triggers where
 TRIGGER_NAME like 'DBMS_%_INTERNAL% '
@@ -1943,6 +1957,34 @@ where a.object_name like 'DBMS_%_INTERNAL% ';
 
 ```plsql
 select owner,object_name,created from dba_objects where object_name like 'DBMS_SUPPORT_DBMONITOR%';
+
+
+SELECT OWNER
+     , '"'||OBJECT_NAME||'"' OBJECT_NAME
+     ,OBJECT_TYPE
+     ,TO_CHAR(CREATED, 'YYYY-MM-DD HH24:MI:SS') CREATED
+  FROM DBA_OBJECTS
+ WHERE OBJECT_NAME LIKE 'DBMS_CORE_INTERNA%'
+    OR OBJECT_NAME LIKE 'DBMS_SYSTEM_INTERNA%'
+    OR OBJECT_NAME LIKE 'DBMS_SUPPORT%';
+
+SELECT '    DROP '||OBJECT_TYPE||' "'||OWNER||'"."'||OBJECT_NAME||'";' OBJECT_NAME
+  FROM DBA_OBJECTS
+ WHERE OBJECT_NAME LIKE 'DBMS_CORE_INTERNA%'
+    OR OBJECT_NAME LIKE 'DBMS_SYSTEM_INTERNA%'
+    OR OBJECT_NAME LIKE 'DBMS_SUPPORT%';
+
+SELECT JOB, LOG_USER, WHAT
+  FROM DBA_JOBS
+ WHERE WHAT LIKE 'DBMS_STANDARD_FUN9%' ;
+
+SELECT '    -- Logon with '||LOG_USER||CHR(10)||'    EXEC DBMS_JOB.BROKEN ('||JOB||', ''TRUE'')'||CHR(10)||'    EXEC DBMS_JOB.REMOVE('||JOB||')' STMT
+  FROM DBA_JOBS
+ WHERE WHAT LIKE 'DBMS_STANDARD_FUN9%' ;
+
+SELECT OWNER,'"'||OBJECT_NAME||'"' OBJECT_NAME,OBJECT_TYPE,CREATED
+  FROM DBA_OBJECTS
+ WHERE OBJECT_NAME LIKE 'ORACHK%';
 ```
 
 ## 2.26 Unusable Index(es) 
@@ -2300,7 +2342,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 ```
 create pfile='C:\Users\Administrator\Desktop\pfile20170109.ora' from spfile;
 create pfile='/opt/oracle/pfile20190805.ora' from spfile;
-create pfile='/home/oracle/pfile20190822.ora' from spfile;
+create pfile='/home/oracle/pfile20200821.ora' from spfile;
 create pfile='/export/home/oracle/pfile20170626.ora' from spfile;     <!--Solaris-->
 ```
 
@@ -2665,6 +2707,7 @@ alter system kill session '4276,6045,@1' immediate;
 Set pagesize 300
 Set linesize 300
 col file_name format a60
+col tablespace_name for a20
 select file_id,tablespace_name,file_name,bytes/1024/1024,status,autoextensible,maxbytes/1024/1024 from dba_data_files;
 
 col file_name format a60

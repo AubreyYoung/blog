@@ -216,7 +216,6 @@ s.paddr = p.addr
 and s.username is not null
 and s.sql_address=y.address
 and y.sql_text like '%scott%';
-
 ```
 
 ##  2.3 查询SQL以及session
