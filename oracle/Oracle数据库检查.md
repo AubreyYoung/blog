@@ -16,7 +16,30 @@ from gv$instance;
 -- RAC
 alter session set NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS';
 select INSTANCE_NUMBER,INSTANCE_NAME,HOST_NAME,STARTUP_TIME ,STATUS from sys.gv_$instance; 
+
 ```
+
+**强制关库**
+
+```plsql
+手动强制清理oracle用户相关资源。以root用户结束Oracle所有进程。
+# ps -fu oracle|grep -v grep| awk '{print $2}' |xargs kill -9
+以root用户删除Oracle所有共享内存。生成删除共享内存和信号量的语句:
+共享内存：ipcs -m|grep oracle|grep -v grep| awk '{printf"ipcrm -m %s;\n", $2}'
+信号量：ipcs -s|grep oracle|grep -v grep| awk '{printf"ipcrm -s %s;\n", $2}'
+执行上面两个语句生成的命令，然后执行ipcs -a|grep oracle命令查看是否还有相关结果。以oracle用户删除“/dev/shm”下面的共性内存数据。
+% ls -alt /dev/shm/ora_${ORACLE_SID}_*
+上面查询如果有结果执行删除：
+% rm /dev/shm/ora_${ORACLE_SID}_*
+清理锁文件：“$ORACLE_HOME/dbs/”目录下的“lk<sid>”与“sgadef<sid>.dbf”文件。
+ls -alt $ORACLE_HOME/dbs/lk*
+ls -alt $ORACLE_HOME/dbs/sgadef*
+例如：
+oracle@linux220:/opt/oracle/product/11gR2/db/dbs> ls -alt $ORACLE_HOME/dbs/lk*
+-rw-r----- 1 oracle oinstall 24 2014-05-19 14:42 /opt/oracle/product/11gR2/db/dbs/lkOR
+```
+
+
 
 ## 1.2  查看cursors
 
@@ -319,6 +342,9 @@ cd $ORACLE_BASE/admin/{SID}/adump
 find /opt/oracle/app/oracle/admin/oss/adump -name "*.aud" -print0 |xargs -0 rm -f
 
 find /u01/app/oracle/admin/lydsj/cdump -name "*.trc" -ctime +30 -exec ls {} \;
+
+-- 清空审计日志。
+SQL> truncate table SYS.AUD$;
 ```
 
 **ASM/RAC日志**
@@ -1521,6 +1547,8 @@ FROM gv$sort_usage su, gv$parameter p, gv$session se, gv$sql s
      AND s.hash_value = su.sqlhash
      AND s.address = su.sqladdr
 ORDER BY se.username, se.sid;
+
+ SELECT su.username,se.sid,se.serial#,se.sql_address,se.machine,se.program,su.tablespace,su.segtype,su.contents FROM v$session se,v$sort_usage su WHERE se.saddr=su.session_addr;
 ```
 
 ### 2.15.6 收缩临时表空间
@@ -1582,6 +1610,12 @@ show all;
 [^注]: 若是备份信息存储在control file中,并且rman的保留策略是天数；需要根据control_file_record_keep_time的参数值,进一步评估control_file_record_keep_time参数值的合理性。
 
 [查看RMAN备份还原进度](\Git\blog\oracle\RMAN监控脚本.md)
+
+```plsql
+SELECT  SID,  decode(totalwork, 0, 0, round(100 * sofar/totalwork, 2)) "Percent", message "Message", start_time, elapsed_seconds, time_remaining , inst_id  from GV$Session_longops where TIME_REMAINING>0;
+```
+
+
 
 ## 2.18  数据库中无效对象情况
 
@@ -2019,6 +2053,7 @@ SELECT T.INDEX_OWNER ,T.INDEX_NAME,T.PARTITION_NAME,BLEVEL,T.NUM_ROWS,T.LEAF_BLO
 ```plsql
 -- Rebuild index
 Select 'alter index '||owner||'.'||index_name||' rebuild ONLINE;' from dba_indexes d where  status = 'UNUSABLE';
+ select 'alter index '||owner||'.'||index_name||' rebuild online nologging parallel 4;' from dba_indexes where table_name=upper('TASK_INSTANCE_LOG');
 
 -- Rebuild Partition index
 Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||partition_name||' ONLINE;' from dba_ind_partitions where  status = 'UNUSABLE';
@@ -2027,8 +2062,8 @@ Select 'alter index '||index_owner||'.'||index_name||' rebuild partition '||part
 Select 'alter index '||index_owner||'.'||index_name||' rebuild subpartition '||subpartition_name||' ONLINE;' from dba_ind_subpartitions where  status = 'UNUSABLE';
 
 -- online重建索引
-alter index PM4H_DB.IDX_IND_H_3723 rebuild online;
-alter index PM4H_DB.IDX_IND_H_3723 rebuild partition PD_IND_H_3723_190501 online;
+alter index ADMIN01.PK_TASK_INSTANCE_LOG rebuild online nologging parallel 4;
+alter index PM4H_DB.IDX_IND_H_3723 rebuild partition PD_IND_H_3723_190501 online nologging parallel 4;
 
 -- 重建索引
 set linesize 120
@@ -2500,6 +2535,26 @@ flashback table table_name to before drop rename to table_name_new;
 flashback table table_name to scn scn_number;
 flashback table table_name to timestamp to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd hh24:mi:ss');
 
+-- 查询误删除操作时间点的SQL。
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+select start_timestamp,operation,undo_sql from flashback_transaction_query where table_name=upper('TABLE_NAME') and table_owner=upper('USER_NAME') and start_timestamp>to_date('2012-07-02 20:30:00','yyyy-mm-dd hh24:mi:ss') order  by start_timestamp desc;
+--以误删除了admin数据库中的W_UVS_SERVICE表为例，误删除时间为2013年4月2日晚上20点30分以后，执行以下SQL：
+ select start_timestamp,operation,undo_sql from flashback_transaction_query where table_name=upper('W_UVS_SERVICE') and table_owner=upper('admin') and start_timestamp>to_date('2013-04-20 20:30:00','yyyy-mm-dd hh24:mi:ss') order  by start_timestamp desc;
+显示以下信息：
+START_TIMESTAMP     OPERATION
+------------------- --------------------------------
+UNDO_SQL
+--------------------------------------------------------------------------------
+04/20/2013 20:40:15 DELETE
+insert into "ADMIN"."W_UVS_SERVICE"("DURATION_UNIT_LENGTH","START_TIME_RULE_CODE") val
+ues ('2','2');
+-- 设置待恢复表为行迁移模式。
+alter table TABLE_NAME enable row movement;
+-- 恢复到删除前指定时间点前的一段时间。时间从2查询结果的start_timestamp获取，填写到下面的SQL语句中。
+flashback table TABLE_NAME to timestamp to_date('2013/04/20 20:40:00','yyyy-mm-dd hh24:mi:ss');
+-- 删除操作的时间戳是2013/04/20 20:40:15，因此可以恢复到2013/04/20 20:40:00，早于删除操作15秒。这个提前值一般经验值，取10到20秒较为合适。检查数据恢复后数据。
+select count(*) from TABLE_NAME;
+
 -- 闪回查询
 select * from table_name as of timestamp to_timestamp('2017-12-14 14:28:33','yyyy-mm-dd hh24:mi:ss');
 select * from scott.dept as of scn 16801523;
@@ -2689,12 +2744,13 @@ END;
 
 ```
 
-## 3.11 锁定对象处理(ORA-04021)
+## 3.11 锁表
 
 ```plsql
+select object_name,s.sid,s.serial#,p.spid from v$locked_object l,dba_objects o,v$session s,v$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr;
 SELECT OBJECT_ID, SESSION_ID, inst_id FROM GV$LOCKED_OBJECT WHERE OBJECT_ID in (select object_id FROM dba_objects where object_name='OBJ_4525' AND OWNER='PM4H_MO');
 
-select SERIAL# from gv$session where sid=4276 and INST_ID=1;
+select 'alter system kill session '||chr(39)||s.sid||','||s.serial#||chr(39)||'，@'||s.inst_id||chr(39)||' immediate;'  from gv$locked_object l,dba_objects o,gv$session s,gv$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr and S.USERNAME='db_username';
 
 alter system kill session '4276,6045,@1' immediate;
 ```
@@ -2870,6 +2926,10 @@ select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H
 -- 查看索引统计信息
 select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
 
+-- 分区表和分区索引统计信息
+select index_owner,tablespace_name,index_name,partition_name,logging,num_rows,last_analyzed,status from dba_ind_partitions where index_name in (select index_name from dba_part_indexes where table_name=upper('tablename')) and TABLE_OWNER=upper('username');
+select table_owner,table_name,partition_name,logging,num_rows,last_analyzed, global_stats from dba_tab_partitions t where t.table_name=upper('tablename') and TABLE_OWNER=upper('username');
+
 -- 查看统计信息过期的表
 SELECT OWNER, TABLE_NAME, PARTITION_NAME, 
        OBJECT_TYPE, STALE_STATS, LAST_ANALYZED 
@@ -2939,12 +2999,23 @@ exec dbms_stats.gather_table_stats(ownname => 'PM4H_DB', tabname =>'IND_TOH_2068
 ### 3.14.3 统计信息管理
 
 ```plsql
---- 还原统计信息
+-- 确认执行计划是否在统计更新前后不一致。可以根据sql_id去查执行计划是否有变化，比如在统计更新之前是用到索引的，统计之后反而是全表扫描。
+-- 确认sql_id信息：
+select * from v$sql where sql_text like '%tablename%';
+-- 根据sql_id查询所有执行计划，确认是否有变化：
+ select * from DBA_HIST_SQL_PLAN where sql_id= 'sql_id' order by TIMESTAMP;
+-- 查询结果中的“LAST_ANALYZED”列所示时间即为统计更新时间。查看统计更新可以保留的时间。
+select DBMS_STATS.GET_STATS_HISTORY_RETENTION from dual;
+-- 系统默认统计信息保留31天。查看最早可以恢复的时间点。
+ select DBMS_STATS.GET_STATS_HISTORY_AVAILABILITY from dual;
+-- 检查数据表所有的统计情况，选择时间点来恢复。
+select * from dba_tab_stats_history where table_name ='tablename';
+-- 还原统计信息
 select TABLE_NAME, STATS_UPDATE_TIME from dba_tab_stats_history where table_name=upper('IND_ORG_20686');
-
 select TABLE_NAME, PARTITION_NAME,STATS_UPDATE_TIME from dba_tab_stats_history where table_name=upper('MO_MOENTITY');
-
 execute dbms_stats.restore_table_stats ('PM4H_AD','MO_MOENTITY','25-SEP-19 02.26.47.499595 PM +07:00');
+-- 确认还原情况。
+SQL> select TABLE_NAME ,LAST_ANALYZED  from user_tables where TABLE_NAME='AR_LOG_TRX_DETAIL';
 
 -- 删除列统计信息
 exec dbms_stats.gather_table_stats('PM4H_DB','IND_TOH_20688',method_opt=>'for columns owner size 1');
@@ -3742,9 +3813,10 @@ and r.usn = u.usn
 order by s.username; 
 ```
 
-## 5.8 查看表的索引
+## 5.8 查看表的DDL
 
 ```plsql
+-- 查看表的索引
 SELECT
     col.table_owner    "table_owner",
     idx.table_name     "table_name",
@@ -3769,5 +3841,37 @@ ORDER BY
     idx.index_name,
     col.table_owner,
     column_position;
+    
+-- 后台执行操作，导出建表语句：使用表归属用户登录（不推荐，适用场景在PL/SQL无法登录场景）
+EXECUTE DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'STORAGE',false);
+-- 生成建表语句：
+SELECT DBMS_METADATA.GET_DDL('TABLE',u.table_name) FROM USER_TABLES u where table_name=upper('tablename');
+-- 生成建索引语句：
+SELECT DBMS_METADATA.GET_DDL('INDEX',u.index_name) FROM USER_INDEXES u where table_name=upper('tablename');
+-- 生成建限制语句：
+SELECT DBMS_METADATA.GET_DDL('CONSTRAINT',u.CONSTRAINT_NAME) FROM user_constraints u where table_name=upper('tablename');
+```
+
+## 5.9 CPU占用率高的进程
+
+```plsql
+ -- 根据CPU占用率高的进程号查询对应的SQL操作
+ alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss'; 
+ select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,a.client_info,b.SQL_ID,b.sql_text from v$session a,v$sqlarea b where a.sql_hash_value=b.hash_value and a.sid in (select s.sid from v$session s,v$process p where p.spid=27697 and s.paddr=p.addr); 
+ select sid,event,sql_id,program,machine,blocking_session,blocking_instance,p1,p2 from v$session where event not like 'S%';
+```
+
+## 5.10 阻塞会话
+
+```plsql
+-- 查询被阻塞Session信息和blocking_session信息。
+select BLOCKING_SESSION,count(*) from v$session where BLOCKING_SESSION!=0 group by BLOCKING_SESSION;
+-- 如果有记录，则说明存在blocking_session，执行以下SQL进一步分析。
+select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_text, a.blocking_session,a.p1,a.p2 from v$session a,v$sqlarea b where a.sql_hash_value=b.hash_value and a.BLOCKING_SESSION!=0;
+--如果有记录，则说明记录中的sid被blocking_session对应的操作阻塞。根据查询出来的“blocking_session”查询对应的操作信息。查询正在运行的SQL信息。
+select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_text from v$session a,v$sqlarea b where a.sql_hash_value=b.hash_value and a.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
+-- 如果能查询到记录，则说明可能是因为这个SQL执行慢，导致其它session被阻塞，此时需要等待SQL执行完毕以解锁；如果查询不到记录，则说明可能是因为某次执行了更新，未commit提交导致锁表，需要通过后续步骤判断是否有锁存在。
+-- 查询锁信息。
+select o.object_name, s.osuser,s.machine, s.program, s.status,s.sid,s.serial#,p.spid from v$locked_object l,dba_objects o,v$session s,v$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr and s.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
 ```
 
