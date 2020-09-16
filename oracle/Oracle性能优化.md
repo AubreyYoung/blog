@@ -390,6 +390,14 @@ select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, inv
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 
+## 2.8 阻塞会话
+
+```plsql
+select * from GV$SESSION_BLOCKERS;
+```
+
+
+
 # 3. Top SQL
 
 ## 3.1 SQL ordered by Elapsed Time
@@ -1348,7 +1356,7 @@ tracefile名字会是 <instance><spid>_<stid>.trc 的格式.
 -- 基表
 select * from v$fixed_table;
 -- 动态性能视图定义
-select * from v$fixed_view_definition;
+select * from gv$fixed_view_definition;
 -- 数据字典
 select * from dba_views;
 select * from dict where table_name like 'DBA_HIST_%';
