@@ -812,31 +812,89 @@ HOST = 192.168.1.216 --此处使用数字形式的VIP，绝对禁止使用rac1-v
 HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-vip
 #更改控制文件记录保留时间
 alter system set control_file_record_keep_time =31;
-alter system set resource_manager_plan='FORCE:' scope=spfile;
+alter system set resource_limit=true sid='*' scope=spfile;
+alter system set resource_manager_plan='force:' sid='*' scope=spfile;
 alter system set parallel_force_local=true  sid='*' scope=spfile;
 alter system set fast_start_parallel_rollback='LOW' scope=spfile;
+ALTER SYSTEM SET open_cursors=1000 SCOPE=SPFILE;             
+ALTER SYSTEM SET session_cached_cursors=1000 SCOPE=SPFILE;
+alter system set cursor_sharing=force scope=spfile;
+ALTER SYSTEM SET log_buffer=512000000 SCOPE=SPFILE;
+ALTER SYSTEM SET parallel_max_servers=20;    默认480
+ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
+alter system set db_file_multiblock_read_count = 128 ;
+alter system set disk_asynch_io=true sid ='*' scope=spfile;
+alter system set recyclebin='OFF' scope=spfile;
+
+alter profile "DEFAULT" limit PASSWORD_GRACE_TIME UNLIMITED;
+alter profile "DEFAULT" limit PASSWORD_LIFE_TIME UNLIMITED;
+alter profile "DEFAULT" limit PASSWORD_LOCK_TIME UNLIMITED;
+alter profile "DEFAULT" limit FAILED_LOGIN_ATTEMPTS UNLIMITED;
+
+exec dbms_scheduler.disable( 'ORACLE_OCM.MGMT_CONFIG_JOB' );
+exec dbms_scheduler.disable( 'ORACLE_OCM.MGMT_STATS_CONFIG_JOB' );
 
 BEGIN
-DBMS_AUTO_TASK_ADMIN.disable(
+DBMS_AUTO_TASK_ADMIN.DISABLE(
+client_name => 'auto space advisor',
+operation => NULL,
+window_name => NULL);
+END;
+/
+
+BEGIN
+DBMS_AUTO_TASK_ADMIN.DISABLE(
 client_name => 'sql tuning advisor',
-operation =>NULL,
-window_name =>NULL);
+operation => NULL,
+window_name => NULL);
 END;
 /
-commit;
-
-BEGIN
-DBMS_AUTO_TASK_ADMIN.disable(
-client_name =>'auto space advisor',
-operation =>NULL,
-window_name =>NULL);
-END;
-/
-commit;
 
 -- asm parameter
 alter system set memory_max_target=4096m scope=spfile;
 alter system set memory_target=1536m scope=spfile;
+
+ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
+ALTER SYSTEM SET db_cache_size=56g SCOPE=SPFILE;
+ALTER SYSTEM SET pga_aggregate_target=10g SCOPE=SPFILE;   
+
+
+-- 云和恩墨参数
+alter system set "_optimizer_adaptive_cursor_sharing"=false sid='*' scope=spfile;
+alter system set "_optimizer_extended_cursor_sharing"=none sid='*' scope=spfile;
+alter system set "_optimizer_extended_cursor_sharing_rel"=none sid='*' scope=spfile;
+alter system set "_optimizer_use_feedback"=false sid ='*' scope=spfile;
+alter system set deferred_segment_creation=false sid='*' scope=spfile;
+alter system set event='28401 trace name context forever,level 1' sid='*' scope=spfile;
+alter system set resource_limit=true sid='*' scope=spfile;
+alter system set resource_manager_plan='force:' sid='*' scope=spfile;
+alter system set "_undo_autotune"=false sid='*' scope=spfile;
+alter system set "_optimizer_null_aware_antijoin"=false sid ='*' scope=spfile;
+alter system set "_px_use_large_pool"=true sid ='*' scope=spfile;
+alter system set audit_trail=none sid ='*' scope=spfile;
+alter system set "_partition_large_extents"=false sid='*' scope=spfile;
+alter system set "_index_partition_large_extents"= false sid='*' scope=spfile;
+alter system set "_use_adaptive_log_file_sync"=false sid ='*' scope=spfile;
+alter system set disk_asynch_io=true sid ='*' scope=spfile;
+alter system set db_files=2000 scope=spfile;
+alter profile "DEFAULT" limit PASSWORD_GRACE_TIME UNLIMITED;
+alter profile "DEFAULT" limit PASSWORD_LIFE_TIME UNLIMITED;
+exec dbms_scheduler.disable( 'ORACLE_OCM.MGMT_CONFIG_JOB' );
+exec dbms_scheduler.disable( 'ORACLE_OCM.MGMT_STATS_CONFIG_JOB' );
+BEGIN
+DBMS_AUTO_TASK_ADMIN.DISABLE(
+client_name => 'auto space advisor',
+operation => NULL,
+window_name => NULL);
+END;
+/
+BEGIN
+DBMS_AUTO_TASK_ADMIN.DISABLE(
+client_name => 'sql tuning advisor',
+operation => NULL,
+window_name => NULL);
+END;
+/
 ```
 
 ### 2.5.5 Oracle 参数调优
@@ -846,34 +904,29 @@ ALTER SYSTEM SET "_buffer_busy_wait_timeout"=2     SCOPE=SPFILE;
 ALTER SYSTEM SET "_kill_diagnostics_timeout"=140   SCOPE=SPFILE;
 ALTER SYSTEM SET "_lm_rcvr_hang_allow_time"=140    SCOPE=SPFILE;
 ALTER SYSTEM SET "_optim_peek_user_binds"=FALSE    SCOPE=SPFILE;
-ALTER SYSTEM SET "_use_adaptive_log_file_sync"=FALSE SCOPE=SPFILE;
-ALTER SYSTEM SET "_PX_use_large_pool"=TRUE SCOPE=SPFILE;
-ALTER SYSTEM SET "deferred_segment_creation"=FALSE SCOPE=SPFILE;
-ALTER SYSTEM SET log_buffer=512000000 SCOPE=SPFILE;
-ALTER SYSTEM SET parallel_force_local=false;
-ALTER SYSTEM SET parallel_max_servers=20;    默认480
-ALTER SYSTEM SET open_cursors=1000 SCOPE=SPFILE;             
-open_cursors设定每个session（会话）最多能同时打开多少个cursor（游标）。session_cached_cursor设定每个session（会话）最多可以缓存多少个关闭掉的cursor
-ALTER SYSTEM SET session_cached_cursors=1000 SCOPE=SPFILE;
+alter system set "_optimizer_adaptive_cursor_sharing"=false sid='*' scope=spfile;
+alter system set "_optimizer_extended_cursor_sharing"=none sid='*' scope=spfile;
+alter system set "_optimizer_extended_cursor_sharing_rel"=none sid='*' scope=spfile;
+alter system set "_optimizer_use_feedback"=false sid ='*' scope=spfile;
+alter system set "_undo_autotune"=false sid='*' scope=spfile;
+alter system set "_optimizer_null_aware_antijoin"=false sid ='*' scope=spfile;
+alter system set "_px_use_large_pool"=true sid ='*' scope=spfile;
+alter system set "_partition_large_extents"=false sid='*' scope=spfile;
+alter system set "_index_partition_large_extents"= false sid='*' scope=spfile;
+alter system set "_use_adaptive_log_file_sync"=false sid ='*' scope=spfile;
+
 ALTER SYSTEM SET "_kgl_hot_object_copies"=2 SCOPE=SPFILE;
-ALTER SYSTEM SET audit_trail='none' SCOPE=SPFILE;
-ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
-ALTER SYSTEM SET db_cache_size=56g SCOPE=SPFILE;
-ALTER SYSTEM SET pga_aggregate_target=10g SCOPE=SPFILE;   
-ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
 ALTER SYSTEM SET "_enable_NUMA_support"=false;
 ALTER SYSTEM SET PLSQL_CODE_TYPE=NATIVE SCOPE=SPFILE;    ---把plsql存储过程编译成本地代码的过程，不会导致任何解释器开销
 ALTER SYSTEM SET PLSQL_OPTIMIZE_LEVEL=2 SCOPE=SPFILE;
 alter system set use_large_pages='ONLY' SCOPE=SPFILE;
-alter system set recyclebin='OFF' scope=spfile;
 //10g
 alter system set commit_write='immediate,nowait';    异步提交
 //11g
 alter system set commit_logging ='immediate';
 alter system set commit_wait ='nowait' ;
-alter system set db_file_multiblock_read_count = 128 ;
 alter system set java_jit_enabled=false scope=spfile;
-alter system set cursor_sharing=force scope=spfile;
+
 
 待定参数
 alter system set "_disk_sector_size_override" = true scope=spfile;
@@ -3721,10 +3774,31 @@ select USER_NAME,CREATED from dba_users where DEFAULT_TABLESPACE not in('SYSTEM'
 'OWBSYS', 'OWBSYS_AUDIT', 'SI_INFORMTN_SCHEMA', 'SPATIAL_CSW_ADMIN_USR', 'SPATIAL_WFS_ADMIN_USR', 'SYS', 'SYSTEM', 'WMSYS','XDB','XS$NULL','SCOTT','DBSNMP','SYSMAN','MGMT_VIEW','MDSYS');
 ```
 
-## 5.4 查看资源限制
+## 5.4 资源管理计划
 
 ```plsql
 select resource_name,max_utilization,initial_allocation,limit_value from v$resource_limit;
+
+-- 方法一：禁用资源调整：
+1.在线修改；
+如果resource_manager_plan null可以无需重复设置
+ALTER system SET resource_manager_plan=’’;
+EXECUTE dbms_scheduler.set_attribute(‘WEEKNIGHT_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘WEEKEND_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘MONDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘TUESDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘WEDNESDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘THURSDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘FRIDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘SATURDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+EXECUTE dbms_scheduler.set_attribute(‘SUNDAY_WINDOW’,‘RESOURCE_PLAN’,’’);
+2.如果上述操作没有生效，或者能够重启的情况下执行
+alter system set “_resource_manager_always_on” = false scope=spfile;
+
+-- 方法二：
+alter system set resource_limit=true sid='*' scope=spfile;
+alter system set resource_manager_plan='force:' sid='*' scope=spfile;
+说明：这两个参数用于将资源管理计划强制设置为“空”，避免Oracle 自动打开维护窗口（每晚22:00 到早上6:00，周末全天）的资源计划（resource manager plan），使系统在维护窗口期间资源不足或触发相应的BUG。
 ```
 
 ## 5.5 动态性能视图
