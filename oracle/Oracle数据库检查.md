@@ -3910,15 +3910,7 @@ select o.object_name, s.osuser,s.machine, s.program, s.status,s.sid,s.serial#,p.
  select component,current_size from v$sga_dynamic_components where component='KEEP buffer cache';
  
   -- 查看keep pool的建议大小
- SELECT size_for_estimate,
-       buffers_for_estimate,
-       estd_physical_read_factor,
-       estd_physical_reads
-FROM v$db_cache_advice
-WHERE name = 'KEEP'
-AND block_size = (SELECT value FROM v$parameter
-  WHERE name = 'db_block_size')
-AND advice_status = 'ON'；
+ SELECT size_for_estimate,buffers_for_estimate,estd_physical_read_factor,estd_physical_reads FROM v$db_cache_advice WHERE name = 'KEEP' AND block_size = (SELECT value FROM v$parameter  WHERE name = 'db_block_size') AND advice_status = 'ON'；
 
 -- 查看哪些表使用keep buffer
 SELECT * FROM dba_segments WHERE segment_type = 'KEEP'；
@@ -3928,8 +3920,7 @@ SELECT * FROM dba_tables WHERE buffer_pool = 'KEEP'；
 alter table xxx storage(buffer_pool keep);
 CREATE INDEX cust_idx ... STORAGE (BUFFER_POOL KEEP);
 ALTER TABLE customer STORAGE (BUFFER_POOL KEEP);
-ALTER INDEX cust_name_idx STORAGE (BUFFER_POOL KEEP);
-    
+ALTER INDEX cust_name_idx STORAGE (BUFFER_POOL KEEP);  
 同时要修改表的cache属性：
 Alter table xxx cache;
 也可以在表创建时直接指定相应的属性：
@@ -3953,7 +3944,6 @@ alter table t2 modify lob(c2) (storage (buffer_pool keep) cache);
 
 --取消缓存 
 alter table test modify lob(address) (storage (buffer_pool keep) nocache);  
-
 
 --对基于CLOB类型的对象的cache方法   
 alter table lob1 modify lob(c1.xmldata) (storage (buffer_pool keep) cache);   
