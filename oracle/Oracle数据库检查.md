@@ -3898,3 +3898,95 @@ select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_tex
 select o.object_name, s.osuser,s.machine, s.program, s.status,s.sid,s.serial#,p.spid from v$locked_object l,dba_objects o,v$session s,v$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr and s.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
 ```
 
+## 5.11  keep_buffer_pool
+
+```plsql
+ alter system set db_keep_cache_size=100m scope=both;
+ 
+ -- 查看keep pool剩余大小
+ select p.name,a.cnum_repl "total buffers",a.anum_repl "free buffers" from x$kcbwds a, v$buffer_pool p where a.set_id=p.LO_SETID and p.name='KEEP';  
+ 
+ -- 查看当前keep pool的大小：
+ select component,current_size from v$sga_dynamic_components where component='KEEP buffer cache';
+ 
+  -- 查看keep pool的建议大小
+ SELECT size_for_estimate,
+       buffers_for_estimate,
+       estd_physical_read_factor,
+       estd_physical_reads
+FROM v$db_cache_advice
+WHERE name = 'KEEP'
+AND block_size = (SELECT value FROM v$parameter
+  WHERE name = 'db_block_size')
+AND advice_status = 'ON'；
+
+-- 查看哪些表使用keep buffer
+SELECT * FROM dba_segments WHERE segment_type = 'KEEP'；
+SELECT * FROM dba_tables WHERE buffer_pool = 'KEEP'；
+
+-- 修改表或索引的结构
+alter table xxx storage(buffer_pool keep);
+CREATE INDEX cust_idx ... STORAGE (BUFFER_POOL KEEP);
+ALTER TABLE customer STORAGE (BUFFER_POOL KEEP);
+ALTER INDEX cust_name_idx STORAGE (BUFFER_POOL KEEP);
+    
+同时要修改表的cache属性：
+Alter table xxx cache;
+也可以在表创建时直接指定相应的属性：
+create table aaa(i int) storage (buffer_pool keep);
+create table bbb(i int) storage (buffer_pool keep) cache;
+    
+--观察表的cache情况及大小：
+select table_name,cache,blocks from user_tables where buffer_pool='KEEP';
+
+--查看哪些表被放在缓存区 但并不意味着该表已经被缓存 
+select table_name from dba_tables where buffer_pool='KEEP';
+
+--查询到该表是否已经被缓存 
+select table_name,cache,buffer_pool from user_TABLES where cache like '%Y';
+
+--已经加入到KEEP区的表想要移出缓存，使用 
+alter table table_name nocache;  
+
+--对于普通LOB类型的segment的cache方法 
+alter table t2 modify lob(c2) (storage (buffer_pool keep) cache);  
+
+--取消缓存 
+alter table test modify lob(address) (storage (buffer_pool keep) nocache);  
+
+
+--对基于CLOB类型的对象的cache方法   
+alter table lob1 modify lob(c1.xmldata) (storage (buffer_pool keep) cache);   
+
+--查询该用户下所有表内的大字段情况 
+select column_name,segment_name from user_lobs;   
+```
+
+## 5.12 表CACHE
+
+```plsql
+-- 创建表对象时使用cache，如下面的例子
+  create table tb_test
+        (id number,name varchar2(20),
+         sex  char(1),
+         age  number,
+         score number)
+         tablespace users
+         storage(initial 50k next 50k pctincrease 0)
+         cache;    --指定cache子句
+ 
+-- 使用alter table 修改已经存在的表
+alter table scott.emp cache;
+
+-- 可以使用nocache来修改对象，使其不具备cache属性
+alter table soctt.emp nocache
+       
+-- 使用hint提示符来实现cache
+select /*+ cache*/ empno,ename from scott.emp; 
+```
+
+**注意** cache table*与*keep buffer pool*的异同
+
+  两者的目的都是尽可能将最热的对象置于到*buffer pool*，尽可能的避免*aged out*。*cache table*是将对象置于到*default buffer cache*。  而使用*buffer_pool keep*子句是将对象置于到*keep buffer pool*。  
+
+当*buffer_pool*和*cache*同时指定时，*keep*比*cache*有优先权。*buffer_pool*用来指定存贮使用缓冲池，而*cache/nocache*指定存储的方式*(LRU*或*MRU*端*)*。建表时候不注明的话，*nocache*是默认值。
