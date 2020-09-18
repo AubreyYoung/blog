@@ -801,7 +801,7 @@ alter system set enable_ddl_logging=true;
 #关闭11g密码延迟验证新特性
 ALTER SYSTEM SET EVENT = '28401 TRACE NAME CONTEXT FOREVER, LEVEL 1' SCOPE = SPFILE;
 #限制trace日志文件大最大25M
-alter system set max_dump_file_size ='2G' ;
+alter system set max_dump_file_size ='25M' ;
 #关闭密码大小写限制
 ALTER SYSTEM SET SEC_CASE_SENSITIVE_LOGON = FALSE;
 alter system set db_files=2000 scope=spfile;
@@ -819,8 +819,8 @@ alter system set fast_start_parallel_rollback='LOW' scope=spfile;
 ALTER SYSTEM SET open_cursors=1000 SCOPE=SPFILE;             
 ALTER SYSTEM SET session_cached_cursors=1000 SCOPE=SPFILE;
 alter system set cursor_sharing=force scope=spfile;
-ALTER SYSTEM SET log_buffer=512000000 SCOPE=SPFILE;
-ALTER SYSTEM SET parallel_max_servers=20;    默认480
+ALTER SYSTEM SET log_buffer=536870912 SCOPE=SPFILE;
+ALTER SYSTEM SET parallel_max_servers=80;    默认480
 ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
 alter system set db_file_multiblock_read_count = 128 ;
 alter system set disk_asynch_io=true sid ='*' scope=spfile;
@@ -853,6 +853,7 @@ END;
 -- asm parameter
 alter system set memory_max_target=4096m scope=spfile;
 alter system set memory_target=1536m scope=spfile;
+
 
 ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
 ALTER SYSTEM SET db_cache_size=56g SCOPE=SPFILE;
