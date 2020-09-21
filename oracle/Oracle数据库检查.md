@@ -1340,20 +1340,7 @@ where f.tablespace_name= d.tablespace_name
 order by  used_percent_with_extend desc;
 
 --某个表空间
-set linesize 150 pagesize 500
-select f.tablespace_name tablespace_name,
-round((d.sumbytes/1024/1024/1024),2) total_without_extend_GB,
-round(((d.sumbytes+d.extend_bytes)/1024/1024/1024),2) total_with_extend_GB,
-round((f.sumbytes+d.Extend_bytes)/1024/1024/1024,2) free_with_extend_GB,
-round((d.sumbytes-f.sumbytes)/1024/1024/1024,2) used_GB,
-round((d.sumbytes-f.sumbytes)*100/(d.sumbytes+d.extend_bytes),2) used_percent_with_extend
-from (select tablespace_name,sum(bytes) sumbytes from dba_free_space group by tablespace_name) f,
-(select tablespace_name,sum(aa.bytes) sumbytes,sum(aa.extend_bytes) extend_bytes from
-(select  nvl(case  when autoextensible ='YES' then (case when (maxbytes-bytes)>=0 then (maxbytes-bytes) end) end,0) Extend_bytes
-,tablespace_name,bytes  from dba_data_files) aa group by tablespace_name) d
-where f.tablespace_name= d.tablespace_name
-and f.tablespace_name in ('PM4H_SELF','PM4H_HW')
-order by  used_percent_with_extend desc;
+ 
 
 set linesize 120
 SELECT /* SHSNC */
