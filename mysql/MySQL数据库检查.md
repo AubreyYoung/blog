@@ -128,6 +128,19 @@ mysql> set global transaction_isolation='READ COMMITTED';
 
 ## 5. 用户权限管理
 
+MySQL访问权限系统表
+
+```sql
+user
+db
+tables_priv
+columns_priv
+procs_priv
+proxies_priv
+```
+
+
+
 ### 5.1 创建/删除用户
 
 ```mysql

@@ -25,6 +25,7 @@ select INSTANCE_NUMBER,INSTANCE_NAME,HOST_NAME,STARTUP_TIME ,STATUS from sys.gv_
 手动强制清理oracle用户相关资源。以root用户结束Oracle所有进程。
 # ps -fu oracle|grep -v grep| awk '{print $2}' |xargs kill -9
 以root用户删除Oracle所有共享内存。生成删除共享内存和信号量的语句:
+ipcs  -a 进程间通信的信息
 共享内存：ipcs -m|grep oracle|grep -v grep| awk '{printf"ipcrm -m %s;\n", $2}'
 信号量：ipcs -s|grep oracle|grep -v grep| awk '{printf"ipcrm -s %s;\n", $2}'
 执行上面两个语句生成的命令，然后执行ipcs -a|grep oracle命令查看是否还有相关结果。以oracle用户删除“/dev/shm”下面的共性内存数据。
@@ -172,6 +173,9 @@ col path format a60;
 col group_name format a10
 col name format a20
 select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from v$asm_disk a,v$asm_diskgroup b where a.group_number=b.group_number;
+
+-- 查看ASM磁盘组使用率
+select name,round(total_mb/1024) "总容量",round(free_mb/1024) "空闲空间",round((free_mb/total_mb)*100) "可用空间比例" from gv$asm_diskgroup;
 
 col name for a20
 col STATE for a10      
@@ -1340,8 +1344,6 @@ where f.tablespace_name= d.tablespace_name
 order by  used_percent_with_extend desc;
 
 --某个表空间
- 
-
 set linesize 120
 SELECT /* SHSNC */
  TABLESPACE_NAME   TS_NAME,
@@ -1354,6 +1356,13 @@ SELECT /* SHSNC */
   FROM DBA_TABLESPACES
  ORDER BY TABLESPACE_NAME
  
+ -- 查看表空间可用百分比
+select b.tablespace_name,a.total,b.free,round((b.free/a.total)*100) "% Free" from
+(select tablespace_name, sum(bytes/(1024*1024)) total from dba_data_files group by tablespace_name) a,
+(select tablespace_name, round(sum(bytes/(1024*1024))) free from dba_free_space group by tablespace_name) b
+WHERE a.tablespace_name = b.tablespace_name
+order by "% Free";
+
  -- 大于90
  set linesize 150 pagesize 500
 SELECT tablespace_name,total_space_GB,max_space_GB,space_usage_percent FROM (
@@ -1372,6 +1381,56 @@ and ( instr(f.tablespace_name, '_DAT_') <= 0
                   AND instr(f.tablespace_name, '_IDX_') <= 0 ))
 where space_usage_percent > 90
 order by  space_usage_percent desc;
+
+
+-- 统计每个用户使用表空间率
+SELECT c.owner                                  "用户",
+       a.tablespace_name                        "表空间名",
+       total/1024/1024                          "表空间大小M",
+       free/1024/1024                           "表空间剩余大小M",
+       ( total - free )/1024/1024               "表空间使用大小M",
+       Round(( total - free ) / total, 4) * 100 "表空间总计使用率%",
+       c.schemas_use/1024/1024                  "用户使用表空间大小M",
+       round((schemas_use)/total,4)*100         "用户使用表空间率%"
+FROM   (SELECT tablespace_name,
+               Sum(bytes) free
+        FROM   DBA_FREE_SPACE
+        GROUP  BY tablespace_name) a,
+       (SELECT tablespace_name,
+               Sum(bytes) total
+        FROM   DBA_DATA_FILES
+        GROUP  BY tablespace_name) b,
+       (Select owner ,Tablespace_Name,
+                Sum(bytes) schemas_use
+        From Dba_Segments
+        Group By owner,Tablespace_Name) c
+WHERE  a.tablespace_name = b.tablespace_name
+and a.tablespace_name =c.Tablespace_Name
+order by c.owner,a.tablespace_name;
+
+SELECT c.owner,
+       a.tablespace_name,
+       total/1024/1024,
+       free/1024/102,
+       ( total - free )/1024/1024,
+       Round(( total - free )/total, 4)*100,
+       c.schemas_use/1024/1024,
+       round((schemas_use)/total,4)*100
+FROM   (SELECT tablespace_name,
+               Sum(bytes) free
+        FROM   DBA_FREE_SPACE
+        GROUP  BY tablespace_name) a,
+       (SELECT tablespace_name,
+               Sum(bytes) total
+        FROM   DBA_DATA_FILES
+        GROUP  BY tablespace_name) b,
+       (Select owner ,Tablespace_Name,
+                Sum(bytes) schemas_use
+        From Dba_Segments
+        Group By owner,Tablespace_Name) c
+WHERE  a.tablespace_name = b.tablespace_name
+and a.tablespace_name =c.Tablespace_Name
+order by c.owner,a.tablespace_name;
 ```
 
 ### 2.14.4 查看表空间使用信息3
@@ -1568,6 +1627,18 @@ WHERE d.tablespace_name = a.tablespace_name(+)
 AND d.tablespace_name = t.tablespace_name(+)
 AND d.extent_management like 'LOCAL'
 AND d.contents like 'TEMPORARY';
+
+-- 查看临时表空间使用率
+SELECT temp_used.tablespace_name,total,used,
+           total - used as "Free",
+           round(nvl(total-used, 0) * 100/total,3) "Free percent"
+      FROM (SELECT tablespace_name, SUM(bytes_used)/1024/1024 used
+              FROM GV_$TEMP_SPACE_HEADER
+             GROUP BY tablespace_name) temp_used,
+           (SELECT tablespace_name, SUM(bytes)/1024/1024 total
+              FROM dba_temp_files
+             GROUP BY tablespace_name) temp_total
+     WHERE temp_used.tablespace_name = temp_total.tablespace_name
 ```
 
 ### 2.15.3 临时数据文件大小
@@ -2456,6 +2527,14 @@ select owner,job_name,session_id,slave_process_id,running_instance from dba_sche
  select job_name,state from dba_datapump_jobs;
  
  select vs.sid, vp.program PROCESSNAME, vp.spid THREADID from   v$session vs,v$process p,dba_datapump_sessions dp where vp.addr = vs.paddr(+) and vs.saddr = dp.saddr; 
+ 
+ 
+-- 查询正在执行的SCHEDULER_JOB
+select owner,job_name,sid,b.SERIAL#,b.username,spid from ALL_SCHEDULER_RUNNING_JOBS,v$session b,v$process  where session_id=sid and paddr=addr
+
+-- 查询正在执行的dbms_job
+select job,b.sid,b.SERIAL#,b.username,spid from DBA_JOBS_RUNNING a ,v$session b,v$process  where a.sid=b.sid and paddr=addr
+
 ```
 
 ## 3.4 还原点设置
@@ -2815,9 +2894,40 @@ SELECT OBJECT_ID, SESSION_ID, inst_id FROM GV$LOCKED_OBJECT WHERE OBJECT_ID in (
 select 'alter system kill session '||chr(39)||s.sid||','||s.serial#||chr(39)||'，@'||s.inst_id||chr(39)||' immediate;'  from gv$locked_object l,dba_objects o,gv$session s,gv$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr and S.USERNAME='db_username';
 
 alter system kill session '4276,6045,@1' immediate;
+
+
+-- 查询DML死锁会话sid，及引起死锁的堵塞者会话blocking_session
+select sid, blocking_session, LOGON_TIME,sql_id,status,event,seconds_in_wait,state, BLOCKING_SESSION_STATUS from v$session where event like 'enq%' and state='WAITING' and BLOCKING_SESSION_STATUS='VALID';
+
+BLOCKING_SESSION:Session identifier of the blocking session. This column is valid only if BLOCKING_SESSION_STATUS has the value VALID.
+
+-- 可以在v$session.LOGON_TIME上看到引起死锁的堵塞者会话比等待者要早如果遇到RAC环境，一定要用gv$来查，并且执行alter system kill session 'sid,serial#'要到RAC对应的实例上去执行 或如下也可以
+select
+           (select username from v$session where sid=a.sid) blocker,
+         a.sid,
+         a.id1,
+         a.id2,
+       ' is blocking ' "IS BLOCKING",
+         (select username from v$session where sid=b.sid) blockee,
+             b.sid
+    from v$lock a, v$lock b
+   where a.block = 1
+     and b.request > 0
+     and a.id1 = b.id1
+     and a.id2 = b.id2;
+     
+     
+-- 查询DDL锁的sql
+SELECT sid, event, p1raw, seconds_in_wait, wait_time FROM sys.v_$session_wait WHERE event like 'library cache %';
+p1raw结果为'0000000453992440'
+SELECT s.sid, kglpnmod "Mode", kglpnreq "Req", s.LOGON_TIME FROM x$kglpn p, v$session s WHERE p.kglpnuse=s.saddr AND kglpnhdl='0000000453992440';
+
+-- 查询锁住的DDL对象
+select d.session_id,s.SERIAL#,d.name from dba_ddl_locks d,v$session s where d.owner='MKLMIGEM' and d.SESSION_ID=s.sid
+
 ```
 
-## 3.12 数据库文件
+## 3.12 数据文件
 
 ### 3.12.1 数据文件
 
@@ -2847,6 +2957,28 @@ SELECT /* SHSNC */ /*+ RULE */
  WHERE F.TS# = T.TS#
    AND T.NAME in ('PM4H_SELF','PM4H_HW')
  ORDER BY F.CREATION_TIME;
+ 
+ 
+-- 查看数据文件可用百分比
+select b.file_id,b.tablespace_name,b.file_name,b.AUTOEXTENSIBLE,
+ROUND(b.bytes/1024/1024/1024,2) ||'G'  "文件总容量",
+ROUND((b.bytes-sum(nvl(a.bytes,0)))/1024/1024/1024,2)||'G' "文件已用容量",
+ROUND(sum(nvl(a.bytes,0))/1024/1024/1024,2)||'G' "文件可用容量",
+ROUND(sum(nvl(a.bytes,0))/(b.bytes),2)*100||'%' "文件可用百分比"
+from dba_free_space a,dba_data_files b
+where a.file_id=b.file_id
+group by b.tablespace_name,b.file_name,b.file_id,b.bytes,b.AUTOEXTENSIBLE
+order by b.tablespace_name;
+
+-- 查看数据文件可用百分比
+select b.file_id,b.tablespace_name,b.file_name,b.AUTOEXTENSIBLE,
+ROUND(b.MAXBYTES/1024/1024/1024,2) ||'G'  "文件最大可用总容量",
+ROUND((b.bytes-sum(nvl(a.bytes,0)))/1024/1024/1024,2)||'G' "文件已用容量",
+ROUND(((b.MAXBYTES/1024/1024/1024)-((b.bytes-sum(nvl(a.bytes,0)))/1024/1024/1024))/(b.MAXBYTES/1024/1024/1024),2)*100||'%' "文件可用百分比"
+from dba_free_space a,dba_data_files b
+where a.file_id=b.file_id and b.file_id>4
+group by b.tablespace_name,b.file_name,b.file_id,b.bytes,b.AUTOEXTENSIBLE,b.MAXBYTES
+order by b.tablespace_name;
 ```
 
 ### 3.12.2 数据文件需要还原
@@ -3249,7 +3381,32 @@ SELECT B.OWNER || '.' || B.INDEX_NAME INDEX_NAME,
            AND TABLE_OWNER = UPPER('SCOTT')) B
  WHERE A.TABLE_OWNER = B.TABLE_OWNER
    AND A.TABLE_NAME = B.TABLE_NAME
-   AND A.INDEX_NAME = B.INDEX_NAME;
+   AND A.INDEX_NAME = B.INDEX_NAME;  
+```
+
+**查看无索引的表**
+
+```plsql
+select * from dba_tables where table_name not in (select DISTINCT table_name from dba_indexes  where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS'))
+                     and owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS');  
+```
+
+  **查询索引碎片的比例**
+
+```plsql
+select name,del_lf_rows,lf_rows, round(del_lf_rows/decode(lf_rows,0,1,lf_rows)*100,0)||'%' frag_pct from index_stats where round(del_lf_rows/decode(lf_rows,0,1,lf_rows)*100,0)>30;
 ```
 
 ## 3.17 Segment查看
@@ -3758,8 +3915,8 @@ FROM dual;
 ## 5.3 查看业务用户
 
 ```plsql
-select USER_NAME,CREATED from dba_users where DEFAULT_TABLESPACE not in('SYSTEM','SYSAUX') AND username not in('ANONYMOUS','APEX_030200', 'APEX_PUBLIC_USER', 'APPQOSSYS', 'CTXSYS', 'DIP', 'EXFSYS', 'FLOWS_FILES', 'MDDATA', 'OLAPSYS', 'ORACLE_OCM','ORDDATA', 'ORDPLUGINS', 'ORDSYS', 'OUTLN',
-'OWBSYS', 'OWBSYS_AUDIT', 'SI_INFORMTN_SCHEMA', 'SPATIAL_CSW_ADMIN_USR', 'SPATIAL_WFS_ADMIN_USR', 'SYS', 'SYSTEM', 'WMSYS','XDB','XS$NULL','SCOTT','DBSNMP','SYSMAN','MGMT_VIEW','MDSYS');
+select USER_NAME,CREATED from dba_users where DEFAULT_TABLESPACE not in('SYSTEM','SYSAUX') AND username not in('ANONYMOUS','APEX_030200', 'APEX_PUBLIC_USER', 'APPQOSSYS', 'CTXSYS', 'DIP', 'EXFSYS', 'FLOWS_FILES', 'MDDATA', 'OLAPSYS', 'ORACLE_OCM','ORDDATA', 
+ 'ORDPLUGINS', 'ORDSYS', 'OUTLN','OWBSYS', 'OWBSYS_AUDIT', 'SI_INFORMTN_SCHEMA', 'SPATIAL_CSW_ADMIN_USR', 'SPATIAL_WFS_ADMIN_USR', 'SYS', 'SYSTEM', 'WMSYS','XDB','XS$NULL','SCOTT','DBSNMP','SYSMAN','MGMT_VIEW','MDSYS');
 ```
 
 ## 5.4 资源管理计划
@@ -3957,7 +4114,8 @@ select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_tex
 select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_text from v$session a,v$sqlarea b where a.sql_hash_value=b.hash_value and a.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
 -- 如果能查询到记录，则说明可能是因为这个SQL执行慢，导致其它session被阻塞，此时需要等待SQL执行完毕以解锁；如果查询不到记录，则说明可能是因为某次执行了更新，未commit提交导致锁表，需要通过后续步骤判断是否有锁存在。
 -- 查询锁信息。
-select o.object_name, s.osuser,s.machine, s.program, s.status,s.sid,s.serial#,p.spid from v$locked_object l,dba_objects o,v$session s,v$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr and s.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
+select o.object_name, s.osuser,s.machine, s.program, s.status,s.sid,s.serial#,p.spid from v$locked_object l,dba_objects o,v$session s,v$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr
+and s.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
 ```
 
 ## 5.11  keep_buffer_pool
@@ -3983,9 +4141,10 @@ alter table xxx storage(buffer_pool keep);
 CREATE INDEX cust_idx ... STORAGE (BUFFER_POOL KEEP);
 ALTER TABLE customer STORAGE (BUFFER_POOL KEEP);
 ALTER INDEX cust_name_idx STORAGE (BUFFER_POOL KEEP);  
-同时要修改表的cache属性：
+
+-- 同时要修改表的cache属性：
 Alter table xxx cache;
-也可以在表创建时直接指定相应的属性：
+-- 也可以在表创建时直接指定相应的属性：
 create table aaa(i int) storage (buffer_pool keep);
 create table bbb(i int) storage (buffer_pool keep) cache;
     
@@ -4039,6 +4198,16 @@ select /*+ cache*/ empno,ename from scott.emp;
 
 **注意** cache table*与*keep buffer pool*的异同
 
-  两者的目的都是尽可能将最热的对象置于到*buffer pool*，尽可能的避免*aged out*。*cache table*是将对象置于到*default buffer cache*。  而使用*buffer_pool keep*子句是将对象置于到*keep buffer pool*。  
+  两者的目的都是尽可能将最热的对象置于到buffer pool，尽可能的避免aged out。cache table是将对象置于到default buffer cache。  而使用buffer_pool keep子句是将对象置于到keep buffer pool.buffer_pool和cache同时指定时，keep比cache有优先权。*buffer_pool*用来指定存贮使用缓冲池，而cache/nocache指定存储的方式(LRU或MRU端)。建表时候不注明的话,nocache是默认值。
 
-当*buffer_pool*和*cache*同时指定时，*keep*比*cache*有优先权。*buffer_pool*用来指定存贮使用缓冲池，而*cache/nocache*指定存储的方式*(LRU*或*MRU*端*)*。建表时候不注明的话，*nocache*是默认值。
+## 5.13 族表
+
+```plsql
+-- 集群因子clustering_factor高的表,集群因子越接近块数越好，接近行数则说明索引列的列值相等的行分布极度散列，可能不走索引扫描而走全表扫描
+select tab.table_name,tab.blocks,tab.num_rows,ind.index_name,ind.clustering_factor,
+round(nvl(ind.clustering_factor,1)/decode(tab.num_rows,0,1,tab.num_rows),3)*100||'%' "集群因子接近行数"
+from user_tables tab, user_indexes ind where tab.table_name=ind.table_name
+and tab.blocks>100
+and nvl(ind.clustering_factor,1)/decode(tab.num_rows,0,1,tab.num_rows) between 0.35 and 3
+```
+
