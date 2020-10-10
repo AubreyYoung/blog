@@ -2861,22 +2861,134 @@ mysql 5.7.22，去掉--flush-logs，只使用mysqldump -uroot -proot --default-c
 
 ## 1. 数据库操作
 
+### 1.1 基本操作
+
 ```mysql
+-- 登录 mysql -h ip -P 端⼜ -u ⽤户名 -p
+mysql -h localhost -P 3306 -u root -p
+-- 查看数据库版本
+mysql -V
+mysql --version
+select version();    -- 登录情况下，查看链接的库版本
 -- 如果【某数据库】存在就删除【某数据库】 
 DROP DATABASE IF EXISTS db;
 -- 如果【某数据库】不存在就创建【某数据库】
 CREATE DATABASE IF NOT EXISTS db;
 CREATE DATABASE IF NOT EXISTS yourdbname DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 create database yourdb DEFAULT CHARACTER SET gbk COLLATE gbk_chinese_ci;
--- 使用【某数据库】
-USE db;
--- 查看数据库
+-- 显示所有数据库
 show databases;
--- 查看创建语句
+-- 进⼊指定的库：use 库名;
+USE db;
+-- 显示当前库中所有的表
+show tables;
+-- 查看其他库中所有的表：show tables from 库名;
+show tables from seata;
+-- 查看表的创建语句：show create table 表名;
 show create database mytest;
+-- 查看表结构：desc 表名;
+desc biz_tags;
+-- 查看当前所在库：
+select database();
+-- 查看当前mysql⽀持的存储引擎
+SHOW ENGINES;
+-- 查看系统变量及其值
+SHOW VARIABLES;
+-- 查看某个系统变量：SHOW VARIABLES like '变量名';
+SHOW VARIABLES like 'wait_timeout';
+SHOW VARIABLES like '%timeout%';
 -- 修改数据库字符集
 alter database sampdb character set utf8 collate utf8_general_ci;
 ```
+### 1.2 MySQL语法规范
+
+1. 不区分⼤⼩写，但建议关键字⼤写，表名、列名⼩写
+
+2. 每条命令最好⽤英⽂分号结尾
+
+3. 每条命令根据需要，可以进⾏缩进或换⾏
+
+4. 注释
+    – 单⾏注释：#注释⽂字
+    – 单⾏注释：-- 注释⽂字 ，注意， 这⾥需要加空格
+    – 多⾏注释：/* 注释⽂字 */
+
+### 1.3 SQL的语⾔分类
+-  DQL（Data Query Language）：数据查询语⾔ select 相关语句
+-  DML（Data Manipulate Language）：数据操作语⾔ insert 、update、delete 语句
+- DDL（Data De>ine Languge）：数据定义语⾔ create、drop、alter 语句
+-  TCL（Transaction Control Language）：事务控制语⾔ set autocommit=0、start transaction、savepoint、commit、rollback
+
+### 1.4 MySQL的数据类型
+
+主要包括以下五⼤类
+
+- 整数类型：bit、bool、tinyint、smallint、mediumint、int、bigint
+- 浮点数类型：float、double、decimal
+- 字符串类型：char、varchar、tinyblob、blob、mediumblob、longblob、tinytext、text、mediumtext、longtext
+- ⽇期类型：Date、DateTime、TimeStamp、Time、Year
+- 其他数据类型：暂不介绍，⽤的⽐较少。
+
+**整数类型**
+
+| 类型                      | 字节数 | 有符号值范围       | 无符号值范围 |
+| ------------------------- | ------ | ------------------ | ------------ |
+| tinyint[(n)] [unsigned]   | 1      | [- 2^7^, 2^7^-1]   | [0, 2^8^-1]  |
+| smallint[(n)] [unsigned]  | 2      | [- 2^15^, 2^15^-1] | [0, 2^16^-1] |
+| mediumint[(n)] [unsigned] | 3      | [- 2^23^, 2^23^-1] | [0, 2^24^-1] |
+| int[(n)] [unsigned]       | 4      | [- 2^31^, 2^31^-1] | [0, 2^32^-1] |
+| bigint[(n)] [unsigned]    | 8      | [- 2^63^, 2^63^-1] | [0, 2^64^-1] |
+
+上面[]包含的内容是可选的，默认是有符号类型的，无符号的需要在类型后面跟上unsigned
+
+```sql
+-- 有符号类型
+mysql> create table demo1(
+c1 tinyint
+);
+Query OK, 0 rows affected (0.01 sec)
+mysql> insert into demo1 values(-pow(2,7)),(pow(2,7)-1);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2 Duplicates: 0 Warnings: 0
+mysql> select * from demo1;
++------+
+| c1 |
++------+
+| -128 |
+| 127 |
++------+
+2 rows in set (0.00 sec)
+mysql> insert into demo1 values(pow(2,7));
+ERROR 1264 (22003): Out of range value for column 'c1' at row 1
+-- demo1表中c1 字段为tinyint有符号类型的，可以看一下上面的演示，有超出范围报错的。关于数值对应的范围计算方式属于计算机基础的一些知识，可以去看一下计算机的二进制表示相关的文
+章。
+
+--无符号类型
+mysql> create table demo2(
+c1 tinyint unsigned
+);
+Query OK, 0 rows affected (0.01 sec)
+mysql> insert into demo2 values (-1);
+ERROR 1264 (22003): Out of range value for column 'c1' at row 1
+mysql> insert into demo2 values (pow(2,8)+1);
+ERROR 1264 (22003): Out of range value for column 'c1' at row 1
+mysql> insert into demo2 values (0),(pow(2,8));
+mysql> insert into demo2 values (0),(pow(2,8)-1);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2 Duplicates: 0 Warnings: 0
+mysql> select * from demo2;
++------+
+| c1 |
++------+
+| 0 |
+| 255 |
++------+
+2 rows in set (0.00 sec)
+-- c1是⽆符号的tinyint类型的，插⼊了负数会报错。
+```
+
+
+
 ## 2. 分区表
 
 ### 2.1 分区类型

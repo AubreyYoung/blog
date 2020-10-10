@@ -902,6 +902,35 @@ END;
 /
 ```
 
+| 参数                                   | 解释                                                         | 级别 |
+| -------------------------------------- | :----------------------------------------------------------- | ---- |
+| dit_trail: DB,  EXTENDED               | 审计（Audit）用于监视用户所执行的数据库操作，审计记录可存在数据字典表，当数据库的审计是开启时，在语句执行阶段产生审计记录。<br />\|由于审计表（AUD\$）存放在SYSTEM表空间，因此为了不影响系统的性能，保护SYSTEM表空间，建议把AUD$移动到其他的表空间上，或者关闭审计。<br />参考命令：alter  system set audit_trail='NONE' #INSTANCE# scope=spfile | 警告 |
+| parallel_force_local                   | 为了降低集群间的数据交互，建议并行进程强制在本地实例分配，以便降低集群间的数据交互。<br />参考命令：alter  system set parallel_force_local=TRUE #INSTANCE# | 警告 |
+| _gc_policy_time                        | DRM（Dynamic Resource  Mastering）负责将 Cache 资源 Remaster 到频繁访问这部分数据的节点上，从而提高 RAC 的性能。<br />但是 DRM 在实际使用中存在诸多  Bug，频繁的 DRM 会引发实例长时间 Hang 住甚至是宕机，建议关闭 DRM。<br />参考命令：alter  system set "_gc_policy_time"=0 #INSTANCE# scope=spfile; | 严重 |
+| _gc_undo_affinity                      | 建议关闭集群 Undo  Affinity，降低集群交互，避免触发相关 BUG。<br />参考命令：alter  system set "_gc_undo_affinity"=FALSE #INSTANCE# scope=spfile; | 严重 |
+| _optimizer_use_feedback                | 基数反馈（Cardinality  Feedback）是 Oracle 11.2 中引入的关于 SQL  性能优化的新特性，该特性主要针对统计信息陈旧、无直方图或虽然有直方图但仍基数计算不准确的情况，<br />Cardinality 基数的计算直接影响到后续的 JOIN  COST 等重要的成本计算评估，造成 CBO 选择不当的执行计划。但是该参数存在不稳定因素，可能会带来执行效率的问题，建议关闭优化器反馈。<br />参考命令：alter  system set "_optimizer_use_feedback"=FALSE #INSTANCE#; | 警告 |
+| deferred_segment_creation              | 延迟段创建会导致使用 Direct 方式的  Export 出来的 DMP 文件无法正常导入（文档 ID 1604983.1），建议关闭延迟段创建的特性。<br />参考命令：alter  system set deferred_segment_creation=FALSE #INSTANCE#; | 提示 |
+| _undo_autotune                         | 隐含参数 _undo_autotune 负责  undo retention（即 undo 段的保持时间）的自动调整，若由 Oracle 自动负责 undo retention，<br />则 Oracle  会根据事务量来占用 undo 表空间，可能会形成 undo 表空间的争用，建议将其关闭。<br />参考命令：alter  system set "_undo_autotune"=FALSE #INSTANCE#; | 严重 |
+| _memory_imm_mode_without_autosga       | alter system set  "_memory_imm_mode_without_autosga"=false sid='*' scope=spfile;<br />说明：11.2.0.3开始，即使是手工管理内存方式下，如果某个POOL内存吃紧，Oracle仍然可能会自动调整内存，用这个参数来关闭这种行为 | 警告 |
+| event                                  | alter system set  event='28401 trace name context forever,level 1','10949 trace name context  forever,level 1' sid='*' scope=spfile;<br />说明：这个参数主要设置2个事件：<br />1）  10949事件用于关闭11g的自动serial direct path read特性，避免出现过多的直接路径读，消耗过多的IO资源。<br />2）  28401事件用于关闭11g数据库中用户持续输入错误密码时的延迟用户验证特性，避免用户持续输入错误密码时产生大量的row cache  lock或library cache lock等待，严重时使数据库完全不能登录。 | 严重 |
+| enable_ddl_logging                     | alter system set  enable_ddl_logging=true sid='*' scope=spfile;<br />说明：在11g里面，打开这个参数可以将ddl语句记录在alert日志中。以便于某些故障的排查。建议在OLTP类系统中使用。 | 提示 |
+| parallel_max_servers                   | alter system set  parallel_max_servers=cpu_count逻辑CPU数 sid='*' scope=spfile;<br />说明：这个参数默认值与CPU相关，OLTP系统中将这个参数设置小一些，可以避免过多的并行对系统造成冲击。 | 提示 |
+| result_cache_max_size                  | alter system set  result_cache_max_size=0 scope=spfile sid='*';<br />说明：12c中关闭result_cache，容易触发latch  free等bug。 | 严重 |
+| _optimizer_ads_use_result_cache        | alter system set  "_optimizer_ads_use_result_cache" = FALSE scope=spfile sid='*';<br />说明：12c中关闭result_cache，容易触发latch  free等bu | 警告 |
+| _datafile_write_errors_crash_instance  | alter system set  "_datafile_write_errors_crash_instance"=FALSE scope=spfile sid='*';<br />说明：在 PDB  由于某些原因丢失数据文件后，允许 CDB 继续运行。注意: 只对 PDB 的非系统数据文件有效。 | 警告 |
+| _optimizer_adaptive_plans              | alter system set  "_optimizer_adaptive_plans"=FALSE scope=spfile sid='*';<br />说明：关闭自适应执行 | 警告 |
+| _optimizer_aggr_groupby_elim           | alter system set  "_optimizer_aggr_groupby_elim"=FALSE scope=spfile sid='*';<br />19567916.8，Wrong  results when GROUP BY uses nested queries in 12.1.0.2 | 警告 |
+| _optimizer_reduce_groupby_key          | alter system set  "_optimizer_reduce_groupby_key"=FALSE scope=spfile sid='*';<br />说明：Wrong  results from OUTER JOIN with a bind variable and a GROUP BY claus | 警告 |
+| _optimizer_cost_based_transformation   | alter system set  "_optimizer_reduce_groupby_key"=off scope=spfile sid='*';<br />说明：关闭COST查询转换。 | 警告 |
+| _optimizer_adaptive_cursor_sharing     | 隐含参数  _optimizer_adaptive_cursor_sharing 能控制自适应式游标共享的部分行为，由 Oracle  自适应的处理绑定变量的窥探，但这可能会触发性能问题。 Oracle 建议在非技术指导下，将其关闭掉。<br />参考命令：alter  system set "_optimizer_adaptive_cursor_sharing"=FALSE #INSTANCE#; | 警告 |
+| _optimizer_extended_cursor_sharing     | 建议禁用自适应游标共享，将隐含参数_optimizer_extended_cursor_sharing设置为  NONE。<br />参考命令：alter  system set "_optimizer_extended_cursor_sharing"='NONE' #INSTANCE#; | 警告 |
+| _optimizer_extended_cursor_sharing_rel | 建议禁用自适应游标共享，将隐含参数_optimizer_extended_cursor_sharing_rel设置为  NONE。<br />参考命令：alter  system set "_optimizer_extended_cursor_sharing_rel"='NONE'  #INSTANCE#; | 警告 |
+| _optimizer_null_aware_antijoin         | 参数  _optimizer_null_aware_antijoin 是在 Oracle 11g  引入的新参数，它用于解决在反连接（Anti-Join）时，关联列上存在空值（NULL）或关联列无非空约束的问题。但是该参数不稳定，存在较多的  Bug，为避免触发相关 Bug，建议关闭。<br />参考命令：alter  system set "_optimizer_null_aware_antijoin"=FALSE #INSTANCE#; | 警告 |
+| _PX_use_large_pool                     | 并行执行的从属进程在工作时需要交换数据和信息，默认从  Shared Pool 中分配内存空间。当 _PX_use_large_pool=TRUE 时并行进程将从 Large Pool  中分配内存，减少对共享池（Shared Pool）的争用。<br />参考命令：alter  system set "_PX_use_large_pool"=TRUE scope=spfile #INSTANCE#; | 警告 |
+| _partition_large_extents               | 建议关闭分区使用大的初始化区（Extent）。<br />参考命令：alter  system set "_partition_large_extents"=FALSE #INSTANCE#; | 警告 |
+| _use_adaptive_log_file_sync            | Oracle 默认启用  _use_adaptive_log_file_sync 参数，使得 LGWR 进程写日志的方式能自动在 post/wait 和 polling  两种方式之间进行取舍，可能会导致比较严重的写日志等待（log file sync的平均单次等待时间较高）,建议关闭此功能。<br />参考命令：alter  system set "_use_adaptive_log_file_sync"=FALSE #INSTANCE#; | 严重 |
+| job_queue_processes                    | alter system set  job_queue_processes=cpu_core（CPU核数） scope=spfile sid='*';<br />说明：默认1000，建议调整为CPU核数。 | 提示 |
+
 ### 2.5.5 Oracle 参数调优
 
 ```plsql
@@ -953,16 +982,14 @@ PARALLEL_MAX_SEVERS参数设置并行执行可用的最大进程数量，该参�
 
 隐藏参数含义
 
-| NAME                        | VALUE | ISDEFAULT | DESCRIPTION                                             | ISMOD | ISADJ |
-| --------------------------- | ----- | --------- | ------------------------------------------------------- | ----- | ----- |
-| _PX_use_large_pool          | TRUE  | FALSE     | Use Large Pool as source of PX buffers                  | FALSE | FALSE |
-| _buffer_busy_wait_timeout   | 2     | FALSE     | buffer busy wait time in centiseconds                   | FALSE | FALSE |
-| _enable_NUMA_support        | FALSE | TRUE      | Enable NUMA support and optimizations                   | FALSE | FALSE |
-| _kgl_hot_object_copies      | 2     | FALSE     | Number of copies for the hot object                     | FALSE | FALSE |
-| _kill_diagnostics_timeout   | 140   | FALSE     | timeout delay in seconds before killing enqueue blocker | FALSE | FALSE |
-| _lm_rcvr_hang_allow_time    | 140   | FALSE     | receiver hang allow time in seconds                     | FALSE | FALSE |
-| _optim_peek_user_binds      | FALSE | FALSE     | enable peeking of user binds                            | FALSE | FALSE |
-| _use_adaptive_log_file_sync | FALSE | FALSE     | Adaptively switch between post/wait and polling         | FALSE | FALSE |
+| NAME                      | VALUE | ISDEFAULT | DESCRIPTION                                             | ISMOD | ISADJ |
+| ------------------------- | ----- | --------- | ------------------------------------------------------- | ----- | ----- |
+| _buffer_busy_wait_timeout | 2     | FALSE     | buffer busy wait time in centiseconds                   | FALSE | FALSE |
+| _enable_NUMA_support      | FALSE | TRUE      | Enable NUMA support and optimizations                   | FALSE | FALSE |
+| _kgl_hot_object_copies    | 2     | FALSE     | Number of copies for the hot object                     | FALSE | FALSE |
+| _kill_diagnostics_timeout | 140   | FALSE     | timeout delay in seconds before killing enqueue blocker | FALSE | FALSE |
+| _lm_rcvr_hang_allow_time  | 140   | FALSE     | receiver hang allow time in seconds                     | FALSE | FALSE |
+| _optim_peek_user_binds    | FALSE | FALSE     | enable peeking of user binds                            | FALSE | FALSE |
 
 ### 2.5.6 ASM隐藏参数
 
@@ -2241,7 +2268,8 @@ SELECT owner,index_name,INDEX_TYPE,TABLE_OWNER,TABLE_NAME,TABLE_TYPE,blevel,PART
 ```plsql
 select t.owner,t.table_name,t.index_name,t.index_type,t.status,t.blevel,t.leaf_blocks from dba_indexes t
 where index_type in ('BITMAP', 'FUNCTION-BASED NORMAL', 'NORMAL/REV')
-and owner not in ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS') and owner in (select username from dba_users where account_status='OPEN');
+and owner not in ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS') 
+and owner in (select username from dba_users where account_status='OPEN');
 ```
 
 ## 2.29 SYSTEM表空间业务数据
@@ -2249,7 +2277,8 @@ and owner not in ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYS
 ```plsql
 select * from (select owner, segment_name, segment_type,tablespace_name
   from dba_segments where tablespace_name in('SYSTEM','SYSAUX'))
-where  owner not in ('MTSSYS','ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS') and owner in (select username from dba_users where account_status='OPEN');
+where  owner not in ('MTSSYS','ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS')
+and owner in (select username from dba_users where account_status='OPEN');
 ```
 
 ## 2.30 表的并行度
@@ -3179,7 +3208,7 @@ and last_analyzed <=  TO_DATE('2019-09-26 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
 and  last_analyzed >= TO_DATE('2019-09-21 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
 
 -- 收集表统计信息
-exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZ,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 4, cascade => TRUE ); 
+exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 4, cascade => TRUE ); 
 
 -- 收集表分区统计信息
 exec dbms_stats.gather_table_stats(ownname=>'PM4H_DB', tabname=> 'IND_TOH_21989_2',partname => 'P21989_2_20190926',estimate_percent =>DBMS_STATS.AUTO_SAMPLE_SIZE,method_opt=> 'FOR ALL COLUMNS SIZE AUTO', degree => 10, cascade => TRUE ); 
