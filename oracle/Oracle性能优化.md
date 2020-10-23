@@ -957,8 +957,6 @@ V$WAITSTAT 视图保持自实例启动所有的等待事件统计信息。
 SELECT * FROM  v$waitstat order by count desc;
 ```
 
-
-
 ## 3.6 等待事件相关视图
 
 ```plsql
@@ -1336,6 +1334,10 @@ WHERE
     t.sql_plan_operation = 'TABLE ACCESS'
     AND sql_plan_options = 'FULL'
     group by target;
+    
+col name for a30
+select name,value from v$sysstat    where name in ('table scans (short tables)','table scans (long tables)');
+  
 ```
 
 # 8. 10046Trace

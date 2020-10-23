@@ -172,7 +172,7 @@ set linesize 150
 col path format a60;
 col group_name format a10
 col name format a20
-select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from v$asm_disk a,v$asm_diskgroup b where a.group_number=b.group_number;
+select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb/1024 from v$asm_disk a,v$asm_diskgroup b where a.group_number=b.group_number;
 
 -- 查看ASM磁盘组使用率
 select name,round(total_mb/1024) "总容量",round(free_mb/1024) "空闲空间",round((free_mb/total_mb)*100) "可用空间比例" from gv$asm_diskgroup;
@@ -2300,6 +2300,8 @@ col OWNER for a15
 col TRIGGER_NAME for a30
 col TABLE_NAME for a40
 SELECT owner, trigger_name, table_name, status FROM dba_triggers WHERE  owner in (select username from dba_users where account_status='OPEN');
+
+select owner,trigger_name,table_name,status from dba_triggers where status= 'DISABLED';
 ```
 
 ## 2.33 Disabled Constraint(s) 
