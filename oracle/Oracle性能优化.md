@@ -1,154 +1,7 @@
-# 1. AWR、ASH
 
-## 1.1 生成AWR、ASH、ADDM
+# 1. 会话相关
 
-**脚本目录  $ORACLE_HOME/rdbms/admin**
-
-```
-@?/rdbms/admin/addmrpt.sql
-@?/rdbms/admin/awrrpt.sql
-@?/rdbms/admin/ashrpt.sql
-```
-## 1.2 快照设置
-```
--- 修改快照时间间隔
-EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
--- 手动生成快照
-EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
-或
-BEGIN 
-  DBMS_WORKLOAD_REPOSITORY.create_snapshot(); 
-END; 
-/
-
--- 生成 AWR 基线：
-BEGIN 
-  DBMS_WORKLOAD_REPOSITORY.create_baseline ( 
-    start_snap_id => 10,  
-    end_snap_id   => 100, 
-    baseline_name => 'AWR First baseline'); 
-END; 
-/
-
--- 生成 AWR 基线(11g)：
-BEGIN
-DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
-start_time => to_date('&start_date_time','&start_date_time_format'),
-end_time => to_date('&end_date_time','&end_date_time_format'),
-baseline_name => 'MORNING',
-template_name => 'MORNING',
-expiration => NULL ) ;
-END;
-/
-
--- 基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
-BEGIN
-DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
-day_of_week => 'MONDAY',
-hour_in_day => 9,
-duration => 3,
-start_time => to_date('&start_date_time','&start_date_time_format'),
-end_time => to_date('&end_date_time','&end_date_time_format'),
-baseline_name_prefix => 'MONDAY_MORNING'
-template_name => 'MONDAY_MORNING',
-expiration => 30 );
-END;
-/
-
--- 删除 AWR 基线：
-BEGIN
-    DBMS_WORKLOAD_REPOSITORY.DROP_BASELINE (baseline_name => 'AWR First baseline');
-END;
-/
-```
-## 1.3 其他AWR脚本
-```
-awrrpt.sql 
-展示一段时间范围两个快照之间的数据库性能指标。
-awrrpti.sql 
-展示一段时间范围两个快照之间的特定数据库和特定实例的性能指标。
-awrsqrpt.sql
-展示特定 SQL 在一段时间范围两个快照之间的性能指标，运行这个脚本来检查和诊断一个特定 SQL 的性能问题。
-awrsqrpi.sql 
-展示特定 SQL 在特定数据库和特定实例的一段时间范围内两个快照之间的性能指标。
-awrddrpt.sql
-用于比较两个指定的时间段之间数据库详细性能指标和配置情况。
-awrddrpi.sql 
-用于在特定的数据库和特定实例上，比较两个指定的时间段之间的数据库详细性能指标和配置情况。
-awrextr.sql/awrload.sql
-导出/导入AWR数据
-```
-
-## 1.4 AWR 相关的视图
-
-如下系统视图与 AWR 相关：
-
-```
-V$ACTIVE_SESSION_HISTORY - 展示每秒采样的 active session history (ASH)。
-V$METRIC - 展示度量信息。
-V$METRICNAME - 展示每个度量组的度量信息。
-V$METRIC_HISTORY - 展示历史度量信息。
-V$METRICGROUP - 展示所有的度量组。
-DBA_HIST_ACTIVE_SESS_HISTORY - 展示 active session history 的历史信息。
-DBA_HIST_BASELINE - 展示 AWR 基线信息。
-DBA_HIST_DATABASE_INSTANCE - 展示数据库环境信息。
-DBA_HIST_SNAPSHOT - 展示 AWR 快照信息。
-DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
-DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
-```
-## 1.5 查看ASH信息
-
-![image-20191202111133104](Oracle性能优化.assets/image-20191202111133104.png)
-
-```plsql
-select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
-       from v$active_session_history ash, v$event_name enm 
-       where ash.event#=enm.event# 
-       and SESSION_ID=&SID and SAMPLE_TIME>=(sysdate-&minute/(24*60));
-
--- Input is:
--- Enter value for sid: 15 
--- Enter value for minute: 1  /* How many minutes activity you want to see */
-
-
--- ASH
--- Most Active SQL in the Previous Hour	desc gv$active_session_history
-
-SELECT sql_id,COUNT(*),ROUND(COUNT(*)/SUM(COUNT(*)) OVER(), 2) PCTLOAD
-FROM gv$active_session_history ash
-WHERE ash.sample_time > SYSDATE - 1/24
-AND ash.session_type = 'BACKGROUND'
-GROUP BY ash.sql_id
-ORDER BY COUNT(*) DESC;
-
-SELECT ash.sql_id,COUNT(*),ROUND(COUNT(*)/SUM(COUNT(*)) OVER(), 2) PCTLOAD
-FROM gv$active_session_history ash
-WHERE ash.sample_time > SYSDATE - 1/24
-AND ash.session_type = 'FOREGROUND'
-GROUP BY ash.sql_id
-ORDER BY COUNT(*) DESC;
--- Most Active I/O	
-SELECT DISTINCT wait_class
-FROM gv$event_name
-ORDER BY 1;
-
-SELECT sql_id, COUNT(*)
-FROM gv$active_session_history ash, v$event_name evt
-WHERE ash.sample_time > SYSDATE - 3/24
-AND ash.session_state = 'WAITING'
-AND ash.event_id = evt.event_id
-AND evt.wait_class = 'System I/O'
-GROUP BY sql_id
-ORDER BY COUNT(*) DESC;
-
--- modify the above query, if necessary, until the condition yields a SQL_ID
-set linesize 121
-SELECT * FROM TABLE(dbms_xplan.display_cursor('424h0nf7bhqzd'));
-```
-
-# 2. 会话相关
-
-## 2.1 查看查询SID、SPID
+## 1.1 查看查询SID、SPID
 
 ```plsql
 -- 方法一：
@@ -229,7 +82,7 @@ select s.sid,s.serial#,s.LOGON_TIME,s.machine,p.spid,p.terminal from v$session s
 tcp      210      0 192.168.64.228:11095        192.168.21.16:1521          ESTABLISHED 17630/oracleDB
 tcp        0      0 ::ffff:192.168.64.228:1521  ::ffff:192.168.64.220:59848 ESTABLISHED 17630/oracleDB
 ```
-## 2.2 表相关SQL、SID、SPID
+## 1.2 表相关SQL、SID、SPID
 
 ```plsql
 --- 单实例
@@ -245,7 +98,7 @@ and s.sql_address=y.address
 and y.sql_text like '%scott%';
 ```
 
-##  2.3 查询SQL以及session
+##  1.3 查询SQL以及session
 
 ```plsql
 -- 查询执行最慢的sql
@@ -268,7 +121,7 @@ select *
  where rownum <= 50;
 ```
 
-## 2.4 会话管理
+## 1.4 会话管理
 
 ```
 select
@@ -300,7 +153,7 @@ select inst_id,sid,serial#,status,sql_id,sql_exec_start,module,blocking_session 
 select inst_id,sid,sql_id,event,module,machine,blocking_session  from gv$session where module ='PL/SQL Developer';
 ```
 
-## 2.5 查杀会话
+## 1.5 查杀会话
 
 ```
 SELECT 'Lock' "Status",
@@ -328,7 +181,7 @@ order by b.ctime;
 alter system kill session '1568,27761,@2' immediate; 
 ```
 
-## 2.6 根据SID查询SQL
+## 1.6 根据SID查询SQL
 
 ```plsql
 select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid;
@@ -341,7 +194,7 @@ SELECT 'ps -ef|grep ' || TO_CHAR(SPID) ||
    AND S.SQL_ID = '$2';
 ```
 
-## 2.7 会话资源占用
+## 1.7 会话资源占用
 sessions with highest CPU consumption
 
 ```plsql
@@ -385,7 +238,7 @@ AND s.logon_time > (SYSDATE - 240/1440) -- sessions logged on within 4 hours
 AND st.value > 0;
 ```
 
-## 2.8 查询SQL语句的SQL_ID
+## 1.8 查询SQL语句的SQL_ID
 
 ```
 SELECT sql_id, plan_hash_value, substr(sql_text,1,40) sql_text FROM v$sql WHERE sql_text like 'SELECT /* TARGET SQL */%'
@@ -402,15 +255,13 @@ select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, inv
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
 ```
 
-## 2.9 阻塞会话
+## 1.9 阻塞会话
 
 ```plsql
 select * from GV$SESSION_BLOCKERS;
 ```
 
-
-
-# 3. Top SQL
+# 2. Top SQL
 
 ```plsql
 -- 查询一个会话session、process平均消耗多少内存，查看下面avg_used_M值
@@ -446,11 +297,35 @@ from (select CPU_TIME/1000000,username,PARSING_USER_ID,sql_id,ELAPSED_TIME/10000
    from v$sql,dba_users where user_id=PARSING_USER_ID order by CPU_TIME/1000000 desc)
 where rownum <=5;
 
+-- TOP SQL
+set linesize 220 pagesize 10000
+col begin_interval_time for a30
+col end_interval_time for a30
+select a.SNAP_ID,
+       b.BEGIN_INTERVAL_TIME,
+       b.END_INTERVAL_TIME,
+       c.owner,
+       c.object_Name,
+       c.subobject_name,
+       a.logical_reads_delta,
+       a.physical_reads_delta,
+       a.physical_writes_delta,
+       a.physical_reads_direct_delta,
+       a.buffer_busy_waits_delta,
+       a.db_block_changes_delta,
+       a.row_lock_waits_delta,
+       a.gc_buffer_busy_delta,
+       a.table_scans_delta
+  from dba_hist_seg_stat a, dba_hist_snapshot b,dba_hist_seg_stat_obj c 
+ where a.SNAP_ID = b.SNAP_ID
+   and a.obj#=c.obj#
+   and a.INSTANCE_NUMBER = b.INSTANCE_NUMBER
+   and a.INSTANCE_NUMBER in (select instance_number from v$instance)
+   and b.BEGIN_INTERVAL_TIME>sysdate-3
+ order by b.BEGIN_INTERVAL_TIME desc;
 ```
 
-
-
-## 3.1 SQL ordered by Elapsed Time
+## 2.1 SQL ordered by Elapsed Time
 
 方法一: 来源AWR
 
@@ -539,7 +414,63 @@ order by 3 desc
 Provide the BEGIN & END SNAP_ID and no.of top N SQLs to be displayed.
 The Same script can be modified to get the Top SQLs ordered by CPU Time, Buffer gets etc.
 
-## 3.2 Top 10 by Buffer Gets
+**求取每个snapshot内的sql execute elapsed time占据db time时间的百分比例**
+
+```plsql
+set linesize 220 pagesize 1000
+col begin_interval_time for a30
+col end_interval_time for a30
+col stat_name for a40
+WITH 
+sysstat1
+        AS (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.stat_name stat_name,
+       ss.VALUE e_value,
+       LAG(ss.VALUE) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_value
+  FROM dba_hist_sys_time_model ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time >= SYSDATE - 14
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.stat_name = 'DB time'
+   and ss.instance_number in (select instance_number from v$instance)
+              ),
+sysstat2
+        AS (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.stat_name stat_name,
+       ss.VALUE e_value,
+       LAG(ss.VALUE) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_value
+  FROM dba_hist_sys_time_model ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time >= SYSDATE - 14
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.stat_name = 'sql execute elapsed time'
+   and ss.instance_number in (select instance_number from v$instance)
+              )              
+select a.inst_id,
+       a.begin_interval_time,
+       a.end_interval_time,
+       b.stat_name,
+       round((a.e_value - a.b_value) / 1000 / 1000 / 60) db_time_value_min,
+       round((b.e_value - b.b_value) / 1000 / 1000 / 60) stat_name_value_min,
+       round((b.e_value - b.b_value) / (a.e_value - a.b_value) * 100,2) used_percent
+  from sysstat1 a, sysstat2 b
+ where a.inst_id = b.inst_id
+   and a.begin_interval_time = b.begin_interval_time
+   and a.end_interval_time = b.end_interval_time
+ order by 2 desc, 3 desc
+```
+
+## 2.2 Top 10 by Buffer Gets
 
 ```plsql
 set linesize 100
@@ -555,7 +486,7 @@ WHERE rownum <=10
 ;
 ```
 
-## 3.3 Top 10 by Physical Reads
+## 2.3 Top 10 by Physical Reads
 
 ```plsql
 set linesize 100
@@ -571,7 +502,7 @@ WHERE rownum  <=10
 ;
 ```
 
-## 3.4 Top 10 by Executions
+## 2.4 Top 10 by Executions
 
 ```plsql
 set linesize 100
@@ -587,7 +518,7 @@ WHERE rownum  <=10
 ;
 ```
 
-## 3.5 Top 10 by Parse Calls
+## 2.5 Top 10 by Parse Calls
 
 ```plsql
 set linesize 100
@@ -602,7 +533,7 @@ WHERE rownum  <=10
 ;
 ```
 
-## 3.6 Top 10 by Sharable Memory
+## 2.6 Top 10 by Sharable Memory
 
 ```plsql
 set linesize 100
@@ -617,7 +548,7 @@ WHERE rownum  <=10
 ;
 ```
 
-## 3.7 Top 10 by Version Count
+## 2.7 Top 10 by Version Count
 
 ```plsql
 set linesize 100
@@ -632,7 +563,7 @@ WHERE rownum  <=10
 ;
 ```
 
-## 3.8  SQL Ordered by Reloads or Invalidations
+## 2.8  SQL Ordered by Reloads or Invalidations
 
 **SQL Ordered by Reloads**
 
@@ -669,7 +600,7 @@ The following script can be used to identify the top 10 SQLs ordered by reloads 
  select * from (select sql_id, INVALIDATIONS_TOTAL, INVALIDATIONS_DELTA from dba_hist_sqlstat where snap_id between &begin_snap and &end_snap and INVALIDATIONS_DELTA>0 order by 3 desc) where rownum<=10;
 ```
 
-## 3.9 SQL执行历史
+## 2.9 SQL执行历史
 
 **From Memory**
 
@@ -734,6 +665,205 @@ and sample_time < to_date('2019-10-29 09:00:00','yyyy-mm-dd hh24:mi:ss')
 and a.instance_number =1 and a.event ='latch: cache buffers chains'
 group by user_id,sql_id
 order by 3;
+
+-- awr周期的某等待事件的平均响应时间、等待次数、等待时间：
+set linesize 260 pagesize 1000
+col begin_interval_time for a30
+col end_interval_time for a30
+WITH
+x AS (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.event_name event_name,
+       ss.total_waits e_total_waits,
+       LAG(ss.total_waits) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_total_waits,
+       ss.time_waited_micro e_wait_time,
+       LAG(ss.time_waited_micro) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_wait_time
+  FROM dba_hist_system_event ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time >= SYSDATE - 3
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.event_name = '&event_name'
+   and ss.instance_number in (select instance_number from v$instance)
+)
+select inst_id,
+       begin_interval_time,
+       end_interval_time,
+       event_name,
+       round((e_wait_time-b_wait_time)/1000/1000) wait_time_s,
+       round((e_total_waits - b_total_waits)) waits,
+       round((e_wait_time-b_wait_time)/(e_total_waits - b_total_waits)/1000) avg_ms
+  from x
+ order by 2, 3;
+ 
+ 
+-- 某个等待事件占据awr报告snapshot的db time百分比、总等待时间、平均等待时间信息：
+set linesize 260 pagesize 10000
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+col inst_id for 9
+col begin_interval_time for a30
+col end_interval_time for a30
+col event_name for a20
+WITH 
+x AS (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.event_name event_name,
+       ss.total_waits e_total_waits,
+       LAG(ss.total_waits) OVER(partition by ss.event_name ORDER BY ss.snap_id) b_total_waits,
+       ss.time_waited_micro e_wait_time,
+       LAG(ss.time_waited_micro) OVER(partition by ss.event_name ORDER BY ss.snap_id) b_wait_time
+  FROM dba_hist_system_event ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time>= SYSDATE - 1
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.event_name = '&event_name'
+   and ss.instance_number in (select instance_number from v$instance)
+),
+y AS (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.stat_name stat_name,
+       ss.VALUE e_value,
+       LAG(ss.VALUE) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_value
+  FROM dba_hist_sys_time_model ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time >= SYSDATE - 14
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.stat_name = 'DB time'
+   and ss.instance_number in (select instance_number from v$instance)
+              )
+select x.inst_id,
+       x.begin_interval_time,
+       x.end_interval_time,
+       x.event_name,
+       round((x.e_wait_time - x.b_wait_time) / 1000 / 1000) wait_time_s,
+       round(x.e_total_waits - x.b_total_waits) waits,
+       round((x.e_wait_time - x.b_wait_time) /
+             (x.e_total_waits - x.b_total_waits) / 1000) avg_ms,
+       round((x.e_wait_time - x.b_wait_time) / 1000 / 1000 / 60 /
+             z.value_min * 100,
+             1) db_time_percent,
+       z.value_min db_time_min
+  from x
+ inner join (select y.inst_id,
+                    y.begin_interval_time,
+                    y.end_interval_time,
+                    y.stat_name,
+                    round((y.e_value - y.b_value) / 1000 / 1000 / 60) value_min
+               from y
+              order by 2 desc, 3 desc) z on x.inst_id = z.inst_id
+                                        and x.begin_interval_time =
+                                            z.begin_interval_time
+                                        and x.end_interval_time =
+                                            z.end_interval_time
+ order by 2, 3;
+ 
+ 
+-- 某个snapshot的awr top event
+set linesize 220 pagesize 10000
+col begin_interval_time for a30
+col end_interval_time for a30
+col stat_name for a30
+with 
+x as (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.event_name event_name,
+       ss.total_waits e_total_waits,
+       LAG(ss.total_waits) OVER(partition by ss.event_name ORDER BY ss.snap_id, ss.EVENT_NAME) b_total_waits,
+       ss.time_waited_micro e_wait_time,
+       LAG(ss.time_waited_micro) OVER(partition by ss.event_name ORDER BY ss.snap_id, ss.event_name) b_wait_time
+  FROM dba_hist_system_event ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time >= SYSDATE - 7
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.snap_id in (&begin_snap_id, &end_snap_id)
+   and ss.wait_class <> 'Idle'
+   and ss.instance_number in (select instance_number from v$instance)
+   ),
+o as (
+select round((e_value - b_value) / 1000 / 1000 / 60) value_min
+  from (SELECT ss.instance_number inst_id,
+               sn.begin_interval_time begin_interval_time,
+               sn.end_interval_time end_interval_time,
+               ss.stat_name stat_name,
+               ss.VALUE e_value,
+               LAG(ss.VALUE) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_value
+          FROM dba_hist_sys_time_model ss, dba_hist_snapshot sn
+         WHERE sn.begin_interval_time >= SYSDATE - 7
+           AND ss.snap_id = sn.snap_id
+           AND ss.dbid = sn.dbid
+           AND ss.instance_number = sn.instance_number
+           AND ss.dbid = (SELECT dbid FROM v$database)
+           and ss.stat_name = 'DB time'
+           and ss.snap_id in (&begin_snap_id, &end_snap_id)
+           and ss.instance_number in
+               (select instance_number from v$instance))
+ where b_value is not null
+  ),
+l AS (
+select *
+  from (SELECT ss.instance_number inst_id,
+               sn.begin_interval_time begin_interval_time,
+               sn.end_interval_time end_interval_time,
+               ss.stat_name stat_name,
+               ss.VALUE e_value,
+               LAG(ss.VALUE) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_value
+          FROM dba_hist_sys_time_model ss, dba_hist_snapshot sn
+         WHERE sn.begin_interval_time >= SYSDATE - 7
+           AND ss.snap_id = sn.snap_id
+           AND ss.dbid = sn.dbid
+           AND ss.instance_number = sn.instance_number
+           AND ss.dbid = (SELECT dbid FROM v$database)
+           and ss.stat_name = 'DB CPU'
+           and ss.snap_id in (&begin_snap_id, &end_snap_id)
+           and ss.instance_number in
+               (select instance_number from v$instance))
+ where b_value is not null
+   )    
+select *
+  from (select x.inst_id,
+               x.begin_interval_time,
+               x.end_interval_time,
+               x.event_name,
+               round((x.e_wait_time - x.b_wait_time) / 1000 / 1000 / 60) wait_time_min,
+               round((x.e_total_waits - x.b_total_waits)) waits,
+               round((x.e_wait_time - x.b_wait_time) /
+                     (x.e_total_waits - x.b_total_waits) / 1000) avg_ms,
+               round((x.e_wait_time - x.b_wait_time) / 1000 / 1000 / 60 /
+                     o.value_min * 100,
+                     1) db_time_percent,
+               o.value_min db_time_min
+          from (select * from x where x.e_total_waits - x.b_total_waits <> 0) x,
+               o
+        union all
+        select l.inst_id,
+               l.begin_interval_time,
+               l.end_interval_time,
+               'db cpu',
+               round((l.e_value - l.b_value) / 1000 / 1000 / 60) value_min,
+               null,
+               null,
+               round((l.e_value - l.b_value) / 1000 / 1000 / 60 /
+                     o.value_min * 100,
+                     1) db_time_percent,
+               null
+          from l, o
+         order by 5 desc)
+ where rownum < 11;
 ```
 
 ##  3.2  数据库当前的等待事件
@@ -1062,6 +1192,82 @@ dba_hist_active_sess_history
 	优点:直接看到结论;不需要很专业的技术能力;适合解决主要问题
 	缺点:缺乏细节;分析的深度不够;对次要矛盾的把握能力较弱
 ```
+
+## 3.7  等待事件直方图
+
+```plsql
+--dba_hist_event_histogram等待事件直方图
+set linesize 220 pagesize 10000
+col begin_interval_time for a30
+col end_interval_time for a30
+col waitem for a40
+SELECT
+    *
+FROM
+    (
+        SELECT
+            TO_CHAR(snap_time, 'yyyy-mm-dd hh24:Mi:ss'),
+            snap_id,
+            waitem,
+            delta_wait_count,
+            SUM(delta_wait_count) OVER(
+                PARTITION BY snap_id, instance_number
+                ORDER BY
+                    snap_id
+            ) total_detail,
+            100
+                    * round(delta_wait_count /(SUM(
+                               Delta_wait_count) OVER(
+                PARTITION BY snap_id, instance_number
+                ORDER BY snap_id
+            )),
+                         5)
+            || '%' pct
+        FROM
+            (
+                SELECT
+                    em.instance_number
+                    || '-'
+                    || em.event_name
+                    || '- <'
+                    || em.wait_time_milli
+                    || ' ms' waitem,
+                    em.wait_time_milli,
+                           CAST(MIN(sn.begin_interval_time) OVER(
+                        PARTITION BY sn.dbid, sn.snap_id
+                    ) AS DATE) snap_time,
+                    em.snap_id,
+                    em.instance_number,
+                    wait_count,
+                    em.wait_count - LAG(em.wait_count) OVER(
+                        PARTITION BY em.dbid, em.instance_number, em.event_id, em.wait_time_milli
+                        ORDER BY
+                            em.snap_id
+                    ) AS delta_wait_count
+                FROM
+                    dba_hist_event_histogram   em,
+                    dba_hist_snapshot          sn
+                WHERE
+                    event_name = 'log file parallel write'
+                    AND em.snap_id = sn.snap_id
+                    AND em.dbid = sn.dbid
+                    AND em.instance_number = sn.instance_number
+                    and em.instance_number in (select instance_number from v$instance)
+                    AND sn.begin_interval_time >= SYSDATE - 2
+                ORDER BY
+                    snap_id,
+                    event_name,
+                    wait_time_milli
+            )
+        ORDER BY
+            snap_id DESC,
+            wait_time_milli
+    )
+WHERE
+    waitem = '1-log file parallel write- <1 ms';
+```
+
+
 
 # 4. 追踪数据库修改
 
@@ -1701,6 +1907,37 @@ WHERE
         b_value, 0
     ) > 0
 /
+
+
+--方法二：DB TIME波动：
+set linesize 220 pagesize 1000
+col begin_interval_time for a30
+col end_interval_time for a30
+col stat_name for a40
+WITH sysstat
+        AS (
+SELECT ss.instance_number inst_id,
+       sn.begin_interval_time begin_interval_time,
+       sn.end_interval_time end_interval_time,
+       ss.stat_name stat_name,
+       ss.VALUE e_value,
+       LAG(ss.VALUE) OVER(partition by ss.instance_number ORDER BY ss.snap_id) b_value
+  FROM dba_hist_sys_time_model ss, dba_hist_snapshot sn
+ WHERE sn.begin_interval_time >= SYSDATE - 4
+   AND ss.snap_id = sn.snap_id
+   AND ss.dbid = sn.dbid
+   AND ss.instance_number = sn.instance_number
+   AND ss.dbid = (SELECT dbid FROM v$database)
+   and ss.stat_name = 'DB time'
+   and ss.instance_number in (select instance_number from v$instance)
+              )
+select inst_id,
+       begin_interval_time,
+       end_interval_time,
+       stat_name,
+       round((e_value - b_value)/1000/1000/60) value_min
+  from sysstat 
+ order by 2 desc, 3 desc;
 ```
 
 # 15. REDO LOG
@@ -2592,6 +2829,25 @@ chain_cnt ：Number of rows in the table that are chained from one data block to
 SLECT a.VALUE+b.VALUE logical_reads, c.VALUE phys_reads,round(100*(1-c.value/(a.value+b.value)),2)||'%' hit_ratio FROM v$sysstat a,v$sysstat b,v$sysstat c WHERE a.NAME='db block gets' AND b.NAME='consistent gets' AND c.NAME='physical reads';
 或
 SELECT DB_BLOCK_GETS+CONSISTENT_GETS Logical_reads,PHYSICAL_READS phys_reads,round(100*(1-(PHYSICAL_READS/(DB_BLOCK_GETS+CONSISTENT_GETS))),2)||'%' "Hit Ratio" FROM V$BUFFER_POOL_STATISTICS WHERE NAME='DEFAULT';
+
+buffer cache命中率：
+set linesize 220 pagesize 1000
+col begin_interval_time for a30
+col end_interval_time for a30
+col METRIC_NAME for a45
+select a.SNAP_ID,
+       b.BEGIN_INTERVAL_TIME,
+       b.END_INTERVAL_TIME,
+       a.METRIC_NAME,
+       round(a.AVERAGE, 2) AVERAGE,
+       round(a.MAXVAL, 2) MAXVAL
+  from dba_hist_sysmetric_summary a, dba_hist_snapshot b
+ where a.SNAP_ID = b.SNAP_ID
+   and a.INSTANCE_NUMBER = b.INSTANCE_NUMBER
+   and a.INSTANCE_NUMBER in (select instance_number from v$instance)
+   and a.METRIC_NAME in ('Buffer Cache Hit Ratio')
+   and b.begin_interval_time > sysdate-3
+ order by b.BEGIN_INTERVAL_TIME desc;
 ```
 
 # 41、共享池命中率
@@ -2898,4 +3154,152 @@ UPDATE /*+ NOLOGGING */ T1 SET A='1';
 2CREATE INDEX T1_IDX ON T1(A) NOLOGGING;
 3ALTER INDEX T1_IDX REDUILD ONLINE NOLOGGING;
 4ALTER TABLE T1 NOLOGGING;
+```
+
+# 52. AWR、ASH
+
+## 52.1 生成AWR、ASH、ADDM
+
+**脚本目录  $ORACLE_HOME/rdbms/admin**
+
+```
+@?/rdbms/admin/addmrpt.sql
+@?/rdbms/admin/awrrpt.sql
+@?/rdbms/admin/ashrpt.sql
+```
+## 52.2 快照设置
+```
+-- 修改快照时间间隔
+EXEC DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS( interval => 30);
+-- 手动生成快照
+EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT('TYPICAL');
+或
+BEGIN 
+  DBMS_WORKLOAD_REPOSITORY.create_snapshot(); 
+END; 
+/
+
+-- 生成 AWR 基线：
+BEGIN 
+  DBMS_WORKLOAD_REPOSITORY.create_baseline ( 
+    start_snap_id => 10,  
+    end_snap_id   => 100, 
+    baseline_name => 'AWR First baseline'); 
+END; 
+/
+
+-- 生成 AWR 基线(11g)：
+BEGIN
+DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
+start_time => to_date('&start_date_time','&start_date_time_format'),
+end_time => to_date('&end_date_time','&end_date_time_format'),
+baseline_name => 'MORNING',
+template_name => 'MORNING',
+expiration => NULL ) ;
+END;
+/
+
+-- 基于重复时间周期来制定用于创建和删除 AWR 基线的模板：
+BEGIN
+DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE_TEMPLATE (
+day_of_week => 'MONDAY',
+hour_in_day => 9,
+duration => 3,
+start_time => to_date('&start_date_time','&start_date_time_format'),
+end_time => to_date('&end_date_time','&end_date_time_format'),
+baseline_name_prefix => 'MONDAY_MORNING'
+template_name => 'MONDAY_MORNING',
+expiration => 30 );
+END;
+/
+
+-- 删除 AWR 基线：
+BEGIN
+    DBMS_WORKLOAD_REPOSITORY.DROP_BASELINE (baseline_name => 'AWR First baseline');
+END;
+/
+```
+## 52.3 其他AWR脚本
+```
+awrrpt.sql 
+展示一段时间范围两个快照之间的数据库性能指标。
+awrrpti.sql 
+展示一段时间范围两个快照之间的特定数据库和特定实例的性能指标。
+awrsqrpt.sql
+展示特定 SQL 在一段时间范围两个快照之间的性能指标，运行这个脚本来检查和诊断一个特定 SQL 的性能问题。
+awrsqrpi.sql 
+展示特定 SQL 在特定数据库和特定实例的一段时间范围内两个快照之间的性能指标。
+awrddrpt.sql
+用于比较两个指定的时间段之间数据库详细性能指标和配置情况。
+awrddrpi.sql 
+用于在特定的数据库和特定实例上，比较两个指定的时间段之间的数据库详细性能指标和配置情况。
+awrextr.sql/awrload.sql
+导出/导入AWR数据
+```
+
+## 52.4 AWR 相关的视图
+
+如下系统视图与 AWR 相关：
+
+```
+V$ACTIVE_SESSION_HISTORY - 展示每秒采样的 active session history (ASH)。
+V$METRIC - 展示度量信息。
+V$METRICNAME - 展示每个度量组的度量信息。
+V$METRIC_HISTORY - 展示历史度量信息。
+V$METRICGROUP - 展示所有的度量组。
+DBA_HIST_ACTIVE_SESS_HISTORY - 展示 active session history 的历史信息。
+DBA_HIST_BASELINE - 展示 AWR 基线信息。
+DBA_HIST_DATABASE_INSTANCE - 展示数据库环境信息。
+DBA_HIST_SNAPSHOT - 展示 AWR 快照信息。
+DBA_HIST_SQL_PLAN - 展示 SQL 执行计划信息。
+DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
+```
+## 52.5 查看ASH信息
+
+![image-20191202111133104](Oracle性能优化.assets/image-20191202111133104.png)
+
+```plsql
+select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
+       from v$active_session_history ash, v$event_name enm 
+       where ash.event#=enm.event# 
+       and SESSION_ID=&SID and SAMPLE_TIME>=(sysdate-&minute/(24*60));
+
+-- Input is:
+-- Enter value for sid: 15 
+-- Enter value for minute: 1  /* How many minutes activity you want to see */
+
+
+-- ASH
+-- Most Active SQL in the Previous Hour	desc gv$active_session_history
+
+SELECT sql_id,COUNT(*),ROUND(COUNT(*)/SUM(COUNT(*)) OVER(), 2) PCTLOAD
+FROM gv$active_session_history ash
+WHERE ash.sample_time > SYSDATE - 1/24
+AND ash.session_type = 'BACKGROUND'
+GROUP BY ash.sql_id
+ORDER BY COUNT(*) DESC;
+
+SELECT ash.sql_id,COUNT(*),ROUND(COUNT(*)/SUM(COUNT(*)) OVER(), 2) PCTLOAD
+FROM gv$active_session_history ash
+WHERE ash.sample_time > SYSDATE - 1/24
+AND ash.session_type = 'FOREGROUND'
+GROUP BY ash.sql_id
+ORDER BY COUNT(*) DESC;
+-- Most Active I/O	
+SELECT DISTINCT wait_class
+FROM gv$event_name
+ORDER BY 1;
+
+SELECT sql_id, COUNT(*)
+FROM gv$active_session_history ash, v$event_name evt
+WHERE ash.sample_time > SYSDATE - 3/24
+AND ash.session_state = 'WAITING'
+AND ash.event_id = evt.event_id
+AND evt.wait_class = 'System I/O'
+GROUP BY sql_id
+ORDER BY COUNT(*) DESC;
+
+-- modify the above query, if necessary, until the condition yields a SQL_ID
+set linesize 121
+SELECT * FROM TABLE(dbms_xplan.display_cursor('424h0nf7bhqzd'));
 ```
