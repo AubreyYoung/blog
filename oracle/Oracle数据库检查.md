@@ -806,8 +806,6 @@ alter system set enable_ddl_logging=true;
 ALTER SYSTEM SET EVENT = '28401 TRACE NAME CONTEXT FOREVER, LEVEL 1' SCOPE = SPFILE;
 #限制trace日志文件大最大25M
 alter system set max_dump_file_size ='25M' ;
-#关闭密码大小写限制
-ALTER SYSTEM SET SEC_CASE_SENSITIVE_LOGON = FALSE;
 alter system set db_files=2000 scope=spfile;
 #RAC修改local_listener：（现象：使用PlSql Developer第一次连接超时，第二次之后连接正常）
 alter system set local_listener = '(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.125)(PORT = 1521))' sid='orcl1';

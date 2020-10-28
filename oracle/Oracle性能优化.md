@@ -3258,7 +3258,7 @@ DBA_HIST_WR_CONTROL - 展示 AWR 设置信息。
 
 ![image-20191202111133104](Oracle性能优化.assets/image-20191202111133104.png)
 
-```plsql
+```
 select SESSION_ID,NAME,P1,P2,P3,WAIT_TIME,CURRENT_OBJ#,CURRENT_FILE#,CURRENT_BLOCK#
        from v$active_session_history ash, v$event_name enm 
        where ash.event#=enm.event# 
