@@ -1,6 +1,6 @@
 
 
-
+[TOC]
 
 # **Oracle数据库检查**
 
@@ -451,6 +451,12 @@ srvctl status asm -a
  
 srvctl disable diskgroup -g DATA1
 srvctl remove diskgroup -g REDO5_SELF -f
+
+
+-- 禁用ora.crf：禁用ora.crf，避免osysmond进程大量吃系统资源（如CPU）以root用户在每个RAC节点执行以下语句：
+crsctl modify res ora.crf -attr "AUTO_START=never" -init
+crsctl modify res ora.crf -attr "ENABLED=0" -init
+crsctl stop res ora.crf -init
 ```
 
 ## 1.7 RAC自启
@@ -639,6 +645,13 @@ alter session set nls_timestamp_format = 'yyyy-mm-dd hh24:mi:ss.ff';
 select * from dba_registry_history;
 ```
 
+### 2.2.4 打PSU和Patch
+
+打最新PSU和Oracle推荐的Patch
+
+• Quick Reference to Patch Numbers for Database PSU, SPU(CPU), Bundle Patches and Patchsets(Doc ID 1454618.1)
+• Oracle Recommended Patches -- Oracle Database(Doc ID 756671.1)
+
 ## 2.2 数据库基本配置信息
 
 ### 2.2.1 数据库基本信息
@@ -802,8 +815,8 @@ alter systemn set pga_aggregate_target   =XXXXXM         scope=spfile;
 Alter PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
 alter database add SUPPLEMENTAL log data;
 alter system set enable_ddl_logging=true;
-#关闭11g密码延迟验证新特性
-ALTER SYSTEM SET EVENT = '28401 TRACE NAME CONTEXT FOREVER, LEVEL 1' SCOPE = SPFILE;
+-- 设置28401和10949事件
+alter system set event='28401 trace name context forever,level 1','10949 trace name context forever,level 1' sid='*' scope=spfile;
 #限制trace日志文件大最大25M
 alter system set max_dump_file_size ='25M' ;
 alter system set db_files=2000 scope=spfile;
@@ -827,6 +840,9 @@ ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
 alter system set db_file_multiblock_read_count = 128 ;
 alter system set disk_asynch_io=true sid ='*' scope=spfile;
 alter system set recyclebin='OFF' scope=spfile;
+alter system set "_undo_autotune"=false scope=spfile sid='*';
+alter system set undo_retention=10800 scope=spfile sid='*';
+
 
 alter profile "DEFAULT" limit PASSWORD_GRACE_TIME UNLIMITED;
 alter profile "DEFAULT" limit PASSWORD_LIFE_TIME UNLIMITED;
@@ -861,6 +877,33 @@ ALTER SYSTEM SET shared_pool_size=10g SCOPE=SPFILE;
 ALTER SYSTEM SET db_cache_size=56g SCOPE=SPFILE;
 ALTER SYSTEM SET pga_aggregate_target=10g SCOPE=SPFILE;   
 
+-- 如果要禁掉ASM实例的AMM，就一定不要同时reset memory_target和memory_max_target，而是应该将memory_target设为0并只reset memory_max_target。
+-- 在任意一个RAC节点执行如下操作:
+alter system set sga_target=2048M scope=spfile sid='*';
+alter system set pga_aggregate_target=1024M scope=spfile sid='*';
+alter system set memory_target=0 scope=spfile sid='*';
+alter system set memory_max_target=0 scope=spfile sid='*';
+alter system reset memory_max_target scope=spfile sid='*';
+
+-- 关闭DRM（因DRM导致的问题非常多）：
+alter system set "_gc_policy_time"=0 scope=spfile sid='*';
+alter system set "_gc_undo_affinity"=false sid='*';
+-- 增加实例延迟降级锁的时长为3毫秒,避免遇到一些导致实例crash的bug：
+alter system set "_gc_defer_time"=3 scope=spfile sid='*';
+
+-- 关闭自适应游标共享
+alter system set "_optimizer_adaptive_cursor_sharing"=false sid='*' scope=spfile;
+alter system set "_optimizer_extended_cursor_sharing"=none sid='*' scope=spfile;
+alter system set "_optimizer_extended_cursor_sharing_rel"=none sid='*'scope=spfile;
+
+-- 关闭Cardinality feedback：11g的Cardinality feedback可能会导致执行计划的不稳定：
+alter system set "_optimizer_use_feedback"=false sid ='*' scope=spfile;
+
+-- 使并行会话改为使用large pool
+alter system set "_px_use_large_pool"=true sid ='*' scope=spfile;
+
+-- 恢复LGWR的post/wait通知方式
+alter system set "_use_adaptive_log_file_sync"=false sid='*' scope=spfile;
 
 -- 云和恩墨参数
 alter system set "_optimizer_adaptive_cursor_sharing"=false sid='*' scope=spfile;
@@ -952,6 +995,8 @@ ALTER SYSTEM SET "_enable_NUMA_support"=false;
 ALTER SYSTEM SET PLSQL_CODE_TYPE=NATIVE SCOPE=SPFILE;    ---把plsql存储过程编译成本地代码的过程，不会导致任何解释器开销
 ALTER SYSTEM SET PLSQL_OPTIMIZE_LEVEL=2 SCOPE=SPFILE;
 alter system set use_large_pages='ONLY' SCOPE=SPFILE;
+-- 调整ASM实例的LARGE_POOL_SIZE
+alter system set large_pool_size=128M scope=spfile sid='*';
 //10g
 alter system set commit_write='immediate,nowait';    异步提交
 //11g
@@ -1151,6 +1196,9 @@ select num_rows*avg_row_len/1024/1024 from sys.dba_tables where table_name=upper
 ```plsql
 col segment_name FOR a10
 SELECT owner,segment_name,tablespace_name,bytes/1024/1024/1024 GB FROM dba_segments WHERE segment_name ='AUD$' AND owner='SYS';
+
+-- 关闭登录、登出的审计日志：记录的每一次登录、登出操作
+noaudit create session;
 ```
 
 ## 2.11 控制文件
@@ -4240,3 +4288,9 @@ and tab.blocks>100
 and nvl(ind.clustering_factor,1)/decode(tab.num_rows,0,1,tab.num_rows) between 0.35 and 3
 ```
 
+### 5.14 停掉NTP，配置CTSSD
+
+- 在RAC各个节点先停掉NTPD
+- cluvfy comp clocksync
+- 将RAC各个节点的NTP配置文件/etc/ntp.conf改名
+- 重启GI
