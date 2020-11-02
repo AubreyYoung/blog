@@ -2051,7 +2051,7 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
 select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
 
-### 5.20.2 检查锁与library闩锁等待
+### 2.20.2 检查锁与library闩锁等待
 
 ```plsql
 1. 查询锁等待。
@@ -2085,7 +2085,7 @@ select * from (select a.event, count(*) from v$active_session_history a  where a
    如果返回结果为空，则表示系统无library闩锁等待事件
 ```
 
-### 5.20.3 等待事件信息
+### 2.20.3 等待事件信息
 
 ```plsql
 select * from v$event_name B where b.name ='latch: cache buffers chains';
@@ -2106,7 +2106,7 @@ group by sql_id,p1
 order by 3 desc;
 ```
 
-## 5.21 客户端连接分布
+## 2.21 客户端连接分布
 
 查询每个客户端连接每个实例的连接数
 
@@ -2115,6 +2115,12 @@ col MACHINE format a20
 select inst_id,machine ,count(*) from gv$session group by machine,inst_id order by 3;
 
 select INST_ID,status,count(status) from gv$session group by status,INST_ID order by status,INST_ID;
+```
+
+连接数满排查
+
+```plsql
+ select inst_id,status,count() from gv$session where type <> ‘BACKGROUNND’ group by inst_id,status order by 3;
 ```
 
 ## 2.22 未删除归档
