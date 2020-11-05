@@ -6,13 +6,14 @@ package com.inspur.pm4h2.amt.dao;
 
 public class Demo04Control {
     public static void main(String[] args) {
-        int n = 40;
-        if (n >= 60) {
+        int n = 99;
+        if (n >= 90) {
+            System.out.println("优秀");
+        } else if (n >= 60) {
             System.out.println("及格了");
-            System.out.println("恭喜你");
+        } else {
+            System.out.println("挂科了");
         }
-        if (n < 60)
-            System.out.println("不及格");
         System.out.println("END");
     }
 }
