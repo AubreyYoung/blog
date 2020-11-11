@@ -404,6 +404,40 @@ ORDER BY
 SELECT * FROM (SELECT ROWNUM AS SN, EMP.* FROM EMP) WHERE SN = 2;
 ```
 
+## 3.8 行列转置
+
+```plsql
+select student, 
+       sum(decode(subject,'语文', grade,null)) "语文",
+       sum(decode(subject,'数学', grade,null)) "数学",
+       sum(decode(subject,'英语', grade,null)) "英语"
+from table
+group by student;
+
+
+SELECT NO,
+    DECODE(DAY,1,MONEY,'') DAY1,
+    DECODE(DAY,2,MONEY,'') DAY2,
+    DECODE(DAY,3,MONEY,'') DAY3
+FROM TEMP
+
+select id,name,'Chinese' as course from scores
+union
+select id,name,'Math' as course from scores
+union
+select id,name,'English' as course from scores;
+
+SELECT id,
+MAX(decode(cn, 'c1', cv, NULL)) AS c1,
+MAX(decode(cn, 'c2', cv, NULL)) AS c2,
+MAX(decode(cn, 'c3', cv, NULL)) AS c3
+FROM t_row_col
+GROUP BY id
+ORDER BY 1;
+```
+
+
+
 # 4 排序
 
 ## 4.1 基本排序

@@ -81,8 +81,7 @@ class clockForm(QWidget):
             transform.translate(-50, -50)
             painter.setWorldTransform(transform)
             painter.drawLine(50, 2, 50, 8)
-            painter.drawText(PyQt5.QtCore.QRectF(fontRect), PyQt5.QtCore.Qt.AlignHCenter | PyQt5.QtCore.Qt.AlignTop,
-                             "%d" % i)
+            painter.drawText(PyQt5.QtCore.QRectF(fontRect), PyQt5.QtCore.Qt.AlignHCenter | PyQt5.QtCore.Qt.AlignTop,"%d" % i)
 
         transform.reset()
 
