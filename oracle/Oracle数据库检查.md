@@ -509,6 +509,8 @@ oifcfg [-help]
 <subnet> - subnet address of the interface
 <if_type> - type of the interface { cluster_interconnect | public | storage }
 
+oifcfg iflist -p -n
+
 $ oifcfg iflist									  -- 查看网卡对应的网段，oracle网卡配置工具
 eth0 192.168.1.0
 eth1 192.168.2.0
