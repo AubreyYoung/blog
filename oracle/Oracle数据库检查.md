@@ -691,6 +691,9 @@ col value format a10
 select inst_id, sessions_current,sessions_highwater,SESSIONS_MAX,SESSIONS_WARNING ,USERS_MAX from  gv$license;
 
 select name,value from v$parameter where name='processes';
+
+--杀会话
+ps -ef | grep "LOCAL=NO"|grep -v grep | awk '{print "kill -9 " $2}'|sh
 ```
 
 ## 2.4 数据库时区
