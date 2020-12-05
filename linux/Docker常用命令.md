@@ -1,4 +1,6 @@
-## Docker常用命令
+# Docker&Kubenetes常用命令
+
+# 一、Docker常用命令 
 
 [TOC]
 
@@ -433,4 +435,295 @@ docker commit container images-
 ```
 
 
+
+# 二、k8s常用命令 
+
+## 2.1 常用命令
+
+```sh
+# 查看namespace
+kubectl get ns
+
+# 查看pod 
+# -A 或--all-namespaces 所有的namespace 
+# -n 指定namespace
+kubectl get pod -A
+kubectl get pod --all-namespaces
+kubectl get pod -n kube-system
+kubectl get pod --selector name=redis
+kubectl --kubeconfig=/opt/k8s/conf/admin.conf get pods
+kubectl  get pods -n kube-system|grep  dashboard
+# 查看service
+kubectl get svc -A
+
+# 服务访问方式
+# Cluster IP 
+curl  ClusterIP:ClusterPort
+# Node IP 
+curl  NodeIP:NodePort
+# 域名访问
+curl 域名:9090
+
+# 查看节点服务信息
+kubectl get no
+kubectl get nodes
+kubectl get nodes -lzone
+
+# 登录容器
+kubectl  exec  -it npsm-0 /bin/bash
+
+kubectl apply -f nps-config.yaml
+
+kubectl describe pod XXX
+kubectl describe service/kubenetes-dashboard --namespace="kube-system"
+kubectl describe pods/kubenetes-dashboardXXX --namespace="kube-system"
+
+# 查看集群
+kubectl cluster-info
+kubectl get cs
+
+# 查看组件信息
+kubectl -s http://localhost:8080 get componentstatuses
+
+# 查看pods所在的节点/IP
+kubectl get pods -o wide
+kubectl get pods -o wide --all-namespaces
+获取已经部署的pod完整的信息
+kubectl get pods ${podName} -o yaml 		# (yaml可改为 json\wide)
+
+# 查看pods定义信息
+kubectl get pods -o yaml
+
+# 查看pod环境变量
+kubectl exec pod名 env
+
+# 查看pod日志
+kubectl logs  -f pod名 -n namespace名
+# 查看pod前一个容器的日志 (当容器崩溃时，k8s会启动一个新的，看上个崩溃的日志)
+kubectl logs ${podName} --previous
+# 在创建或启动某些资源的时候没有达到预期结果，可以使用如下命令先简单进行故障定位
+kubectl describe deployment/nginx_app
+kubectl logs nginx_pods
+kubectl exec nginx_pod -c nginx-app <command>
+
+# 创建资源 -f后面跟yaml文件或者json文件
+kubectl  create -f xxx.yaml
+或者cat xxx.yaml | kubectl create -f -
+
+# 重建资源
+kubectl  replace -f 文件.yaml [--force]
+
+# 修改资源
+kubectl edit [deploy | svc | pvc | cm] resource_name
+
+kubectl apply -f xxx.yaml
+
+# 删除资源  kubectl delete [deployment | service | pvc | configmaps] resource_name 其中，resource_name表示具体的资源名；
+kubectl  delete  -f 文件
+kubectl  delete pod  pod名
+kubectl  delete rc  rc名
+kubectl  delete service service名
+kubectl  delete pod  --all
+
+# 查看资源名称 kubectl get [all | deployment | service | pvc | configmaps]
+# 查看网络策略
+kubectl get networkpolicy
+# 查看资源的信息 kubectl get xxx -o [yaml | json | wide | name]
+# 描述资源信息 kubectl describe [deployment | service | pvc | configmaps] resource_name 其中，resource_name表示具体的资源名；
+# 还可以对输出结果进行自定义，比如对pod只输出容器名称和镜像名称
+kubectl get pod httpd-app-5bc589d9f7-rnhj7 -o custom-columns=CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image
+# 获取某个特定key的值还可以输入如下命令得到，此目录参照go template的用法，且命令结尾'\n'是为了输出结果换行
+kubectl get pod httpd-app-5bc589d9f7-rnhj7 -o template --template='{{(index spec.containers 0).name}}{{"\n"}}'
+# 还有一些可选项可以对结果进行过滤，这儿就不一一列举了，如有兴趣，可参照kubectl get --help说明
+
+# 查看所有service
+kubectl get  service  kubenetes-dashboard -n kube-system
+
+# 查看所有发布
+kubectl get  deployment  kubenetes-dashboard -n kube-system
+
+
+# 列出所有的RC
+kubectl get rc
+kubectl get replicationcontrollers
+
+# 扩容复本
+kubectl scale rc rc_name --replicas=3  						# 其中rc_name为RC名称
+
+# 查看标签
+kubectl get pods --show-label
+# 列出某个标签的所有pod
+kubectl get pods -l env
+# 列出没有某个标签的pod
+kubectl get pods -l '!env'
+
+# 查看某个标签
+kubectl get pods -L label_name								# 其中label_name为需要查询的标签名
+
+# 查看有该标签的特定资源
+kubectl get pods -l label_name								# 其中label_name为需要查询的标签名
+
+# 添加标签  其中resource_name表示资源名，label_name表示标签名，label_value表示标签值
+kubectl label po resource_name label_name=label_value		
+
+# 修改标签 resource_name表示资源名 label_name表示标签名，label_new_value表示标签需要更新的值
+kubectl label po resource_name label_name=label_new_value --overwrite		
+
+# 显示kubectl命令行及kube服务端的版本
+kubectl version
+
+# 显示支持的API版本集合
+kubectl api-versions
+# 查看K8s支持的完整资源列表
+kubectl api-resources
+
+# 显示当前kubectl配置
+kubectl config view
+
+# 使用某种镜像创建Deployment
+kubectl run <name> --imageimage>
+
+# 映射端口允许外部访问
+kubectl expose deployment/nginx_app --type='NodePort' --port=80
+# 然后通过kubectl get services -o wide来查看被随机映射的端口
+# 如此就可以通过node的外部IP和端口来访问nginx服务了
+
+# 转发本地端口访问Pod的应用服务程序
+kubectl port-forward nginx_app_pod_0 8090:80
+# 如此，本地可以访问：curl -i localhost:8090
+
+# 集群内部调用接口(比如用curl命令)，可以采用代理的方式，根据返回的ip及端口作为baseurl
+kubectl proxy &
+
+# 实现水平扩展或收缩
+kubectl scale
+kubectl autoscale rc rc-nginx-3 —min=1 —max=4 
+kubectl autoscale deployment/nginx_app --min=3 --max=10 --cpu_percent=80
+
+# 部署状态变更状态检查
+kubectl set image deployment/nginx_app nginx=nginx:1.9.1
+kubectl rollout status deployment/nginx_app
+
+# 暂停
+kubectl rollout pause deployment/nginx_app
+# 完成所有的更新操作命令后进行恢复
+kubectl rollout resume deployment/nginx_app
+
+# 部署的历史
+kubectl rollout history
+# 回滚之前先查看历史版本信息
+kubectl rollout history deployment/nginx_app
+
+# 回滚部署到最近或者某个版本
+kubectl rollout undo
+# 不指定版本
+kubectl rollout undo deploy deploy_name      # 不指定版本，则默认回滚到上一个版本。等价于--to-revision=0
+kubectl rollout undo deployment/nginx_app
+# 指定版本：
+kubectl rollout undo deploy deploy_name --to-revision=2			# 回滚到revision为2的deployment
+kubectl rollout undo deployment/nginx_app --to-revision=<version_index>
+
+# kubectl patch：使用补丁修改、更新某个资源的字段，比如更新某个node
+kubectl patch node/node-0 -p '{"spec":{"unschedulable":true}}'
+kubectl patch -f node-0.json -p '{"spec": {"unschedulable": "true"}}'
+kubectl patch pod rc-nginx-2-kpiqt -p '{"metadata":{"labels":{"app":"nginx-3"}}}' 
+
+# rolling-update需要确保新的版本有不同的name，Version和label，否则会报错 。
+kubectl rolling-update rc-nginx-2 -f rc-nginx.yaml 
+# 如果在升级过程中，发现有问题还可以中途停止update，并回滚到前面版本 
+kubectl rolling-update rc-nginx-2 —rollback 
+
+kubectl attach kube-dns-v9-rcfuk -c skydns —namespace=kube-system 
+
+# cordon & uncordon命令 设置是否能够将pod调度到该节点上。
+# 不可调度
+kubectl cordon node-0
+# 当某个节点需要维护时，可以驱逐该节点上的所有pods(会删除节点上的pod，并且自动通过上面命令设置
+# 该节点不可调度，然后在其他可用节点重新启动pods)
+kubectl drain node-0
+# 待其维护完成后，可再设置该节点为可调度
+kubectl uncordon node-0
+
+# 设置taint
+kubecl taint nodes node-0 key1=value1:NoSchedule
+# 移除taint
+kubecl taint nodes node-0 key1:NoSchedule-
+# 如果pod想要被调度到上述设置了taint的节点node-0上，则需要在该pod的spec的tolerations字段设置：
+tolerations:
+- key: "key1"
+  operator: "Equal"
+  value: "value1"
+  effect: "NoSchedule"
+# 或者
+tolerations:
+- key: "key1"
+  operator: "Exists"
+  effect: "NoSchedule"
+```
+
+
+
+## 2.2 etcdctl常用命令
+
+```sh
+# 检查网络集群
+etcdctl cluster-health
+
+# 带有安全认证检查网络
+etcdctl --endpoints=https://192.168.110.100:2379 cluster-health
+
+etcdctl member  list
+
+etcdctl  set  /k8s/network/config'{"Network":"10.1.0.0/16"}'
+
+etcdctl  get  /k8s/network/config
+```
+
+
+
+
+
+## 2.3 其他技巧
+
+```sh
+# k8s命令补全
+yum install  bash-completions
+source /usr/share/bash-completion/bash-completion
+
+# k8s里kube-proxy支持三种模式，在v1.8之前我们使用的是iptables以及userspace两种模式，在k8s1.8之后引入了ipvs模式
+yum install ipvsadm -y
+ipvsadm -L -n
+```
+
+**命令行中的资源缩写**
+
+| 资源全名称             | 缩写                |
+| ---------------------- | ------------------- |
+| namespace              | ns                  |
+| pods                   | pod 、po            |
+| deploymentes           | deployment 、deploy |
+| replicaset             | rs                  |
+| replicationcontroller  | rc                  |
+| persistentVolumes      | pv                  |
+| persistentVolumesClaim | pvc                 |
+| service                | svc                 |
+
+## 2.4 配置文件路径（kubeadm）
+
+- kubeectl 读取集群配置文件路径：`~/.kube/config`
+- 静态 pod 工作目录：`/etc/kubernetes/manifests/`
+- kubelet 配置文件路径：`/var/lib/kubelet/config.yaml`
+- docker 日志文件路径：`/var/lib/docker/containers/<container-id>/<container-id>-json.log`
+- emptyDir 路径：`/var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~empty-dir/`
+- 证书路径：`/etc/kubernetes/pki`
+
+## 配置文件路径（二进制）
+
+- 证书路径：`/opt/kubernetes/ssl`
+- token 文件路径：`/opt/kubernetes/cfg/token.csv`
+- 配置文件路径：`/opt/kubernetes/cfg/kube-apiserver.conf`
+
+
+
+kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
 
