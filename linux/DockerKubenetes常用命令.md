@@ -444,6 +444,11 @@ docker commit container images-
 # 查看namespace
 kubectl get ns
 
+# 查看节点服务信息
+kubectl get no
+kubectl get nodes
+kubectl get nodes -lzone
+
 # 查看pod 
 # -A 或--all-namespaces 所有的namespace 
 # -n 指定namespace
@@ -464,11 +469,6 @@ curl  NodeIP:NodePort
 # 域名访问
 curl 域名:9090
 
-# 查看节点服务信息
-kubectl get no
-kubectl get nodes
-kubectl get nodes -lzone
-
 # 登录容器
 kubectl  exec  -it npsm-0 /bin/bash
 
@@ -477,6 +477,12 @@ kubectl apply -f nps-config.yaml
 kubectl describe pod XXX
 kubectl describe service/kubenetes-dashboard --namespace="kube-system"
 kubectl describe pods/kubenetes-dashboardXXX --namespace="kube-system"
+
+# 查看PV
+kubectl get pv
+
+# 查看PVC
+kubectl get pvc
 
 # 查看集群
 kubectl cluster-info
