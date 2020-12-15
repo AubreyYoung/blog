@@ -733,3 +733,615 @@ ipvsadm -L -n
 
 kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
 
+
+11.1	K8S命令
+# kubectl
+kubectl controls the Kubernetes cluster manager.
+ Find more information at: https://kubernetes.io/docs/reference/kubectl/overview/
+
+Basic Commands (Beginner):
+  create         Create a resource from a file or from stdin.
+  expose         Take a replication controller, service, deployment or pod and expose it as a new Kubernetes Service
+  run            Run a particular image on the cluster
+  set            Set specific features on objects
+
+Basic Commands (Intermediate):
+  explain        Documentation of resources
+  get            Display one or many resources
+  edit           Edit a resource on the server
+  delete         Delete resources by filenames, stdin, resources and names, or by resources and label selector
+
+Deploy Commands:
+  rollout        Manage the rollout of a resource
+  scale          Set a new size for a Deployment, ReplicaSet or Replication Controller
+  autoscale      Auto-scale a Deployment, ReplicaSet, or ReplicationController
+
+Cluster Management Commands:
+  certificate    Modify certificate resources.
+  cluster-info   Display cluster info
+  top            Display Resource (CPU/Memory/Storage) usage.
+  cordon         Mark node as unschedulable
+  uncordon       Mark node as schedulable
+  drain          Drain node in preparation for maintenance
+  taint          Update the taints on one or more nodes
+
+Troubleshooting and Debugging Commands:
+  describe       Show details of a specific resource or group of resources
+  logs           Print the logs for a container in a pod
+  attach         Attach to a running container
+  exec           Execute a command in a container
+  port-forward   Forward one or more local ports to a pod
+  proxy          Run a proxy to the Kubernetes API server
+  cp             Copy files and directories to and from containers.
+  auth           Inspect authorization
+
+Advanced Commands:
+  diff           Diff live version against would-be applied version
+  apply          Apply a configuration to a resource by filename or stdin
+  patch          Update field(s) of a resource using strategic merge patch
+  replace        Replace a resource by filename or stdin
+  wait           Experimental: Wait for a specific condition on one or many resources.
+  convert        Convert config files between different API versions
+  kustomize      Build a kustomization target from a directory or a remote url.
+
+Settings Commands:
+  label          Update the labels on a resource
+  annotate       Update the annotations on a resource
+  completion     Output shell completion code for the specified shell (bash or zsh)
+
+Other Commands:
+  api-resources  Print the supported API resources on the server
+  api-versions   Print the supported API versions on the server, in the form of "group/version"
+  config         Modify kubeconfig files
+  plugin         Provides utilities for interacting with plugins.
+  version        Print the client and server version information
+
+Usage:
+  kubectl [flags] [options]
+
+Use "kubectl <command> --help" for more information about a given command.
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+11.1.1	Kubectl get
+kubectl get -h
+Display one or many resources
+ Prints a table of the most important information about the specified resources. You can filter the list using a label
+selector and the --selector flag. If the desired resource type is namespaced you will only see results in your current
+namespace unless you pass --all-namespaces.
+ Uninitialized objects are not shown unless --include-uninitialized is passed.
+ By specifying the output as 'template' and providing a Go template as the value of the --template flag, you can filter
+the attributes of the fetched resources.
+Use "kubectl api-resources" for a complete list of supported resources.
+Examples:
+  # List all pods in ps output format.
+  kubectl get pods
+  # List all pods in ps output format with more information (such as node name).
+  kubectl get pods -o wide
+  # List a single replication controller with specified NAME in ps output format.
+  kubectl get replicationcontroller web
+  # List deployments in JSON output format, in the "v1" version of the "apps" API group:
+  kubectl get deployments.v1.apps -o json
+  # List a single pod in JSON output format.
+  kubectl get -o json pod web-pod-13je7
+  # List a pod identified by type and name specified in "pod.yaml" in JSON output format.
+  kubectl get -f pod.yaml -o json
+  # List resources from a directory with kustomization.yaml - e.g. dir/kustomization.yaml.
+  kubectl get -k dir/
+  # Return only the phase value of the specified pod.
+  kubectl get -o template pod/web-pod-13je7 --template={{.status.phase}}
+  # List resource information in custom columns.
+  kubectl get pod test-pod -o custom-columns=CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image
+  # List all replication controllers and services together in ps output format.
+  kubectl get rc,services
+  # List one or more resources by their type and names.
+  kubectl get rc/web service/frontend pods/web-pod-13je7
+Options:
+  -A, --all-namespaces=false: If present, list the requested object(s) across all namespaces. Namespace in current
+context is ignored even if specified with --namespace.
+      --allow-missing-template-keys=true: If true, ignore any errors in templates when a field or map key is missing in
+the template. Only applies to golang and jsonpath output formats.
+      --chunk-size=500: Return large lists in chunks rather than all at once. Pass 0 to disable. This flag is beta and
+may change in the future.
+      --field-selector='': Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector
+key1=value1,key2=value2). The server only supports a limited number of field queries per type.
+  -f, --filename=[]: Filename, directory, or URL to files identifying the resource to get from a server.
+      --ignore-not-found=false: If the requested object does not exist the command will return exit code 0.
+  -k, --kustomize='': Process the kustomization directory. This flag can't be used together with -f or -R.
+  -L, --label-columns=[]: Accepts a comma separated list of labels that are going to be presented as columns. Names are
+case-sensitive. You can also use multiple flag options like -L label1 -L label2...
+      --no-headers=false: When using the default or custom-column output format, don't print headers (default print
+headers).
+  -o, --output='': Output format. One of:
+json|yaml|wide|name|custom-columns=...|custom-columns-file=...|go-template=...|go-template-file=...|jsonpath=...|jsonpath-file=...
+See custom columns [http://kubernetes.io/docs/user-guide/kubectl-overview/#custom-columns], golang template
+[http://golang.org/pkg/text/template/#pkg-overview] and jsonpath template
+[http://kubernetes.io/docs/user-guide/jsonpath].
+      --output-watch-events=false: Output watch event objects when --watch or --watch-only is used. Existing objects are
+output as initial ADDED events.
+      --raw='': Raw URI to request from the server.  Uses the transport specified by the kubeconfig file.
+  -R, --recursive=false: Process the directory used in -f, --filename recursively. Useful when you want to manage
+related manifests organized within the same directory.
+  -l, --selector='': Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)
+      --server-print=true: If true, have the server return the appropriate table output. Supports extension APIs and
+CRDs.
+      --show-kind=false: If present, list the resource type for the requested object(s).
+      --show-labels=false: When printing, show all labels as the last column (default hide labels column)
+      --sort-by='': If non-empty, sort list types using this field specification.  The field specification is expressed
+as a JSONPath expression (e.g. '{.metadata.name}'). The field in the API resource specified by this JSONPath expression
+must be an integer or a string.
+      --template='': Template string or path to template file to use when -o=go-template, -o=go-template-file. The
+template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview].
+  -w, --watch=false: After listing/getting the requested object, watch for changes. Uninitialized objects are excluded
+if no object name is provided.
+      --watch-only=false: Watch for changes to the requested object(s), without listing/getting first.
+Usage:
+  kubectl get
+[(-o|--output=)json|yaml|wide|custom-columns=...|custom-columns-file=...|go-template=...|go-template-file=...|jsonpath=...|jsonpath-file=...]
+(TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [flags] [options]
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+11.1.2	kubectl get node
+kubectl get node   
+kubectl get no
+kubectl get nodes
+NAME                  STATUS   ROLES    AGE   VERSION
+host-10-64-20-158     Ready    <none>   16d   v1.17.9
+host-10-64-20-174     Ready    <none>   16d   v1.17.9
+host-10-64-21-144     Ready    <none>   16d   v1.17.9
+host-10-64-21-220     Ready    <none>   16d   v1.17.9
+host-10-64-21-55      Ready    <none>   16d   v1.17.9
+host-10-64-21-76      Ready    <none>   16d   v1.17.9
+host-100-100-98-163   Ready    master   17d   v1.17.9
+11.1.3	kubectl get ns
+kubectl get ns
+kubectl get namespace
+kubectl get namespaces
+NAME              STATUS   AGE
+bes4              Active   16d
+bom               Active   16d
+default           Active   17d
+kube-node-lease   Active   17d
+kube-public       Active   17d
+kube-system       Active   17d
+11.1.4	kubectl get pod
+kubectl get pod -n bom
+kubectl get pod -nbom
+NAME                        READY   STATUS    RESTARTS   AGE
+bomportal-bd66f4fb7-495t7   1/1     Running   1          16d
+
+kubectl get pods -A
+kubectl get pods --all-namespaces
+kubectl get pods -o wide
+kubectl get pod -n bes4 -o wide
+NAME                                   READY   STATUS    RESTARTS   AGE    IP             NODE                NOMINATED NODE   READINESS GATES
+apiaccess-in-85c5ff6f5b-nd667            1/1     Running   1          16d    172.169.3.5    host-10-64-21-144   <none>           <none>
+
+kubectl get pod -n bom -o yaml
+kubectl get pod -n bom -o json
+kubectl get pods --include-uninitialized 		# 列出该namespace中的所有pod包括未初始化的
+查看集群状态是否正常
+kubectl get node,cs
+NAME                     STATUS    ROLES     AGE       VERSION
+no/host-100-100-50-208   Ready     master    2h        v1.9.6
+no/host-100-100-51-100   Ready     <none>    23m       v1.9.6
+
+NAME                    STATUS    MESSAGE              ERROR
+cs/controller-manager   Healthy   ok
+cs/scheduler            Healthy   ok
+cs/etcd-0               Healthy   {"health": "true"}
+11.1.5	kubectl get pv
+kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                STORAGECLASS                  REASON   AGE
+package-pv                                 5Gi        RWX            Retain           Bound    bom/package-pvc                      package                                16d
+pvc-16844bee-352d-4516-8797-355ce93297a9   5Gi        RWX            Delete           Bound    bes4/dds-data-ddsbackend-0           managed-nfs-storage-dds                16d
+pvc-19a6a140-055e-4fe9-b96b-f1a2e5d2594e   30Gi       RWX            Delete           Bound    bes4/vs-storage-vsearch-0            managed-nfs-storage-vs                 16d
+pvc-36f5be0d-2eb7-4906-a52b-dc43c0765c85   30Gi       RWX            Delete           Bound    bes4/jetmq-storage-jetmqapp-0        managed-nfs-storage-jetmq              16d
+
+kubectl get pvc -n bom
+NAME          STATUS   VOLUME       CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+package-pvc   Bound    package-pv   5Gi        RWX            package        16d
+
+11.1.6	kubectl describe
+kubectl describe nodes my-node
+kubectl describe pod lss-0 -n bes4
+Name:         lss-0
+Namespace:    bes4
+Priority:     0
+Node:         host-10-64-20-158/10.64.20.158
+Start Time:   Mon, 23 Nov 2020 20:01:43 +0800
+Labels:       controller-revision-hash=lss-6b697499ff
+              hostLogRootPath=start__var__log__applogs__bes4__LSS
+              hwsApplicationName=LSS
+              hwsApplicationNetype=com.huawei.itpaas.platformservice.ncss
+              hwsApplicationVersion=V600R001C51
+              hwsAppunitCount=2
+              hwsAppunitName.0=soe
+              hwsAppunitName.1=sme
+              hwsAppunitNetype.0=com.huawei.itpaas.platformservice.ncss.soe
+              hwsAppunitNetype.1=com.huawei.itpaas.platformservice.ncss.sme
+              hwsInstanceNetype=com.huawei.itpaas.platformservice.ncss.ncssInstance
+              hwsapp=lss
+              statefulset.kubernetes.io/pod-name=lss-0
+Annotations:  <none>
+Status:       Running
+IP:           10.64.20.158
+IPs:
+  IP:           10.64.20.158
+Controlled By:  StatefulSet/lss
+Containers:
+  lss:
+    Container ID:   docker://d7918dd10a83b2d7c1af4d6d4f0e702deb7261aefde3e603a27c8c57a9abfae4
+    Image:          sz-docker-public.szxy1.artifactory.cd-cloud-artifact.tools.huawei.com/bes-commerce/dw_lss_euleros2sp5_x86:3.300.3.1013
+    Image ID:       docker-pullable://sz-docker-public.szxy1.artifactory.cd-cloud-artifact.tools.huawei.com/bes-commerce/dw_lss_euleros2sp5_x86@sha256:b8988389596ff82efd56397890d99dc25712d5dab487c7a5d3c9fcb296e16c15
+    Port:           7001/TCP
+    Host Port:      7001/TCP
+    State:          Running
+      Started:      Tue, 24 Nov 2020 11:17:59 +0800
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    137
+      Started:      Tue, 24 Nov 2020 11:16:44 +0800
+      Finished:     Tue, 24 Nov 2020 11:17:58 +0800
+    Ready:          True
+    Restart Count:  4
+    Limits:
+      cpu:     4
+      memory:  8Gi
+    Requests:
+      cpu:      1
+      memory:   6Gi
+    Liveness:   exec [/bin/bash /home/lss/netrixDeploy/liveness_probe.sh] delay=30s timeout=1s period=5s #success=1 #failure=3
+    Readiness:  exec [bash /home/lss/netrixDeploy/readiness_probe.sh] delay=30s timeout=1s period=5s #success=1 #failure=3
+    Environment:
+      POD_NAMESPACE:               bes4 (v1:metadata.namespace)
+      POD_UID:                      (v1:metadata.uid)
+      POD_LABEL_hwsAppunitName_0:   (v1:metadata.labels['hwsAppunitName.0'])
+      POD_LABEL_hwsAppunitName_1:   (v1:metadata.labels['hwsAppunitName.1'])
+      DV_ZK_HOSTS:                 127.0.0.1:15522,127.0.0.2:15522,127.0.0.3:15522
+      LSS_SERVICE_NAME:            lss
+      INSTANCE_NUM:                1
+      ZOOKEEPER_URL:               zookeeper:2181
+      LSS_LOG_STORAGE_PATH:        /home/log
+      LSS_STORAGE_PATH:            /home/lss/volume/phyfile
+      LSS_HTTP_PORT:               7001
+      CLIENT_JKS_URL:              null
+      datacenterID:                0
+      ZK_AUTH_FLAG:                ITPaaSAcl
+      ZK_INTER_USER:               paasinter
+      lss-outauth-way:             none
+      volume_phyfilevol_size:      20
+      TIME_ZONE:                   GMT-8
+      soe_loadbalance_addr:        ip
+      MY_POD_NAME:                 lss-0 (v1:metadata.name)
+    Mounts:
+      /home/agentlib/uniagentconf from uniagentconfdir (rw)
+      /home/log from lss-log (rw)
+      /home/lss/configmap from lss-configmap (rw)
+      /home/lss/secret from lss-secret (rw)
+      /home/lss/volume from lss-data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-4nrv5 (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  lss-data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  lss-data-lss-0
+    ReadOnly:   false
+  lss-log:
+    Type:          HostPath (bare host directory volume)
+    Path:          /var/log/applogs/bes4/LSS
+    HostPathType:
+  lss-configmap:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      lss-configmap
+    Optional:  false
+  lss-secret:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  lss-secret
+    Optional:    false
+  uniagentconfdir:
+    Type:          HostPath (bare host directory volume)
+    Path:          /home/agentlib/uniagentconf
+    HostPathType:
+  default-token-4nrv5:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-4nrv5
+    Optional:    false
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:          <none>
+
+kubectl describe pvc zk-storage-zookeeper-0 -nbes4
+Name:          zk-storage-zookeeper-0
+Namespace:     bes4
+StorageClass:  managed-nfs-storage-zk
+Status:        Bound
+Volume:        pvc-c3a4d431-6e7a-4d94-8de3-6178d7bf6158
+Labels:        hwsapp=zookeeper
+Annotations:   pv.kubernetes.io/bind-completed: yes
+               pv.kubernetes.io/bound-by-controller: yes
+               volume.beta.kubernetes.io/storage-class: managed-nfs-storage-zk
+               volume.beta.kubernetes.io/storage-provisioner: fuseim.pri/ifs-zk
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      10Gi
+Access Modes:  RWX
+VolumeMode:    Filesystem
+Mounted By:    zookeeper-0
+Events:        <none>
+
+kubectl describe pv tenant-pv
+Name:            tenant-pv
+Labels:          type=NFS
+Annotations:     pv.kubernetes.io/bound-by-controller: yes
+Finalizers:      [kubernetes.io/pv-protection]
+StorageClass:    tenant
+Status:          Bound
+Claim:           bes4/tenant-pvc
+Reclaim Policy:  Retain
+Access Modes:    RWX
+VolumeMode:      Filesystem
+Capacity:        1Gi
+Node Affinity:   <none>
+Message:
+Source:
+    Type:      NFS (an NFS mount that lasts the lifetime of a pod)
+    Server:    10.64.21.76
+    Path:      /home/tenant
+    ReadOnly:  false
+Events:        <none>
+
+11.1.7	kubectl exec
+kubectl exec  -it lss-0  -n bes4  bash
+[lss@host-10-64-20-158 ~]$ exit
+exit
+kubectl exec  -it lss-0  -n bes4  ls /home
+agentlib  configagent  log  lss  uniagent
+
+容器化部署场景下，对应有程序的启停、查看日志等操作均需要先进入容器，本章介绍如何进入到容器中。
+方法一：在Master节点或执行机通过kubectl命令进入容器内
+登录Master节点或执行机。查询部署的pod。
+kubectl get pod -n namespace -o wide
+通过pod name进入容器内。
+kubectl exec -it podname -n namespace bash
+方法二：在Pod所在节点通过docker 命令进入容器内
+登录Master节点或执行机。查询部署的pod及其宿主机。
+kubectl get pod -n namespace -o wide
+登录pod所在宿主机。查询容器。
+docker ps
+通过容器ID进入容器内。
+docker exec -it container_id bash
+11.1.8	BES目录
+car包路径：/home/app/opt/container/webapps
+网元配置信息：/home/app/opt/container/webapps/bes/WEB-INF/classes
+11.1.9	kubectl cp
+kubectl cp bes4/bhf-687865dfc5-l9w4v: /home/app/opt/container/webapps/bes/WEB-INF/classes/certs/CommerceAll.jks /home/infra/yangguang/CommerceAll.jks
+kubectl cp a.txt bes4/bhf-687865dfc5-l9w4v:/home/app/opt/container/webapps/bes/WEB-INF/classes/
+
+OPTIONS说明：
+-a：拷贝所有uid/gid信息
+-L：保持源目标中的链接
+11.1.10	登录MySQL
+/mysql -S /home/mysql/mysql-files/mysql.sock -uroot -p
+ 
+SELECT 	* FROM 	bescust.inf_customer;  
+ 
+ 
+ 
+
+11.1.11	Docker 配置文件
+Docker 配置文件：/etc/sysconfig/docker
+11.1.12	kubectl create
+kubectl create namespace bom
+kubectl create namespace bes
+kubectl create namespace bssp
+kubectl create namespace echannel
+11.1.13	NFS配置文件
+NFS配置文件：/etc/exports
+showmount -e 10.21.244.145
+11.1.14	登录云龙仓库
+docker login sz-docker-public.szxy1.artifactory.cd-cloud-artifact.tools.huawei.com
+11.1.15	K8s 集群架构
+ 
+K8s 集群API: kube-apiserver
+与Kubernetes 集群进行交互，通过 REST 调用、kubectl 命令行界面或其他命令行工具（例如 kubeadm）来访问 API
+K8s 调度程序：kube-scheduler
+考虑容器集的资源需求（例如 CPU 或内存）以及集群的运行状况。将容器集安排到适当的计算节点
+K8s 控制器：kube-controller-manager
+控制器用于查询调度程序，并确保有正确数量的容器集在运行
+键值存储数据库 etcd
+配置数据以及有关集群状态的信息位于 etcd（一个键值存储数据库）中
+kubelet
+每个计算节点中都包含一个 kubelet
+一个与控制平面通信的微型应用。当控制平面需要在节点中执行某个操作时，kubelet 就会执行该操作。
+
+kube-proxy
+每个计算节点中还包含 kube-proxy，这是一个用于优化 Kubernetes 网络服务的网络代理。kube-proxy 负责处理集群内部或外部的网络通信——靠操作系统的数据包过滤层，或者自行转发流量
+持久存储
+容器镜像仓库
+底层基础架构
+11.1.16	安装Helm
+Helm是Kubernetes的一个包管理工具，用来简化Kubernetes应用的部署和管理。获取Helm安装需要安装包和文件，并上传到Master节点或执行机
+ 
+helm uninstall bom
+11.1.17	 kubectl get deployment
+# 列出指定 deployment
+kubectl get deployment my-dep
+11.1.18	kubectl get services 
+# 列出所有 namespace 中的所有 service
+kubectl get services
+kubectl describe service servicename -n namespace
+11.1.19	创建对象
+$ kubectl create -f ./my-manifest.yaml # 创建资源
+$ kubectl create -f ./my1.yaml -f ./my2.yaml # 使用多个文件创建资源
+$ kubectl create -f ./dir # 使用目录下的所有清单文件来创建资源
+$ kubectl create -f https://git.io/vPieo # 使用 url 来创建资源
+$ kubectl run nginx --image=nginx # 启动一个 nginx 实例
+$ kubectl explain pods,svc # 获取 pod 和 svc 的文档
+11.1.20	删除资源
+$ kubectl delete -f ./pod.json # 删除 pod.json 文件中定义的类型和名称的 pod
+$ kubectl delete pod,service baz foo # 删除名为“baz”的 pod 和名为“foo”的 service
+$ kubectl delete pods,services -l name=myLabel # 删除具有 name=myLabel 标签的 pod 和 serivce
+$ kubectl delete pods,services -l name=myLabel --include-uninitialized # 删除具有 name=myLabel 标签的 pod 和 service，包括尚未初始化的
+$ kubectl -n my-ns delete po,svc --all # 删除 my-ns namespace 下的所有 pod 和 serivce，包括尚未初始化
+11.1.21	与运行中的 Pod 交互
+$ kubectl logs my-pod # dump 输出 pod 的日志（stdout）
+$ kubectl logs my-pod -c my-container # dump 输出 pod 中容器的日志（stdout，pod 中有多个容器的情况下使用）
+$ kubectl logs -f my-pod # 流式输出 pod 的日志（stdout）
+$ kubectl logs -f my-pod -c my-container # 流式输出 pod 中容器的日志（stdout，pod 中有多个容器的情况下使用）
+$ kubectl run -i --tty busybox --image=busybox -- sh # 交互式 shell 的方式运行 pod
+$ kubectl attach my-pod -i # 连接到运行中的容器
+$ kubectl exec my-pod -- ls / # 在已存在的容器中执行命令（只有一个容器的情况下）
+$ kubectl exec my-pod -c my-container -- ls / # 在已存在的容器中执行命令（pod 中有多个容器的情况下）
+$ kubectl top pod POD_NAME --containers # 显示指定 pod 和容器的指标度量
+11.1.22	节点标签常用管理命令
+查询节点标签
+kubectl get nodes --show-labels
+添加节点标签，示例：给宿主机名称为host-100-100-50-208的节点，打上hwpurpose=besapp的标签;
+kubectl label node host-100-100-50-208 hwpurpose=besapp
+修改节点标签，如果命令中带了--overwrite ，则可以覆盖修改已有的 label。
+kubectl label node host-100-100-50-208 hwpurpose=besapp –overwrite
+在标签值后面使用“ - ”减号相连，则标签删除该标签，示例：删除host-100-100-50-208节点的hwpurpose标签
+kubectl label node host-100-100-50-208 hwpurpose-
+11.1.23	修改应用的部署参数
+目前Commerce部署的应用中分为平台应用和业务应用，平台应用的配置参数记录在statefulSet中，业务应用的配置参数记录在deployment中。当您不确定应用是属于平台还是应用时，可分别执行kubectl get sts -n namespace和kubectl get deploy -n namespace命令，查看该应用在哪条命令的结果中。
+平台应用（statefulSet）
+平台服务的部署参数记录在statefulSet，可通过修改statefulSet来更新配置。查询statefulSet
+kubectl get sts -n namespace
+NAME             DESIRED   CURRENT   AGE
+apigovernance    1         1         1d
+执行编辑命令。
+kubectl edit sts lss -n namespace
+修改方式与vi命令类似。修改成功后，请保存退出。修改后的配置参数，在保存后立即生效。
+
+Commerce应用（deployment）
+业务应用的部署参数记录在deployment中，可通过修改deployment来更新实例数配置。查询deploy
+kubectl get deploy -n namespace
+NAME                     DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+apiaccess-in             1         1         1            1           1d
+执行编辑命令。
+kubectl edit deploy ce -n namespace
+11.1.24	Configmap
+ConfigMap 允许你将配置文件与镜像文件分离，以使容器化的应用程序具有可移植性
+kubectl get configmap -n namespace
+kubectl describe configmap configmapname -n namespace
+kubectl edit configmap configmapname -n namespace
+
+11.2	Pod别名环境变量
+$ alias
+alias app='cd /home/app/app'
+alias bin='cd /home/app/opt/container/bin'
+alias class='cd /home/app/opt/container/webapps/BOMPortal/WEB-INF/classes'
+alias clog='cd /home/log/app/bomportal-5b8864448-w5hht/container'
+alias conf='cd /home/app/opt/container/conf'
+alias dlog='cd /home/log/app/bomportal-5b8864448-w5hht/debug'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias grep='grep --color=auto'
+alias l.='ls -d .* --color=auto'
+alias lib='cd /home/app/opt/container/webapps/BOMPortal/WEB-INF/lib'
+alias ll='ls -l'
+alias log='cd /home/log/app/bomportal-5b8864448-w5hht'
+alias ls='ls --color=auto'
+alias startbom='/home/app/app/bin/startportal.sh'
+alias status='/home/app/app/bin/monitor.sh'
+alias stopbom='/home/app/app/bin/stopportal.sh'
+alias tlog='cd /home/log/app/bomportal-5b8864448-w5hht/container;tail -f catalina.out'
+alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
+
+11.3	PV和PVC
+11.3.1	PV
+PVC和PV是一一对应的
+	PV生命周期: 
+Provisioning ——-> Binding ——–>Using——>Releasing——>Recycling
+	PV类型
+GCEPersistentDisk
+ AWSElasticBlockStore
+ AzureFile
+ AzureDisk
+ FC (Fibre Channel)
+ Flexvolume
+ Flocker
+ NFS
+ iSCSI
+ RBD (Ceph Block Device)
+ CephFS
+ Cinder (OpenStack block storage)
+ Glusterfs
+ VsphereVolume
+ Quobyte Volumes
+ HostPath (Single node testing only – local storage is not supported in any way and WILL NOT WORK in a multi-node cluster)
+ Portworx Volumes
+ ScaleIO Volumes
+ StorageOS
+	PV卷阶段状态
+Available – 资源尚未被claim使用
+Bound – 卷已经被绑定到claim了
+Released – claim被删除，卷处于释放状态，但未被集群回收。
+Failed – 卷自动回收失败
+11.3.2	实例
+kubectl  get pvc --all-namespaces
+NAMESPACE   NAME                            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS                  AGE
+beslc1      dbagent-log-storage-dbagent-0   Bound    pvc-29e55e35-3d3b-11eb-820e-286ed4892931   8Gi        RWX            managed-nfs-storage-dbagent   44h
+beslc1      dds-data-ddsbackend-0           Bound    pvc-7c8120be-3d3b-11eb-820e-286ed4892931   5Gi        RWX            managed-nfs-storage-dds       44h
+beslc1      dds-data-ddsfrontend-0          Bound    pvc-7ceea012-3d3b-11eb-820e-286ed4892931   5Gi        RWX            managed-nfs-storage-dds       44h
+beslc1      jetmq-storage-jetmqapp-0        Bound    pvc-cdb74514-3d3b-11eb-820e-286ed4892931   30Gi       RWX            managed-nfs-storage-jetmq     44h
+beslc1      lss-data-lss-0                  Bound    pvc-c7074513-3d3b-11eb-820e-286ed4892931   30Gi       RWX            managed-nfs-storage-lss       44h
+beslc1      tenant-pvc                      Bound    tenant-pv                                  1Gi        RWX            tenant                        45h
+beslc1      vs-storage-vsearch-0            Bound    pvc-c4b4665b-3d3b-11eb-820e-286ed4892931   30Gi       RWX            managed-nfs-storage-vs        44h
+beslc1      zk-storage-zookeeper-0          Bound    pvc-36037ccf-3d3b-11eb-820e-286ed4892931   10Gi       RWX            managed-nfs-storage-zk        44h
+bom         package-pvc                     Bound    package-pv                                 5Gi        RWX            package                       46h
+
+kubectl  get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                  STORAGECLASS                  REASON   AGE
+package-pv                                 5Gi        RWX            Retain           Bound    bom/package-pvc                        package                                46h
+pvc-29e55e35-3d3b-11eb-820e-286ed4892931   8Gi        RWX            Delete           Bound    beslc1/dbagent-log-storage-dbagent-0   managed-nfs-storage-dbagent            44h
+pvc-36037ccf-3d3b-11eb-820e-286ed4892931   10Gi       RWX            Delete           Bound    beslc1/zk-storage-zookeeper-0          managed-nfs-storage-zk                 44h
+pvc-7c8120be-3d3b-11eb-820e-286ed4892931   5Gi        RWX            Delete           Bound    beslc1/dds-data-ddsbackend-0           managed-nfs-storage-dds                44h
+pvc-7ceea012-3d3b-11eb-820e-286ed4892931   5Gi        RWX            Delete           Bound    beslc1/dds-data-ddsfrontend-0          managed-nfs-storage-dds                44h
+pvc-c4b4665b-3d3b-11eb-820e-286ed4892931   30Gi       RWX            Delete           Bound    beslc1/vs-storage-vsearch-0            managed-nfs-storage-vs                 44h
+pvc-c7074513-3d3b-11eb-820e-286ed4892931   30Gi       RWX            Delete           Bound    beslc1/lss-data-lss-0                  managed-nfs-storage-lss                44h
+pvc-cdb74514-3d3b-11eb-820e-286ed4892931   30Gi       RWX            Delete           Bound    beslc1/jetmq-storage-jetmqapp-0        managed-nfs-storage-jetmq              44h
+tenant-pv                                  1Gi        RWX            Retain           Bound    beslc1/tenant-pvc                      tenant                                 45h
+11.3.3	NFS常用命令
+（1）在nfs服务器上先建立存储卷对应的目录
+[root@nfs ~]# cd /data/volumes/
+[root@nfs volumes]# mkdir v{1,2,3,4,5}
+[root@nfs volumes]# ls
+index.html  v1  v2  v3  v4  v5
+[root@nfs volumes]# echo "<h1>NFS stor 01</h1>" > v1/index.html 
+[root@nfs volumes]# echo "<h1>NFS stor 02</h1>" > v2/index.html 
+[root@nfs volumes]# echo "<h1>NFS stor 03</h1>" > v3/index.html 
+[root@nfs volumes]# echo "<h1>NFS stor 04</h1>" > v4/index.html 
+[root@nfs volumes]# echo "<h1>NFS stor 05</h1>" > v5/index.html
+（2）修改nfs的配置
+# vim /etc/exports
+/data/volumes/v1        192.168.130.0/24(rw,no_root_squash)
+/data/volumes/v2        192.168.130.0/24(rw,no_root_squash)
+/data/volumes/v3        192.168.130.0/24(rw,no_root_squash)
+/data/volumes/v4        192.168.130.0/24(rw,no_root_squash)
+/data/volumes/v5        192.168.130.0/24(rw,no_root_squash)
+（3）查看nfs的配置
+# exportfs -arv
+exporting 192.168.130.0/24:/data/volumes/v5
+exporting 192.168.130.0/24:/data/volumes/v4
+exporting 192.168.130.0/24:/data/volumes/v3
+exporting 192.168.130.0/24:/data/volumes/v2
+exporting 192.168.130.0/24:/data/volumes/v1
+（4）是配置生效
+[root@nfs volumes]# showmount -e
+Export list for nfs:
+/data/volumes/v5 192.168.130.0/24
+/data/volumes/v4 192.168.130.0/24
+/data/volumes/v3 192.168.130.0/24
+/data/volumes/v2 192.168.130.0/24
+/data/volumes/v1 192.168.130.0/24
+
+12	参考文档
+https://www.cnblogs.com/along21/p/10342788.html     pvc、pv创建
+https://www.cnblogs.com/rexcheny/p/10925464.html   pvc、pv如何关联
+https://blog.csdn.net/qianggezhishen/article/details/80764378  pvc、pv 通过label关联    查看其它blog文章
+
