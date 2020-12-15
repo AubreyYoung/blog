@@ -734,6 +734,9 @@ ipvsadm -L -n
 kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
 
 
+
+```shell
+
 11.1	K8S命令
 # kubectl
 kubectl controls the Kubernetes cluster manager.
@@ -1345,3 +1348,4 @@ https://www.cnblogs.com/along21/p/10342788.html     pvc、pv创建
 https://www.cnblogs.com/rexcheny/p/10925464.html   pvc、pv如何关联
 https://blog.csdn.net/qianggezhishen/article/details/80764378  pvc、pv 通过label关联    查看其它blog文章
 
+```
