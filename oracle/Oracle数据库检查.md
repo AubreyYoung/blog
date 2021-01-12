@@ -2023,7 +2023,7 @@ end;
 /
 ```
 
-## 2.20 数据库当前的等待事件
+## 2.20 等待事件
 
 ### 2.20.1 数据库等待事件
 
@@ -3351,7 +3351,13 @@ exec DBMS_STATS.GATHER_TABLE_STATS(ownname=>‘xxx',tabname=>‘DEALREC_ERR_2016
 该表是否是分区表，分区表的分区类型是什么，是否有子分区，分区总数有多少
 
 ```plsql
-select OWNER,table_name,partitioning_type,subpartitioning_type,partition_count from dba_part_tables where table_name ='RANGE_PART_TAB';
+select OWNER,table_name,partitioning_type,subpartitioning_type,partition_count from dba_part_tables where  owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS');
 
 -- 方法二
 set linesize 120
@@ -4299,9 +4305,41 @@ and tab.blocks>100
 and nvl(ind.clustering_factor,1)/decode(tab.num_rows,0,1,tab.num_rows) between 0.35 and 3
 ```
 
-### 5.14 停掉NTP，配置CTSSD
+## 5.14 停掉NTP，配置CTSSD
 
 - 在RAC各个节点先停掉NTPD
 - cluvfy comp clocksync
 - 将RAC各个节点的NTP配置文件/etc/ntp.conf改名
 - 重启GI
+
+## 5.15 查看服务器资源
+
+```plsqlSELECT * FROM v$osstat;
+SELECT * FROM v$osstat;
+
+select * from V$SYSSTAT;
+```
+
+## 5.17 序列
+
+```plsql
+select * from DBA_SEQUENCES  where  sequence_owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS');
+                     
+                     
+  select * from gv$enqueue_stat;
+  
+  ALTER SEQUENCE schema_name.sequence_name
+    [INCREMENT BY interval]
+    [MAXVALUE max_value | NOMAXVALUE]
+    [MINVALUE min_value | NOMINVALUE]
+    [CYCLE | NOCYCLE]
+    [CACHE cache_size | NOCACHE]
+    [ORDER | NOORDER];
+```
+

@@ -21,7 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f5b090d1-ab6b-465f-9618-b392224e4ac0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../linux/操作系统检查.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../linux/操作系统检查.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../头脑风暴.xmind" beforeDir="false" afterPath="$PROJECT_DIR$/../../头脑风暴.xmind" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,9 +46,9 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
-  <component name="SpellCheckerSettings" BundledDictionaries="0" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SshConsoleOptionsProvider">
     <option name="myEncoding" value="UTF-8" />
   </component>
@@ -81,6 +81,10 @@
       <workItem from="1608690965732" duration="869000" />
       <workItem from="1609383196902" duration="28000" />
       <workItem from="1609383412263" duration="1099000" />
+      <workItem from="1610163137077" duration="457000" />
+      <workItem from="1610164035626" duration="124000" />
+      <workItem from="1610164176137" duration="324000" />
+      <workItem from="1610174504629" duration="618000" />
     </task>
     <servers />
   </component>
@@ -100,18 +104,9 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="563" y="199" key="#Notifications" timestamp="1608534677022">
-      <screen x="0" y="0" width="1366" height="728" />
-    </state>
-    <state x="563" y="199" key="#Notifications/0.0.1366.728@0.0.1366.728" timestamp="1608534677022" />
-    <state x="263" y="98" key="IDE.errors.dialog" timestamp="1608535862497">
-      <screen x="0" y="0" width="1366" height="728" />
-    </state>
-    <state x="263" y="98" key="IDE.errors.dialog/0.0.1366.728@0.0.1366.728" timestamp="1608535862497" />
-    <state x="184" y="0" key="SettingsEditor" timestamp="1609383894931">
+    <state x="137" y="23" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1610175730092">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="184" y="0" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1608692020296" />
-    <state x="184" y="0" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1609383894931" />
+    <state x="137" y="23" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1366.738@0.0.1366.738" timestamp="1610175730092" />
   </component>
 </project>
