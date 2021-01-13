@@ -60,77 +60,71 @@ from (select max(sum(s.value)) used from v$statname n, v$sesstat s where n.name 
 and s.statistic# = n.statistic# group by s.sid),
 (select value from v$parameter where name = 'open_cursors');
 
--- RAC (存在问题需要修复)
-COL value FOR a15
-COL usage FOR a15
-SELECT
-    inst_id,
-    'session_cached_cursors' parameter,
-    lpad(
-        value, 5
-    )   value,
-    decode(
-        value, 0,
-        ' n/a',
-        to_char(
-            100 * used / value, '990'
-        )
-        || '%'
-    )             usage
-FROM
-    (
-        SELECT
-            MAX(s.value) used
-        FROM
-            gv$statname  n,
-            gv$sesstat   s
-        WHERE
-                n.name = 'session cursor cache count'
-            AND s.statistic# = n.statistic#
-    ),
-    (
-        SELECT
-            inst_id,value
-        FROM
-            gv$parameter
-        WHERE
-            name = 'session_cached_cursors'
-    )
-UNION ALL
-SELECT
-    inst_id,
-    'open_cursors',
-    lpad(
-        value, 5
-    ),
-    to_char(
-        100 * used / value, '990'
-    )
-    || '%'
-FROM
-    (
-        SELECT
-            MAX(SUM(s.value)) used
-        FROM
-            gv$statname  n,
-            gv$sesstat   s
-        WHERE
-            n.name IN (
-                'opened cursors current'
-            )
-            AND s.statistic# = n.statistic#
-        GROUP BY
-            s.sid
-    ),
-    (
-        SELECT
-            inst_id,value
-        FROM
-            gv$parameter
-        WHERE
-            name = 'open_cursors'
-    )
-ORDER BY inst_id,PARAMETER;
+-- 查看用户的cursor使用
+SELECT A.USER_NAME, COUNT(*) FROM V$OPEN_CURSOR A GROUP BY A.USER_NAME; 
+
+-- 查看终端的cursor使用
+SELECT AA.USERNAME, AA.MACHINE, SUM(AA.VALUE) 
+ FROM (SELECT A.VALUE, S.MACHINE, S.USERNAME 
+ FROM V$SESSTAT A, V$STATNAME B, V$SESSION S 
+ WHERE A.STATISTIC# = B.STATISTIC# 
+ AND S.SID = A.SID 
+ AND B.NAME = 'session cursor cache count') AA 
+ GROUP BY AA.USERNAME, AA.MACHINE 
+ ORDER BY AA.USERNAME, AA.MACHINE; 
+
+-- 查看cursors的会话
+SELECT a.inst_id,
+     a.sid,
+     a.USERNAME,
+     a.SCHEMANAME,
+     a.OSUSER,
+     a.machine,
+     a.TERMINAL,
+     a.LOGON_TIME,
+     a.PROGRAM,
+     a.STATUS,
+     b.name,
+     b.used
+FROM gv$session a,
+     (SELECT n.inst_id,
+             sid,
+             n.name,
+             s.VALUE used
+        FROM gv$statname n, gv$sesstat s
+       WHERE     n.name IN ('opened cursors current',
+                            'session cursor cache count')
+             AND s.statistic# = n.statistic#
+             AND n.inst_id = s.inst_id) b
+WHERE     a.sid = b.sid
+     AND a.inst_id = b.inst_id
+     AND b.name <> 'session cursor cache count'
+ORDER BY b.used DESC;
+
+
+--查看cursors的SQLID
+SELECT distinct a.inst_id,
+         a.sid,
+         a.USERNAME,
+         a.SCHEMANAME,
+         a.OSUSER,
+         a.machine,
+         a.TERMINAL,
+         a.LOGON_TIME,
+         a.PROGRAM,
+         a.STATUS,
+         b.name,
+         b.used,c.sql_id
+  FROM   gv$session a,
+         (SELECT   n.inst_id, sid, n.name, s.VALUE used
+            FROM   gv$statname n, gv$sesstat s
+           WHERE   n.name IN
+                         ('opened cursors current',
+                          'session cursor cache count')
+                   AND s.statistic# = n.statistic# and n.inst_id=s.inst_id ) b,v$open_cursor c
+ WHERE   a.sid = b.sid and a.inst_id = b.inst_id and a.sid=c.sid and c.CURSOR_TYPE in('OPEN','OPEN-PL/SQL','OPEN-RECURSIVE')
+ and b.name <> 'session cursor cache count'
+ order by b.used desc;
 ```
 
 ## 1.3 ASM rbal进程内存泄露检查
