@@ -1541,7 +1541,6 @@ WHERE
     
 col name for a30
 select name,value from v$sysstat    where name in ('table scans (short tables)','table scans (long tables)');
-  
 ```
 
 # 8. 10046Trace

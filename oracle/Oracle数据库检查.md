@@ -62,9 +62,7 @@ and s.statistic# = n.statistic# group by s.sid),
 
 -- RAC (存在问题需要修复)
 COL value FOR a15
-
 COL usage FOR a15
-
 SELECT
     inst_id,
     'session_cached_cursors' parameter,
@@ -700,7 +698,7 @@ ps -ef | grep "LOCAL=NO"|grep -v grep | awk '{print "kill -9 " $2}'|sh
 
 ```plsql
 -- 数据库时区
-select dbtimezone from dual ;  
+select dbtimezone from dual;  
 -- 看会话时区
 select sessiontimezone from dual; 
 -- 查看当前时间和时区 
@@ -1064,6 +1062,7 @@ col PROFILE format a20
 col RESOURCE_NAME format a25
 col LIMIT format a15
 select * from dba_profiles where profile='PM4H';
+select * from dba_profiles;
 ```
 
 ## 2.7 数据库字符集
@@ -1097,6 +1096,10 @@ select comp_id,comp_name, status, substr(version,1,10) as version  from dba_regi
 select comp_name, version, status from dba_server_registry where comp_name like '%OLAP%';
 
 select name, detected_usages, currently_used from dba_feature_usage_statistics where name like 'OLAP%' order by name;
+
+set pagesize500
+set linesize 100
+select substr(comp_name,1,40) comp_name, status, substr(version,1,10) version from dba_registry order by comp_name;
 ```
 
 ## 2.10 数据量大小
@@ -1716,7 +1719,7 @@ SELECT temp_used.tablespace_name,total,used,
            (SELECT tablespace_name, SUM(bytes)/1024/1024 total
               FROM dba_temp_files
              GROUP BY tablespace_name) temp_total
-     WHERE temp_used.tablespace_name = temp_total.tablespace_name
+     WHERE temp_used.tablespace_name = temp_total.tablespace_name;
 ```
 
 ### 2.15.3 临时数据文件大小
@@ -1791,7 +1794,8 @@ col TIME_TAKEN_DISPLAY format a17;
 col status format a10;
 COL hours    FORMAT 999.999
 COL out_size FORMAT a10
-select session_key,AUTOBACKUP_DONE,OUTPUT_DEVICE_TYPE, INPUT_TYPE,status,ELAPSED_SECONDS/3600     hours,   TO_CHAR(START_TIME,'yyyy-mm-dd hh24:mi') start_time, OUTPUT_BYTES_DISPLAY out_size,OUTPUT_BYTES_PER_SEC_DISPLAY,INPUT_BYTES_PER_SEC_DISPLAY  from v$RMAN_BACKUP_JOB_DETAILS order by start_time ;
+select session_key,AUTOBACKUP_DONE,OUTPUT_DEVICE_TYPE, INPUT_TYPE,status,ELAPSED_SECONDS/3600     hours,   TO_CHAR(START_TIME,'yyyy-mm-dd hh24:mi') start_time, OUTPUT_BYTES_DISPLAY out_size,OUTPUT_BYTES_PER_SEC_DISPLAY,INPUT_BYTES_PER_SEC_DISPLAY  
+from v$RMAN_BACKUP_JOB_DETAILS order by start_time ;
 ```
 ```plsql
 col INPUT_BYTES_PER_SEC_DISPLAY format a15;
@@ -1844,10 +1848,6 @@ FROM  dba_objects where status<>'VALID' order by owner,object_name,OBJECT_TYPE;
 ```
 其他查询
 ```plsql
-set pagesize500
-set linesize 100
-select substr(comp_name,1,40) comp_name, status, substr(version,1,10) version from dba_registry order by comp_name;
-
 select substr(object_name,1,40) object_name,substr(owner,1,15) owner,object_type from dba_objects where status='INVALID' order by owner,object_type;
 
 select owner,object_type,count(*) from dba_objects where status='INVALID' group by owner,object_type order by owner,object_type ;
@@ -2053,14 +2053,15 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
  row cache lock
 如果15分钟内“EVENT”列包括以上等待事件，但等待次数小于或等于30次，则检查通过。例如，15分钟内“log file sync”总共等待16次。
 
-select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
+select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) 
+               and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
 ```
 
 ### 2.20.2 检查锁与library闩锁等待
 
 ```plsql
 1. 查询锁等待。
-   SQL> select 'session ' || c.locker || ' lock ' || c.locked ||
+select 'session ' || c.locker || ' lock ' || c.locked ||
     ', alter system kill session ' || '''' || c.locker || ',' ||
     d.serial# || '''' || ', OS:kill -9 ' || e.spid as "result"
     from (select a.sid locked, b.sid locker
@@ -2076,7 +2077,7 @@ select * from (select a.event, count(*) from v$active_session_history a  where a
     and d.paddr = e.addr;
    如果返回结果为空，则表示系统无锁等待事件。
 2. 查询library闩锁等待。
-   SQL> select 'session ' || d.locker || ' lock ' || d.locked ||
+   select 'session ' || d.locker || ' lock ' || d.locked ||
     ', alter system kill session ' || '''' || d.locker || ',' ||
     d.serial# || '''' || ', OS:kill -9 ' || d.os as "result"
     from (select distinct s.sid locker, s.serial#, p.spid os, w.sid locked
@@ -2125,7 +2126,7 @@ select INST_ID,status,count(status) from gv$session group by status,INST_ID orde
 连接数满排查
 
 ```plsql
- select inst_id,status,count() from gv$session where type <> ‘BACKGROUNND’ group by inst_id,status order by 3;
+ select inst_id,status,count(1) from gv$session where type <> 'BACKGROUNND' group by inst_id,status order by 3;
 ```
 
 ## 2.22 未删除归档
@@ -2150,7 +2151,7 @@ delete  archivelog until time "sysdate -3";
 select
 trunc(completion_time) as "Date"
 ,count(*) as "Count"
-,((sum(blocks * block_size)) /1024 /1024) as "MB"
+,((sum(blocks * block_size)) /1024/1024/1024) as "GB"
 from v$archived_log where  STANDBY_DEST  ='NO'
 group by trunc(completion_time) order by trunc(completion_time) ;
 ```
@@ -2338,16 +2339,44 @@ where  owner not in ('MTSSYS','ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','
 and owner in (select username from dba_users where account_status='OPEN');
 ```
 
-## 2.30 表的并行度
+## 2.30 并行度
 
 ```plsql
+--表的并行度
 select owner,table_name name,status,degree from dba_tables where degree>1;
+--索引并行度
+select owner,index_name name,status,degree from dba_indexes where degree>'1';
 ```
 
-## 2.31 索引并行度
+## 2.31 全表扫面
 
 ```plsql
-select owner,index_name name,status,degree from dba_indexes where degree>'1';
+SELECT
+    t.inst_id,
+    t.sid,
+    t.serial#,
+    target,
+    t.sql_exec_start,
+    t.username,
+    t.sql_id
+FROM
+    gv$session_longops t
+WHERE
+    t.sql_plan_operation = 'TABLE ACCESS'
+    AND sql_plan_options = 'FULL';
+    
+SELECT
+    target,
+    count(1)
+FROM
+    gv$session_longops t
+WHERE
+    t.sql_plan_operation = 'TABLE ACCESS'
+    AND sql_plan_options = 'FULL'
+    group by target;
+    
+col name for a30
+select name,value from v$sysstat    where name in ('table scans (short tables)','table scans (long tables)');
 ```
 
 ## 2.32 Trigger(es)
@@ -3199,14 +3228,17 @@ where rownum < 11;
 
 ```plsql
 -- 查看表统计信息
-select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND  last_analyzed is not null and last_analyzed >= (sysdate-2);
+select * from DBA_TAB_STATISTICS where OWNER  NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES') AND  
+last_analyzed is not null and last_analyzed >= (sysdate-2);
 
 select table_name,partition_name,subpartition_name,object_type, num_rows, global_stats,last_analyzed from user_tab_statistics;
 -- 查看列统计信息
-select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
-;
+select * from DBA_TAB_COL_STATISTICS where OWNER  NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES') 
+AND last_analyzed is not null and last_analyzed >= (sysdate-1);
+
 -- 查看索引统计信息
-select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') AND last_analyzed is not null and last_analyzed >= (sysdate-2);
+select * from DBA_IND_STATISTICS where OWNER  NOT IN ('ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','SQLTXPLAIN','OWBSYS','FLOWS_FILES') 
+AND last_analyzed is not null and last_analyzed >= (sysdate-2);
 
 -- 分区表和分区索引统计信息
 select index_owner,tablespace_name,index_name,partition_name,logging,num_rows,last_analyzed,status from dba_ind_partitions where index_name in (select index_name from dba_part_indexes where table_name=upper('tablename')) and TABLE_OWNER=upper('username');
@@ -4009,7 +4041,7 @@ FROM dual;
 ## 5.3 查看业务用户
 
 ```plsql
-select USER_NAME,CREATED from dba_users where DEFAULT_TABLESPACE not in('SYSTEM','SYSAUX') AND username not in('ANONYMOUS','APEX_030200', 'APEX_PUBLIC_USER', 'APPQOSSYS', 'CTXSYS', 'DIP', 'EXFSYS', 'FLOWS_FILES', 'MDDATA', 'OLAPSYS', 'ORACLE_OCM','ORDDATA', 
+select USERNAME,CREATED from dba_users where DEFAULT_TABLESPACE not in('SYSTEM','SYSAUX') AND username not in('ANONYMOUS','APEX_030200', 'APEX_PUBLIC_USER', 'APPQOSSYS', 'CTXSYS', 'DIP', 'EXFSYS', 'FLOWS_FILES', 'MDDATA', 'OLAPSYS', 'ORACLE_OCM','ORDDATA', 
  'ORDPLUGINS', 'ORDSYS', 'OUTLN','OWBSYS', 'OWBSYS_AUDIT', 'SI_INFORMTN_SCHEMA', 'SPATIAL_CSW_ADMIN_USR', 'SPATIAL_WFS_ADMIN_USR', 'SYS', 'SYSTEM', 'WMSYS','XDB','XS$NULL','SCOTT','DBSNMP','SYSMAN','MGMT_VIEW','MDSYS');
 ```
 
@@ -4130,7 +4162,7 @@ register using:
 ## 5.7 回滚段使用
 
 查询回滚段的信息。所用数据字典： DBA_ROLLBACK_SEGS，可以查询的信息：回滚段的标识(SEGMENT_ID)、名称(SEGMENT_NAME)、所在表空间(TABLESPACE_NAME)、类型(OWNER)、状态(STATUS)。
->select * from DBA_ROLLBACK_SEGS
+>select * from DBA_ROLLBACK_SEGS;
 
 查看回滚段的统计信息
 ```plsql
