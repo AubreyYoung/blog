@@ -162,7 +162,7 @@ DECODE(b.request, 1, 'No Lock', 2, 'Row Share', 3, 'Row Exclusive', 4, 'Share', 
 c.object_name "对象名",
 c.owner "对象所有者", c.object_type "对象类型",
 b.id1 "资源ID1", b.id2 "资源ID2",b.ctime "ctime(秒) ",
-'ALTER SYSTEM KILL SESSION '''||a.sid||','||a.serial#||''';' "kill Session ",
+'ALTER SYSTEM KILL SESSION '''||a.sid||','||a.serial#||',@'||a.inst_id||''';' "kill Session ",
 'kill -9 '||d.spid "Kill Process (Unix Linux)", 
 'orakill '||f.instance_name||' '||d.spid "Kill Process (Windows)" 
 FROM v$session a, v$lock b, v$locked_object b1, dba_objects c, v$process d, v$instance f
@@ -866,7 +866,7 @@ select *
 
 ##  3.2  数据库当前的等待事件
 
-```
+```plsql
 select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by inst_id,event order by 1,3;
  
 -- "查询结果中，15分钟内“EVENT”列中不包含以下等待事件：
@@ -890,7 +890,6 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
  library cache pin
  row cache lock
 如果15分钟内“EVENT”列包括以上等待事件，但等待次数小于或等于30次，则检查通过。例如，15分钟内“log file sync”总共等待16次。
-"
 
 select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) and a.sample_time < sysdate and a.session_state = 'WAITING' 
 and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
@@ -2812,7 +2811,7 @@ SELECT INSTANCE_NUMBER,
  ORDER BY SNAP_ID DESC, INSTANCE_NUMBER;
 ```
 
-# 39、查看行迁移或行链接的表
+# 39. 查看行迁移或行链接的表
 
 ```
 select * From dba_tables where nvl(chain_cnt,0)<>0
@@ -2820,7 +2819,7 @@ select * From dba_tables where nvl(chain_cnt,0)<>0
 chain_cnt ：Number of rows in the table that are chained from one data block to another or that have migrated to a new block, requiring a link to preserve the old rowid. This column is updated only after you analyze the table.
 ```
 
-# 40、数据缓冲区命中率
+# 40. 数据缓冲区命中率
 
 ```plsql
 SLECT a.VALUE+b.VALUE logical_reads, c.VALUE phys_reads,round(100*(1-c.value/(a.value+b.value)),2)||'%' hit_ratio FROM v$sysstat a,v$sysstat b,v$sysstat c WHERE a.NAME='db block gets' AND b.NAME='consistent gets' AND c.NAME='physical reads';
@@ -2847,7 +2846,7 @@ select a.SNAP_ID,
  order by b.BEGIN_INTERVAL_TIME desc;
 ```
 
-# 41、共享池命中率
+# 41. 共享池命中率
 
 ```plsql
 以下两者应该都可以，看个人怎么理解

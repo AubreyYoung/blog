@@ -902,6 +902,8 @@ alter system set "_px_use_large_pool"=true sid ='*' scope=spfile;
 -- 恢复LGWR的post/wait通知方式
 alter system set "_use_adaptive_log_file_sync"=false sid='*' scope=spfile;
 
+
+修改中设置，登录失败后不锁定用户*9+:=)=>?@9:A:?*B9+9@C@+?*@9:A'9>D@&'*++:C)+7B&9@C@+:A-0<0.
 -- 云和恩墨参数
 alter system set "_optimizer_adaptive_cursor_sharing"=false sid='*' scope=spfile;
 alter system set "_optimizer_extended_cursor_sharing"=none sid='*' scope=spfile;
@@ -2049,6 +2051,13 @@ select inst_id,event,count(1) from gv$session where wait_class#<> 6 group by ins
 
 select * from (select a.event, count(*) from v$active_session_history a  where a.sample_time > sysdate - 15 / (24 * 60) 
                and a.sample_time < sysdate and a.session_state = 'WAITING' and a.wait_class not in ('Idle') group by a.event order by 2 desc, 1) where rownum <= 5;
+               
+-- 检查数据库的等待事件
+set pages 80
+set lines 120
+col event for a40
+select sid, event, p1, p2, p3, WAIT_TIME, SECONDS_IN_WAIT  from v$session_wait where event not like 'SQL%'   and event not like 'rdbms%';               
+如果数据库长时间持续出现大量像latch free，enqueue，buffer busy waits，db file sequentialread，db file scattered read等等待事件时，需要对其进行分析，可能存在问题的语句。               
 ```
 
 ### 2.20.2 检查锁与library闩锁等待
@@ -4102,7 +4111,6 @@ select * from dict where table_name like 'DBA_HIST_%';
 >
 > alter database recover managed standby database nodelay disconnect;
 
-
 **Stop and Start of Logical standby apply**
 
 > alter database stop logical standby apply;
@@ -4152,6 +4160,14 @@ Find archive log gap by query:
 register using:
 
 > ALTER DATABASE REGISTER PHYSICAL LOGFILE 'filespec1';
+
+**切换保护**
+
+> alter database set standby database to maximize availability;
+>
+> alter database set standby database to maximize protection;
+>
+> alter database set standby database to maximize performa
 
 ## 5.7 回滚段使用
 
@@ -4228,14 +4244,24 @@ SELECT DBMS_METADATA.GET_DDL('CONSTRAINT',u.CONSTRAINT_NAME) FROM user_constrain
 ```plsql
 -- 查询被阻塞Session信息和blocking_session信息。
 select BLOCKING_SESSION,count(*) from v$session where BLOCKING_SESSION!=0 group by BLOCKING_SESSION;
+
 -- 如果有记录，则说明存在blocking_session，执行以下SQL进一步分析。
 select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_text, a.blocking_session,a.p1,a.p2 from v$session a,v$sqlarea b where a.sql_hash_value=b.hash_value and a.BLOCKING_SESSION!=0;
+
 --如果有记录，则说明记录中的sid被blocking_session对应的操作阻塞。根据查询出来的“blocking_session”查询对应的操作信息。查询正在运行的SQL信息。
 select a.osuser,a.machine,a.sid,a.serial#,a.program,a.status,b.SQL_ID, b.sql_text from v$session a,v$sqlarea b where a.sql_hash_value=b.hash_value and a.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
+
 -- 如果能查询到记录，则说明可能是因为这个SQL执行慢，导致其它session被阻塞，此时需要等待SQL执行完毕以解锁；如果查询不到记录，则说明可能是因为某次执行了更新，未commit提交导致锁表，需要通过后续步骤判断是否有锁存在。
+
 -- 查询锁信息。
 select o.object_name, s.osuser,s.machine, s.program, s.status,s.sid,s.serial#,p.spid from v$locked_object l,dba_objects o,v$session s,v$process p where l.object_id=o.object_id and l.session_id=s.sid and s.paddr=p.addr
 and s.sid in (select distinct BLOCKING_SESSION from v$session where BLOCKING_SESSION!=0);
+
+--查询目前锁对象信息
+select sid,serial#,username,SCHEMANAME,osuser,MACHINE,terminal,PROGRAM,owner,object_name,object_type,o.object_id  from dba_objects o,v$locked_object l,v$session s where o.object_id = l.object_id and s.sid = l.session_id; 
+
+-- 杀会话
+alter system kill session '1568,27761,@2' immediate; 
 ```
 
 ## 5.11  keep_buffer_pool
