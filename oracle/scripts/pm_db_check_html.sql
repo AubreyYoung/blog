@@ -91,8 +91,10 @@ select a.group_number,b.name as group_name,a.name,a.path,a.state,a.total_mb from
 prompt <font><B>Note:</B></font>
 prompt <br>
 
-prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>7.LOG and Flashback Info</b></font>
+
+prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>7.LOG and Flashback Info and dbtimezone</b></font>
 select force_logging,supplemental_log_data_min,supplemental_log_data_all,flashback_on from v$database;
+select dbtimezone from dual;
 prompt <font><B>Note:</B></font>
 prompt <br>
 
@@ -103,6 +105,7 @@ prompt <br>
 
 prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>9.DB Parameter</b></font>
 select inst_id,name,value from gv$parameter where value is not null;
+select inst_id,num,name,value FROM GV$PARAMETER where isdefault='FALSE' order by inst_id,num;
 prompt <font><B>Note:</B></font>
 prompt <br>
 
@@ -175,10 +178,6 @@ select count(name) as Number_of_tablesapces from v$tablespace;
 prompt <font><B>Note:</B></font>
 prompt <br>
 prompt <font><B>Follow result no include autoextend space :</B></font>
-set linesize 150
-set pagesize 400
-column file_name format a65
-column tablespace_name format a25
 select f.tablespace_name tablespace_name,round((d.sumbytes/1024/1024/1024),2) total_g,
 round(f.sumbytes/1024/1024/1024,2) free_g,
 round((d.sumbytes-f.sumbytes)/1024/1024/1024,2) used_g,
@@ -242,9 +241,27 @@ prompt <font><B>Note:</B></font>
 prompt <br>
 
 prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>26.STATISTICS</b></font>
-select * from DBA_TAB_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') where  last_analyzed is not null and last_analyzed <= (sysdate-2);
-select * from DBA_TAB_COL_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') where last_analyzed is not null and last_analyzed <= (sysdate-2);
-select * from DBA_IND_STATISTICS where OWNER in ('PM4H_DB', 'PM4H_MO', 'PM4H_HW') where last_analyzed is not null and last_analyzed <= (sysdate-2);
+select count(1) from DBA_TAB_STATISTICS where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS') and last_analyzed is not null and last_analyzed <= (sysdate-1);
+select count(1) from DBA_TAB_COL_STATISTICS where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS') and last_analyzed is not null and last_analyzed <= (sysdate-1);
+select count(1) from DBA_IND_STATISTICS where owner  NOT IN ('MDDATA', 'MDSYS', 'ORDSYS', 'CTXSYS', 
+                     'ANONYMOUS', 'EXFSYS', 'OUTLN', 'DIP', 
+                     'DMSYS', 'WMSYS', 'XDB', 'ORACLE_OCM', 
+                     'TSMSYS', 'ORDPLUGINS', 'SI_INFORMTN_SCHEMA',
+                     'OLAPSYS', 'SYSTEM', 'SYS', 'SYSMAN',
+                     'DBSNMP', 'SCOTT', 'PERFSTAT', 'PUBLIC',
+                     'MGMT_VIEW', 'WK_TEST', 'WKPROXY', 'WKSYS') and  last_analyzed is not null and last_analyzed <= (sysdate-1);
 prompt <font><B>Note:</B></font>
 prompt <br>
 
@@ -363,7 +380,7 @@ prompt <font><B>Note:</B></font>
 prompt <br>
 
 prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>38.Create pfile</b></font>
-create pfile='/home/oracle/pfile_&pfileName..ora' from spfile;
+create pfile='pfile_&pfileName..ora' from spfile;
 prompt <br>
 prompt <font><B>Note:Pfile was created successfully as <font color="blue">"pfile_&pfileName..ora"</font>.Please download it!</B></font>
 prompt <br>
@@ -531,7 +548,7 @@ prompt <font><B>Note:</B></font>
 prompt <br>
 
 prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>43.Any Business data in system tablespace</b></font>
-select * from (select owner, segment_name, segment_type,tablespace_name
+select count(1) from (select owner, segment_name, segment_type,tablespace_name
   from dba_segments where tablespace_name in('SYSTEM','SYSAUX'))
 where  owner not in ('MTSSYS','ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS') and owner in (select username from dba_users where account_status='OPEN');
 prompt <font><B>Note:</B></font>
@@ -558,54 +575,43 @@ FROM dba_constraints WHERE status ='DISABLE' and constraint_type='P' and owner i
 prompt <font><B>Note:</B></font>
 prompt <br>
 
-prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>48.Foreign Key no index</b></font>
-select c.owner,d.table_name,d.CONSTRAINT_NAME,d.columns from DBA_CONS_COLUMNS c,
-(SELECT TABLE_NAME,
-       CONSTRAINT_NAME,
-       CNAME1 || NVL2(CNAME2, ',' || CNAME2, NULL) ||
-       NVL2(CNAME3, ',' || CNAME3, NULL) ||
-       NVL2(CNAME4, ',' || CNAME4, NULL) ||
-       NVL2(CNAME5, ',' || CNAME5, NULL) ||
-       NVL2(CNAME6, ',' || CNAME6, NULL) ||
-       NVL2(CNAME7, ',' || CNAME7, NULL) ||
-       NVL2(CNAME8, ',' || CNAME8, NULL) COLUMNS
-  FROM (SELECT B.TABLE_NAME,
-               B.CONSTRAINT_NAME,               
-               MAX(DECODE(POSITION, 1, COLUMN_NAME, NULL)) CNAME1,
-               MAX(DECODE(POSITION, 2, COLUMN_NAME, NULL)) CNAME2,
-               MAX(DECODE(POSITION, 3, COLUMN_NAME, NULL)) CNAME3,
-               MAX(DECODE(POSITION, 4, COLUMN_NAME, NULL)) CNAME4,
-               MAX(DECODE(POSITION, 5, COLUMN_NAME, NULL)) CNAME5,
-               MAX(DECODE(POSITION, 6, COLUMN_NAME, NULL)) CNAME6,
-               MAX(DECODE(POSITION, 7, COLUMN_NAME, NULL)) CNAME7,
-               MAX(DECODE(POSITION, 8, COLUMN_NAME, NULL)) CNAME8,
-               COUNT(*) COL_CNT
-          FROM (SELECT SUBSTR(TABLE_NAME, 1, 30) TABLE_NAME,
-                       SUBSTR(CONSTRAINT_NAME, 1, 30) CONSTRAINT_NAME,
-                       SUBSTR(COLUMN_NAME, 1, 30) COLUMN_NAME,
-                       POSITION
-                  FROM DBA_CONS_COLUMNS) A,
-               DBA_CONSTRAINTS B
-         WHERE A.CONSTRAINT_NAME = B.CONSTRAINT_NAME
-           AND B.CONSTRAINT_TYPE = 'R'
-         GROUP BY B.TABLE_NAME, B.CONSTRAINT_NAME) CONS
- WHERE COL_CNT > ALL (SELECT COUNT(*)
-          FROM DBA_IND_COLUMNS I WHERE I.TABLE_NAME = CONS.TABLE_NAME
-           AND I.COLUMN_NAME IN (CNAME1,CNAME2,CNAME3,CNAME4,CNAME5,CNAME6,CNAME7,CNAME8)
-           AND I.COLUMN_POSITION <= CONS.COL_CNT
-GROUP BY I.INDEX_NAME)) d where c.constraint_name=d.CONSTRAINT_NAME and c.table_name=d.TABLE_NAME
-and c.owner in(select username from dba_users where account_status='OPEN' and username not in ('MTSSYS','ORDDATA','ORDSYS','DMSYS','APEX_030200','OUTLN','DBSNMP','SYSTEM','SYSMAN','SYS','CTXSYS','MDSYS','OLAPSYS','WMSYS','EXFSYS','LBACSYS','WKSYS','XDB','ORDSYS','DBSNMP','OUTLN','TSMSYS')) order by c.owner;
+
+prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>48.Datafile of Numbers</b></font>
+select count(*) from dba_data_files;
 prompt <font><B>Note:</B></font>
 prompt <br>
 
-
-prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>49.Datafile of Numbers</b></font>
-select count(*) from dba_data_files; 
+prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>49. Table Full Scan</b></font>
+SELECT
+    target,
+    count(1)
+FROM
+    gv$session_longops t
+WHERE
+    t.sql_plan_operation = 'TABLE ACCESS'
+    AND sql_plan_options = 'FULL'
+    group by target;
 prompt <font><B>Note:</B></font>
 prompt <br>
 
-prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>Datafile Info</b></font>
-select file_id,tablespace_name,file_name,bytes/1024/1024,status,autoextensible,maxbytes/1024/1024 from dba_data_files; 
+prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>50. Total Size of the database</b></font>
+select (a.data_size+b.temp_size+c.redo_size+d.cont_size)/1024/1024/1024 "total_size GB"
+from ( select sum(bytes) data_size
+       from dba_data_files ) a,
+     ( select nvl(sum(bytes),0) temp_size
+       from dba_temp_files ) b,
+     ( select sum(bytes) redo_size
+       from sys.v_$logfile lf, sys.v_$log l
+       where lf.group# = l.group#) c,
+     ( select sum(block_size*file_size_blks) cont_size
+       from v$controlfile ) d;
+prompt <font><B>Note:</B></font>
+prompt <br>
+
+prompt <font size="+2" face="Arial,Helvetica,Geneva,sans-serif" color="#336699"><b>51. keep pool</b></font>
+SELECT size_for_estimate,buffers_for_estimate,estd_physical_read_factor,estd_physical_reads FROM v$db_cache_advice 
+WHERE name = 'KEEP' AND block_size = (SELECT value FROM v$parameter  WHERE name = 'db_block_size') AND advice_status = 'ON';
+SELECT * FROM dba_segments WHERE segment_type = 'KEEP';
 prompt <font><B>Note:</B></font>
 prompt <br>
 spool off

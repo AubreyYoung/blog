@@ -324,6 +324,7 @@ find / -name "alert*.log*" | xargs du -h
 ```
 find / -name "*listener*.log*" | xargs du -m
 find / -name "alert*.log*" | xargs du -m
+
 HP-UX
 find / -name "*listener*.log*" | xargs du -sk
 find / -name "alert*.log*" | xargs du -sk
@@ -346,10 +347,11 @@ SQL> truncate table SYS.AUD$;
 **ASM/RAC日志**
 
 ```sh
-#ASM日志：
-cd $ORACLE_BASE/diag/asm/+ASMX/trace/alert_+ASMX.log
-#CRS日志：
-cd $ORACLE_HOME/log/主机名/alert主机名.log
+#ASM日志(grid用户)：
+$ORACLE_BASE/diag/asm/+ASMX/trace/alert_+ASMX.log
+#CRS日志(grid用户)：
+$ORACLE_HOME/log/主机名/alert主机名.log
+cd $ADR_BASE/diag/crs/主机名/crs/trace   				## Oracle 19C
 ```
 
 ## 1.6 查看集群运行状态
@@ -902,8 +904,24 @@ alter system set "_px_use_large_pool"=true sid ='*' scope=spfile;
 -- 恢复LGWR的post/wait通知方式
 alter system set "_use_adaptive_log_file_sync"=false sid='*' scope=spfile;
 
+-- 修改参数样例
+alter system set session_cached_cursors=300  sid='*' scope=spfile;
+alter system set parallel_execution_message_size=32768  sid='*' scope=spfile;
+alter system set "_optim_peek_user_binds"=false sid='*' scope=spfile;
+alter system set "_b_tree_bitmap_plans"=false sid='*' scope=spfile;
+alter system set filesystemio_options=asynch sid='*' scope=spfile;
+alter system set "_cursor_obsolete_threshold"=100 sid='*' scope=spfile;
+alter system set "_undo_autotune"=false sid='*' scope=spfile;
+alter system set "_use_adaptive_log_file_sync"=false sid='*' scope=spfile;
+alter system set "_gc_policy_time"=0  sid='*' scope=spfile;
+alter system set db_file_multiblock_read_count=16  sid='*' scope=spfile;
+alter system set undo_retention=10800   sid='*' scope=spfile;
+alter system set "_memory_broker_stat_interval"=900  sid='*' scope=spfile;
+alter system set job_queue_processes=80 sid='*' scope=spfile;
+alter system set "_lm_tickets"=5000 sid='*' scope=spfile; 
+alter system set "_gc_undo_affinity"=false sid='*';
+alter system set large_pool_size=128M scope=spfile sid='*';
 
-修改中设置，登录失败后不锁定用户*9+:=)=>?@9:A:?*B9+9@C@+?*@9:A'9>D@&'*++:C)+7B&9@C@+:A-0<0.
 -- 云和恩墨参数
 alter system set "_optimizer_adaptive_cursor_sharing"=false sid='*' scope=spfile;
 alter system set "_optimizer_extended_cursor_sharing"=none sid='*' scope=spfile;
