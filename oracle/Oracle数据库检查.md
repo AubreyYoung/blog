@@ -2369,7 +2369,7 @@ select owner,table_name name,status,degree from dba_tables where degree>1;
 select owner,index_name name,status,degree from dba_indexes where degree>'1';
 ```
 
-## 2.31 全表扫面
+## 2.31 全表扫描
 
 ```plsql
 SELECT
