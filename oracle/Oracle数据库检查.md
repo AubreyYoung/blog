@@ -768,6 +768,24 @@ x.ksppinm LIKE '/_%' escape '/'
 order by
 translate(x.ksppinm, ' _', ' ');
 
+-- 隐含参数session/system级可修改性
+SELECT a.ksppinm "Parameter",
+       b.ksppstvl "Session Value",
+       c.ksppstvl "Instance Value",
+       decode(bitand(a.ksppiflg/256,1),1,'TRUE','FALSE') IS_SESSION_MODIFIABLE,
+       decode(bitand(a.ksppiflg/65536,3),1,'IMMEDIATE',2,'DEFERRED',3,'IMMEDIATE','FALSE') IS_SYSTEM_MODIFIABLE
+FROM   x$ksppi a,
+       x$ksppcv b,
+       x$ksppsv c
+WHERE  a.indx = b.indx
+AND    a.indx = c.indx
+AND    a.ksppinm LIKE '/_%' escape '/';
+
+-- 隐含参数pdb级可修改性
+SELECT a.ksppinm "Parameter",
+decode(bitand(ksppiflg/524288,1),1,'TRUE','FALSE') ISPDB_MODIFIABLE
+FROM x$ksppi a;
+
 -- 关键字隐藏参数
 SELECT  P.KSPPINM NAME, V.KSPPSTVL VALUE
   FROM SYS.X$KSPPI P, SYS.X$KSPPSV V
@@ -780,6 +798,8 @@ SELECT  P.KSPPINM NAME, V.KSPPSTVL VALUE
 ### 2.5.3 查看参数
 
 ```
+select * from  pdb_spfile$;
+
 select inst_id,name,value from gv$parameter where name in('audit_trail',
 'max_dump_file_size',
 'processes',
@@ -819,6 +839,7 @@ alter system set event='28401 trace name context forever,level 1','10949 trace n
 #限制trace日志文件大最大25M
 alter system set max_dump_file_size ='25M' ;
 alter system set db_files=2000 scope=spfile;
+-- 19c/12c不修改
 #RAC修改local_listener：（现象：使用PlSql Developer第一次连接超时，第二次之后连接正常）
 alter system set local_listener = '(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.125)(PORT = 1521))' sid='orcl1';
 alter system set local_listener = '(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.130)(PORT = 1521))' sid='orcl2';
