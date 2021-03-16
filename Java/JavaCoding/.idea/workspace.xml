@@ -19,10 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5b090d1-ab6b-465f-9618-b392224e4ac0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../头脑风暴.xmind" beforeDir="false" afterPath="$PROJECT_DIR$/../../头脑风暴.xmind" afterDir="false" />
-    </list>
+    <list default="true" id="f5b090d1-ab6b-465f-9618-b392224e4ac0" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -85,6 +82,8 @@
       <workItem from="1610164035626" duration="124000" />
       <workItem from="1610164176137" duration="324000" />
       <workItem from="1610174504629" duration="618000" />
+      <workItem from="1615362338582" duration="210000" />
+      <workItem from="1615362722722" duration="37000" />
     </task>
     <servers />
   </component>
@@ -108,5 +107,9 @@
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="137" y="23" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1366.738@0.0.1366.738" timestamp="1610175730092" />
+    <state x="184" y="13" key="SettingsEditor" timestamp="1615362759631">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="184" y="13" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1615362759631" />
   </component>
 </project>
