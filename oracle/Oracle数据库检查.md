@@ -451,6 +451,9 @@ srvctl remove diskgroup -g REDO5_SELF -f
 crsctl modify res ora.crf -attr "AUTO_START=never" -init
 crsctl modify res ora.crf -attr "ENABLED=0" -init
 crsctl stop res ora.crf -init
+
+--  Oracle19c asm 单实例
+crsctl  start  resource  -all
 ```
 
 ## 1.7 RAC自启
