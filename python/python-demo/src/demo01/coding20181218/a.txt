@@ -1,3 +1,1 @@
 hello,iplaypython
-hello,iplaypython2
-hello,iplaypython3
