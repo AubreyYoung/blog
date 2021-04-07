@@ -177,12 +177,74 @@ AND f.database_status = 'ACTIVE'
 order by b.ctime;
 
 alter system kill session '1568,27761,@2' immediate; 
+
+-- 1. kill某个等待事件对应的spid：
+set linesize 260 pagesize 10000
+select 'kill -9 ' || a.spid
+  from v$process a, v$session b
+ where a.addr = b.paddr
+   and a.background is null
+   and b.type = 'USER'
+   and b.event like '%' || '&eventname' || '%'
+   and b.status = 'ACTIVE';
+
+-- 对应的alter system kill session的语法：
+set linesize 260 pagesize 1000
+col machine for a50
+col kill_session for a60;
+select machine,
+       'alter system kill session ' || ''''||sid|| ',' || serial# ||''''|| 'immediate;' kill_session,
+       status
+  from v$session
+ where type='USER' and event like '%event_name%' and status = 'ACTIVE';
 ```
 
 ## 1.6 根据SID查询SQL
 
 ```plsql
-select sql_text from v$sqlarea a,v$session b where a.SQL_ID=b.PREV_SQL_ID and b.SID=&sid;
+set linesize 260
+set pagesize 1000
+col sid for 99999
+col spid for a8
+col event for a30
+col module for a35
+col machine for a15
+col username for a10
+col holder for a10
+col final for a10
+col sql_id for a15
+col exec_gets for 99999999
+col seconds for a5
+col object_id for 999999
+col param for a30
+col sql_text for a6
+col PGA_USE for 9999
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+select a.sid,
+       a.username,
+       a.machine,
+       a.module,
+       a.event,
+       a.sql_id,
+       round(decode(c.executions,0,buffer_gets,buffer_gets/executions)) exec_gets,
+       a.ROW_WAIT_OBJ# object_id,
+       a.BLOCKING_INSTANCE||'_'||a.blocking_session  holder,
+       a.FINAL_BLOCKING_INSTANCE||'_'||a.FINAL_BLOCKING_SESSION final,
+       to_char(LAST_CALL_ET) seconds,
+       a.p1 || '_' || a.p2 || '_' || a.p3 param,
+       b.spid,
+       trunc(b.PGA_USED_MEM / 1024 / 1024,2) as PGA_USE,
+       substr(c.sql_text,0,6) sql_text
+  from v$session a, v$process b,v$sql c
+ where a.paddr = b.addr(+)
+   and a.status = 'ACTIVE'
+   and not (a.type = 'BACKGROUND' and a.state = 'WAITING' and
+        a.wait_class = 'Idle')
+   and a.sql_id=c.sql_id(+)
+   and a.sql_child_number=c.CHILD_NUMBER(+)
+   and b.spid='&SPID'
+ order by a.sql_id, a.machine;
+
 
 set line 120;
 SELECT 'ps -ef|grep ' || TO_CHAR(SPID) ||
@@ -251,6 +313,45 @@ select 'alter system kill session '''|| t.SID||','||t.SERIAL#||',@'||t.inst_id||
 select SQL_TEXT,sql_id, address, hash_value, executions, loads, parse_calls, invalidations from v$sqlarea  where sql_id='0nx7fbv1w5xg2';
 
 call sys.dbms_shared_pool.purge('0000000816530A98,3284334050','c');
+
+-- blocking会话类型和kill blocking会话：
+set linesize 260 pagesize 10000
+col machine for a50
+col kill_session for a60
+SELECT
+    blocking_instance,
+    blocking_session,
+    BLOCKING_SESSION_STATUS,
+    FINAL_BLOCKING_INSTANCE,
+    FINAL_BLOCKING_SESSION,
+    COUNT(*)
+FROM
+    v$session
+WHERE   upper(event) LIKE '%&cursor%'
+GROUP BY
+    blocking_instance,
+    blocking_session,
+    BLOCKING_SESSION_STATUS,
+    FINAL_BLOCKING_INSTANCE,
+    FINAL_BLOCKING_SESSION
+    order by blocking_instance,count(*);
+
+-- kill blocking会话
+select 
+       inst_id,
+       machine,
+       'alter system kill session ' || ''''||sid|| ',' || serial# ||''''|| 'immediate;' kill_session,
+       status
+  from gv$session a
+where a.type='USER' and (a.inst_id,a.sid) in 
+(
+select 
+BLOCKING_INSTANCE,
+BLOCKING_SESSION 
+from v$session
+where upper(event) like '%&cursor%'
+)
+order by inst_id;
 ```
 
 ## 1.9 阻塞会话

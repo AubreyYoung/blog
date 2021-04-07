@@ -753,6 +753,7 @@ SELECT inst_id,name from gv$parameter WHERE isdeprecated = 'TRUE' ORDER BY name;
 ### 2.5.3 隐藏参数
 
 ```plsql
+-- 以_筛选隐含参数，实际也可以查询非隐含参数
 set linesize 200
 column name format a50
 column value format a25
@@ -1347,7 +1348,8 @@ SUM(decode(to_char(first_time, 'hh24'),'19',1,0)) "h19",
 SUM(decode(to_char(first_time, 'hh24'),'20',1,0)) "h20",
 SUM(decode(to_char(first_time, 'hh24'),'21',1,0)) "h21",
 SUM(decode(to_char(first_time, 'hh24'),'22',1,0)) "h22",
-SUM(decode(to_char(first_time, 'hh24'),'23',1,0)) "h23"
+SUM(decode(to_char(first_time, 'hh24'),'23',1,0)) "h23"，
+ROUND(COUNT(1) / 24, 2) "Avg"
 FROM    V$log_history where to_date(first_time)>to_date(sysdate-15)
 group by trunc(first_time), to_char(first_time, 'Dy')
 Order by 1;
@@ -1748,16 +1750,17 @@ AND d.extent_management like 'LOCAL'
 AND d.contents like 'TEMPORARY';
 
 -- 查看临时表空间使用率
-SELECT temp_used.tablespace_name,total,used,
-           total - used as "Free",
-           round(nvl(total-used, 0) * 100/total,3) "Free percent"
-      FROM (SELECT tablespace_name, SUM(bytes_used)/1024/1024 used
-              FROM GV_$TEMP_SPACE_HEADER
-             GROUP BY tablespace_name) temp_used,
-           (SELECT tablespace_name, SUM(bytes)/1024/1024 total
-              FROM dba_temp_files
-             GROUP BY tablespace_name) temp_total
-     WHERE temp_used.tablespace_name = temp_total.tablespace_name;
+select  df.tablespace_name "Tablespace",
+       df.totalspace "Total(MB)",
+       nvl(FS.UsedSpace, 0)  "Used(MB)",
+       (df.totalspace - nvl(FS.UsedSpace, 0)) "Free(MB)",
+       round(100 * (1-( nvl(fs.UsedSpace, 0) / df.totalspace)), 2) "Pct. Free(%)"
+FROM  (SELECT tablespace_name, round(SUM(bytes) / 1048576) TotalSpace
+        FROM   dba_TEMP_files
+        GROUP  BY tablespace_name) df,
+       (SELECT tablespace_name, ROUND(SUM(bytes_used) / 1024 / 1024)  UsedSpace
+        FROM   gV$temp_extent_pool
+        GROUP  BY tablespace_name) fs  WHERE  df.tablespace_name = fs.tablespace_name(+);
 ```
 
 ### 2.15.3 临时数据文件大小
@@ -1788,6 +1791,9 @@ ORDER BY 1 DESC;
 ```plsql
 SELECT   se.username,
          se.sid,
+         se.serial#,
+         se.machine,
+         se.program,
          su.extents,
          su.blocks * to_number(rtrim(p.value)) as Space,
          tablespace,
@@ -1800,7 +1806,18 @@ FROM gv$sort_usage su, gv$parameter p, gv$session se, gv$sql s
      AND s.address = su.sqladdr
 ORDER BY se.username, se.sid;
 
- SELECT su.username,se.sid,se.serial#,se.sql_address,se.machine,se.program,su.tablespace,su.segtype,su.contents FROM v$session se,v$sort_usage su WHERE se.saddr=su.session_addr;
+-- 查询历史的temp表空间的使用的SQL_ID
+select a.SQL_ID,
+       a.SAMPLE_TIME,
+       a.program,
+       sum(trunc(a.TEMP_SPACE_ALLOCATED / 1024 / 1024)) MB
+  from v$active_session_history a
+ where TEMP_SPACE_ALLOCATED is not null 
+ and sample_time between
+ to_date('&date1', 'yyyy-mm-dd hh24:mi:ss') and
+ to_date('&date2', 'yyyy-mm-dd hh24:mi:ss')
+ group by a.sql_id,a.SAMPLE_TIME,a.PROGRAM
+ order by 2 asc,4 desc;
 ```
 
 ### 2.15.6 收缩临时表空间
@@ -3656,6 +3673,19 @@ ORDER BY
 ;
 ```
 
+### 3.17.3 某个segment
+
+```plsql
+col owner for a15
+col segment_name for a29
+col partition_name for a30
+col tablespace_name for a29
+col size_m for 999,999,999
+col blocks for 999,999,999
+select owner,segment_name, partition_name,tablespace_name,bytes/1024/1024 size_m,blocks from dba_segments where segment_name=UPPER('&segment_name') order by 1;
+```
+
+
 
 ## 3.18 查看UNDO表空间
 
@@ -3715,6 +3745,35 @@ order by segment_name ;
 
 select usn,xacts,rssize/1024/1024/1024,hwmsize/1024/1024/1024,shrinks
 from v$rollstat order by rssize;
+
+-- 实时的undo使用量
+set linesize 220
+set pagesize 1000
+col username for a20
+col module for a40
+col sql_id for a15
+col status for a10
+col machine for a20
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+select *
+  from (select start_time,
+               username, 
+               s.MACHINE, 
+               s.OSUSER, 
+               r.name, 
+               ubafil, --Undo block address (UBA) filenum  
+               ubablk, --UBA block number  
+               t.status,   
+               (used_ublk * 8192 / 1024) kbtye,   
+               used_urec,   
+               s1.SQL_ID,   
+               substr(s1.SQL_TEXT,0,20)
+          from v$transaction t, v$rollname r, v$session s, v$sqlarea s1
+         where t.xidusn = r.usn
+           and s.saddr = t.ses_addr
+           and s.sql_id = s1.sql_id(+)
+         order by 9 desc)
+ where rownum <= 10;
 ```
 ### 3.18.3 UNDO表空间管理
 
@@ -4435,5 +4494,58 @@ select * from DBA_SEQUENCES  where  sequence_owner  NOT IN ('MDDATA', 'MDSYS', '
     [CYCLE | NOCYCLE]
     [CACHE cache_size | NOCACHE]
     [ORDER | NOORDER];
+```
+
+## 6.1 查看DDL
+
+```plsql
+set linesize 260
+set long 999999
+set pagesize 1000
+select dbms_metadata.get_ddl(upper('&object_type'),upper('&object_name'),upper('&owner')) FROM DUAL;
+```
+
+## 6.2 查看对象DML操作信息
+
+```plsql
+set linesize 220 pagesize 10000
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+col table_owner for a20
+col table_name for a30
+col partition_name for a20
+col subpartition_name for a20
+select a.*,sysdate from dba_tab_modifications a where table_name=upper('&table_name');
+```
+
+## 6.3未使用绑定变量的SQL
+
+```plsql
+set linesize 220 pagesize 10000
+set long 999999999
+col MODULE for a40
+col sql_id for a30
+col PARSING_SCHEMA_NAME for a20
+alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss';
+select a.sql_id,
+       a.MODULE,
+       a.PARSING_SCHEMA_NAME,
+       a.last_active_time,
+       a.last_load_time,
+       a.sql_fulltext,
+       b.pool_mb,
+       b.cnt
+  from v$sqlarea a,
+       (select max(sql_id) sql_id,
+               FORCE_MATCHING_SIGNATURE,
+               round(sum(SHARABLE_MEM / 1024 / 1024)) pool_mb,
+               count(1) cnt
+          from v$sqlarea
+         where FORCE_MATCHING_SIGNATURE > 0
+           and FORCE_MATCHING_SIGNATURE != EXACT_MATCHING_SIGNATURE
+         group by FORCE_MATCHING_SIGNATURE
+        having count(1) > 3
+         order by count(1) desc) b
+ where a.sql_id = b.sql_id
+ order by cnt desc;
 ```
 
