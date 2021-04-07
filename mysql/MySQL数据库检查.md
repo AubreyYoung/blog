@@ -129,6 +129,54 @@ mysql > select @@transaction_isolation;
 mysql> set global transaction_isolation='READ COMMITTED';
 ```
 
+### 3.4 查看参数
+
+```sql
+//1.查看系统所有变量
+show [global | session] variables;
+//查看全局变量
+show global variables;
+//查看会话变量
+show session variables;
+show variables;
+
+//查看满足条件的系统变量(like模糊匹配)
+show [global|session] like '%变量名%';
+show global variables like '%tx%';
+
+//查看指定的系统变量的值
+select @@[global.|session.]系统变量名称;
+select @@global.autocommit;
+select @@tx_isolation;
+select @@session.tx_isolation
+```
+
+> **注意:** 
+>
+> ​		select 和 @@ 关键字，global和session后面有个.符号
+
+### 3.5参数赋值
+
+```sql
+/*为某个系统变量赋值*/
+//方式1
+set [global|session] 系统变量名=值;
+set global autocommit=0;
+//方式2
+set @@[global.|session.]系统变量名=值;
+set @@global.autocommit=1;
+
+/*④为某个会话变量赋值*/
+set @@session.tx_isolation='read-uncommitted';
+set @@tx_isolation='read-committed';
+```
+
+> **注意:**
+>
+> ​		上面使用中介绍的，全局变量需要添加global关键字，会话变量需要添加session关键字，如果不 写，默认为session级别。 
+>
+> ​		全局变量的使用中用到了 @@ 关键字，后面会介绍自定义变量，**自定义变量中使用了一个 @ 符号**， 这点需要和全局变量区分一下。
+
 ## 4. percona toolkit
 
 ## 5. 用户权限管理
@@ -3497,4 +3545,129 @@ root@mysql 17:23:  [mytest]> show create table t8;
 1 row in set (0.00 sec)
 ```
 
+## 6. 自定义变量
+
+### 6.1 用户变量  
+
+#### 6.1.1 声明并初始化(要求声明时必须初始化)  
+
+```sql
+/*方式1*/
+set @变量名=值;
+/*方式2*/
+set @变量名:=值;
+/*方式3*/
+select @变量名:=值;
+```
+
+> **注意：**
+>
+> ​		上面使用了 @ 符合，而上面介绍全局变量使用了2个 @ 符号，这点注意区分一下。
+>
+> ​		set中=号前面冒号是可选的，select方式=前面必须有冒号  
+
+#### 6.1.2 赋值(更新变量的值)
+
+```sql
+/*方式1：这块和变量的声明一样*/
+set @变量名=值;
+set @变量名:=值;
+select @变量名:=值;
+/*方式2*/
+select 字段 into @变量名 from 表;
+```
+
+#### 6.1.3 使用  
+
+```sql
+select @变量名;
+```
+
+#### 6.1.4 综合示例 
+
+```sql
+/*set方式创建变量并初始化*/
+set @username='路人甲java';
+/*select into方式创建变量*/
+select 'javacode2018' into @gzh;
+select count(*) into @empcount from employees;
+/*select :=方式创建变量*/
+select @first_name:='路人甲Java',@email:='javacode2018@163.com';
+/*使用变量*/
+insert into employees (first_name,email) values (@first_name,@email);
+```
+
+### 6.2 局部变量  
+
+#### 6.2.1 声明
+
+```sql
+declare 变量名 变量类型;
+declare 变量名 变量类型 [default 默认值];
+```
+
+#### 6.2.2 赋值  
+
+```sql
+/*方式1*/
+set 局部变量名=值;
+set 局部变量名:=值;
+select 局部变量名:=值;
+/*方式2*/
+select 字段 into 局部变量名 from 表;
+```
+
+> **注意**：局部变量前面没有 @ 符号  
+
+#### 6.2.3 使用(查看变量的值) 
+
+```sql
+select 局部变量名;
+```
+
+#### 6.2.4 示例
+
+```sql
+/*创建表test1*/
+drop table IF EXISTS test1;
+create table test1(a int PRIMARY KEY,b int);
+/*声明脚本的结束符为$$*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS proc1;
+CREATE PROCEDURE proc1()
+BEGIN
+/*声明了一个局部变量*/
+DECLARE v_a int;
+select ifnull(max(a),0)+1 into v_a from test1;
+select @v_b:=v_a*2;
+insert into test1(a,b) select v_a,@v_b;
+end $$
+/*声明脚本的结束符为;*/
+DELIMITER ;
+/*调用存储过程*/
+call proc1();
+/*查看结果*/
+select * from test1;
+```
+
+### 6.3 用户变量和局部变量对比  
+
+|          | 作用域                | 定义位置              | 语法                    |
+| -------- | --------------------- | --------------------- | ----------------------- |
+| 用户变量 | 当前会话              | 会话的任何地方        | 加 @ 符号，不用指定类型 |
+| 局部变量 | 定义他的begin end之间 | begin end中的第一句话 | 不加 @ 符号，要指定类型 |
+
+> **总结**
+>
+> ​		系统变量可以设置系统的一些配置信息，数据库重启之后会被还原
+>
+> ​		会话变量可以设置当前会话的一些配置信息，对当前会话起效
+>
+> ​		declare创建的局部变量常用于存储过程和函数的创建中
+>
+> ​		作用域：全局变量对整个系统有效、会话变量作用于当前会话、用户变量作用于当前会话、局部变量作用于begin end之间
+>
+> ​		注意全局变量中用到了 @@ ，用户变量变量用到了 @ ，而局部变量没有这个符号
+>
+> ​		delimiter 关键字用来声明脚本的结束符  
 
