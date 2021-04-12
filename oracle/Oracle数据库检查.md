@@ -829,6 +829,7 @@ select inst_id,name,value from gv$parameter where name in('audit_trail',
 ### 2.5.4 修改参数
 
 ```plsql
+ alter system set sec_case_sensitive_logon=false;
 alter system set audit_sys_operations=false scope=spfile;
 alter system set deferred_segment_creation=FALSE;     
 alter system set audit_trail             =none           scope=spfile;  
@@ -2116,7 +2117,17 @@ set pages 80
 set lines 120
 col event for a40
 select sid, event, p1, p2, p3, WAIT_TIME, SECONDS_IN_WAIT  from v$session_wait where event not like 'SQL%'   and event not like 'rdbms%';               
-如果数据库长时间持续出现大量像latch free，enqueue，buffer busy waits，db file sequentialread，db file scattered read等等待事件时，需要对其进行分析，可能存在问题的语句。               
+如果数据库长时间持续出现大量像latch free，enqueue，buffer busy waits，db file sequentialread，db file scattered read等等待事件时，需要对其进行分析，可能存在问题的语句。
+
+--查看某个等待时间
+set linesize 220
+set pagesize 1000
+select inst_id,event,sql_id,BLOCKING_INSTANCE,blocking_session,FINAL_BLOCKING_INSTANCE,FINAL_BLOCKING_SESSION, count(*)
+  from gv$session a
+ where a.status='ACTIVE'
+ and not (a.type = 'BACKGROUND' and a.state='WAITING' and  a.wait_class='Idle') and upper(event) like upper('%&event%')
+ group by inst_id,event,sql_id,BLOCKING_INSTANCE,blocking_session,FINAL_BLOCKING_INSTANCE,FINAL_BLOCKING_SESSION
+ order by inst_id ,count(*) desc, sql_id;
 ```
 
 ### 2.20.2 检查锁与library闩锁等待
@@ -2810,7 +2821,11 @@ select scn,to_char(time_dp,'yyyy-mm-dd hh24:mi:ss')from sys.smon_scn_time;
 select scn, STORAGE_SIZE ,to_char(time,'yyyy-mm-dd hh24:mi:ss') time,NAME from v$restore_point;
 
 -- 查看闪回空间使用情况
-select * from V$RECOVERY_AREA_USAGE;
+select file_type, percent_space_used,percent_space_reclaimable,number_of_files as "number" from v$flash_recovery_area_usage;
+
+SELECT substr(name, 1, 30) name, round(space_limit/1024/1024)||'M' AS quota,
+       round(space_used/1024/1024)||'M' AS used,round(100*space_used/space_limit) used1,round(space_reclaimable/1024/1024)||'M' AS reclaimable,number_of_files   AS files
+  FROM  v$recovery_file_dest
 ```
 
 ### 3.7.2 开启/关闭闪回
@@ -4547,5 +4562,12 @@ select a.sql_id,
          order by count(1) desc) b
  where a.sql_id = b.sql_id
  order by cnt desc;
+```
+
+## 6.4 内存使用
+
+```plsql
+set linesize 260 pagesize 1000
+select pool, name, bytes/1024/1024/1024 GB from v$sgastat where name like 'free memory';
 ```
 

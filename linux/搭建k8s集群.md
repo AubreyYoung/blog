@@ -622,6 +622,8 @@ scp /usr/lib/systemd/system/etcd.service root@192.168.217.102:/usr/lib/systemd/s
 
 ```shell
 vim /opt/etcd/cfg/etcd.conf
+
+## node1
 #[Member]  
 ETCD_NAME="etcd-2"  
 ETCD_DATA_DIR="/var/lib/etcd/default.etcd" 
@@ -634,6 +636,8 @@ ETCD_ADVERTISE_CLIENT_URLS="https://192.168.217.101:2379"
 ETCD_INITIAL_CLUSTER="etcd-1=https://192.168.217.100:2380,etcd-2=https://192.168.217.101:2380,etcd-3=https://192.168.217.102:2380" 
 ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
 ETCD_INITIAL_CLUSTER_STATE="new" 
+
+## node2 
 #[Member]  
 ETCD_NAME="etcd-3"  
 ETCD_DATA_DIR="/var/lib/etcd/default.etcd" 
