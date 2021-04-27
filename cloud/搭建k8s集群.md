@@ -2,11 +2,11 @@
 
 ## 1.1 单master集群
 
-![单master集群](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121241155-1525790695.jpg)
+![单master集群](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121241155-1525790695.jpg)
 
 ## 1.2 多master集群
 
-![多master集群](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121241473-680545982.jpg)
+![多master集群](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121241473-680545982.jpg)
 
 # 2. 服务器硬件配置要求
 
@@ -53,7 +53,7 @@ kubeadm join <master节点的IP和端口>
 
 ## 4.2 准备环境
 
-[![img](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121241687-1927905796.jpg)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121241687-1927905796.jpg)
+[![img](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121241687-1927905796.jpg)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121241687-1927905796.jpg)
 
 | 角色       | IP              |
 | ---------- | --------------- |
@@ -292,7 +292,7 @@ kubeadm init \
   --pod-network-cidr=10.244.0.0/16
 ```
 
-[![部署k8s的Master节点](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121241851-153602148.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121241851-153602148.png)
+[![部署k8s的Master节点](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121241851-153602148.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121241851-153602148.png)
 
 - 根据提示信息，在Master节点上使用kubectl工具：
 
@@ -302,7 +302,7 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-[![根据提示信息，在Master节点上使用kubectl工具](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121242066-733200847.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242066-733200847.png)
+[![根据提示信息，在Master节点上使用kubectl工具](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121242066-733200847.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242066-733200847.png)
 
 ## 4.6 添加k8s的Node节点
 
@@ -314,7 +314,7 @@ kubeadm join 192.168.217.100:6443 --token 4016im.eg4e10yamcbxjm59 \
     --discovery-token-ca-cert-hash sha256:ce2111ce594e5189255144a72268250e5eedda87470cc3a1f69f8c973927699e
 ```
 
-[![添加k8s的Node节点](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121242274-1695630840.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242274-1695630840.png)
+[![添加k8s的Node节点](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121242274-1695630840.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242274-1695630840.png)
 
 - 默认的token有效期为24小时，当过期之后，该token就不能用了，这时可以使用如下的命令创建token：
 
@@ -332,7 +332,7 @@ kubeadm token create --ttl 0
 kubectl get nodes
 ```
 
-[![根据提示，在Master节点使用kubectl工具查看节点](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121242435-37741854.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242435-37741854.png)
+[![根据提示，在Master节点使用kubectl工具查看节点](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121242435-37741854.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242435-37741854.png)
 
 - 在Master节点部署CNI网络插件(可能会失败，如果失败，请下载到本地，然后安装)：
 
@@ -341,7 +341,7 @@ wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
-[![在Master节点部署CNI网络插件](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121242660-509987373.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242660-509987373.png)
+[![在Master节点部署CNI网络插件](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121242660-509987373.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242660-509987373.png)
 
 - 查看部署CNI网络插件进度：
 
@@ -349,7 +349,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 kubectl get pods -n kube-system
 ```
 
-[![查看部署CNI网络插件进度](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121242826-406886257.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242826-406886257.png)
+[![查看部署CNI网络插件进度](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121242826-406886257.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121242826-406886257.png)
 
 - 再次在Master节点使用kubectl工具查看节点状态：
 
@@ -357,7 +357,7 @@ kubectl get pods -n kube-system
 kubectl get nodes
 ```
 
-[![再次在Master节点使用kubectl工具查看节点](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121243000-2058564133.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243000-2058564133.png)
+[![再次在Master节点使用kubectl工具查看节点](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121243000-2058564133.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243000-2058564133.png)
 
 - 查看集群健康状态：
 
@@ -365,13 +365,13 @@ kubectl get nodes
 kubectl get cs
 ```
 
-[![查看集群健康状态命令1](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121243181-1043784943.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243181-1043784943.png)
+[![查看集群健康状态命令1](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121243181-1043784943.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243181-1043784943.png)
 
 ```shell
 kubectl cluster-info
 ```
 
-[![查看集群健康状态命令2](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121243369-1942439398.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243369-1942439398.png)
+[![查看集群健康状态命令2](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121243369-1942439398.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243369-1942439398.png)
 
 # 5.二进制包搭建k8s集群
 
@@ -529,7 +529,7 @@ mv cfssl-certinfo_linux-amd64 /usr/bin/cfssl-certinfo
   ls -l server*pem
   ```
 
-  [![查看自签CA签发etcd的https证书](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121243711-2052771909.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243711-2052771909.png)
+  [![查看自签CA签发etcd的https证书](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121243711-2052771909.png)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121243711-2052771909.png)
 
 ### 5.3.4 从GitHub下载二进制文件
 
@@ -1251,10 +1251,10 @@ systemctl start kube-proxy
 kubectl get csr
 ```
 
-[![kubectl get csr](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121244031-720770964.jpg)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121244031-720770964.jpg)
+[![kubectl get csr](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121244031-720770964.jpg)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121244031-720770964.jpg)
 
 ```shell
 kubectl certificate approve <NAME>
 ```
 
-[![kubectl certificate approve 上面生成的name](D:\Github\blog\linux\搭建k8s集群.assets\1128804-20201027121244250-560506130.jpg)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121244250-560506130.jpg)
+[![kubectl certificate approve 上面生成的name](D:\Github\blog\cloud\搭建k8s集群.assets\1128804-20201027121244250-560506130.jpg)](https://img2020.cnblogs.com/blog/1128804/202010/1128804-20201027121244250-560506130.jpg)
