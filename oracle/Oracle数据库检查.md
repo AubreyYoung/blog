@@ -829,7 +829,7 @@ select inst_id,name,value from gv$parameter where name in('audit_trail',
 ### 2.5.4 修改参数
 
 ```plsql
- alter system set sec_case_sensitive_logon=false;
+alter system set sec_case_sensitive_logon=false;
 alter system set audit_sys_operations=false scope=spfile;
 alter system set deferred_segment_creation=FALSE;     
 alter system set audit_trail             =none           scope=spfile;  
