@@ -862,7 +862,6 @@ alter system set cursor_sharing=force scope=spfile;
 ALTER SYSTEM SET log_buffer=536870912 SCOPE=SPFILE;
 ALTER SYSTEM SET parallel_max_servers=80;    默认480
 ALTER SYSTEM SET processes=5000 SCOPE=SPFILE;
-alter system set db_file_multiblock_read_count = 128 ;
 alter system set disk_asynch_io=true sid ='*' scope=spfile;
 alter system set recyclebin='OFF' scope=spfile;
 alter system set "_undo_autotune"=false scope=spfile sid='*';
