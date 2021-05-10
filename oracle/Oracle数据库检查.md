@@ -911,7 +911,7 @@ alter system reset memory_max_target scope=spfile sid='*';
 
 -- 关闭DRM（因DRM导致的问题非常多）：
 alter system set "_gc_policy_time"=0 scope=spfile sid='*';
-alter system set "_gc_undo_affinity"=false sid='*';
+alter system set "_gc_undo_affinity"=false scope=spfile sid='*';
 -- 增加实例延迟降级锁的时长为3毫秒,避免遇到一些导致实例crash的bug：
 alter system set "_gc_defer_time"=3 scope=spfile sid='*';
 
