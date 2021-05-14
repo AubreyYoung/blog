@@ -852,7 +852,6 @@ HOST = 192.168.1.216 --此处使用数字形式的VIP，绝对禁止使用rac1-v
 HOST = 192.168.1.219 --此处使用数字形式的VIP，绝对禁止使用rac2-vip
 #更改控制文件记录保留时间
 alter system set control_file_record_keep_time =31;
-alter system set resource_limit=true sid='*' scope=spfile;
 alter system set resource_manager_plan='force:' sid='*' scope=spfile;
 alter system set parallel_force_local=true  sid='*' scope=spfile;
 alter system set fast_start_parallel_rollback='LOW' scope=spfile;
