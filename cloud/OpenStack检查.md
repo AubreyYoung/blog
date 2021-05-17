@@ -2,16 +2,69 @@
 
 # 1. 认证 (keystone)
 
-列出所有的用户
+## 1.1 Domain
 
-```
-$ openstack user list
+```sh
+# 创建domain
+openstack domain create --description "Default Domain" default
 ```
 
-列出认证服务目录
+## 1.2 租户
 
+```sh
+# 列出所有的租户
+openstack project list
+# 创建租户
+openstack project create --domain default --description "hzbtest Project" hzbtest
+# 修改租户属性（以修改enabled和name为例子）
+openstack project set --disable --name=hzbtest2 hzbtest
+# 禁用/启用租户
+openstack project set PROJECT_ID --disable/enable
+# 更新租户名称
+openstack project set PROJECT_ID --name project-new
+# 删除租户
+openstack project delete hzbtest2
+# 查看租户详情
+openstack project show admin
 ```
-$ openstack catalog list
+
+## 1.3 用户
+
+```sh
+# 列出所有的用户
+openstack user list
+# 查询某一租户下的所有用户
+openstack user list --project=admin
+# 创建用户
+ openstack user create --domain default --password-prompt hzbtest
+# 查看用户详情
+ openstack user show hzbtest
+# 更新用户信息
+ openstack user set --email=hzbtest@qq.com --description=xxx --password=12345678 hzbtest
+# 禁用/启用用户
+openstack user set USER_NAME --disable/enable
+# 更新用户名称
+openstack user set USER_NAME --name user-new
+# 删除用户
+openstack user delete hzbtest
+```
+
+## 1.4 角色
+
+```sh
+# 创建角色
+openstack role create hzb-role
+# 将租户和用户加入到角色
+openstack role add --project hzbtest --user hzbtest hzb-role
+# 将role移除租户和用户
+openstack role remove --user=hzbtest --project=hzbtest hzb-role
+```
+
+## 1.5 服务目录
+
+```sh
+# 列出认证服务目录
+openstack catalog list
 ```
 
 # 2. 镜像（glance）
