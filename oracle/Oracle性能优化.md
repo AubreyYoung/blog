@@ -176,7 +176,7 @@ AND f.status = 'OPEN'
 AND f.database_status = 'ACTIVE'
 order by b.ctime;
 
-alter system kill session '1568,27761,@2' immediate; 
+alter system kill session '1568,27761,@1' immediate; 
 
 -- 1. kill某个等待事件对应的spid：
 set linesize 260 pagesize 10000
