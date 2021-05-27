@@ -4607,3 +4607,124 @@ set linesize 260 pagesize 1000
 select pool, name, bytes/1024/1024/1024 GB from v$sgastat where name like 'free memory';
 ```
 
+## 6.5碎片
+
+### 6.5.1 表空间碎片
+
+```plsql
+--- 检测表空间碎片是否过度的脚本
+--- Check tablespace for excessive fragmentation
+--- Author : Huai Xiaoming
+--- Date:    20200114
+--- 当我们碰到明明表空间还有10G剩余，为什么出现表/索引无法扩展的情况？
+--- 通过下面的脚本可以告诉你，虽然实际上表空间剩余容量虽然有10G那么大，但有可能实际并没有一块空间是可以满足next extend去扩展的。
+--- t1_filter是用来筛选表空间的，剩余空间绰绰有余的表空间可以不用检测
+
+SET LINES 200 PAGES 200 HEAD ON FEEDBACK OFF AUTOT OFF TI OFF TIMI OFF
+
+col mes for a100
+
+with 
+t1 as (select TABLESPACE_NAME, round(USED_SPACE/128) mb, round(TABLESPACE_SIZE/128) totalmb, round(USED_PERCENT,2) USED_PERCENT 
+         from dba_tablespace_usage_metrics)
+,t1_filter as (select * from t1 where totalmb-mb<100*power(2,10) and USED_PERCENT>90)
+,t2 as 
+(select fs.tablespace_name, fs.bytes/power(2,20) mb, count(*) cnt from DBA_FREE_SPACE fs, t1_filter t1f 
+   where 
+   --fs.tablespace_name like 'TBS%' and 
+   fs.tablespace_name= t1f.tablespace_name
+   group by fs.tablespace_name, bytes/power(2,20))
+,t3 as (select tablespace_name, case when mb<1 then '<1MB' when mb<4 then '<4MB' else '>=4MB' end size_range, sum(mb) mb, sum(cnt) cnt 
+          from t2 group by tablespace_name, case when mb<1 then '<1MB' when mb<4 then '<4MB' else '>=4MB' end)
+,t4 as (select tablespace_name, size_range, mb, cnt, ratio_to_report(mb)over(partition by tablespace_name) rtp
+  from t3)
+, t5 as (
+   select tablespace_name,nvl(mb_less_1,0) mb_less_1,nvl(cnt_less_1,0)  cnt_less_1,nvl(rtp_less_1,0) rtp_less_1,
+              nvl(mb_less_4,0) mb_less_4,nvl(cnt_less_4,0) cnt_less_4,nvl(rtp_less_4,0) rtp_less_4,
+              nvl(mb_more_4,0) mb_more_4,nvl(cnt_more_4,0) cnt_more_4,nvl(rtp_more_4,0) rtp_more_4
+  from (       
+     select tablespace_name,
+           max(case when size_range='<1MB' then size_range end) size_range_less_1, max(case when size_range='<1MB' then mb end) mb_less_1, 
+           max(case when size_range='<1MB' then cnt end) cnt_less_1, max(case when size_range='<1MB' then rtp end) rtp_less_1,
+           max(case when size_range='<4MB' then size_range end) size_range_less_4, max(case when size_range='<4MB' then mb end) mb_less_4, 
+           max(case when size_range='<4MB' then cnt end) cnt_less_4, max(case when size_range='<4MB' then rtp end) rtp_less_4,
+           max(case when size_range='>=4MB' then size_range end) size_range_more_4, max(case when size_range='>=4MB' then mb end) mb_more_4, 
+           max(case when size_range='>=4MB' then cnt end) cnt_more_4, max(case when size_range='>=4MB' then rtp end) rtp_more_4
+           from t4 group by tablespace_name)
+  )
+select 'Tablespace :'||tablespace_name ||'is no continuous space greater than or equal to 4M, or the total is less than 5G, and the table space usage rate exceeds 90%' mes 
+from t5 where not(cnt_more_4>=1 and mb_more_4>5120);
+```
+
+## 6.6 清理日志
+
+```sh
+自动清理oracle的归档日志、alert日志、监听日志、审计日志脚本。
+#crontab
+30 8 * * *  /ora/u01/scripts/clean_log.sh  > /dev/null 2>&1
+
+####################################################################### 
+################archive log
+#!/bin/bash 
+. /home/oracle/.bash_profile
+# --------------------
+# every day archivelog about 400G
+# --------------------                
+export ORACLE_SID=ORCL
+$ORACLE_HOME/bin/rman log=/oracle/archlog/ORCL/clean.log <<EOF   
+connect target /
+run{
+crosscheck archivelog all;
+delete noprompt expired archivelog all;
+delete noprompt archivelog all completed before 'sysdate - 3';
+}
+exit;
+EOF
+
+#################arlert log
+#!/bin/bash 
+#---------------------
+#alert about 30m every month
+#---------------------
+cd ${ORACLE_BASE}/diag/rdbms/ORCL/$ORACLE_SID/trace
+export SIZE=`du -m alert_${ORACLE_SID}.log | cut -f1`
+if [ ${SIZE} -ge 30 ]; then
+#  cp alert_${ORACLE_SID}.log /oracle/rmanbackup/oracle_log/alert/alert_${ORACLE_SID}_`date +%Y%m%d%H%M%S`.log
+  cp alert_${ORACLE_SID}.log /oracle/rmanbackup/oracle_log/alert/alert_${ORACLE_SID}_`date +%Y%m%d%H%M%S`.log
+# cat /dev/null > alert_${ORACLE_SID}.log
+  truncate -s 0 alert_${ORACLE_SID}.log
+fi
+find . -mtime +30 -name "*.trc" | xargs rm -rf  
+find . -mtime +30 -name "*.trm" | xargs rm -rf
+
+
+#################listener log
+#!/bin/bash 
+#---------------------
+#listener.log about 100m every 8 month,listener.xml about 200m every month
+#---------------------
+cd $ORACLE_BASE/diag/tnslsnr/`hostname`/listener/trace
+export SIZE=`du -m listener.log | cut -f1`
+if [ $SIZE -ge 100 ]; then
+#  lsnrctl set log_status off
+#  mv listener.log /oracle/rmanbackup/oracle_log/listener/listener_`date +%Y%m%d%H%M%S`.log
+   cp listener.log /oracle/rmanbackup/oracle_log/listener/listener_`date +%Y%m%d%H%M%S`.log
+   truncate -s 0 listener.log
+#  lsnrctl set log_status on
+fi
+cd $ORACLE_BASE/diag/tnslsnr/`hostname`/listener_orcl/alert
+find . -mtime +30 -name "log_*.xml" | xargs rm -rf 
+
+
+#################audit log
+#!/bin/bash 
+#---------------------
+#audit log about 2GB every month,but aud$ table will exist system tablespace,please noted
+#---------------------
+cd $ORACLE_HOME/rdbms/audit
+find . -mtime +30 -exec mv {} /oracle/rmanbackup/oracle_log/audit \;
+
+
+exit
+```
+
