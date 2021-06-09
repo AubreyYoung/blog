@@ -1,9 +1,10 @@
 
 import pandas as pd
 
-frame = pd.read_excel("test.xls",2)
+frame = pd.read_excel("data2.xlsx")
 print(frame)
 
+print("###############################################################")
 
 import numpy as np
 
