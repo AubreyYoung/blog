@@ -10,9 +10,9 @@ cell2 = sheet["C3"]
 print(cell1.value, cell2.value)
 
 print('############################################################################')
-cell3 = sheet.cell(row = 1,column = 1)
-cell4 = sheet.cell(row = 11,column = 3)
-print(cell3.value,cell4.value)
+cell3 = sheet.cell(row=1, column=1)
+cell4 = sheet.cell(row=11, column=3)
+print(cell3.value, cell4.value)
 
 # cell = sheet["A1:E5"]
 # print(cell)
