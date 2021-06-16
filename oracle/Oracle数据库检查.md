@@ -1707,6 +1707,32 @@ SELECT D.TABLESPACE_NAME,
  ORDER BY 1 - NVL(REA_FREE_SPACE, 0) / SPACE DESC;
 ```
 
+### 2.14.6 查看表空间使用信息4
+
+```plsql
+select a.file#,
+a.name,
+c.tablespace_name,
+round(a.bytes/1024/1024) CurrentMB,
+ceil(HWM *a.block_size)/1024/1024 ResizeTo,
+(a.bytes - HWM*a.block_size)/1024/1024 ReleaseMB,
+'alter database datafile ' || a.FILE# || ' resize ' ||
+round(ceil(HWM*a.block_size)/1024/1024+5)||'M;' ResizeCmd
+ from v$datafile a,
+(SELECT file_id,MAX(block_id+blocks-1) HWM
+FROM DBA_EXTENTS
+GROUP BY file_id) b,
+dba_data_files c
+ where a.file# = b.file_id(+)
+And (a.bytes - HWM * a.block_size) >0
+and a.FILE#=c.file_id
+and c.tablespace_name not in ('SYSTEM','SYSAUX')
+and c.tablespace_name not like '%UNDO%'
+ order by 6 desc;
+```
+
+
+
 ## 2.15 临时表空间及账户状态
 
 ### 2.15.1 用户使用临时表空间情况
