@@ -835,7 +835,7 @@ alter system set deferred_segment_creation=FALSE;
 alter system set audit_trail             =none           scope=spfile;  
 alter system set SGA_MAX_SIZE            =xxxxxM         scope=spfile; 
 alter system set SGA_TARGET              =xxxxxM         scope=spfile;  
-alter systemn set pga_aggregate_target   =XXXXXM         scope=spfile;
+alter system set pga_aggregate_target   =XXXXXM         scope=spfile;
 Alter PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
 alter database add SUPPLEMENTAL log data;
 alter system set enable_ddl_logging=true;
