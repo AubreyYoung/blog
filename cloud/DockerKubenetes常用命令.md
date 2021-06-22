@@ -400,6 +400,7 @@ Run 'docker COMMAND --help' for more information on a command.
 ### history
 
 ```shell
+# 查看镜像分层
 $ docker history c48059c55c17
 IMAGE               CREATED              CREATED BY                                      SIZE                COMMENT
 c48059c55c17        About a minute ago   /bin/sh -c #(nop)  CMD ["/hello"]               0B
