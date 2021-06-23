@@ -2,6 +2,8 @@
 
 # 一、Docker常用命令 
 
+## 1. 常用命令
+
 [TOC]
 
 ### image
@@ -99,6 +101,7 @@ docker stop $(docker ps -q)
 docker rm $(docker ps -aq)
 //一条命令实现停用并删除容器
 docker stop $(docker ps -q) & docker rm $(docker ps -aq)
+docker rm $(docker ps -f "status=exited"  -aq)
 ```
 
 ### rmi
@@ -429,11 +432,75 @@ $ docker container ls -f "STATUS=exited" -aq
 a4982dea46df
 ```
 
-commit
+### commit
 
 ```shell
 docker commit container images-
 ```
+
+
+
+## 2. dockerfile
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20210328000023147.png)
+
+### FROM
+
+scratch -- 从头开始
+
+尽量来使用官方提供的image。
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104153354658.png)
+
+### LABLE
+
+metadata信息，类似于代码的注释。
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104153612559.png)
+
+### RUN
+
+没run一次image上会有新的一层。因此有必要使用&&合并执行，避免layer 过多看起来很混乱
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\2020110415370059.png)
+
+### WORKDIR
+
+使用workdir不要使用run cd来替代
+
+workdir尽量使用绝对路径。增强dockerfile的可移植性。
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104153852668.png)
+
+### ADD和COPY 
+
+- 区别：add 还具有解压缩的功能，例如add test.tat.gz / 
+- workdir 和add的结合
+- 添加远程文件/目录使用curl 或者 wget
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104154103438.png)
+
+### ENV
+
+定义常量，增加可维护性，和shell中定义变量一个意思。
+
+![img](D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104154401439.png)
+
+### volume 和expose 
+
+ 
+
+### run、cmd 和entrypoint
+
+<img src="D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104155911109.png" alt="img" style="zoom:67%;" />
+
+<img src="D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201105215535370.png" alt="img" style="zoom: 50%;" />
+
+<img src="D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201105221447574.png" alt="img" style="zoom: 50%;" />
+
+### SHELL和EXEC
+
+<img src="D:\Github\blog\cloud\DockerKubenetes常用命令.assets\20201104155945657.png" alt="img" style="zoom: 80%;" />
 
 
 
