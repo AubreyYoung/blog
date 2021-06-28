@@ -3092,7 +3092,7 @@ BEGIN
 END;
 /
 
---光闭自动统计信息收集，（慎用，除非有其他手工收集统计信息的完整方案，否则不建议关闭）
+--关闭自动统计信息收集，（慎用，除非有其他手工收集统计信息的完整方案，否则不建议关闭）
 BEGIN
   DBMS_AUTO_TASK_ADMIN.disable(
     client_name => 'auto optimizer stats collection',
